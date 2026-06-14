@@ -24,6 +24,10 @@ import {
   CuracaoFlag,
   NetherlandsFlag,
   JapanFlag,
+  IvoryCoastFlag,
+  EcuadorFlag,
+  SwedenFlag,
+  TunisiaFlag,
 } from "./flags";
 
 interface FlagIconProps {
@@ -56,6 +60,10 @@ const FLAGS: Record<string, React.FC<{ className?: string }>> = {
   curacao: CuracaoFlag,
   netherlands: NetherlandsFlag,
   japan: JapanFlag,
+  ivorycoast: IvoryCoastFlag,
+  ecuador: EcuadorFlag,
+  sweden: SwedenFlag,
+  tunisia: TunisiaFlag,
 };
 
 export const FlagIcon: React.FC<FlagIconProps> = ({ flag, className = "w-16 h-12" }) => {

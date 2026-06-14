@@ -22,3 +22,7 @@ export { ParaguayFlag } from "./Paraguay";
 export { CuracaoFlag } from "./Curacao";
 export { NetherlandsFlag } from "./Netherlands";
 export { JapanFlag } from "./Japan";
+export { IvoryCoastFlag } from "./IvoryCoast";
+export { EcuadorFlag } from "./Ecuador";
+export { SwedenFlag } from "./Sweden";
+export { TunisiaFlag } from "./Tunisia";
