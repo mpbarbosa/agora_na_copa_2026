@@ -618,5 +618,68 @@
       { "id": "s3", "type": "TV PAGA", "name": "SportTV", "iconColor": "#ffd700", "link": "https://ge.globo.com/sportv/" },
       { "id": "gb3", "type": "STREAM PAGO", "name": "Globoplay / FIFA+", "iconColor": "#00e476", "link": "https://plus.fifa.com" }
     ]
+  },
+  {
+    "id": "ned-jpn-2026",
+    "teamA": {
+      "name": "HOLANDA",
+      "code": "NED",
+      "flagSvg": "netherlands",
+      "primaryColor": "#ff4f00",
+      "secondaryColor": "#ffffff",
+      "group": "Grupo F",
+      "lineup": [
+        { "id": "nl1", "name": "B. Verbruggen", "number": 1, "position": "GK", "x": 50, "y": 88, "club": "Brighton" },
+        { "id": "nl2", "name": "D. Dumfries", "number": 22, "position": "DF", "x": 15, "y": 70, "club": "Inter de Milão" },
+        { "id": "nl3", "name": "V. van Dijk", "number": 4, "position": "DF", "x": 38, "y": 75, "club": "Liverpool" },
+        { "id": "nl4", "name": "M. de Ligt", "number": 3, "position": "DF", "x": 62, "y": 75, "club": "Manchester United" },
+        { "id": "nl5", "name": "N. Aké", "number": 5, "position": "DF", "x": 85, "y": 70, "club": "Manchester City" },
+        { "id": "nl6", "name": "F. de Jong", "number": 21, "position": "MF", "x": 30, "y": 45, "club": "Barcelona" },
+        { "id": "nl7", "name": "T. Reijnders", "number": 14, "position": "MF", "x": 50, "y": 48, "club": "Milan" },
+        { "id": "nl8", "name": "X. Simons", "number": 7, "position": "MF", "x": 70, "y": 45, "club": "RB Leipzig" },
+        { "id": "nl9", "name": "J. Frimpong", "number": 12, "position": "FW", "x": 15, "y": 22, "club": "Bayer Leverkusen" },
+        { "id": "nl10", "name": "M. Depay", "number": 10, "position": "FW", "x": 50, "y": 28, "club": "Corinthians" },
+        { "id": "nl11", "name": "C. Gakpo", "number": 11, "position": "FW", "x": 85, "y": 22, "club": "Liverpool" }
+      ]
+    },
+    "teamB": {
+      "name": "JAPÃO",
+      "code": "JPN",
+      "flagSvg": "japan",
+      "primaryColor": "#bc002d",
+      "secondaryColor": "#ffffff",
+      "group": "Grupo F",
+      "lineup": [
+        { "id": "jp1", "name": "Z. Suzuki", "number": 1, "position": "GK", "x": 50, "y": 12, "club": "Parma" },
+        { "id": "jp2", "name": "Y. Sugawara", "number": 2, "position": "DF", "x": 15, "y": 30, "club": "Southampton" },
+        { "id": "jp3", "name": "K. Itakura", "number": 4, "position": "DF", "x": 38, "y": 25, "club": "Borussia Monchengladbach" },
+        { "id": "jp4", "name": "T. Tomiyasu", "number": 22, "position": "DF", "x": 62, "y": 25, "club": "Arsenal" },
+        { "id": "jp5", "name": "H. Ito", "number": 21, "position": "DF", "x": 85, "y": 30, "club": "Bayern Munique" },
+        { "id": "jp6", "name": "W. Endo", "number": 6, "position": "MF", "x": 30, "y": 50, "club": "Liverpool" },
+        { "id": "jp7", "name": "H. Morita", "number": 5, "position": "MF", "x": 50, "y": 45, "club": "Sporting" },
+        { "id": "jp8", "name": "T. Kubo", "number": 20, "position": "MF", "x": 70, "y": 50, "club": "Real Sociedad" },
+        { "id": "jp9", "name": "J. Ito", "number": 14, "position": "FW", "x": 15, "y": 75, "club": "Reims" },
+        { "id": "jp10", "name": "A. Ueda", "number": 9, "position": "FW", "x": 50, "y": 85, "club": "Feyenoord" },
+        { "id": "jp11", "name": "K. Mitoma", "number": 7, "position": "FW", "x": 85, "y": 75, "club": "Brighton" }
+      ]
+    },
+    "stadiumName": "Estádio de Dallas",
+    "city": "DALLAS",
+    "stageName": "Group Stage",
+    "kickoffTime": "17:00",
+    "kickoffDate": "14 Junho, 2026",
+    "kickoffTimestamp": "2026-06-14T17:00:00-03:00",
+    "officialMatchUrl": "https://www.fifa.com/pt/match-centre/match/17/285023/289273/400021470",
+    "status": "PRE_GAME",
+    "countdownTargetSeconds": 48638,
+    "broadcasters": [
+      { "id": "getv11", "type": "STREAM", "name": "GETV", "iconColor": "#00e476", "link": "https://globoplay.globo.com/categorias/ge-tv/", "logoUrl": "https://extranets.fifa.com/TvStationPhotos/914.png" },
+      { "id": "gb11", "type": "STREAM", "name": "Globoplay", "iconColor": "#00e476", "link": "https://globoplay.globo.com/tv-globo/ao-vivo/6120663/", "logoUrl": "https://extranets.fifa.com/TvStationPhotos/30.png" },
+      { "id": "cz11", "type": "YOUTUBE", "name": "CazéTV", "iconColor": "#ed2939", "link": "https://www.youtube.com/@CazeTV", "logoUrl": "https://extranets.fifa.com/TvStationPhotos/451.png" },
+      { "id": "ns11", "type": "STREAM", "name": "NSPORTS", "iconColor": "#00e476", "link": "https://nsports.com.br/n/", "logoUrl": "https://extranets.fifa.com/TvStationPhotos/892.png" },
+      { "id": "sbt11", "type": "TV ABERTA", "name": "SBT", "iconColor": "#05ff85", "link": "https://www.sbt.com.br/", "logoUrl": "https://extranets.fifa.com/TvStationPhotos/901.png" },
+      { "id": "g11", "type": "TV ABERTA", "name": "TV Globo", "iconColor": "#05ff85", "link": "https://redeglobo.globo.com/", "logoUrl": "https://extranets.fifa.com/TvStationPhotos/25.png" },
+      { "id": "s11", "type": "TV PAGA", "name": "sportv", "iconColor": "#ffd700", "link": "https://ge.globo.com/sportv/", "logoUrl": "https://extranets.fifa.com/TvStationPhotos/26.png" }
+    ]
   }
 ]

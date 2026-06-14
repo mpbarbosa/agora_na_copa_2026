@@ -22,6 +22,8 @@ import {
   UnitedStatesFlag,
   ParaguayFlag,
   CuracaoFlag,
+  NetherlandsFlag,
+  JapanFlag,
 } from "./flags";
 
 interface FlagIconProps {
@@ -52,6 +54,8 @@ const FLAGS: Record<string, React.FC<{ className?: string }>> = {
   usa: UnitedStatesFlag,
   paraguay: ParaguayFlag,
   curacao: CuracaoFlag,
+  netherlands: NetherlandsFlag,
+  japan: JapanFlag,
 };
 
 export const FlagIcon: React.FC<FlagIconProps> = ({ flag, className = "w-16 h-12" }) => {

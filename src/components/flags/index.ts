@@ -20,3 +20,5 @@ export { CzechiaFlag } from "./Czechia";
 export { UnitedStatesFlag } from "./UnitedStates";
 export { ParaguayFlag } from "./Paraguay";
 export { CuracaoFlag } from "./Curacao";
+export { NetherlandsFlag } from "./Netherlands";
+export { JapanFlag } from "./Japan";
