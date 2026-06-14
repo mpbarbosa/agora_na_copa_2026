@@ -157,6 +157,10 @@ validate_prerequisites() {
         die "rsync is required but was not found on PATH."
     fi
 
+    if ! command -v node >/dev/null 2>&1; then
+        die "node is required but was not found on PATH."
+    fi
+
     if ! command -v npm >/dev/null 2>&1; then
         die "npm is required but was not found on PATH."
     fi

@@ -9,15 +9,16 @@
 #
 # What it does:
 #   1. Checks the local Node.js version and warns if it is older than v20.
-#   2. Runs "npm run build"; exits 1 if build fails.
-#   3. Verifies dist/index.html exists.
-#   4. Verifies dist/server.cjs exists.
-#   5. Verifies dist/assets/ contains bundled JS and CSS files.
-#   6. Starts the production server on port 9011 and smoke-tests:
+#   2. Runs "npm ci" so the local install matches package-lock.json.
+#   3. Runs "npm run build"; exits 1 if build fails.
+#   4. Verifies dist/index.html exists.
+#   5. Verifies dist/server.cjs exists.
+#   6. Verifies dist/assets/ contains bundled JS and CSS files.
+#   7. Starts the production server on port 9011 and smoke-tests:
 #        GET /                      → HTTP 200
 #        GET /assets/<first-js>     → HTTP 200
-#   7. Runs the Playwright e2e suite against the running preview server.
-#   8. Stops the preview server and prints a deployment-ready summary.
+#   8. Runs the Playwright e2e suite against the running preview server.
+#   9. Stops the preview server and prints a deployment-ready summary.
 #
 # Exit codes:
 #   0  All checks passed; deploy payload is ready.
@@ -29,6 +30,9 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 PREVIEW_PORT=9011
 PREVIEW_LOG="/tmp/agora-na-copa-preflight.log"
+INSTALL_LOG="/tmp/agora-na-copa-preflight-install.log"
+BUILD_LOG="/tmp/agora-na-copa-preflight-build.log"
+E2E_LOG="/tmp/agora-na-copa-preflight-e2e.log"
 PREVIEW_PID=""
 
 cleanup() {
@@ -55,9 +59,20 @@ else
 fi
 
 echo ""
+echo "✓ Installing dependencies from package-lock.json..."
+if npm ci > "$INSTALL_LOG" 2>&1; then
+    echo "  ✅ Dependencies installed"
+else
+    echo "  ❌ Dependency install failed"
+    echo "  See log: $INSTALL_LOG"
+    exit 1
+fi
+
+echo ""
 echo "✓ Building production bundle..."
-if ! npm run build > /dev/null 2>&1; then
+if ! npm run build > "$BUILD_LOG" 2>&1; then
     echo "  ❌ Build failed"
+    echo "  See log: $BUILD_LOG"
     exit 1
 fi
 echo "  ✅ Build succeeded"
@@ -142,11 +157,11 @@ fi
 
 echo ""
 echo "✓ Running e2e smoke suite against production preview..."
-if PREFLIGHT_PREVIEW_PORT="$PREVIEW_PORT" npm run test:e2e:prod > /tmp/agora-na-copa-preflight-e2e.log 2>&1; then
+if PREFLIGHT_PREVIEW_PORT="$PREVIEW_PORT" npm run test:e2e:prod > "$E2E_LOG" 2>&1; then
     echo "  ✅ e2e smoke suite passed"
 else
     echo "  ❌ e2e smoke suite failed"
-    echo "  See log: /tmp/agora-na-copa-preflight-e2e.log"
+    echo "  See log: $E2E_LOG"
     exit 1
 fi
 
