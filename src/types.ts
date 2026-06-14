@@ -97,3 +97,67 @@ export interface CommentaryEvent {
   text: string;
   team?: "A" | "B";
 }
+
+// --- Tournament-wide data (groups, stadiums, bracket, news) ---
+// Added in Phase 0b. These types are additive and not yet wired into
+// App.tsx; see src/data/tournament.ts for the seed dataset.
+
+export interface Team {
+  id: string;
+  name: string;
+  code: string;
+  flagSvg: string;
+  primaryColor: string;
+  secondaryColor: string;
+  group: string; // e.g. "A".."L"
+  points: number;
+  played: number;
+  won: number;
+  drawn: number;
+  lost: number;
+  goalsFor: number;
+  goalsAgainst: number;
+  goalDifference: number;
+}
+
+// A group-table row. `dataSource` discloses whether the stats reflect a real
+// `FINISHED` match result from matches.json ("result") or are still at their
+// pre-tournament seed values ("seed") because the team hasn't played yet.
+export interface StandingsRow extends Team {
+  dataSource: "result" | "seed";
+}
+
+export interface Stadium {
+  id: string;
+  name: string;
+  city: string;
+  country: "USA" | "MEX" | "CAN";
+  capacity: number;
+  yearBuilt: number;
+  coordinates: { x: number; y: number }; // 0-100 relative position on the venue map
+  facts: string[];
+  image: string;
+}
+
+export interface BracketNode {
+  id: string; // e.g. "R32-1", "QF-1"
+  stage: "R32" | "R16" | "QF" | "SF" | "F";
+  nextMatchId?: string; // id of the BracketNode this winner advances to
+  teamA?: { name: string; code: string; flagSvg: string };
+  teamB?: { name: string; code: string; flagSvg: string };
+  winner?: "A" | "B";
+  scoreA?: number;
+  scoreB?: number;
+  placeholderA?: string;
+  placeholderB?: string;
+}
+
+export interface NewsArticle {
+  id: string;
+  title: string;
+  summary: string;
+  content: string;
+  category: "Geral" | "Sedes" | "Equipes" | "Ingressos";
+  date: string;
+  imageUrl?: string;
+}

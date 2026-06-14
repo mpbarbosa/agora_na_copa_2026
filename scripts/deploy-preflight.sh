@@ -93,6 +93,18 @@ else
     exit 1
 fi
 
+echo ""
+echo "✓ Checking JS bundle size..."
+JS_TOTAL_BYTES="$(find dist/assets -name "*.js" -exec du -cb {} + | tail -n 1 | cut -f1)"
+JS_TOTAL_KB="$((JS_TOTAL_BYTES / 1024))"
+JS_BUDGET_BYTES="$((2 * 1024 * 1024))" # generous 2 MB ceiling for dist/assets/*.js
+if [ "$JS_TOTAL_BYTES" -le "$JS_BUDGET_BYTES" ]; then
+    echo "  ✅ JS bundle size OK (${JS_TOTAL_KB} KB, budget $((JS_BUDGET_BYTES / 1024)) KB)"
+else
+    echo "  ❌ JS bundle size ${JS_TOTAL_KB} KB exceeds budget of $((JS_BUDGET_BYTES / 1024)) KB"
+    exit 1
+fi
+
 FIRST_JS_ASSET="$(find dist/assets -name "*.js" | sort | head -n 1)"
 FIRST_JS_ROUTE="/${FIRST_JS_ASSET#dist/}"
 
