@@ -1,0 +1,6 @@
+{
+  "name": "Agora na Copa 26",
+  "description": "FIFA World Cup 2026 Live Broadcast Companion & AI Match Hub featuring countdowns, broadcaster schedules, tactical team lineups, and AI pundit analysis.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

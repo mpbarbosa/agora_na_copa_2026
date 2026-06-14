@@ -1,0 +1,614 @@
+[
+  {
+    "id": "usa-par-2026",
+    "teamA": {
+      "name": "ESTADOS UNIDOS",
+      "code": "USA",
+      "flagSvg": "usa",
+      "primaryColor": "#b22234",
+      "secondaryColor": "#3c3b6e",
+      "group": "Grupo D",
+      "lineup": [
+        { "id": "us1", "name": "M. Turner", "number": 1, "position": "GK", "x": 50, "y": 88, "club": "Nottingham Forest" },
+        { "id": "us2", "name": "S. Dest", "number": 2, "position": "DF", "x": 15, "y": 70, "club": "PSV" },
+        { "id": "us3", "name": "C. Richards", "number": 3, "position": "DF", "x": 38, "y": 75, "club": "Crystal Palace" },
+        { "id": "us4", "name": "T. Ream", "number": 13, "position": "DF", "x": 62, "y": 75, "club": "Charlotte FC" },
+        { "id": "us5", "name": "A. Robinson", "number": 5, "position": "DF", "x": 85, "y": 70, "club": "Fulham" },
+        { "id": "us6", "name": "T. Adams", "number": 4, "position": "MF", "x": 30, "y": 45, "club": "Bournemouth" },
+        { "id": "us7", "name": "W. McKennie", "number": 8, "position": "MF", "x": 50, "y": 48, "club": "Juventus" },
+        { "id": "us8", "name": "G. Reyna", "number": 7, "position": "MF", "x": 70, "y": 45, "club": "Nottingham Forest" },
+        { "id": "us9", "name": "T. Weah", "number": 21, "position": "FW", "x": 15, "y": 22, "club": "Juventus" },
+        { "id": "us10", "name": "F. Balogun", "number": 20, "position": "FW", "x": 50, "y": 28, "club": "Monaco" },
+        { "id": "us11", "name": "C. Pulisic", "number": 10, "position": "FW", "x": 85, "y": 22, "club": "Milan" }
+      ]
+    },
+    "teamB": {
+      "name": "PARAGUAI",
+      "code": "PAR",
+      "flagSvg": "paraguay",
+      "primaryColor": "#d52b1e",
+      "secondaryColor": "#0038a8",
+      "group": "Grupo D",
+      "lineup": [
+        { "id": "py1", "name": "C. Coronel", "number": 1, "position": "GK", "x": 50, "y": 12, "club": "New York Red Bulls" },
+        { "id": "py2", "name": "R. Rojas", "number": 2, "position": "DF", "x": 15, "y": 30, "club": "River Plate" },
+        { "id": "py3", "name": "G. Gomez", "number": 15, "position": "DF", "x": 38, "y": 25, "club": "Palmeiras" },
+        { "id": "py4", "name": "O. Alderete", "number": 3, "position": "DF", "x": 62, "y": 25, "club": "Getafe" },
+        { "id": "py5", "name": "J. Alonso", "number": 6, "position": "DF", "x": 85, "y": 30, "club": "Atlético Mineiro" },
+        { "id": "py6", "name": "A. Cubas", "number": 14, "position": "MF", "x": 30, "y": 50, "club": "Vancouver Whitecaps" },
+        { "id": "py7", "name": "M. Villasanti", "number": 23, "position": "MF", "x": 50, "y": 45, "club": "Grêmio" },
+        { "id": "py8", "name": "M. Almirón", "number": 10, "position": "MF", "x": 70, "y": 50, "club": "Newcastle" },
+        { "id": "py9", "name": "R. Sosa", "number": 19, "position": "FW", "x": 15, "y": 75, "club": "Nottingham Forest" },
+        { "id": "py10", "name": "A. Sanabria", "number": 9, "position": "FW", "x": 50, "y": 85, "club": "Torino" },
+        { "id": "py11", "name": "J. Enciso", "number": 17, "position": "FW", "x": 85, "y": 75, "club": "Brighton" }
+      ]
+    },
+    "stadiumName": "Estádio de Los Angeles",
+    "city": "LOS ANGELES",
+    "stageName": "Group Stage",
+    "kickoffTime": "22:00",
+    "kickoffDate": "12 Junho, 2026",
+    "kickoffTimestamp": "2026-06-12T22:00:00-03:00",
+    "officialMatchUrl": "https://www.fifa.com/pt/match-centre/match/17/285023/289273/400021458",
+    "status": "FINISHED",
+    "score": {
+      "teamA": 4,
+      "teamB": 1
+    },
+    "countdownTargetSeconds": 0,
+    "broadcasters": [
+      { "id": "getv9", "type": "STREAM", "name": "GETV", "iconColor": "#00e476", "link": "https://globoplay.globo.com/categorias/ge-tv/", "logoUrl": "https://extranets.fifa.com/TvStationPhotos/914.png" },
+      { "id": "gb9", "type": "STREAM", "name": "Globoplay", "iconColor": "#00e476", "link": "https://globoplay.globo.com/tv-globo/ao-vivo/6120663/", "logoUrl": "https://extranets.fifa.com/TvStationPhotos/30.png" },
+      { "id": "cz9", "type": "YOUTUBE", "name": "CazéTV", "iconColor": "#ed2939", "link": "https://www.youtube.com/@CazeTV", "logoUrl": "https://extranets.fifa.com/TvStationPhotos/451.png" },
+      { "id": "ns9", "type": "STREAM", "name": "NSPORTS", "iconColor": "#00e476", "link": "https://nsports.com.br/n/", "logoUrl": "https://extranets.fifa.com/TvStationPhotos/892.png" },
+      { "id": "sbt9", "type": "TV ABERTA", "name": "SBT", "iconColor": "#05ff85", "link": "https://www.sbt.com.br/", "logoUrl": "https://extranets.fifa.com/TvStationPhotos/901.png" },
+      { "id": "g9", "type": "TV ABERTA", "name": "TV Globo", "iconColor": "#05ff85", "link": "https://redeglobo.globo.com/", "logoUrl": "https://extranets.fifa.com/TvStationPhotos/25.png" },
+      { "id": "s9", "type": "TV PAGA", "name": "sportv", "iconColor": "#ffd700", "link": "https://ge.globo.com/sportv/", "logoUrl": "https://extranets.fifa.com/TvStationPhotos/26.png" }
+    ]
+  },
+  {
+    "id": "mex-rsa-2026",
+    "teamA": {
+      "name": "MÉXICO",
+      "code": "MEX",
+      "flagSvg": "mexico",
+      "primaryColor": "#006847",
+      "secondaryColor": "#ce1126",
+      "group": "Grupo A",
+      "lineup": [
+        { "id": "mx1", "name": "L. Malagón", "number": 1, "position": "GK", "x": 50, "y": 88, "club": "Club América" },
+        { "id": "mx2", "name": "J. Sánchez", "number": 2, "position": "DF", "x": 15, "y": 70, "club": "Cruz Azul" },
+        { "id": "mx3", "name": "C. Montes", "number": 3, "position": "DF", "x": 38, "y": 75, "club": "Lokomotiv Moscou" },
+        { "id": "mx4", "name": "J. Vásquez", "number": 5, "position": "DF", "x": 62, "y": 75, "club": "Genoa" },
+        { "id": "mx5", "name": "J. Gallardo", "number": 23, "position": "DF", "x": 85, "y": 70, "club": "Monterrey" },
+        { "id": "mx6", "name": "E. Álvarez", "number": 4, "position": "MF", "x": 30, "y": 45, "club": "West Ham" },
+        { "id": "mx7", "name": "L. Chávez", "number": 24, "position": "MF", "x": 50, "y": 48, "club": "Dínamo Moscou" },
+        { "id": "mx8", "name": "O. Pineda", "number": 17, "position": "MF", "x": 70, "y": 45, "club": "AEK Atenas" },
+        { "id": "mx9", "name": "U. Antuna", "number": 15, "position": "FW", "x": 15, "y": 22, "club": "Tigres" },
+        { "id": "mx10", "name": "S. Giménez", "number": 11, "position": "FW", "x": 50, "y": 28, "club": "Milan" },
+        { "id": "mx11", "name": "H. Lozano", "number": 22, "position": "FW", "x": 85, "y": 22, "club": "San Diego FC" }
+      ]
+    },
+    "teamB": {
+      "name": "ÁFRICA DO SUL",
+      "code": "RSA",
+      "flagSvg": "southafrica",
+      "primaryColor": "#007a4d",
+      "secondaryColor": "#ffb612",
+      "group": "Grupo A",
+      "lineup": [
+        { "id": "sa1", "name": "R. Williams", "number": 1, "position": "GK", "x": 50, "y": 12, "club": "Mamelodi Sundowns" },
+        { "id": "sa2", "name": "K. Mudau", "number": 2, "position": "DF", "x": 15, "y": 30, "club": "Mamelodi Sundowns" },
+        { "id": "sa3", "name": "S. Ngezana", "number": 21, "position": "DF", "x": 38, "y": 25, "club": "FCSB" },
+        { "id": "sa4", "name": "M. Mvala", "number": 14, "position": "DF", "x": 62, "y": 25, "club": "Mamelodi Sundowns" },
+        { "id": "sa5", "name": "A. Modiba", "number": 6, "position": "DF", "x": 85, "y": 30, "club": "Mamelodi Sundowns" },
+        { "id": "sa6", "name": "T. Mokoena", "number": 4, "position": "MF", "x": 30, "y": 50, "club": "Mamelodi Sundowns" },
+        { "id": "sa7", "name": "S. Sithole", "number": 13, "position": "MF", "x": 50, "y": 45, "club": "Tondela" },
+        { "id": "sa8", "name": "P. Tau", "number": 10, "position": "MF", "x": 70, "y": 50, "club": "Qatar SC" },
+        { "id": "sa9", "name": "E. Mokwana", "number": 17, "position": "FW", "x": 15, "y": 75, "club": "Espérance" },
+        { "id": "sa10", "name": "L. Foster", "number": 9, "position": "FW", "x": 50, "y": 85, "club": "Burnley" },
+        { "id": "sa11", "name": "T. Zwane", "number": 11, "position": "FW", "x": 85, "y": 75, "club": "Mamelodi Sundowns" }
+      ]
+    },
+    "stadiumName": "Estádio da Cidade do México",
+    "city": "CIDADE DO MÉXICO",
+    "stageName": "Group Stage",
+    "kickoffTime": "16:00",
+    "kickoffDate": "11 Junho, 2026",
+    "kickoffTimestamp": "2026-06-11T16:00:00-03:00",
+    "officialMatchUrl": "https://www.fifa.com/pt/match-centre/match/17/285023/289273/400021443",
+    "status": "FINISHED",
+    "score": {
+      "teamA": 2,
+      "teamB": 0
+    },
+    "countdownTargetSeconds": 0,
+    "broadcasters": [
+      { "id": "getv7", "type": "STREAM", "name": "GETV", "iconColor": "#00e476", "link": "https://globoplay.globo.com/categorias/ge-tv/", "logoUrl": "https://extranets.fifa.com/TvStationPhotos/914.png" },
+      { "id": "gb7", "type": "STREAM", "name": "Globoplay", "iconColor": "#00e476", "link": "https://globoplay.globo.com/tv-globo/ao-vivo/6120663/", "logoUrl": "https://extranets.fifa.com/TvStationPhotos/30.png" },
+      { "id": "cz7", "type": "YOUTUBE", "name": "CazéTV", "iconColor": "#ed2939", "link": "https://www.youtube.com/@CazeTV", "logoUrl": "https://extranets.fifa.com/TvStationPhotos/451.png" },
+      { "id": "ns7", "type": "STREAM", "name": "NSPORTS", "iconColor": "#00e476", "link": "https://nsports.com.br/n/", "logoUrl": "https://extranets.fifa.com/TvStationPhotos/892.png" },
+      { "id": "sbt7", "type": "TV ABERTA", "name": "SBT", "iconColor": "#05ff85", "link": "https://www.sbt.com.br/", "logoUrl": "https://extranets.fifa.com/TvStationPhotos/901.png" },
+      { "id": "g7", "type": "TV ABERTA", "name": "TV Globo", "iconColor": "#05ff85", "link": "https://redeglobo.globo.com/", "logoUrl": "https://extranets.fifa.com/TvStationPhotos/25.png" },
+      { "id": "s7", "type": "TV PAGA", "name": "sportv", "iconColor": "#ffd700", "link": "https://ge.globo.com/sportv/", "logoUrl": "https://extranets.fifa.com/TvStationPhotos/26.png" }
+    ]
+  },
+  {
+    "id": "kor-cze-2026",
+    "teamA": {
+      "name": "CORÉIA DO SUL",
+      "code": "KOR",
+      "flagSvg": "southkorea",
+      "primaryColor": "#cd2e3a",
+      "secondaryColor": "#0047a0",
+      "group": "Grupo A",
+      "lineup": [
+        { "id": "kr1", "name": "Jo Hyeon-woo", "number": 1, "position": "GK", "x": 50, "y": 88, "club": "Ulsan HD" },
+        { "id": "kr2", "name": "Seol Young-woo", "number": 22, "position": "DF", "x": 15, "y": 70, "club": "FK Crvena zvezda" },
+        { "id": "kr3", "name": "Kim Min-jae", "number": 4, "position": "DF", "x": 38, "y": 75, "club": "Bayern Munique" },
+        { "id": "kr4", "name": "Jung Seung-hyun", "number": 15, "position": "DF", "x": 62, "y": 75, "club": "Al-Wasl" },
+        { "id": "kr5", "name": "Lee Myung-jae", "number": 3, "position": "DF", "x": 85, "y": 70, "club": "Ulsan HD" },
+        { "id": "kr6", "name": "Hwang In-beom", "number": 6, "position": "MF", "x": 30, "y": 45, "club": "Feyenoord" },
+        { "id": "kr7", "name": "Park Yong-woo", "number": 5, "position": "MF", "x": 50, "y": 48, "club": "Al-Ain" },
+        { "id": "kr8", "name": "Lee Kang-in", "number": 18, "position": "MF", "x": 70, "y": 45, "club": "PSG" },
+        { "id": "kr9", "name": "Hwang Hee-chan", "number": 11, "position": "FW", "x": 15, "y": 22, "club": "Wolverhampton" },
+        { "id": "kr10", "name": "Cho Gue-sung", "number": 9, "position": "FW", "x": 50, "y": 28, "club": "Midtjylland" },
+        { "id": "kr11", "name": "Son Heung-min", "number": 7, "position": "FW", "x": 85, "y": 22, "club": "Tottenham" }
+      ]
+    },
+    "teamB": {
+      "name": "TCHÉQUIA",
+      "code": "CZE",
+      "flagSvg": "czechia",
+      "primaryColor": "#d7141a",
+      "secondaryColor": "#11457e",
+      "group": "Grupo A",
+      "lineup": [
+        { "id": "cz1", "name": "J. Stanek", "number": 1, "position": "GK", "x": 50, "y": 12, "club": "Slavia Praga" },
+        { "id": "cz2", "name": "V. Coufal", "number": 5, "position": "DF", "x": 15, "y": 30, "club": "West Ham" },
+        { "id": "cz3", "name": "T. Holes", "number": 3, "position": "DF", "x": 38, "y": 25, "club": "Slavia Praga" },
+        { "id": "cz4", "name": "L. Krejci", "number": 7, "position": "DF", "x": 62, "y": 25, "club": "Girona" },
+        { "id": "cz5", "name": "D. Jurásek", "number": 13, "position": "DF", "x": 85, "y": 30, "club": "Hoffenheim" },
+        { "id": "cz6", "name": "T. Soucek", "number": 22, "position": "MF", "x": 30, "y": 50, "club": "West Ham" },
+        { "id": "cz7", "name": "A. Barák", "number": 8, "position": "MF", "x": 50, "y": 45, "club": "Kasimpasa" },
+        { "id": "cz8", "name": "L. Provod", "number": 14, "position": "MF", "x": 70, "y": 50, "club": "Slavia Praga" },
+        { "id": "cz9", "name": "A. Hložek", "number": 9, "position": "FW", "x": 15, "y": 75, "club": "Hoffenheim" },
+        { "id": "cz10", "name": "P. Schick", "number": 10, "position": "FW", "x": 50, "y": 85, "club": "Bayer Leverkusen" },
+        { "id": "cz11", "name": "V. Cerny", "number": 17, "position": "FW", "x": 85, "y": 75, "club": "Rangers" }
+      ]
+    },
+    "stadiumName": "Estádio de Guadalajara",
+    "city": "GUADALAJARA",
+    "stageName": "Group Stage",
+    "kickoffTime": "23:00",
+    "kickoffDate": "11 Junho, 2026",
+    "kickoffTimestamp": "2026-06-11T23:00:00-03:00",
+    "officialMatchUrl": "https://www.fifa.com/pt/match-centre/match/17/285023/289273/400021441",
+    "status": "FINISHED",
+    "score": {
+      "teamA": 2,
+      "teamB": 1
+    },
+    "countdownTargetSeconds": 0,
+    "broadcasters": [
+      { "id": "cz8", "type": "YOUTUBE", "name": "CazéTV", "iconColor": "#ed2939", "link": "https://www.youtube.com/@CazeTV", "logoUrl": "https://extranets.fifa.com/TvStationPhotos/451.png" }
+    ]
+  },
+  {
+    "id": "can-bih-2026",
+    "teamA": {
+      "name": "CANADÁ",
+      "code": "CAN",
+      "flagSvg": "canada",
+      "primaryColor": "#ff0000",
+      "secondaryColor": "#ffffff",
+      "group": "Grupo B",
+      "lineup": [
+        { "id": "ca1", "name": "M. Crépeau", "number": 1, "position": "GK", "x": 50, "y": 88, "club": "LAFC" },
+        { "id": "ca2", "name": "A. Johnston", "number": 2, "position": "DF", "x": 15, "y": 70, "club": "Celtic" },
+        { "id": "ca3", "name": "D. Cornelius", "number": 5, "position": "DF", "x": 38, "y": 75, "club": "Panathinaikos" },
+        { "id": "ca4", "name": "M. Bombito", "number": 4, "position": "DF", "x": 62, "y": 75, "club": "Nice" },
+        { "id": "ca5", "name": "A. Davies", "number": 19, "position": "DF", "x": 85, "y": 70, "club": "Bayern Munique" },
+        { "id": "ca6", "name": "S. Eustáquio", "number": 7, "position": "MF", "x": 30, "y": 45, "club": "Porto" },
+        { "id": "ca7", "name": "I. Koné", "number": 18, "position": "MF", "x": 50, "y": 48, "club": "Marselha" },
+        { "id": "ca8", "name": "J. Osorio", "number": 21, "position": "MF", "x": 70, "y": 45, "club": "Toronto FC" },
+        { "id": "ca9", "name": "T. Buchanan", "number": 11, "position": "FW", "x": 15, "y": 22, "club": "Villarreal" },
+        { "id": "ca10", "name": "J. David", "number": 20, "position": "FW", "x": 50, "y": 28, "club": "Juventus" },
+        { "id": "ca11", "name": "C. Larin", "number": 17, "position": "FW", "x": 85, "y": 22, "club": "Club América" }
+      ]
+    },
+    "teamB": {
+      "name": "BÓSNIA E HERZEGOVINA",
+      "code": "BIH",
+      "flagSvg": "bosnia",
+      "primaryColor": "#002395",
+      "secondaryColor": "#fecb00",
+      "group": "Grupo B",
+      "lineup": [
+        { "id": "bh1", "name": "N. Vasilj", "number": 1, "position": "GK", "x": 50, "y": 12, "club": "Midtjylland" },
+        { "id": "bh2", "name": "A. Dedić", "number": 2, "position": "DF", "x": 85, "y": 30, "club": "Benfica" },
+        { "id": "bh3", "name": "T. Šunjić", "number": 5, "position": "DF", "x": 62, "y": 25, "club": "Cagliari" },
+        { "id": "bh4", "name": "D. Hadžikadunić", "number": 14, "position": "DF", "x": 38, "y": 25, "club": "FC Köln" },
+        { "id": "bh5", "name": "S. Kolašinac", "number": 20, "position": "DF", "x": 15, "y": 30, "club": "Atalanta" },
+        { "id": "bh6", "name": "G. Cimirot", "number": 8, "position": "MF", "x": 35, "y": 50, "club": "Standard de Liège" },
+        { "id": "bh7", "name": "R. Krunić", "number": 16, "position": "MF", "x": 65, "y": 50, "club": "Fenerbahçe" },
+        { "id": "bh8", "name": "N. Bajrami", "number": 10, "position": "MF", "x": 50, "y": 62, "club": "Sassuolo" },
+        { "id": "bh9", "name": "E. Demirović", "number": 9, "position": "FW", "x": 15, "y": 68, "club": "Stuttgart" },
+        { "id": "bh10", "name": "H. Tabaković", "number": 29, "position": "FW", "x": 85, "y": 68, "club": "Hoffenheim" },
+        { "id": "bh11", "name": "E. Džeko", "number": 17, "position": "FW", "x": 50, "y": 80, "club": "Fenerbahçe" }
+      ]
+    },
+    "stadiumName": "BMO Field",
+    "city": "TORONTO",
+    "stageName": "Group Stage",
+    "kickoffTime": "16:00",
+    "kickoffDate": "12 Junho, 2026",
+    "kickoffTimestamp": "2026-06-12T16:00:00-03:00",
+    "status": "FINISHED",
+    "score": {
+      "teamA": 1,
+      "teamB": 1
+    },
+    "countdownTargetSeconds": 0,
+    "broadcasters": [
+      { "id": "g4", "type": "TV ABERTA", "name": "Globo", "iconColor": "#05ff85", "link": "https://globoplay.globo.com" },
+      { "id": "s4", "type": "TV PAGA", "name": "SportTV", "iconColor": "#ffd700", "link": "https://ge.globo.com/sportv/" },
+      { "id": "cz4", "type": "YOUTUBE", "name": "CazéTV", "iconColor": "#ed2939", "link": "https://www.youtube.com/@CazeTV" }
+    ]
+  },
+  {
+    "id": "bra-mar-2026",
+    "teamA": {
+      "name": "BRASIL",
+      "code": "BRA",
+      "flagSvg": "brazil",
+      "primaryColor": "#009c3b",
+      "secondaryColor": "#ffdf00",
+      "group": "Grupo C",
+      "lineup": [
+        { "id": "b1", "name": "Alisson", "number": 1, "position": "GK", "x": 50, "y": 88, "club": "Liverpool" },
+        { "id": "b2", "name": "Danilo", "number": 2, "position": "DF", "x": 15, "y": 70, "club": "Juventus" },
+        { "id": "b3", "name": "Marquinhos", "number": 4, "position": "DF", "x": 38, "y": 75, "club": "PSG" },
+        { "id": "b4", "name": "G. Magalhães", "number": 3, "position": "DF", "x": 62, "y": 75, "club": "Arsenal" },
+        { "id": "b5", "name": "Abner", "number": 6, "position": "DF", "x": 85, "y": 70, "club": "Lyon" },
+        { "id": "b6", "name": "B. Guimarães", "number": 5, "position": "MF", "x": 30, "y": 45, "club": "Newcastle" },
+        { "id": "b7", "name": "João Gomes", "number": 15, "position": "MF", "x": 70, "y": 45, "club": "Wolverhampton" },
+        { "id": "b8", "name": "Raphinha", "number": 7, "position": "FW", "x": 15, "y": 22, "club": "Barcelona" },
+        { "id": "b9", "name": "Rodrygo", "number": 10, "position": "FW", "x": 50, "y": 28, "club": "Real Madrid" },
+        { "id": "b10", "name": "Vinicius Jr", "number": 11, "position": "FW", "x": 85, "y": 22, "club": "Real Madrid" },
+        { "id": "b11", "name": "Igor Jesus", "number": 9, "position": "FW", "x": 50, "y": 10, "club": "Botafogo" }
+      ]
+    },
+    "teamB": {
+      "name": "MARROCOS",
+      "code": "MAR",
+      "flagSvg": "morocco",
+      "primaryColor": "#c1272d",
+      "secondaryColor": "#006233",
+      "group": "Grupo C",
+      "lineup": [
+        { "id": "m1", "name": "Y. Bounou", "number": 1, "position": "GK", "x": 50, "y": 12, "club": "Al-Hilal" },
+        { "id": "m2", "name": "N. Mazraoui", "number": 3, "position": "DF", "x": 15, "y": 30, "club": "Bayern Munique" },
+        { "id": "m3", "name": "A. Dari", "number": 23, "position": "DF", "x": 38, "y": 25, "club": "Brest" },
+        { "id": "m4", "name": "N. Aguerd", "number": 5, "position": "DF", "x": 62, "y": 25, "club": "West Ham" },
+        { "id": "m5", "name": "A. Hakimi", "number": 2, "position": "DF", "x": 85, "y": 30, "club": "PSG" },
+        { "id": "m6", "name": "A. Ounahi", "number": 8, "position": "MF", "x": 30, "y": 50, "club": "Panathinaikos" },
+        { "id": "m7", "name": "S. Amrabat", "number": 4, "position": "MF", "x": 50, "y": 45, "club": "Fenerbahçe" },
+        { "id": "m8", "name": "B. El Khannouss", "number": 17, "position": "MF", "x": 70, "y": 50, "club": "Leicester City" },
+        { "id": "m9", "name": "H. Ziyech", "number": 7, "position": "FW", "x": 15, "y": 75, "club": "Galatasaray" },
+        { "id": "m10", "name": "Y. En-Nesyri", "number": 19, "position": "FW", "x": 50, "y": 85, "club": "Fenerbahçe" },
+        { "id": "m11", "name": "Brahim Díaz", "number": 10, "position": "FW", "x": 85, "y": 75, "club": "Real Madrid" }
+      ]
+    },
+    "stadiumName": "MetLife Stadium",
+    "city": "NEW YORK CITY",
+    "stageName": "Group Stage",
+    "kickoffTime": "19:00",
+    "kickoffDate": "13 Junho, 2026",
+    "kickoffTimestamp": "2026-06-13T19:00:00-03:00",
+    "officialMatchUrl": "https://www.fifa.com/pt/match-centre/match/17/285023/289273/400021456",
+    "status": "FINISHED",
+    "score": {
+      "teamA": 1,
+      "teamB": 1
+    },
+    "countdownTargetSeconds": 0,
+    "broadcasters": [
+      { "id": "g1", "type": "TV ABERTA", "name": "Globo", "iconColor": "#05ff85", "link": "https://globoplay.globo.com" },
+      { "id": "s1", "type": "TV PAGA", "name": "SportTV", "iconColor": "#ffd700", "link": "https://ge.globo.com/sportv/" },
+      { "id": "gb1", "type": "STREAM PAGO", "name": "Globoplay / FIFA+", "iconColor": "#00e476", "link": "https://plus.fifa.com" },
+      { "id": "cz1", "type": "YOUTUBE", "name": "CazéTV", "iconColor": "#ed2939", "link": "https://www.youtube.com/@CazeTV" }
+    ]
+  },
+  {
+    "id": "fra-sen-2026",
+    "teamA": {
+      "name": "FRANÇA",
+      "code": "FRA",
+      "flagSvg": "france",
+      "primaryColor": "#002395",
+      "secondaryColor": "#ed2939",
+      "group": "Grupo I",
+      "lineup": [
+        { "id": "f1", "name": "Maignan", "number": 1, "position": "GK", "x": 50, "y": 88, "club": "AC Milan" },
+        { "id": "f2", "name": "T. Hernández", "number": 22, "position": "DF", "x": 15, "y": 70, "club": "AC Milan" },
+        { "id": "f3", "name": "Saliba", "number": 17, "position": "DF", "x": 38, "y": 75, "club": "Arsenal" },
+        { "id": "f4", "name": "Upamecano", "number": 4, "position": "DF", "x": 62, "y": 75, "club": "Bayern Munique" },
+        { "id": "f5", "name": "Koundé", "number": 5, "position": "DF", "x": 85, "y": 70, "club": "Barcelona" },
+        { "id": "f6", "name": "Tchouaméni", "number": 8, "position": "MF", "x": 30, "y": 50, "club": "Real Madrid" },
+        { "id": "f7", "name": "Kanté", "number": 13, "position": "MF", "x": 50, "y": 55, "club": "Al-Ittihad" },
+        { "id": "f8", "name": "Griezmann", "number": 7, "position": "MF", "x": 70, "y": 50, "club": "Atlético Madrid" },
+        { "id": "f9", "name": "Dembélé", "number": 11, "position": "FW", "x": 15, "y": 25, "club": "PSG" },
+        { "id": "f10", "name": "K. Mbappé", "number": 10, "position": "FW", "x": 50, "y": 15, "club": "Real Madrid" },
+        { "id": "f11", "name": "Barcola", "number": 20, "position": "FW", "x": 85, "y": 25, "club": "PSG" }
+      ]
+    },
+    "teamB": {
+      "name": "SENEGAL",
+      "code": "SEN",
+      "flagSvg": "senegal",
+      "primaryColor": "#00853f",
+      "secondaryColor": "#fdef42",
+      "group": "Grupo I",
+      "lineup": [
+        { "id": "sn1", "name": "É. Mendy", "number": 16, "position": "GK", "x": 50, "y": 12, "club": "Al-Ahli" },
+        { "id": "sn2", "name": "I. Jakobs", "number": 5, "position": "DF", "x": 15, "y": 30, "club": "Monaco" },
+        { "id": "sn3", "name": "P. A. Cissé", "number": 25, "position": "DF", "x": 38, "y": 25, "club": "Olympiacos" },
+        { "id": "sn4", "name": "K. Koulibaly", "number": 3, "position": "DF", "x": 62, "y": 25, "club": "Al-Hilal" },
+        { "id": "sn5", "name": "A. Diallo", "number": 21, "position": "DF", "x": 85, "y": 30, "club": "Al-Arabi" },
+        { "id": "sn6", "name": "P. M. Sarr", "number": 17, "position": "MF", "x": 30, "y": 50, "club": "Tottenham" },
+        { "id": "sn7", "name": "P. Gueye", "number": 8, "position": "MF", "x": 50, "y": 45, "club": "Marselha" },
+        { "id": "sn8", "name": "I. Gueye", "number": 4, "position": "MF", "x": 70, "y": 50, "club": "Everton" },
+        { "id": "sn9", "name": "I. Sarr", "number": 11, "position": "FW", "x": 15, "y": 75, "club": "Crystal Palace" },
+        { "id": "sn10", "name": "N. Jackson", "number": 19, "position": "FW", "x": 50, "y": 85, "club": "Chelsea" },
+        { "id": "sn11", "name": "H. Diallo", "number": 9, "position": "FW", "x": 85, "y": 75, "club": "Al-Rayyan" }
+      ]
+    },
+    "stadiumName": "MetLife Stadium",
+    "city": "NEW YORK CITY",
+    "stageName": "Group Stage",
+    "kickoffTime": "16:00",
+    "kickoffDate": "16 Junho, 2026",
+    "kickoffTimestamp": "2026-06-16T16:00:00-03:00",
+    "status": "PRE_GAME",
+    "countdownTargetSeconds": 248400,
+    "broadcasters": [
+      { "id": "g2", "type": "TV ABERTA", "name": "Globo", "iconColor": "#05ff85", "link": "https://globoplay.globo.com" },
+      { "id": "s2", "type": "TV PAGA", "name": "SportTV", "iconColor": "#ffd700", "link": "https://ge.globo.com/sportv/" },
+      { "id": "cz2", "type": "YOUTUBE", "name": "CazéTV", "iconColor": "#ed2939", "link": "https://www.youtube.com/@CazeTV" }
+    ]
+  },
+  {
+    "id": "hai-sco-2026",
+    "teamA": {
+      "name": "HAITI",
+      "code": "HAI",
+      "flagSvg": "haiti",
+      "primaryColor": "#112e8a",
+      "secondaryColor": "#d21034",
+      "group": "Grupo C",
+      "lineup": [
+        { "id": "h1", "name": "J. Placide", "number": 1, "position": "GK", "x": 50, "y": 88, "club": "Bastia" },
+        { "id": "h2", "name": "C. Arcus", "number": 2, "position": "DF", "x": 15, "y": 70, "club": "Angers" },
+        { "id": "h3", "name": "R. Adé", "number": 4, "position": "DF", "x": 38, "y": 75, "club": "LDU Quito" },
+        { "id": "h4", "name": "A. Christian Jr", "number": 3, "position": "DF", "x": 62, "y": 75, "club": "Figueirense" },
+        { "id": "h5", "name": "M. Sainté", "number": 13, "position": "DF", "x": 85, "y": 70, "club": "Mirebalais" },
+        { "id": "h6", "name": "B. Alceus", "number": 8, "position": "MF", "x": 30, "y": 45, "club": "Apollon Limassol" },
+        { "id": "h7", "name": "D. Jean Jacques", "number": 17, "position": "MF", "x": 50, "y": 48, "club": "Metz" },
+        { "id": "h8", "name": "L. Pierre", "number": 14, "position": "MF", "x": 70, "y": 45, "club": "Dunkerque" },
+        { "id": "h9", "name": "D. Nazon", "number": 9, "position": "FW", "x": 15, "y": 22, "club": "Kayserispor" },
+        { "id": "h10", "name": "F. Pierrot", "number": 20, "position": "FW", "x": 50, "y": 28, "club": "Maccabi Haifa" },
+        { "id": "h11", "name": "L. Don Deedson", "number": 7, "position": "FW", "x": 85, "y": 22, "club": "Odense" }
+      ]
+    },
+    "teamB": {
+      "name": "ESCÓCIA",
+      "code": "SCO",
+      "flagSvg": "scotland",
+      "primaryColor": "#0065bd",
+      "secondaryColor": "#ffffff",
+      "group": "Grupo C",
+      "lineup": [
+        { "id": "sc1", "name": "A. Gunn", "number": 1, "position": "GK", "x": 50, "y": 12, "club": "Norwich City" },
+        { "id": "sc2", "name": "A. Ralston", "number": 2, "position": "DF", "x": 15, "y": 30, "club": "Celtic" },
+        { "id": "sc3", "name": "J. Souttar", "number": 5, "position": "DF", "x": 38, "y": 25, "club": "Rangers" },
+        { "id": "sc4", "name": "S. McKenna", "number": 15, "position": "DF", "x": 62, "y": 25, "club": "Las Palmas" },
+        { "id": "sc5", "name": "A. Robertson", "number": 3, "position": "DF", "x": 85, "y": 30, "club": "Liverpool" },
+        { "id": "sc6", "name": "B. Gilmour", "number": 8, "position": "MF", "x": 30, "y": 50, "club": "Napoli" },
+        { "id": "sc7", "name": "S. McTominay", "number": 4, "position": "MF", "x": 50, "y": 45, "club": "Napoli" },
+        { "id": "sc8", "name": "J. McGinn", "number": 7, "position": "MF", "x": 70, "y": 50, "club": "Aston Villa" },
+        { "id": "sc9", "name": "B. Doak", "number": 11, "position": "FW", "x": 15, "y": 75, "club": "Liverpool" },
+        { "id": "sc10", "name": "C. Adams", "number": 10, "position": "FW", "x": 50, "y": 85, "club": "Torino" },
+        { "id": "sc11", "name": "R. Christie", "number": 21, "position": "FW", "x": 85, "y": 75, "club": "Bournemouth" }
+      ]
+    },
+    "stadiumName": "Estádio de Boston",
+    "city": "BOSTON",
+    "stageName": "Group Stage",
+    "kickoffTime": "22:00",
+    "kickoffDate": "13 Junho, 2026",
+    "kickoffTimestamp": "2026-06-13T22:00:00-03:00",
+    "officialMatchUrl": "https://www.fifa.com/pt/match-centre/match/17/285023/289273/400021453",
+    "status": "PRE_GAME",
+    "countdownTargetSeconds": 5670,
+    "broadcasters": [
+      { "id": "cz5", "type": "YOUTUBE", "name": "CazéTV", "iconColor": "#ed2939", "link": "https://www.youtube.com/@CazeTV", "logoUrl": "https://extranets.fifa.com/TvStationPhotos/451.png" }
+    ]
+  },
+  {
+    "id": "aus-tur-2026",
+    "teamA": {
+      "name": "AUSTRÁLIA",
+      "code": "AUS",
+      "flagSvg": "australia",
+      "primaryColor": "#012169",
+      "secondaryColor": "#ffffff",
+      "group": "Grupo D",
+      "lineup": [
+        { "id": "au1", "name": "M. Ryan", "number": 1, "position": "GK", "x": 50, "y": 88, "club": "AZ Alkmaar" },
+        { "id": "au2", "name": "N. Atkinson", "number": 3, "position": "DF", "x": 15, "y": 70, "club": "Hearts" },
+        { "id": "au3", "name": "H. Souttar", "number": 19, "position": "DF", "x": 38, "y": 75, "club": "Leicester City" },
+        { "id": "au4", "name": "K. Rowles", "number": 4, "position": "DF", "x": 62, "y": 75, "club": "Heart of Midlothian" },
+        { "id": "au5", "name": "J. Bos", "number": 8, "position": "DF", "x": 85, "y": 70, "club": "Westerlo" },
+        { "id": "au6", "name": "J. Irvine", "number": 22, "position": "MF", "x": 30, "y": 45, "club": "St. Pauli" },
+        { "id": "au7", "name": "K. Baccus", "number": 17, "position": "MF", "x": 50, "y": 48, "club": "St. Mirren" },
+        { "id": "au8", "name": "A. Hrustic", "number": 10, "position": "MF", "x": 70, "y": 45, "club": "Salernitana" },
+        { "id": "au9", "name": "M. Boyle", "number": 6, "position": "FW", "x": 15, "y": 22, "club": "Hibernian" },
+        { "id": "au10", "name": "M. Duke", "number": 15, "position": "FW", "x": 50, "y": 28, "club": "Machida Zelvia" },
+        { "id": "au11", "name": "C. Goodwin", "number": 23, "position": "FW", "x": 85, "y": 22, "club": "Al-Wehda" }
+      ]
+    },
+    "teamB": {
+      "name": "TURQUIA",
+      "code": "TUR",
+      "flagSvg": "turkey",
+      "primaryColor": "#e30a17",
+      "secondaryColor": "#ffffff",
+      "group": "Grupo D",
+      "lineup": [
+        { "id": "tr1", "name": "M. Günok", "number": 1, "position": "GK", "x": 50, "y": 12, "club": "Beşiktaş" },
+        { "id": "tr2", "name": "Z. Çelik", "number": 2, "position": "DF", "x": 15, "y": 30, "club": "Roma" },
+        { "id": "tr3", "name": "M. Demiral", "number": 3, "position": "DF", "x": 38, "y": 25, "club": "Al-Ahli" },
+        { "id": "tr4", "name": "A. Bardakcı", "number": 14, "position": "DF", "x": 62, "y": 25, "club": "Galatasaray" },
+        { "id": "tr5", "name": "F. Kadioglu", "number": 20, "position": "DF", "x": 85, "y": 30, "club": "Brighton" },
+        { "id": "tr6", "name": "H. Çalhanoğlu", "number": 10, "position": "MF", "x": 30, "y": 50, "club": "Inter de Milão" },
+        { "id": "tr7", "name": "İ. Yüksek", "number": 16, "position": "MF", "x": 50, "y": 45, "club": "Fenerbahçe" },
+        { "id": "tr8", "name": "A. Güler", "number": 8, "position": "MF", "x": 70, "y": 50, "club": "Real Madrid" },
+        { "id": "tr9", "name": "K. Aktürkoğlu", "number": 7, "position": "FW", "x": 15, "y": 75, "club": "Benfica" },
+        { "id": "tr10", "name": "K. Yıldız", "number": 11, "position": "FW", "x": 50, "y": 85, "club": "Juventus" },
+        { "id": "tr11", "name": "B. Yılmaz", "number": 21, "position": "FW", "x": 85, "y": 75, "club": "Galatasaray" }
+      ]
+    },
+    "stadiumName": "BC Place de Vancouver",
+    "city": "VANCOUVER",
+    "stageName": "Group Stage",
+    "kickoffTime": "01:00",
+    "kickoffDate": "14 Junho, 2026",
+    "kickoffTimestamp": "2026-06-14T01:00:00-03:00",
+    "officialMatchUrl": "https://www.fifa.com/pt/match-centre/match/17/285023/289273/400021463",
+    "status": "PRE_GAME",
+    "countdownTargetSeconds": 14493,
+    "broadcasters": [
+      { "id": "getv6", "type": "STREAM", "name": "GETV", "iconColor": "#00e476", "link": "https://globoplay.globo.com/categorias/ge-tv/", "logoUrl": "https://extranets.fifa.com/TvStationPhotos/914.png" },
+      { "id": "gb6", "type": "STREAM", "name": "Globoplay", "iconColor": "#00e476", "link": "https://globoplay.globo.com/tv-globo/ao-vivo/6120663/", "logoUrl": "https://extranets.fifa.com/TvStationPhotos/30.png" },
+      { "id": "cz6", "type": "YOUTUBE", "name": "CazéTV", "iconColor": "#ed2939", "link": "https://www.youtube.com/@CazeTV", "logoUrl": "https://extranets.fifa.com/TvStationPhotos/451.png" },
+      { "id": "g6", "type": "TV ABERTA", "name": "TV Globo", "iconColor": "#05ff85", "link": "https://redeglobo.globo.com/", "logoUrl": "https://extranets.fifa.com/TvStationPhotos/25.png" },
+      { "id": "s6", "type": "TV PAGA", "name": "sportv", "iconColor": "#ffd700", "link": "https://ge.globo.com/sportv/", "logoUrl": "https://extranets.fifa.com/TvStationPhotos/26.png" }
+    ]
+  },
+  {
+    "id": "ger-cuw-2026",
+    "teamA": {
+      "name": "ALEMANHA",
+      "code": "GER",
+      "flagSvg": "germany",
+      "primaryColor": "#000000",
+      "secondaryColor": "#ffce00",
+      "group": "Grupo E",
+      "lineup": [
+        { "id": "de1", "name": "M. ter Stegen", "number": 1, "position": "GK", "x": 50, "y": 88, "club": "Barcelona" },
+        { "id": "de2", "name": "J. Kimmich", "number": 6, "position": "DF", "x": 15, "y": 70, "club": "Bayern Munique" },
+        { "id": "de3", "name": "A. Rudiger", "number": 2, "position": "DF", "x": 38, "y": 75, "club": "Real Madrid" },
+        { "id": "de4", "name": "J. Tah", "number": 4, "position": "DF", "x": 62, "y": 75, "club": "Bayer Leverkusen" },
+        { "id": "de5", "name": "D. Raum", "number": 3, "position": "DF", "x": 85, "y": 70, "club": "RB Leipzig" },
+        { "id": "de6", "name": "R. Andrich", "number": 8, "position": "MF", "x": 30, "y": 45, "club": "Bayer Leverkusen" },
+        { "id": "de7", "name": "I. Gundogan", "number": 21, "position": "MF", "x": 50, "y": 48, "club": "Barcelona" },
+        { "id": "de8", "name": "J. Musiala", "number": 10, "position": "MF", "x": 70, "y": 45, "club": "Bayern Munique" },
+        { "id": "de9", "name": "L. Sane", "number": 19, "position": "FW", "x": 15, "y": 22, "club": "Bayern Munique" },
+        { "id": "de10", "name": "K. Havertz", "number": 7, "position": "FW", "x": 50, "y": 28, "club": "Arsenal" },
+        { "id": "de11", "name": "F. Wirtz", "number": 17, "position": "FW", "x": 85, "y": 22, "club": "Bayer Leverkusen" }
+      ]
+    },
+    "teamB": {
+      "name": "CURAÇAO",
+      "code": "CUW",
+      "flagSvg": "curacao",
+      "primaryColor": "#002b7f",
+      "secondaryColor": "#f9e814",
+      "group": "Grupo E",
+      "lineup": [
+        { "id": "cw1", "name": "E. Room", "number": 1, "position": "GK", "x": 50, "y": 12, "club": "Columbus Crew" },
+        { "id": "cw2", "name": "J. Gaari", "number": 2, "position": "DF", "x": 15, "y": 30, "club": "Al Hazem" },
+        { "id": "cw3", "name": "C. Martina", "number": 4, "position": "DF", "x": 38, "y": 25, "club": "NAC Breda" },
+        { "id": "cw4", "name": "C. Martina", "number": 3, "position": "DF", "x": 62, "y": 25, "club": "Go Ahead Eagles" },
+        { "id": "cw5", "name": "J. Brenet", "number": 5, "position": "DF", "x": 85, "y": 30, "club": "Al Rayyan" },
+        { "id": "cw6", "name": "L. Bacuna", "number": 10, "position": "MF", "x": 30, "y": 50, "club": "Groningen" },
+        { "id": "cw7", "name": "J. Bacuna", "number": 8, "position": "MF", "x": 50, "y": 45, "club": "Al Wehda" },
+        { "id": "cw8", "name": "K. Leerdam", "number": 14, "position": "MF", "x": 70, "y": 50, "club": "Los Angeles Galaxy" },
+        { "id": "cw9", "name": "R. Janga", "number": 9, "position": "FW", "x": 15, "y": 75, "club": "FCSB" },
+        { "id": "cw10", "name": "G. Nepomuceno", "number": 11, "position": "FW", "x": 50, "y": 85, "club": "Melbourne Knights" },
+        { "id": "cw11", "name": "J. Antonisse", "number": 7, "position": "FW", "x": 85, "y": 75, "club": "Moreirense" }
+      ]
+    },
+    "stadiumName": "Estádio de Houston",
+    "city": "HOUSTON",
+    "stageName": "Group Stage",
+    "kickoffTime": "14:00",
+    "kickoffDate": "14 Junho, 2026",
+    "kickoffTimestamp": "2026-06-14T14:00:00-03:00",
+    "officialMatchUrl": "https://www.fifa.com/pt/match-centre/match/17/285023/289273/400021464",
+    "status": "PRE_GAME",
+    "countdownTargetSeconds": 58820,
+    "broadcasters": [
+      { "id": "cz10", "type": "YOUTUBE", "name": "CazéTV", "iconColor": "#ed2939", "link": "https://www.youtube.com/@CazeTV", "logoUrl": "https://extranets.fifa.com/TvStationPhotos/451.png" }
+    ]
+  },
+  {
+    "id": "arg-alg-2026",
+    "teamA": {
+      "name": "ARGENTINA",
+      "code": "ARG",
+      "flagSvg": "argentina",
+      "primaryColor": "#74acdf",
+      "secondaryColor": "#ffffff",
+      "group": "Grupo J",
+      "lineup": [
+        { "id": "a1", "name": "E. Martínez", "number": 23, "position": "GK", "x": 50, "y": 88, "club": "Aston Villa" },
+        { "id": "a2", "name": "Molina", "number": 26, "position": "DF", "x": 15, "y": 70, "club": "Atlético Madrid" },
+        { "id": "a3", "name": "Romero", "number": 13, "position": "DF", "x": 38, "y": 75, "club": "Tottenham" },
+        { "id": "a4", "name": "Otamendi", "number": 19, "position": "DF", "x": 62, "y": 75, "club": "Benfica" },
+        { "id": "a5", "name": "Tagliafico", "number": 3, "position": "DF", "x": 85, "y": 70, "club": "Lyon" },
+        { "id": "a6", "name": "De Paul", "number": 7, "position": "MF", "x": 30, "y": 45, "club": "Atlético Madrid" },
+        { "id": "a7", "name": "Mac Allister", "number": 20, "position": "MF", "x": 50, "y": 48, "club": "Liverpool" },
+        { "id": "a8", "name": "Enzo F.", "number": 24, "position": "MF", "x": 70, "y": 45, "club": "Chelsea" },
+        { "id": "a9", "name": "Leo Messi", "number": 10, "position": "FW", "x": 50, "y": 25, "club": "Inter Miami" },
+        { "id": "a10", "name": "Álvarez", "number": 9, "position": "FW", "x": 30, "y": 15, "club": "Atlético Madrid" },
+        { "id": "a11", "name": "Lautaro M.", "number": 22, "position": "FW", "x": 70, "y": 15, "club": "Inter de Milão" }
+      ]
+    },
+    "teamB": {
+      "name": "ARGÉLIA",
+      "code": "ALG",
+      "flagSvg": "algeria",
+      "primaryColor": "#006233",
+      "secondaryColor": "#d21034",
+      "group": "Grupo J",
+      "lineup": [
+        { "id": "dz1", "name": "A. Mandrea", "number": 16, "position": "GK", "x": 50, "y": 12, "club": "Lens" },
+        { "id": "dz2", "name": "J. Hadjam", "number": 19, "position": "DF", "x": 15, "y": 30, "club": "Eintracht Frankfurt" },
+        { "id": "dz3", "name": "R. Bensebaini", "number": 3, "position": "DF", "x": 38, "y": 25, "club": "Borussia Dortmund" },
+        { "id": "dz4", "name": "A. Mandi", "number": 5, "position": "DF", "x": 62, "y": 25, "club": "Beşiktaş" },
+        { "id": "dz5", "name": "Y. Atal", "number": 2, "position": "DF", "x": 85, "y": 30, "club": "Al-Arabi" },
+        { "id": "dz6", "name": "I. Bennacer", "number": 8, "position": "MF", "x": 30, "y": 50, "club": "AC Milan" },
+        { "id": "dz7", "name": "H. Aouar", "number": 28, "position": "MF", "x": 50, "y": 45, "club": "Al-Ittihad" },
+        { "id": "dz8", "name": "H. Belkebla", "number": 14, "position": "MF", "x": 70, "y": 50, "club": "Brest" },
+        { "id": "dz9", "name": "R. Mahrez", "number": 7, "position": "FW", "x": 15, "y": 75, "club": "Al-Ahli" },
+        { "id": "dz10", "name": "A. Gouiri", "number": 9, "position": "FW", "x": 50, "y": 85, "club": "Marselha" },
+        { "id": "dz11", "name": "S. Benrahma", "number": 20, "position": "FW", "x": 85, "y": 75, "club": "Lyon" }
+      ]
+    },
+    "stadiumName": "Arrowhead Stadium",
+    "city": "KANSAS CITY",
+    "stageName": "Group Stage",
+    "kickoffTime": "22:00",
+    "kickoffDate": "16 Junho, 2026",
+    "kickoffTimestamp": "2026-06-16T22:00:00-03:00",
+    "status": "PRE_GAME",
+    "countdownTargetSeconds": 270000,
+    "broadcasters": [
+      { "id": "g3", "type": "TV ABERTA", "name": "Globo", "iconColor": "#05ff85", "link": "https://globoplay.globo.com" },
+      { "id": "s3", "type": "TV PAGA", "name": "SportTV", "iconColor": "#ffd700", "link": "https://ge.globo.com/sportv/" },
+      { "id": "gb3", "type": "STREAM PAGO", "name": "Globoplay / FIFA+", "iconColor": "#00e476", "link": "https://plus.fifa.com" }
+    ]
+  }
+]
