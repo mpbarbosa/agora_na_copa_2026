@@ -1,8 +1,10 @@
 import { useMemo } from "react";
+import type { Match } from "../types";
 import { computeStandings, groupStandings } from "../standings";
 import { FlagIcon } from "./FlagIcon";
 
 interface StandingsViewProps {
+  matches: Match[];
   theme: "classic-light" | "stadium-dark";
 }
 
@@ -19,8 +21,8 @@ const COLUMNS = [
 
 const groupSlug = (group: string) => group.replace(/\s+/g, "-").toLowerCase();
 
-export function StandingsView({ theme }: StandingsViewProps) {
-  const groups = useMemo(() => groupStandings(computeStandings()), []);
+export function StandingsView({ matches, theme }: StandingsViewProps) {
+  const groups = useMemo(() => groupStandings(computeStandings(matches)), [matches]);
 
   const cardClasses =
     theme === "classic-light"
@@ -109,6 +111,7 @@ export function StandingsView({ theme }: StandingsViewProps) {
                       {COLUMNS.map((col) => (
                         <td
                           key={col.key}
+                          id={`standings-cell-${row.code.toLowerCase()}-${col.key}`}
                           className={`text-right py-1.5 px-1 ${
                             col.key === "points" ? `font-bold ${headingClasses}` : mutedClasses
                           }`}

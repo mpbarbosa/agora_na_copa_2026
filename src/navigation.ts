@@ -29,7 +29,7 @@ export const NAV_ITEMS: NavItem[] = [
   {
     id: "estadios",
     label: "Estádios",
-    status: "comingSoon",
+    status: "live",
     description: "Mapa e curiosidades das 16 sedes do Mundial.",
   },
   {

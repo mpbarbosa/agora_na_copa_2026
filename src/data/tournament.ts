@@ -148,7 +148,7 @@ export const stadiums: Stadium[] = [
     country: "USA",
     capacity: 70240,
     yearBuilt: 2020,
-    coordinates: { x: 12, y: 50 },
+    coordinates: { lat: 33.9535, lng: -118.3392 },
     facts: [
       "Um dos estádios mais modernos do mundo, com cobertura translúcida.",
       "Já recebeu o Super Bowl LVI em 2022.",
@@ -162,7 +162,7 @@ export const stadiums: Stadium[] = [
     country: "MEX",
     capacity: 83000,
     yearBuilt: 1966,
-    coordinates: { x: 42, y: 84 },
+    coordinates: { lat: 19.3029, lng: -99.1505 },
     facts: [
       "Primeiro estádio a sediar a abertura de duas Copas do Mundo (1970 e 1986).",
       "Localizado a mais de 2.200 metros de altitude.",
@@ -176,7 +176,7 @@ export const stadiums: Stadium[] = [
     country: "MEX",
     capacity: 46232,
     yearBuilt: 2010,
-    coordinates: { x: 34, y: 80 },
+    coordinates: { lat: 20.6829, lng: -103.4623 },
     facts: [
       "Conhecido pela fachada coberta por painéis solares.",
       "Um dos estádios mais novos do futebol mexicano.",
@@ -190,7 +190,7 @@ export const stadiums: Stadium[] = [
     country: "CAN",
     capacity: 30000,
     yearBuilt: 2007,
-    coordinates: { x: 70, y: 18 },
+    coordinates: { lat: 43.6332, lng: -79.4186 },
     facts: [
       "Principal casa do Toronto FC, passará por expansão temporária para a Copa.",
       "Uma das duas sedes canadenses do torneio.",
@@ -204,7 +204,7 @@ export const stadiums: Stadium[] = [
     country: "USA",
     capacity: 82500,
     yearBuilt: 2010,
-    coordinates: { x: 78, y: 30 },
+    coordinates: { lat: 40.8135, lng: -74.0745 },
     facts: [
       "Receberá a histórica Grande Final da Copa de 2026.",
       "Já foi palco do Super Bowl XLVIII em 2014.",
@@ -218,7 +218,7 @@ export const stadiums: Stadium[] = [
     country: "USA",
     capacity: 65878,
     yearBuilt: 2002,
-    coordinates: { x: 81, y: 24 },
+    coordinates: { lat: 42.0909, lng: -71.2643 },
     facts: [
       "Localizado na região metropolitana de Boston, em Foxborough.",
       "Casa tradicional do futebol americano na Nova Inglaterra.",
@@ -232,7 +232,7 @@ export const stadiums: Stadium[] = [
     country: "CAN",
     capacity: 54500,
     yearBuilt: 1983,
-    coordinates: { x: 8, y: 14 },
+    coordinates: { lat: 49.2768, lng: -123.1118 },
     facts: [
       "Possui cobertura retrátil, rara entre as sedes da Copa.",
       "Recebeu jogos da Copa do Mundo Feminina de 2015.",
@@ -246,7 +246,7 @@ export const stadiums: Stadium[] = [
     country: "USA",
     capacity: 72220,
     yearBuilt: 2002,
-    coordinates: { x: 48, y: 68 },
+    coordinates: { lat: 29.6847, lng: -95.4107 },
     facts: [
       "Conta com teto retrátil para proteger o público do calor texano.",
       "Já recebeu o Super Bowl por duas vezes.",
@@ -260,7 +260,7 @@ export const stadiums: Stadium[] = [
     country: "USA",
     capacity: 76416,
     yearBuilt: 1972,
-    coordinates: { x: 50, y: 46 },
+    coordinates: { lat: 39.0489, lng: -94.4839 },
     facts: [
       "Famoso pela torcida mais ruidosa da NFL.",
       "Um dos estádios mais antigos entre as sedes de 2026.",
@@ -274,7 +274,7 @@ export const stadiums: Stadium[] = [
     country: "USA",
     capacity: 80000,
     yearBuilt: 2009,
-    coordinates: { x: 46, y: 60 },
+    coordinates: { lat: 32.7473, lng: -97.0945 },
     facts: [
       "Um dos maiores domos do mundo, com capacidade para mais de 80 mil pessoas.",
       "Telão suspenso é um dos maiores do planeta.",
@@ -288,7 +288,7 @@ export const stadiums: Stadium[] = [
     country: "USA",
     capacity: 69596,
     yearBuilt: 2003,
-    coordinates: { x: 77, y: 34 },
+    coordinates: { lat: 39.9008, lng: -75.1675 },
     facts: [
       "Casa tradicional do futebol americano na Pensilvânia.",
       "Receberá partidas da fase de grupos e do mata-mata inicial.",
@@ -302,7 +302,7 @@ export const stadiums: Stadium[] = [
     country: "MEX",
     capacity: 53500,
     yearBuilt: 2015,
-    coordinates: { x: 43, y: 74 },
+    coordinates: { lat: 25.6692, lng: -100.2447 },
     facts: [
       "Desenho inspirado nas montanhas da Sierra Madre.",
       "Um dos estádios mais modernos do futebol mexicano.",
@@ -316,7 +316,7 @@ export const stadiums: Stadium[] = [
     country: "USA",
     capacity: 71000,
     yearBuilt: 2017,
-    coordinates: { x: 64, y: 58 },
+    coordinates: { lat: 33.7554, lng: -84.4009 },
     facts: [
       "Possui cobertura retrátil em formato de íris de câmera.",
       "Tela de vídeo circular é uma das maiores do mundo.",
@@ -330,7 +330,7 @@ export const stadiums: Stadium[] = [
     country: "USA",
     capacity: 65326,
     yearBuilt: 1987,
-    coordinates: { x: 72, y: 80 },
+    coordinates: { lat: 25.958, lng: -80.2389 },
     facts: [
       "Recebeu reformas recentes para abrigar grandes eventos internacionais.",
       "Clima tropical é um fator tático considerado pelas seleções.",
@@ -344,7 +344,7 @@ export const stadiums: Stadium[] = [
     country: "USA",
     capacity: 68500,
     yearBuilt: 2014,
-    coordinates: { x: 7, y: 38 },
+    coordinates: { lat: 37.403, lng: -121.9694 },
     facts: [
       "Localizado no coração do Vale do Silício.",
       "Já recebeu o Super Bowl 50, em 2016.",
@@ -358,7 +358,7 @@ export const stadiums: Stadium[] = [
     country: "USA",
     capacity: 69000,
     yearBuilt: 2002,
-    coordinates: { x: 9, y: 8 },
+    coordinates: { lat: 47.5952, lng: -122.3316 },
     facts: [
       "Conhecido pela energia da torcida, com recordes de decibéis em jogos da NFL.",
       "Cobertura parcial protege parte do público da chuva típica da região.",

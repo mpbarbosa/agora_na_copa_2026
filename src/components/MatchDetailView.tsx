@@ -1,11 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, type Dispatch, type SetStateAction } from "react";
 import {
   Match,
   MatchStatus,
   MatchOverlayEntry,
   CommentaryEvent,
 } from "../types";
-import matchesData from "../matches.json";
 import { FlagIcon } from "./FlagIcon";
 import { PitchLineup } from "./PitchLineup";
 import { MapPin, Settings, Edit3 } from "lucide-react";
@@ -128,16 +127,21 @@ interface MatchOverlaysApiResponse {
 }
 
 interface MatchDetailViewProps {
+  matches: Match[];
+  setMatches: Dispatch<SetStateAction<Match[]>>;
   theme: "classic-light" | "stadium-dark";
 }
 
-export function MatchDetailView({ theme }: MatchDetailViewProps) {
-  const [matches, setMatches] = useState<Match[]>(matchesData as Match[]);
+export function MatchDetailView({
+  matches,
+  setMatches,
+  theme,
+}: MatchDetailViewProps) {
   const [matchOverlays, setMatchOverlays] = useState<
     Record<string, MatchOverlayEntry>
   >({});
   const [selectedMatchId, setSelectedMatchId] = useState<string>(() =>
-    getInitialMatchId(matchesData as Match[]),
+    getInitialMatchId(matches),
   );
   const [matchSelectionMode, setMatchSelectionMode] = useState<"auto" | "manual">(
     "auto",

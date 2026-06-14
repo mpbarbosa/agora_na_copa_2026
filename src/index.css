@@ -49,3 +49,115 @@
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.2);
 }
+
+.venue-map-surface .leaflet-container {
+  font-family: var(--font-mono);
+}
+
+.venue-map-theme-light .leaflet-container {
+  background: #e2e8f0;
+}
+
+.venue-map-theme-dark .leaflet-container {
+  background: #0b171a;
+}
+
+.venue-map-theme-dark .leaflet-tile-pane {
+  filter: saturate(0.75) hue-rotate(180deg) brightness(0.62) contrast(1.08);
+}
+
+.venue-map-theme-dark .leaflet-control-zoom a {
+  background: rgba(18, 20, 20, 0.92);
+  color: #f8fafc;
+  border-bottom-color: rgba(255, 255, 255, 0.08);
+}
+
+.venue-map-theme-dark .leaflet-control-zoom a:hover {
+  background: rgba(30, 32, 32, 0.96);
+}
+
+.venue-map-theme-dark .leaflet-control-attribution {
+  background: rgba(18, 20, 20, 0.78);
+  color: #cbd5e1;
+}
+
+.venue-map-theme-dark .leaflet-control-attribution a {
+  color: #86efac;
+}
+
+.venue-map-marker-shell {
+  background: transparent;
+  border: 0;
+}
+
+.venue-map-marker {
+  position: relative;
+  width: 22px;
+  height: 22px;
+  border-radius: 9999px;
+  border: 2px solid rgba(255, 255, 255, 0.95);
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.25);
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.venue-map-marker::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -11px;
+  width: 10px;
+  height: 14px;
+  background: inherit;
+  clip-path: polygon(50% 100%, 0 0, 100% 0);
+  transform: translateX(-50%);
+}
+
+.venue-map-marker__core {
+  position: absolute;
+  inset: 5px;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.92);
+}
+
+.venue-map-marker--selected {
+  transform: scale(1.18);
+  box-shadow: 0 14px 34px rgba(15, 23, 42, 0.38);
+}
+
+.venue-map-country-dot--usa,
+.venue-map-marker--usa {
+  background: #1d4ed8;
+}
+
+.venue-map-country-dot--mex,
+.venue-map-marker--mex {
+  background: #16a34a;
+}
+
+.venue-map-country-dot--can,
+.venue-map-marker--can {
+  background: #dc2626;
+}
+
+.venue-map-surface .leaflet-tooltip {
+  border: 0;
+  border-radius: 9999px;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.18);
+  padding: 6px 10px;
+}
+
+.venue-map-theme-light .leaflet-tooltip {
+  background: rgba(255, 255, 255, 0.96);
+  color: #0f172a;
+}
+
+.venue-map-theme-dark .leaflet-tooltip {
+  background: rgba(18, 20, 20, 0.95);
+  color: #f8fafc;
+}
+
+.venue-map-surface .leaflet-tooltip-top::before {
+  border-top-color: transparent;
+}

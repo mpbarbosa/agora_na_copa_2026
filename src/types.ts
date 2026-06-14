@@ -134,7 +134,7 @@ export interface Stadium {
   country: "USA" | "MEX" | "CAN";
   capacity: number;
   yearBuilt: number;
-  coordinates: { x: number; y: number }; // 0-100 relative position on the venue map
+  coordinates: { lat: number; lng: number }; // Real map coordinates for venue exploration
   facts: string[];
   image: string;
 }

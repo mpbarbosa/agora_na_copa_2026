@@ -6,6 +6,54 @@ const GROUP_IDS = Array.from({ length: 12 }, (_, index) => {
 });
 
 test.describe("Standings view (Grupos)", () => {
+  test("refreshes the group table after a match update", async ({ page }) => {
+    const consoleErrors: string[] = [];
+    page.on("console", (msg) => {
+      if (msg.type() === "error") consoleErrors.push(msg.text());
+    });
+
+    await page.route("**/api/match-overlays", async (route) => {
+      await route.fulfill({
+        contentType: "application/json",
+        body: JSON.stringify({
+          refreshAfterMs: 60000,
+          overlays: {
+            "arg-alg-2026": {
+              broadcastGuide: {
+                broadcasters: [],
+                source: "fallback",
+                note: "Sem novas emissoras neste teste.",
+                updatedAt: "2026-06-14T22:00:00.000Z",
+              },
+              matchState: {
+                status: "LIVE",
+                score: { teamA: 2, teamB: 1 },
+                matchTime: "62'",
+                source: "fifa",
+                note: "Teste de atualização da tabela.",
+                updatedAt: "2026-06-14T22:00:00.000Z",
+              },
+            },
+          },
+        }),
+      });
+    });
+
+    await page.goto("/");
+    await expect(
+      page.locator("#match-selector-chips-LIVE #btn-match-arg-alg-2026"),
+    ).toBeVisible();
+
+    await page.click("#btn-nav-grupos");
+
+    await expect(page.locator("#standings-view")).toBeVisible();
+    await expect(page.locator("#standings-cell-arg-played")).toHaveText("1");
+    await expect(page.locator("#standings-cell-arg-points")).toHaveText("3");
+    await expect(page.locator("#standings-cell-alg-points")).toHaveText("0");
+
+    expect(consoleErrors).toEqual([]);
+  });
+
   test("renders all 12 group tables with headers and rows", async ({ page }) => {
     const consoleErrors: string[] = [];
     page.on("console", (msg) => {

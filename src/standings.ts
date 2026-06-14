@@ -27,14 +27,18 @@ function addResult(tally: MatchTally, scored: number, conceded: number): void {
   else tally.lost += 1;
 }
 
-// Reconciles the tournament.ts seed roster with any FINISHED matches in
-// matches.json (matched by team code), so standings stay correct as results
-// come in without needing to hand-edit the seed data.
+function countsForStandings(match: Match) {
+  return (match.status === "LIVE" || match.status === "FINISHED") && match.score;
+}
+
+// Reconciles the tournament.ts seed roster with any scored LIVE/FINISHED
+// matches in matches.json (matched by team code), so the Grupos view updates
+// as live scores arrive without needing to hand-edit the seed data.
 export function computeStandings(matches: Match[] = matchesData as Match[]): StandingsRow[] {
   const tallies = new Map<string, MatchTally>();
 
   for (const match of matches) {
-    if (match.status !== "FINISHED" || !match.score) continue;
+    if (!countsForStandings(match)) continue;
 
     const tallyA = tallies.get(match.teamA.code) ?? emptyTally();
     const tallyB = tallies.get(match.teamB.code) ?? emptyTally();

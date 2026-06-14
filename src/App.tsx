@@ -1,8 +1,11 @@
 import { useState } from "react";
 import packageInfo from "../package.json";
+import matchesData from "./matches.json";
+import type { Match } from "./types";
 import { MatchDetailView } from "./components/MatchDetailView";
 import { ComingSoonView } from "./components/ComingSoonView";
 import { StandingsView } from "./components/StandingsView";
+import { VenueMapView } from "./components/VenueMapView";
 import { NAV_ITEMS } from "./navigation";
 import { Sun, Moon } from "lucide-react";
 
@@ -12,6 +15,7 @@ export default function App() {
   const [theme, setTheme] = useState<"classic-light" | "stadium-dark">(
     "classic-light",
   );
+  const [matches, setMatches] = useState<Match[]>(() => matchesData as Match[]);
   const [activeNavId, setActiveNavId] = useState<string>(NAV_ITEMS[0].id);
 
   const activeNavItem =
@@ -118,9 +122,11 @@ export default function App() {
       {/* VIEW AREA RESPONDING TO SELECTED NAV ITEM */}
       <main id="view-container">
         {activeNavItem.status === "live" && activeNavItem.id === "partidas" ? (
-          <MatchDetailView theme={theme} />
+          <MatchDetailView matches={matches} setMatches={setMatches} theme={theme} />
         ) : activeNavItem.status === "live" && activeNavItem.id === "grupos" ? (
-          <StandingsView theme={theme} />
+          <StandingsView matches={matches} theme={theme} />
+        ) : activeNavItem.status === "live" && activeNavItem.id === "estadios" ? (
+          <VenueMapView matches={matches} theme={theme} />
         ) : (
           <ComingSoonView theme={theme} item={activeNavItem} />
         )}
