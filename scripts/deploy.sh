@@ -166,6 +166,18 @@ validate_prerequisites() {
     fi
 }
 
+payload_is_ready() {
+    local candidate="$1"
+
+    [ -d "$candidate/dist" ] &&
+        [ -f "$candidate/dist/index.html" ] &&
+        [ -f "$candidate/dist/server.cjs" ] &&
+        [ -d "$candidate/dist/assets" ] &&
+        [ -f "$candidate/package.json" ] &&
+        [ -f "$candidate/package-lock.json" ] &&
+        [ -f "$candidate/.env.example" ]
+}
+
 validate_clean_worktrees() {
     echo "==> [1/7] Verifying clean worktrees..."
 
@@ -225,6 +237,11 @@ sync_to_target() {
     echo "==> [5/7] Syncing payload to $DEPLOY_TARGET..."
     mkdir -p "$DEPLOY_TARGET"
     rsync -av --delete "$PAYLOAD_STAGE_DIR/" "$DEPLOY_TARGET/"
+
+    if ! payload_is_ready "$DEPLOY_TARGET"; then
+        die "Deployment target is missing part of the staged payload after rsync: $DEPLOY_TARGET"
+    fi
+
     echo "==> Sync complete."
 }
 
@@ -233,7 +250,11 @@ git_commit_and_push() {
     cd "$MPBARBOSA_COM_ROOT"
 
     echo "==> Staging deployment subtree..."
-    git add -A -f -- "$DEPLOY_SUBTREE"
+    git add -A -- \
+        "$DEPLOY_SUBTREE/.env.example" \
+        "$DEPLOY_SUBTREE/package.json" \
+        "$DEPLOY_SUBTREE/package-lock.json"
+    git add -A -f -- "$DEPLOY_SUBTREE/dist"
 
     if git diff --cached --quiet -- "$DEPLOY_SUBTREE"; then
         echo "==> No agora_na_copa_2026 changes to commit. Nothing to push."

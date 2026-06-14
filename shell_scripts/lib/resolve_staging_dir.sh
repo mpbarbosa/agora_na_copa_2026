@@ -12,6 +12,15 @@ payload_is_ready() {
         [ -f "$candidate/.env.example" ]
 }
 
+local_project_is_buildable() {
+    local candidate="$1"
+
+    [ -f "$candidate/package.json" ] &&
+        [ -f "$candidate/package-lock.json" ] &&
+        [ -f "$candidate/.env.example" ] &&
+        [ -f "$candidate/scripts/deploy-preflight.sh" ]
+}
+
 resolve_staging_dir() {
     local project_root="$1"
     local deploy_subtree="$2"
@@ -38,7 +47,7 @@ resolve_staging_dir() {
         return 0
     fi
 
-    if payload_is_ready "$project_root"; then
+    if payload_is_ready "$project_root" || local_project_is_buildable "$project_root"; then
         printf '%s\n' "$project_root"
         return 0
     fi
@@ -46,6 +55,6 @@ resolve_staging_dir() {
     echo "Error: staging payload not found." >&2
     echo "Checked sibling staging repo: $sibling_candidate" >&2
     echo "Checked local project build: $project_root" >&2
-    echo "Run ./scripts/deploy.sh to refresh the sibling payload, or run npm run build here and try again." >&2
+    echo "Run ./scripts/deploy.sh to refresh the sibling payload, or ensure the local repo contains package manifests plus scripts/deploy-preflight.sh." >&2
     return 1
 }
