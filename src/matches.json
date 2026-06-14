@@ -429,8 +429,12 @@
     "kickoffDate": "13 Junho, 2026",
     "kickoffTimestamp": "2026-06-13T22:00:00-03:00",
     "officialMatchUrl": "https://www.fifa.com/pt/match-centre/match/17/285023/289273/400021453",
-    "status": "PRE_GAME",
-    "countdownTargetSeconds": 5670,
+    "status": "FINISHED",
+    "score": {
+      "teamA": 0,
+      "teamB": 1
+    },
+    "countdownTargetSeconds": 0,
     "broadcasters": [
       { "id": "cz5", "type": "YOUTUBE", "name": "CazéTV", "iconColor": "#ed2939", "link": "https://www.youtube.com/@CazeTV", "logoUrl": "https://extranets.fifa.com/TvStationPhotos/451.png" }
     ]
