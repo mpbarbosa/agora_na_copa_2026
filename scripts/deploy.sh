@@ -13,7 +13,8 @@
 #
 # Prerequisites:
 #   - mpbarbosa.com repository available at $MPBARBOSA_COM_ROOT
-#     (default: $HOME/Documents/GitHub/mpbarbosa.com).
+#     (default: auto-detect /var/www/mpbarbosa.com, then
+#     $HOME/Documents/GitHub/mpbarbosa.com).
 #   - rsync available on PATH.
 #   - Node.js and npm installed.
 #   - git configured with push access to the mpbarbosa.com remote.
@@ -32,7 +33,8 @@
 #
 # Environment variables:
 #   MPBARBOSA_COM_ROOT   Override the path to the mpbarbosa.com repository.
-#                        Default: $HOME/Documents/GitHub/mpbarbosa.com
+#                        Default: auto-detect /var/www/mpbarbosa.com, then
+#                        $HOME/Documents/GitHub/mpbarbosa.com
 #
 # Exit codes:
 #   0  Deployment completed successfully (or no subtree changes to push).
@@ -47,11 +49,14 @@ set -euo pipefail
 # ---------------------------------------------------------------------------
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
-MPBARBOSA_COM_ROOT="${MPBARBOSA_COM_ROOT:-$HOME/Documents/GitHub/mpbarbosa.com}"
+MPBARBOSA_COM_ROOT="${MPBARBOSA_COM_ROOT:-}"
 DEPLOY_SUBTREE="agora_na_copa_2026"
-DEPLOY_TARGET="$MPBARBOSA_COM_ROOT/$DEPLOY_SUBTREE"
+DEPLOY_TARGET=""
 PAYLOAD_STAGE_DIR=""
 COMMIT_MESSAGE=""
+
+source "$PROJECT_ROOT/shell_scripts/lib/resolve_mpbarbosa_com_root.sh"
+source "$PROJECT_ROOT/shell_scripts/lib/stage_deploy_payload.sh"
 
 die() {
     echo "Error: $*" >&2
@@ -86,7 +91,8 @@ OPTIONS:
 
 ENVIRONMENT:
     MPBARBOSA_COM_ROOT  Path to the mpbarbosa.com repository.
-                        Default: $HOME/Documents/GitHub/mpbarbosa.com
+                        Default: auto-detect /var/www/mpbarbosa.com, then
+                        $HOME/Documents/GitHub/mpbarbosa.com
 
 PROCESS:
     1. Verify this repo worktree is clean
@@ -114,6 +120,11 @@ fi
 # ---------------------------------------------------------------------------
 # Prerequisite checks
 # ---------------------------------------------------------------------------
+resolve_paths() {
+    MPBARBOSA_COM_ROOT="$(resolve_mpbarbosa_com_root "$MPBARBOSA_COM_ROOT")"
+    DEPLOY_TARGET="$MPBARBOSA_COM_ROOT/$DEPLOY_SUBTREE"
+}
+
 validate_prerequisites() {
     if [ ! -d "$PROJECT_ROOT/.git" ]; then
         die "'$PROJECT_ROOT' is not a git repository."
@@ -190,13 +201,7 @@ run_preflight() {
 stage_payload() {
     echo "==> [4/6] Staging deployment payload..."
 
-    PAYLOAD_STAGE_DIR="$(mktemp -d "${TMPDIR:-/tmp}/agora-deploy.XXXXXX")"
-    mkdir -p "$PAYLOAD_STAGE_DIR/dist"
-
-    rsync -av --delete "$PROJECT_ROOT/dist/" "$PAYLOAD_STAGE_DIR/dist/"
-    cp "$PROJECT_ROOT/package.json" "$PAYLOAD_STAGE_DIR/package.json"
-    cp "$PROJECT_ROOT/package-lock.json" "$PAYLOAD_STAGE_DIR/package-lock.json"
-    cp "$PROJECT_ROOT/.env.example" "$PAYLOAD_STAGE_DIR/.env.example"
+    PAYLOAD_STAGE_DIR="$(stage_deploy_payload "$PROJECT_ROOT")"
 
     echo "==> Payload staged at $PAYLOAD_STAGE_DIR."
 }
@@ -230,6 +235,7 @@ git_commit_and_push() {
 }
 
 main() {
+    resolve_paths
     validate_prerequisites
     validate_clean_worktrees
     prepare_deploy_metadata

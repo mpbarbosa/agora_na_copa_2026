@@ -1,5 +1,8 @@
 #!/bin/bash
 
+LIB_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$LIB_DIR/resolve_mpbarbosa_com_root.sh"
+
 payload_is_ready() {
     local candidate="$1"
 
@@ -12,8 +15,8 @@ payload_is_ready() {
 resolve_staging_dir() {
     local project_root="$1"
     local deploy_subtree="$2"
-    local sibling_root="${MPBARBOSA_COM_ROOT:-$HOME/Documents/GitHub/mpbarbosa.com}"
-    local sibling_candidate="$sibling_root/$deploy_subtree"
+    local sibling_root
+    local sibling_candidate
     local configured_candidate="${AGORA_STAGING_DIR:-}"
 
     if [ -n "$configured_candidate" ]; then
@@ -26,6 +29,9 @@ resolve_staging_dir() {
         echo "Expected: dist/, package.json, package-lock.json, and .env.example" >&2
         return 1
     fi
+
+    sibling_root="$(resolve_mpbarbosa_com_root)"
+    sibling_candidate="$sibling_root/$deploy_subtree"
 
     if payload_is_ready "$sibling_candidate"; then
         printf '%s\n' "$sibling_candidate"
