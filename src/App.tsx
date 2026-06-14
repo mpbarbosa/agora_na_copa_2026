@@ -2,6 +2,7 @@ import { useState } from "react";
 import packageInfo from "../package.json";
 import { MatchDetailView } from "./components/MatchDetailView";
 import { ComingSoonView } from "./components/ComingSoonView";
+import { StandingsView } from "./components/StandingsView";
 import { NAV_ITEMS } from "./navigation";
 import { Sun, Moon } from "lucide-react";
 
@@ -118,6 +119,8 @@ export default function App() {
       <main id="view-container">
         {activeNavItem.status === "live" && activeNavItem.id === "partidas" ? (
           <MatchDetailView theme={theme} />
+        ) : activeNavItem.status === "live" && activeNavItem.id === "grupos" ? (
+          <StandingsView theme={theme} />
         ) : (
           <ComingSoonView theme={theme} item={activeNavItem} />
         )}

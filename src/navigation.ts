@@ -17,7 +17,7 @@ export const NAV_ITEMS: NavItem[] = [
   {
     id: "grupos",
     label: "Grupos",
-    status: "comingSoon",
+    status: "live",
     description: "Tabelas de classificação dos 12 grupos do torneio.",
   },
   {
