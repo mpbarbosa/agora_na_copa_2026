@@ -32,6 +32,25 @@ export interface BroadcastGuideEntry {
   updatedAt: string;
 }
 
+export interface MatchStateEntry {
+  status: MatchStatus;
+  score?: {
+    teamA: number;
+    teamB: number;
+  };
+  matchTime?: string;
+  incidents?: CommentaryEvent[];
+  source: "fifa" | "fallback";
+  note: string;
+  fifaMatchId?: string;
+  updatedAt: string;
+}
+
+export interface MatchOverlayEntry {
+  broadcastGuide: BroadcastGuideEntry;
+  matchState: MatchStateEntry;
+}
+
 export type MatchStatus = "PRE_GAME" | "LIVE" | "FINISHED";
 
 export interface Match {
@@ -66,6 +85,7 @@ export interface Match {
     teamA: number;
     teamB: number;
   };
+  matchTime?: string; // live match clock label from FIFA, e.g. "44'"
   countdownTargetSeconds: number; // calculated relative to simulated start or exact countdown
   broadcasters: Broadcaster[];
 }

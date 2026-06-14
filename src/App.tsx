@@ -1,5 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { Match, MatchStatus, Position, BroadcastGuideEntry } from "./types";
+import {
+  Match,
+  MatchStatus,
+  MatchOverlayEntry,
+  Position,
+  CommentaryEvent,
+} from "./types";
 import matchesData from "./matches.json";
 import packageInfo from "../package.json";
 import { FlagIcon } from "./components/FlagIcon";
@@ -18,6 +24,7 @@ const HEADER_MATCH_STATUS_GROUPS = MATCH_STATUS_GROUPS.filter(
 );
 
 const APP_VERSION = packageInfo.version;
+const DEFAULT_MATCH_OVERLAY_REFRESH_INTERVAL_MS = 15 * 1000;
 
 // Live match takes priority; otherwise the soonest match that hasn't kicked off yet
 function getInitialMatchId(matches: Match[]): string {
@@ -59,6 +66,48 @@ function formatCountryNameForTooltip(name: string) {
     .join(" ");
 }
 
+function getIncidentLabel(type: CommentaryEvent["type"]) {
+  switch (type) {
+    case "GOAL":
+      return "GOL";
+    case "YELLOW_CARD":
+      return "AM";
+    case "RED_CARD":
+      return "VM";
+    case "SUBSTITUTION":
+      return "SUB";
+    default:
+      return "LANCE";
+  }
+}
+
+function getIncidentAccentClass(
+  type: CommentaryEvent["type"],
+  theme: "classic-light" | "stadium-dark",
+) {
+  if (type === "GOAL") {
+    return theme === "classic-light"
+      ? "border-[#009c3b]/25 bg-[#009c3b]/10 text-[#007a2f]"
+      : "border-[#00e476]/20 bg-[#00e476]/10 text-[#a7e6bf]";
+  }
+
+  if (type === "YELLOW_CARD") {
+    return theme === "classic-light"
+      ? "border-[#d4a017]/25 bg-[#ffd84d]/15 text-[#9a6a00]"
+      : "border-[#ffd84d]/20 bg-[#ffd84d]/10 text-[#ffe58b]";
+  }
+
+  if (type === "RED_CARD") {
+    return theme === "classic-light"
+      ? "border-[#c1121f]/25 bg-[#ed2939]/10 text-[#9f1239]"
+      : "border-[#ed2939]/20 bg-[#ed2939]/10 text-[#ff9cab]";
+  }
+
+  return theme === "classic-light"
+    ? "border-slate-200 bg-slate-100 text-slate-700"
+    : "border-white/10 bg-white/10 text-slate-200";
+}
+
 function getMatchCountdownSeconds(match: Match, now: Date, customSeconds: number) {
   if (match.id === "bra-mar-2026") {
     return Math.max(0, customSeconds);
@@ -76,14 +125,21 @@ function getMatchCountdownSeconds(match: Match, now: Date, customSeconds: number
   return Math.max(0, Math.floor((kickoffTime - now.getTime()) / 1000));
 }
 
-interface BroadcastGuideApiResponse {
-  guides: Record<string, BroadcastGuideEntry>;
+interface MatchOverlaysApiResponse {
+  refreshAfterMs?: number;
+  overlays: Record<string, MatchOverlayEntry>;
 }
 
 export default function App() {
   const [matches, setMatches] = useState<Match[]>(matchesData as Match[]);
+  const [matchOverlays, setMatchOverlays] = useState<
+    Record<string, MatchOverlayEntry>
+  >({});
   const [selectedMatchId, setSelectedMatchId] = useState<string>(() =>
     getInitialMatchId(matchesData as Match[]),
+  );
+  const [matchSelectionMode, setMatchSelectionMode] = useState<"auto" | "manual">(
+    "auto",
   );
   const [activeTab, setActiveTab] = useState<"broadcast" | "lineup">(
     "broadcast",
@@ -91,14 +147,6 @@ export default function App() {
   const [theme, setTheme] = useState<"classic-light" | "stadium-dark">(
     "classic-light",
   );
-  const [broadcastGuides, setBroadcastGuides] = useState<
-    Record<string, BroadcastGuideEntry>
-  >({});
-  const [broadcastGuideLoading, setBroadcastGuideLoading] = useState(true);
-  const [broadcastGuideError, setBroadcastGuideError] = useState<string | null>(
-    null,
-  );
-
   // Custom interactive test parameters for custom mock simulations
   const [showConfig, setShowConfig] = useState(false);
   const [customKickoffTime, setCustomKickoffTime] = useState("16:00");
@@ -107,7 +155,10 @@ export default function App() {
   ); // 15:02:03 default
   const currentMatch =
     matches.find((m) => m.id === selectedMatchId) || matches[0];
+  const currentOverlay = matchOverlays[currentMatch.id];
   const visibleBroadcasters = currentMatch.broadcasters;
+  const currentIncidents = currentOverlay?.matchState.incidents || [];
+  const visibleIncidents = currentIncidents.slice(-8).reverse();
   const hasCurrentMatchScore = Boolean(currentMatch.score);
   const currentMatchScoreText = currentMatch.score
     ? `${currentMatch.score.teamA} x ${currentMatch.score.teamB}`
@@ -115,6 +166,18 @@ export default function App() {
   const currentMatchMapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
     `${currentMatch.stadiumName}, ${currentMatch.city}`,
   )}`;
+  const currentOverlayUpdatedAt = [
+    currentOverlay?.broadcastGuide.updatedAt,
+    currentOverlay?.matchState.updatedAt,
+  ]
+    .filter((value): value is string => Boolean(value))
+    .sort()
+    .at(-1);
+  const currentOverlaySourceLabel =
+    currentOverlay?.broadcastGuide.source === "fifa" &&
+    currentOverlay?.matchState.source === "fifa"
+      ? "FIFA oficial"
+      : "Fallback local";
 
   // Live clock showing the current Horário de Brasília (BRT, UTC-3)
   const [currentTime, setCurrentTime] = useState<Date>(new Date());
@@ -132,47 +195,109 @@ export default function App() {
   }, []);
 
   useEffect(() => {
+    if (matchSelectionMode !== "auto") {
+      return;
+    }
+
+    const preferredMatchId = getInitialMatchId(matches);
+    if (preferredMatchId !== selectedMatchId) {
+      setSelectedMatchId(preferredMatchId);
+    }
+  }, [matches, matchSelectionMode, selectedMatchId]);
+
+  const handleSelectMatch = (matchId: string) => {
+    setMatchSelectionMode("manual");
+    setSelectedMatchId(matchId);
+  };
+
+  useEffect(() => {
     let active = true;
+    let timeoutId: number | undefined;
+    let requestInFlight = false;
 
-    const loadBroadcastGuide = async () => {
-      setBroadcastGuideLoading(true);
-
-      try {
-        const response = await fetch("/api/broadcast-guide");
-        if (!response.ok) {
-          throw new Error("Falha ao atualizar o guia de transmissão.");
-        }
-
-        const data: BroadcastGuideApiResponse = await response.json();
-        if (!active) return;
-
-        setBroadcastGuides(data.guides);
-        setMatches((prev) =>
-          prev.map((match) =>
-            data.guides[match.id]?.broadcasters?.length
-              ? { ...match, broadcasters: data.guides[match.id].broadcasters }
-              : match,
-          ),
-        );
-        setBroadcastGuideError(null);
-      } catch (error) {
-        console.error(error);
-        if (!active) return;
-
-        setBroadcastGuideError(
-          "Não foi possível carregar o guia oficial da FIFA agora.",
-        );
-      } finally {
-        if (active) {
-          setBroadcastGuideLoading(false);
-        }
+    const clearScheduledLoad = () => {
+      if (timeoutId) {
+        window.clearTimeout(timeoutId);
+        timeoutId = undefined;
       }
     };
 
-    void loadBroadcastGuide();
+    const isPageVisible = () =>
+      typeof document === "undefined" || document.visibilityState === "visible";
+
+    const scheduleNextLoad = (refreshAfterMs?: number) => {
+      if (!isPageVisible()) {
+        return;
+      }
+
+      const delay =
+        typeof refreshAfterMs === "number" && refreshAfterMs > 0
+          ? refreshAfterMs
+          : DEFAULT_MATCH_OVERLAY_REFRESH_INTERVAL_MS;
+
+      clearScheduledLoad();
+      timeoutId = window.setTimeout(() => {
+        void loadMatchOverlays();
+      }, delay);
+    };
+
+    const loadMatchOverlays = async () => {
+      if (!active || requestInFlight) {
+        return;
+      }
+
+      requestInFlight = true;
+
+      try {
+        const response = await fetch("/api/match-overlays");
+        if (!response.ok) {
+          throw new Error("Falha ao atualizar dados da FIFA.");
+        }
+
+        const data: MatchOverlaysApiResponse = await response.json();
+        if (!active) return;
+
+        setMatchOverlays(data.overlays);
+        setMatches((prev) =>
+          prev.map((match) =>
+            data.overlays[match.id]
+              ? {
+                  ...match,
+                  broadcasters: data.overlays[match.id].broadcastGuide.broadcasters,
+                  status: data.overlays[match.id].matchState.status,
+                  score: data.overlays[match.id].matchState.score,
+                  matchTime: data.overlays[match.id].matchState.matchTime,
+                }
+              : match,
+          ),
+        );
+        scheduleNextLoad(data.refreshAfterMs);
+      } catch (error) {
+        console.error(error);
+        scheduleNextLoad();
+      } finally {
+        requestInFlight = false;
+      }
+    };
+
+    const handlePageVisible = () => {
+      if (!active || !isPageVisible()) {
+        return;
+      }
+
+      clearScheduledLoad();
+      void loadMatchOverlays();
+    };
+
+    void loadMatchOverlays();
+    window.addEventListener("focus", handlePageVisible);
+    document.addEventListener("visibilitychange", handlePageVisible);
 
     return () => {
       active = false;
+      clearScheduledLoad();
+      window.removeEventListener("focus", handlePageVisible);
+      document.removeEventListener("visibilitychange", handlePageVisible);
     };
   }, []);
 
@@ -184,6 +309,24 @@ export default function App() {
       minute: "2-digit",
       second: "2-digit",
     });
+
+  const formatOverlayUpdatedAt = (value: string | undefined) => {
+    if (!value) {
+      return "Atualização pendente";
+    }
+
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) {
+      return "Atualização indisponível";
+    }
+
+    return `Atualizado ${date.toLocaleTimeString("pt-BR", {
+      timeZone: "America/Sao_Paulo",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+    })}`;
+  };
 
   // Format seconds to hh:mm:ss
   const formatCountdown = (totalSecs: number) => {
@@ -269,7 +412,7 @@ export default function App() {
                       <button
                         key={m.id}
                         id={`btn-match-${m.id}`}
-                        onClick={() => setSelectedMatchId(m.id)}
+                        onClick={() => handleSelectMatch(m.id)}
                         title={`${formatCountryNameForTooltip(m.teamA.name)} x ${formatCountryNameForTooltip(m.teamB.name)}`}
                         aria-label={`${formatCountryNameForTooltip(m.teamA.name)} x ${formatCountryNameForTooltip(m.teamB.name)}`}
                         className={`px-3.5 py-2 rounded-md text-[13px] md:text-sm leading-none font-anton transition-all uppercase tracking-wide ${
@@ -469,11 +612,22 @@ export default function App() {
                   }`}
                 >
                   {currentMatch.status === "LIVE"
-                    ? "AO VIVO"
+                    ? currentMatch.matchTime
+                      ? `AO VIVO • ${currentMatch.matchTime}`
+                      : "AO VIVO"
                     : currentMatch.status === "FINISHED"
                       ? "ENCERRADO"
                       : "PRÉ-JOGO"}
                 </span>
+              </div>
+              <div
+                className={`font-mono text-[11px] uppercase tracking-wider ${
+                  theme === "classic-light"
+                    ? "text-slate-500"
+                    : "text-slate-300"
+                }`}
+              >
+                {currentOverlaySourceLabel} • {formatOverlayUpdatedAt(currentOverlayUpdatedAt)}
               </div>
 
               {/* Main Scoreboard clock time or score line */}
@@ -628,6 +782,16 @@ export default function App() {
               >
                 Onde ver o jogo
               </p>
+              <p
+                className={`mb-4 font-mono text-[11px] uppercase tracking-wider ${
+                  theme === "classic-light"
+                    ? "text-slate-500"
+                    : "text-slate-300"
+                }`}
+              >
+                {currentOverlay?.broadcastGuide.note || "Carregando dados oficiais da FIFA..."} •{" "}
+                {formatOverlayUpdatedAt(currentOverlay?.broadcastGuide.updatedAt)}
+              </p>
               <div
                 className="flex items-center gap-4"
                 id="fifa-broadcaster-strip"
@@ -703,6 +867,108 @@ export default function App() {
                 </div>
               </div>
 
+              {(currentMatch.status !== "PRE_GAME" || visibleIncidents.length > 0) && (
+                <div
+                  className={`mt-5 rounded-2xl border px-4 py-4 ${
+                    theme === "classic-light"
+                      ? "bg-slate-50 border-slate-200"
+                      : "bg-[#121414]/70 border-white/10"
+                  }`}
+                  id="match-incidents-panel"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <p
+                        className={`font-anton text-base uppercase tracking-wide ${
+                          theme === "classic-light" ? "text-slate-900" : "text-white"
+                        }`}
+                      >
+                        Lances do jogo
+                      </p>
+                      <p
+                        className={`mt-1 font-mono text-[11px] uppercase tracking-wider ${
+                          theme === "classic-light"
+                            ? "text-slate-500"
+                            : "text-slate-300"
+                        }`}
+                      >
+                        {currentOverlay?.matchState.source === "fifa"
+                          ? "Feed oficial da FIFA"
+                          : "Aguardando lances oficiais da FIFA"}{" "}
+                        • {formatOverlayUpdatedAt(currentOverlay?.matchState.updatedAt)}
+                      </p>
+                    </div>
+                  </div>
+
+                  {visibleIncidents.length > 0 ? (
+                    <div className="mt-4 flex flex-col gap-2">
+                      {visibleIncidents.map((incident) => (
+                        <div
+                          key={incident.id}
+                          className={`rounded-xl border px-3 py-3 ${
+                            theme === "classic-light"
+                              ? "bg-white border-slate-200"
+                              : "bg-[#161919] border-white/10"
+                          }`}
+                        >
+                          <div className="flex flex-wrap items-center gap-2">
+                            <span
+                              className={`font-mono text-xs font-black uppercase tracking-wider ${
+                                theme === "classic-light"
+                                  ? "text-slate-700"
+                                  : "text-slate-100"
+                              }`}
+                            >
+                              {incident.time}
+                            </span>
+                            <span
+                              className={`rounded-full border px-2 py-1 font-mono text-[10px] font-black uppercase tracking-[0.18em] ${getIncidentAccentClass(
+                                incident.type,
+                                theme,
+                              )}`}
+                            >
+                              {getIncidentLabel(incident.type)}
+                            </span>
+                            {incident.team && (
+                              <span
+                                className={`rounded-full px-2 py-1 font-mono text-[10px] font-black uppercase tracking-[0.18em] ${
+                                  theme === "classic-light"
+                                    ? "bg-slate-100 text-slate-600"
+                                    : "bg-white/10 text-slate-200"
+                                }`}
+                              >
+                                {incident.team === "A"
+                                  ? currentMatch.teamA.code
+                                  : currentMatch.teamB.code}
+                              </span>
+                            )}
+                          </div>
+                          <p
+                            className={`mt-2 font-archivo text-sm leading-6 ${
+                              theme === "classic-light"
+                                ? "text-slate-700"
+                                : "text-slate-100"
+                            }`}
+                          >
+                            {incident.text}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p
+                      className={`mt-4 font-archivo text-sm leading-6 ${
+                        theme === "classic-light"
+                          ? "text-slate-600"
+                          : "text-slate-200"
+                      }`}
+                    >
+                      Sem lances oficiais registrados pela FIFA ate agora.
+                    </p>
+                  )}
+                </div>
+              )}
+
               {(() => {
                 const finishedMatches = matches
                   .filter((m) => m.status === "FINISHED")
@@ -744,7 +1010,7 @@ export default function App() {
                         <button
                           key={m.id}
                           id={`btn-match-${m.id}`}
-                          onClick={() => setSelectedMatchId(m.id)}
+                          onClick={() => handleSelectMatch(m.id)}
                           title={`${formatCountryNameForTooltip(m.teamA.name)} x ${formatCountryNameForTooltip(m.teamB.name)}`}
                           aria-label={`${formatCountryNameForTooltip(m.teamA.name)} x ${formatCountryNameForTooltip(m.teamB.name)}`}
                           className={`px-3.5 py-2 rounded-md text-[13px] md:text-sm leading-none font-anton transition-all uppercase tracking-wide ${
