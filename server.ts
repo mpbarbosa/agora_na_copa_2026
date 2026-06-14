@@ -3,7 +3,6 @@ import { createServer as createHttpServer } from "node:http";
 import { createServer as createNetServer } from "node:net";
 import path from "path";
 import { createServer as createViteServer } from "vite";
-import { GoogleGenAI, Type } from "@google/genai";
 import dotenv from "dotenv";
 import matchesData from "./src/matches.json";
 import type { Broadcaster, BroadcastGuideEntry, Match } from "./src/types";
@@ -277,23 +276,6 @@ const resolveAppPort = async () => {
   return candidatePort;
 };
 
-// Initialize Gemini API client lazily to avoid crashing if empty, but standard error handling
-const getGeminiClient = () => {
-  const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey) {
-    console.warn("GEMINI_API_KEY is not defined. AI features fallback to offline simulator.");
-    return null;
-  }
-  return new GoogleGenAI({
-    apiKey: apiKey,
-    httpOptions: {
-      headers: {
-        'User-Agent': 'aistudio-build',
-      }
-    }
-  });
-};
-
 app.get("/api/broadcast-guide", async (req, res) => {
   try {
     const country =
@@ -360,110 +342,6 @@ app.get("/api/broadcast-guide", async (req, res) => {
   } catch (error: any) {
     console.error("FIFA API Error in /api/broadcast-guide:", error);
     res.status(502).json({ error: error?.message || "Erro ao carregar guia de transmissão da FIFA" });
-  }
-});
-
-// API Endpoint for AI Game prediction and analysis
-app.post("/api/predict", async (req, res) => {
-  try {
-    const { teamA, teamB } = req.body;
-    if (!teamA || !teamB) {
-      return res.status(400).json({ error: "Missing teamA or teamB parameters." });
-    }
-
-    const ai = getGeminiClient();
-    if (!ai) {
-      // Fallback response for offline/preview with no API key
-      return res.json({
-        prediction: `[OFFLINE FALLBACK] Brasil vs França é sempre um clássico lendário! Sem chave de API do Gemini no momento, nossa previsão simulada indica um jogo equilibrado. Brasil 2 - 1 França, com gols de Vinicius Jr. e Mbappé. Domínio brasileiro no segundo tempo com excelente organização tática.`,
-        suggestedFormationA: "4-3-3",
-        suggestedFormationB: "4-2-3-1",
-        keyPlayers: ["Vinicius Jr (Brasil)", "Kylian Mbappé (França)"],
-        tacticalNotes: "O Brasil deve explorar velocidade pelas pontas, enquanto a França tentará transições rápidas capitaneadas por Mbappé."
-      });
-    }
-
-    const prompt = `Você é um analista tático esportivo de elite de futebol da FIFA.
-Analise a partida entre os países sugeridos: ${teamA} vs ${teamB} para a Copa do Mundo FIFA 2026.
-Gere um resultado no formato JSON contendo:
-1. "prediction" (um texto detalhado de 2 a 3 parágrafos em português com análise tática profunda, possíveis vulnerabilidades, estilo de jogo e um palpite realista do placar).
-2. "suggestedFormationA" (estrutura tática sugerida para o Time A, ex: 4-3-3).
-3. "suggestedFormationB" (estrutura tática sugerida para o Time B, ex: 4-2-3-1).
-4. "keyPlayers" (uma lista com os 3 principais jogadores cruciais que decidirão a partida, indicando suas respectivas seleções).
-5. "tacticalNotes" (um resumo em uma frase da batalha tática no meio campo).
-
-Responda estritamente no formato JSON estruturado.`;
-
-    const response = await ai.models.generateContent({
-      model: "gemini-3.5-flash",
-      contents: prompt,
-      config: {
-        responseMimeType: "application/json",
-        responseSchema: {
-          type: Type.OBJECT,
-          properties: {
-            prediction: { type: Type.STRING },
-            suggestedFormationA: { type: Type.STRING },
-            suggestedFormationB: { type: Type.STRING },
-            keyPlayers: {
-              type: Type.ARRAY,
-              items: { type: Type.STRING }
-            },
-            tacticalNotes: { type: Type.STRING }
-          },
-          required: ["prediction", "suggestedFormationA", "suggestedFormationB", "keyPlayers", "tacticalNotes"]
-        }
-      }
-    });
-
-    const data = JSON.parse(response.text || "{}");
-    res.json(data);
-  } catch (error: any) {
-    console.error("Gemini API Error in /api/predict:", error);
-    res.status(500).json({ error: error?.message || "Erro ao consultar IA" });
-  }
-});
-
-// API Endpoint for interactive tactical chatbot chat
-app.post("/api/chat", async (req, res) => {
-  try {
-    const { message, history } = req.body;
-    const ai = getGeminiClient();
-
-    if (!ai) {
-      return res.json({
-        text: "Desculpe, a chave do Gemini API não foi configurada nos Secrets. Como analista assistente local, prevejo um confronto equilibrado, com ajustes táticos decisivos e muita intensidade sem a bola."
-      });
-    }
-
-    const systemInstruction = `Você é o "Tático Agora na Copa 26", um assistente de IA especialista em análises profundas de futebol para a Copa do Mundo 2026.
-Você debate táticas de futebol, escalações sugeridas, análises de jogadas de bola parada, ajustes de sistema e curiosidades relevantes das seleções.
-Mantenha suas respostas animadas, respeitando a cultura do futebol, escrevendo em português brasileiro contemporâneo. Use termos técnicos como "bloco baixo", "transição ofensiva acelerada", "overlapping", "pressão pós-perda" com facilidade. Mantenha os parágrafos focados e fáceis de ler.`;
-
-    // format history properly
-    const contents = history ? history.map((item: any) => ({
-      role: item.role === "user" ? "user" : "model",
-      parts: [{ text: item.text }]
-    })) : [];
-
-    contents.push({
-      role: "user",
-      parts: [{ text: message }]
-    });
-
-    const response = await ai.models.generateContent({
-      model: "gemini-3.5-flash",
-      contents: contents,
-      config: {
-        systemInstruction,
-        temperature: 0.8
-      }
-    });
-
-    res.json({ text: response.text });
-  } catch (error: any) {
-    console.error("Gemini API Error in /api/chat:", error);
-    res.status(500).json({ error: error?.message || "Erro na conversa da IA" });
   }
 });
 

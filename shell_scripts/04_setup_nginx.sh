@@ -11,7 +11,7 @@
 #
 # Usage:        ./shell_scripts/04_setup_nginx.sh [domain] [port]
 #
-#   domain  Subdomain to serve the app on. Default: agora.mpbarbosa.com
+#   domain  Subdomain to serve the app on. Default: copa2026.mpbarbosa.com
 #   port    Local port the systemd service listens on. Default: 3001
 #
 # Prerequisites:
@@ -36,8 +36,12 @@
 
 set -euo pipefail
 
-DOMAIN="${1:-agora.mpbarbosa.com}"
-PROXY_PORT="${2:-3001}"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=lib/deploy_defaults.sh
+source "$SCRIPT_DIR/lib/deploy_defaults.sh"
+
+DOMAIN="${1:-$DEFAULT_APP_DOMAIN}"
+PROXY_PORT="${2:-$DEFAULT_APP_PORT}"
 CONF_FILE="/etc/nginx/sites-available/${DOMAIN}"
 
 echo "==> Writing $CONF_FILE (requires sudo)..."

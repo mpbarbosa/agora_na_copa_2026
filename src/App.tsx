@@ -4,7 +4,6 @@ import matchesData from "./matches.json";
 import packageInfo from "../package.json";
 import { FlagIcon } from "./components/FlagIcon";
 import { PitchLineup } from "./components/PitchLineup";
-import { AIPunditPanel } from "./components/AIPunditPanel";
 import { MapPin, Settings, Edit3, Sun, Moon } from "lucide-react";
 
 // Header match-selector groups, split by match status
@@ -69,9 +68,9 @@ export default function App() {
   const [selectedMatchId, setSelectedMatchId] = useState<string>(() =>
     getInitialMatchId(matchesData as Match[]),
   );
-  const [activeTab, setActiveTab] = useState<
-    "broadcast" | "lineup" | "ai-coach"
-  >("broadcast");
+  const [activeTab, setActiveTab] = useState<"broadcast" | "lineup">(
+    "broadcast",
+  );
   const [theme, setTheme] = useState<"classic-light" | "stadium-dark">(
     "classic-light",
   );
@@ -802,37 +801,6 @@ export default function App() {
           </div>
         )}
 
-        {/* TAB 3: AI COACH PUNDIT PANEL AND MULTI-GAME AI SIMULATIONS */}
-        {activeTab === "ai-coach" && (
-          <div className="w-full" id="ai-view-container">
-            <div
-              className={`p-6 rounded-2xl border transition ${
-                theme === "classic-light"
-                  ? "bg-white border-slate-200 shadow"
-                  : "bg-gradient-to-br from-[#121414] to-[#1a1c1c] border-white/5 shadow-xl text-white"
-              }`}
-              id="ai-tab-card"
-            >
-              <div
-                className="flex items-center justify-between mb-6"
-                id="ai-tab-header"
-              >
-                <div>
-                  <h3 className="font-anton text-lg tracking-wider uppercase text-slate-800 dark:text-white flex items-center gap-2">
-                    ⚽ CHATBOT E ANÁLISES TÁTICAS DE ELITE
-                  </h3>
-                  <p className="text-sm font-archivo text-slate-600 dark:text-slate-300 leading-6">
-                    Aproveite a Inteligência Artificial do Google Gemini para
-                    simular discussões táticas.
-                  </p>
-                </div>
-              </div>
-
-              {/* AI Hub Pundit UI */}
-              <AIPunditPanel match={currentMatch} />
-            </div>
-          </div>
-        )}
       </main>
 
       {/* FOOTER METADATA DETAIL */}

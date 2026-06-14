@@ -3,16 +3,17 @@
 # 06_redeploy.sh
 # ---------------
 # Purpose:      Roll out a new build of agora_na_copa_2026 to the running
-#               production service. Use this after
-#               scripts/deploy.sh has refreshed mpbarbosa.com/agora_na_copa_2026/.
+#               production service using the latest validated staging payload.
 #
 # Usage:        ./shell_scripts/06_redeploy.sh
 #
 # Prerequisites:
 #   - 01-04 have already been run once (app directory, .env, systemd
 #     service and nginx are already set up).
-#   - mpbarbosa.com/agora_na_copa_2026/ contains an updated dist/ build
-#     (i.e. agora_na_copa_2026/scripts/deploy.sh ran successfully).
+#   - Either:
+#     a. mpbarbosa.com/agora_na_copa_2026 contains an updated dist/ build
+#        (i.e. agora_na_copa_2026/scripts/deploy.sh ran successfully), or
+#     b. this repository already contains a fresh local dist/ build.
 #   - sudo access (to restart the systemd service).
 #
 # What it does:
@@ -28,22 +29,22 @@
 
 set -euo pipefail
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 DEPLOY_DIR="/var/www/agora_na_copa_2026"
-STAGING_DIR="$HOME/Documents/GitHub/mpbarbosa.com/agora_na_copa_2026"
+DEPLOY_SUBTREE="$(basename "$PROJECT_ROOT")"
 SERVICE_NAME="agora-na-copa-2026"
 
-if [ ! -d "$STAGING_DIR/dist" ]; then
-    echo "Error: staging payload not found at $STAGING_DIR/dist" >&2
-    echo "Run agora_na_copa_2026/scripts/deploy.sh first." >&2
-    exit 1
-fi
+source "$SCRIPT_DIR/lib/resolve_staging_dir.sh"
+
+STAGING_DIR="$(resolve_staging_dir "$PROJECT_ROOT" "$DEPLOY_SUBTREE")"
 
 if [ ! -d "$DEPLOY_DIR" ]; then
     echo "Error: $DEPLOY_DIR not found. Run 01_setup_app_directory.sh first." >&2
     exit 1
 fi
 
-echo "==> Syncing latest build to $DEPLOY_DIR..."
+echo "==> Syncing latest build from $STAGING_DIR to $DEPLOY_DIR..."
 rsync -av --delete --exclude ".env" "$STAGING_DIR/" "$DEPLOY_DIR/"
 
 echo "==> Installing production dependencies..."

@@ -1,0 +1,45 @@
+#!/bin/bash
+
+payload_is_ready() {
+    local candidate="$1"
+
+    [ -d "$candidate/dist" ] &&
+        [ -f "$candidate/package.json" ] &&
+        [ -f "$candidate/package-lock.json" ] &&
+        [ -f "$candidate/.env.example" ]
+}
+
+resolve_staging_dir() {
+    local project_root="$1"
+    local deploy_subtree="$2"
+    local sibling_root="${MPBARBOSA_COM_ROOT:-$HOME/Documents/GitHub/mpbarbosa.com}"
+    local sibling_candidate="$sibling_root/$deploy_subtree"
+    local configured_candidate="${AGORA_STAGING_DIR:-}"
+
+    if [ -n "$configured_candidate" ]; then
+        if payload_is_ready "$configured_candidate"; then
+            printf '%s\n' "$configured_candidate"
+            return 0
+        fi
+
+        echo "Error: AGORA_STAGING_DIR is set, but the deploy payload is incomplete at $configured_candidate" >&2
+        echo "Expected: dist/, package.json, package-lock.json, and .env.example" >&2
+        return 1
+    fi
+
+    if payload_is_ready "$sibling_candidate"; then
+        printf '%s\n' "$sibling_candidate"
+        return 0
+    fi
+
+    if payload_is_ready "$project_root"; then
+        printf '%s\n' "$project_root"
+        return 0
+    fi
+
+    echo "Error: staging payload not found." >&2
+    echo "Checked sibling staging repo: $sibling_candidate" >&2
+    echo "Checked local project build: $project_root" >&2
+    echo "Run ./scripts/deploy.sh to refresh the sibling payload, or run npm run build here and try again." >&2
+    return 1
+}

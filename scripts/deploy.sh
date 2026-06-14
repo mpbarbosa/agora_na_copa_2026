@@ -13,7 +13,7 @@
 #
 # Prerequisites:
 #   - mpbarbosa.com repository available at $MPBARBOSA_COM_ROOT
-#     (default: /home/mpb/Documents/GitHub/mpbarbosa.com).
+#     (default: $HOME/Documents/GitHub/mpbarbosa.com).
 #   - rsync available on PATH.
 #   - Node.js and npm installed.
 #   - git configured with push access to the mpbarbosa.com remote.
@@ -32,7 +32,7 @@
 #
 # Environment variables:
 #   MPBARBOSA_COM_ROOT   Override the path to the mpbarbosa.com repository.
-#                        Default: /home/mpb/Documents/GitHub/mpbarbosa.com
+#                        Default: $HOME/Documents/GitHub/mpbarbosa.com
 #
 # Exit codes:
 #   0  Deployment completed successfully (or no subtree changes to push).
@@ -47,7 +47,7 @@ set -euo pipefail
 # ---------------------------------------------------------------------------
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
-MPBARBOSA_COM_ROOT="${MPBARBOSA_COM_ROOT:-/home/mpb/Documents/GitHub/mpbarbosa.com}"
+MPBARBOSA_COM_ROOT="${MPBARBOSA_COM_ROOT:-$HOME/Documents/GitHub/mpbarbosa.com}"
 DEPLOY_SUBTREE="agora_na_copa_2026"
 DEPLOY_TARGET="$MPBARBOSA_COM_ROOT/$DEPLOY_SUBTREE"
 PAYLOAD_STAGE_DIR=""
@@ -86,7 +86,7 @@ OPTIONS:
 
 ENVIRONMENT:
     MPBARBOSA_COM_ROOT  Path to the mpbarbosa.com repository.
-                        Default: /home/mpb/Documents/GitHub/mpbarbosa.com
+                        Default: $HOME/Documents/GitHub/mpbarbosa.com
 
 PROCESS:
     1. Verify this repo worktree is clean

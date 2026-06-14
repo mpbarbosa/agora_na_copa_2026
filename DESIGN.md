@@ -58,12 +58,6 @@ O aplicativo está estruturado com alta modularidade em três camadas funcionais
 - Distribuição espacial dinâmica para o time escalado (Brasil ou França no clássico do MetLife Stadium).
 - Gaveta lateral detalhada para exibição dos clubes originais, valor de mercado simulado e notas táticas dos atletas selecionados.
 
-### 🤖 C. Analista da Elite Google Gemini (`AIPunditPanel`)
-- **Previsor Inteligente**: Envia solicitações estruturadas para o modelo `gemini-3.5-flash` construindo esquemas de vulnerabilidade tática detalhados sobre as seleções participantes.
-- **Chat Adaptativo**: Chatbot esportivo em tempo real que debate o retrospecto histórico das copas anteriores e sugere modificações táticas sob demanda do usuário.
-
----
-
 ## 📱 5. Design Responsivo & Transições
 
 - **Desktop**: Grade de 12 colunas com layout fluido agrupado em bento-boxes dinâmicos.

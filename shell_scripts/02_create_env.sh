@@ -12,7 +12,7 @@
 # What it does:
 #   1. Refuses to run if /var/www/agora_na_copa_2026/.env already exists,
 #      to avoid accidentally overwriting real secrets.
-#   2. Prompts for GEMINI_API_KEY, APP_URL and PORT.
+#   2. Prompts for APP_URL and PORT.
 #   3. Writes /var/www/agora_na_copa_2026/.env with mode 600.
 #
 # Exit codes:
@@ -20,6 +20,10 @@
 #   1  .env already exists, or deploy directory missing.
 
 set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=lib/deploy_defaults.sh
+source "$SCRIPT_DIR/lib/deploy_defaults.sh"
 
 DEPLOY_DIR="/var/www/agora_na_copa_2026"
 ENV_FILE="$DEPLOY_DIR/.env"
@@ -35,20 +39,13 @@ if [ -f "$ENV_FILE" ]; then
     exit 1
 fi
 
-read -rp "GEMINI_API_KEY: " GEMINI_API_KEY
-if [ -z "$GEMINI_API_KEY" ]; then
-    echo "Error: GEMINI_API_KEY cannot be empty." >&2
-    exit 1
-fi
+read -rp "APP_URL [${DEFAULT_APP_URL}]: " APP_URL
+APP_URL="${APP_URL:-$DEFAULT_APP_URL}"
 
-read -rp "APP_URL [https://copa2026.mpbarbosa.com]: " APP_URL
-APP_URL="${APP_URL:-https://copa2026.mpbarbosa.com}"
-
-read -rp "PORT [3001]: " PORT
-PORT="${PORT:-3001}"
+read -rp "PORT [${DEFAULT_APP_PORT}]: " PORT
+PORT="${PORT:-$DEFAULT_APP_PORT}"
 
 cat > "$ENV_FILE" <<EOF
-GEMINI_API_KEY=$GEMINI_API_KEY
 APP_URL=$APP_URL
 NODE_ENV=production
 PORT=$PORT

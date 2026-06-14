@@ -31,8 +31,12 @@
 
 set -euo pipefail
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=lib/deploy_defaults.sh
+source "$SCRIPT_DIR/lib/deploy_defaults.sh"
+
 SITE_REPO="$HOME/Documents/GitHub/mpbarbosa_site"
-APP_URL="${1:-https://copa2026.mpbarbosa.com}"
+APP_URL="${1:-$DEFAULT_APP_URL}"
 
 PT_FILE="$SITE_REPO/src/index.html"
 EN_FILE="$SITE_REPO/src/en/index.html"
@@ -46,7 +50,7 @@ insert_li() {
         exit 1
     fi
 
-    if grep -q "agora.mpbarbosa.com\|Agora na Copa" "$file"; then
+    if grep -Fq "$APP_URL" "$file" || grep -Fq "Agora na Copa 2026" "$file"; then
         echo "==> $file already references Agora na Copa 2026, skipping."
         return 0
     fi

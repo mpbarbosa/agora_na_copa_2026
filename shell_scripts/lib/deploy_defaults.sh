@@ -1,0 +1,5 @@
+#!/bin/bash
+
+DEFAULT_APP_DOMAIN="copa2026.mpbarbosa.com"
+DEFAULT_APP_URL="https://${DEFAULT_APP_DOMAIN}"
+DEFAULT_APP_PORT="3001"

@@ -70,23 +70,6 @@ export interface Match {
   broadcasters: Broadcaster[];
 }
 
-export interface PredictionResult {
-  prediction: string;
-  suggestedFormationA: string;
-  suggestedFormationB: string;
-  keyPlayers: string[];
-  tacticalNotes: string;
-}
-
-export interface ChatMessage {
-  id: string;
-  role: "user" | "model";
-  text: string;
-  username?: string;
-  timestamp: string;
-  avatarColor?: string;
-}
-
 export interface CommentaryEvent {
   id: string;
   time: string; // e.g. "12'"
