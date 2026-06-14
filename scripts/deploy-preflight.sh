@@ -16,7 +16,8 @@
 #   6. Starts the production server on port 9011 and smoke-tests:
 #        GET /                      → HTTP 200
 #        GET /assets/<first-js>     → HTTP 200
-#   7. Stops the preview server and prints a deployment-ready summary.
+#   7. Runs the Playwright e2e suite against the running preview server.
+#   8. Stops the preview server and prints a deployment-ready summary.
 #
 # Exit codes:
 #   0  All checks passed; deploy payload is ready.
@@ -124,6 +125,16 @@ else
     echo "    ❌ Built JS asset not accessible"
     echo "    Route tested: $FIRST_JS_ROUTE"
     echo "    See log: $PREVIEW_LOG"
+    exit 1
+fi
+
+echo ""
+echo "✓ Running e2e smoke suite against production preview..."
+if PREFLIGHT_PREVIEW_PORT="$PREVIEW_PORT" npm run test:e2e:prod > /tmp/agora-na-copa-preflight-e2e.log 2>&1; then
+    echo "  ✅ e2e smoke suite passed"
+else
+    echo "  ❌ e2e smoke suite failed"
+    echo "  See log: /tmp/agora-na-copa-preflight-e2e.log"
     exit 1
 fi
 
