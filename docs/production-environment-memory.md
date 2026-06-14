@@ -1,6 +1,6 @@
 # Production environment memory
 
-Generated: 2026-06-14T03:44:37.428+00:00
+Generated: 2026-06-14T22:20:06.081+00:00
 
 ## Role
 
@@ -18,8 +18,17 @@ Generated: 2026-06-14T03:44:37.428+00:00
 
 - Hostname: `ip-172-31-7-80`
 - OS: `Linux 6.17.0-1017-aws x86_64 GNU/Linux`
+- Virtualization: `KVM` guest
 - Node.js: `v25.2.1`
 - npm: `11.6.4`
+
+## Hardware
+
+- CPU: `2` vCPUs - `Intel(R) Xeon(R) Platinum 8259CL CPU @ 2.50GHz`
+- RAM: `1.9 GiB` total (`~961 MiB` available at capture time)
+- Swap: `0 B`
+- Root disk: `25 GB` Amazon Elastic Block Store NVMe volume (`24 GB` root partition)
+- Root filesystem usage at capture time: `15 GB` used / `9.1 GB` available (`61%` used)
 
 ## Application commands available here
 
