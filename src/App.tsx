@@ -59,6 +59,23 @@ function formatCountryNameForTooltip(name: string) {
     .join(" ");
 }
 
+function getMatchCountdownSeconds(match: Match, now: Date, customSeconds: number) {
+  if (match.id === "bra-mar-2026") {
+    return Math.max(0, customSeconds);
+  }
+
+  if (match.status !== "PRE_GAME") {
+    return 0;
+  }
+
+  const kickoffTime = new Date(match.kickoffTimestamp).getTime();
+  if (Number.isNaN(kickoffTime)) {
+    return Math.max(0, match.countdownTargetSeconds);
+  }
+
+  return Math.max(0, Math.floor((kickoffTime - now.getTime()) / 1000));
+}
+
 interface BroadcastGuideApiResponse {
   guides: Record<string, BroadcastGuideEntry>;
 }
@@ -99,30 +116,16 @@ export default function App() {
     `${currentMatch.stadiumName}, ${currentMatch.city}`,
   )}`;
 
-  // Live ticking countdown logic
-  const [secondsRemaining, setSecondsRemaining] = useState<number>(() => {
-    return currentMatch.id === "bra-mar-2026"
-      ? customCountdownSeconds
-      : currentMatch.countdownTargetSeconds;
-  });
-
   // Live clock showing the current Horário de Brasília (BRT, UTC-3)
   const [currentTime, setCurrentTime] = useState<Date>(new Date());
-
-  useEffect(() => {
-    if (currentMatch.id === "bra-mar-2026") {
-      setSecondsRemaining(customCountdownSeconds);
-    } else {
-      setSecondsRemaining(currentMatch.countdownTargetSeconds);
-    }
-  }, [selectedMatchId, customCountdownSeconds]);
+  const secondsRemaining = getMatchCountdownSeconds(
+    currentMatch,
+    currentTime,
+    customCountdownSeconds,
+  );
 
   useEffect(() => {
     const timer = setInterval(() => {
-      setSecondsRemaining((prev) => {
-        if (prev <= 0) return 0;
-        return prev - 1;
-      });
       setCurrentTime(new Date());
     }, 1000);
     return () => clearInterval(timer);
