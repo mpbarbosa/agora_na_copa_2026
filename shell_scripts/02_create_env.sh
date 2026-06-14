@@ -41,8 +41,8 @@ if [ -z "$GEMINI_API_KEY" ]; then
     exit 1
 fi
 
-read -rp "APP_URL [https://agora.mpbarbosa.com]: " APP_URL
-APP_URL="${APP_URL:-https://agora.mpbarbosa.com}"
+read -rp "APP_URL [https://copa2026.mpbarbosa.com]: " APP_URL
+APP_URL="${APP_URL:-https://copa2026.mpbarbosa.com}"
 
 read -rp "PORT [3001]: " PORT
 PORT="${PORT:-3001}"

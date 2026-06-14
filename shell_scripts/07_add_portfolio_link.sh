@@ -8,7 +8,7 @@
 #
 # Usage:        ./shell_scripts/07_add_portfolio_link.sh [url]
 #
-#   url  Public URL of the deployed app. Default: https://agora.mpbarbosa.com
+#   url  Public URL of the deployed app. Default: https://copa2026.mpbarbosa.com
 #
 # Prerequisites:
 #   - mpbarbosa_site checked out at ~/Documents/GitHub/mpbarbosa_site.
@@ -32,7 +32,7 @@
 set -euo pipefail
 
 SITE_REPO="$HOME/Documents/GitHub/mpbarbosa_site"
-APP_URL="${1:-https://agora.mpbarbosa.com}"
+APP_URL="${1:-https://copa2026.mpbarbosa.com}"
 
 PT_FILE="$SITE_REPO/src/index.html"
 EN_FILE="$SITE_REPO/src/en/index.html"
