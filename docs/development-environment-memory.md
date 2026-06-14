@@ -40,12 +40,12 @@ Generated: 2026-06-14T02:00:31-03:00
 - `npm run lint` - runs `tsc --noEmit`
 - `npm run test:e2e` - runs Playwright end-to-end tests
 - `npm run deploy:preflight` - builds and validates the deploy payload locally
-- `npm run deploy` - syncs the deploy payload to the sibling `mpbarbosa.com` staging repository and pushes that subtree
+- `npm run deploy` - syncs the deploy payload to the sibling `mpbarbosa.com` staging repository, pushes that subtree, and only runs the live-app redeploy step on hosts that already have `/var/www/agora_na_copa_2026` plus the `agora-na-copa-2026` systemd unit
 
 ## Deployment helpers available here
 
 - `scripts/deploy-preflight.sh` - production preflight for `dist/` plus smoke checks
-- `scripts/deploy.sh` - `guia_js`-style staging deploy into `mpbarbosa.com/agora_na_copa_2026/`
+- `scripts/deploy.sh` - `guia_js`-style staging deploy into `mpbarbosa.com/agora_na_copa_2026/`, plus an automatic `06_redeploy.sh` handoff when run on a production host with the live service installed
 - `shell_scripts/01_setup_app_directory.sh` - prepares the app directory from staged payload or local `dist/`
 - `shell_scripts/06_redeploy.sh` - redeploy helper for server-side setup flows
 

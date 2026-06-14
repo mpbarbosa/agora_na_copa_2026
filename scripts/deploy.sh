@@ -5,6 +5,9 @@
 # Purpose:      Run the production preflight, sync the deployable Agora na Copa
 #               2026 bundle to the sibling mpbarbosa.com website repository,
 #               then commit and push only this project's deployment subtree.
+#               On production hosts that already have the live systemd service
+#               installed, it also redeploys /var/www/agora_na_copa_2026 so the
+#               running site stays in sync with this repository.
 #
 # Usage:        ./scripts/deploy.sh [-h|--help]
 #
@@ -30,11 +33,17 @@
 #      a. git add -A -- agora_na_copa_2026
 #      b. git commit with the app version and source SHA
 #      c. git push
+#   7. If this host already runs the live app service, call
+#      shell_scripts/06_redeploy.sh to sync /var/www/agora_na_copa_2026.
 #
 # Environment variables:
 #   MPBARBOSA_COM_ROOT   Override the path to the mpbarbosa.com repository.
 #                        Default: auto-detect /var/www/mpbarbosa.com, then
 #                        $HOME/Documents/GitHub/mpbarbosa.com
+#   AGORA_SKIP_LIVE_REDEPLOY
+#                        Set to 1 to skip the production-host redeploy step
+#                        even if /var/www/agora_na_copa_2026 and the
+#                        agora-na-copa-2026 systemd unit are present.
 #
 # Exit codes:
 #   0  Deployment completed successfully (or no subtree changes to push).
@@ -54,6 +63,9 @@ DEPLOY_SUBTREE="agora_na_copa_2026"
 DEPLOY_TARGET=""
 PAYLOAD_STAGE_DIR=""
 COMMIT_MESSAGE=""
+LIVE_DEPLOY_DIR="/var/www/agora_na_copa_2026"
+LIVE_SERVICE_NAME="agora-na-copa-2026"
+LIVE_REDEPLOY_SCRIPT="$PROJECT_ROOT/shell_scripts/06_redeploy.sh"
 
 source "$PROJECT_ROOT/shell_scripts/lib/resolve_mpbarbosa_com_root.sh"
 source "$PROJECT_ROOT/shell_scripts/lib/stage_deploy_payload.sh"
@@ -93,6 +105,8 @@ ENVIRONMENT:
     MPBARBOSA_COM_ROOT  Path to the mpbarbosa.com repository.
                         Default: auto-detect /var/www/mpbarbosa.com, then
                         $HOME/Documents/GitHub/mpbarbosa.com
+    AGORA_SKIP_LIVE_REDEPLOY
+                        Set to 1 to skip the live-app redeploy step.
 
 PROCESS:
     1. Verify this repo worktree is clean
@@ -104,6 +118,7 @@ PROCESS:
     7. git add -A -- agora_na_copa_2026
     8. git commit          — commit with app version + source SHA
     9. git push            — push to remote (skipped if subtree is unchanged)
+   10. 06_redeploy.sh      — on production hosts, sync /var/www/agora_na_copa_2026
 
 EXAMPLES:
     ./scripts/deploy.sh
@@ -152,7 +167,7 @@ validate_prerequisites() {
 }
 
 validate_clean_worktrees() {
-    echo "==> [1/6] Verifying clean worktrees..."
+    echo "==> [1/7] Verifying clean worktrees..."
 
     if [ -n "$(git -C "$PROJECT_ROOT" status --porcelain)" ]; then
         die "agora_na_copa_2026 worktree is not clean. Commit or stash changes before deploying."
@@ -177,7 +192,7 @@ prepare_deploy_metadata() {
 sync_target_repo() {
     local branch
 
-    echo "==> [2/6] Fast-forwarding $MPBARBOSA_COM_ROOT..."
+    echo "==> [2/7] Fast-forwarding $MPBARBOSA_COM_ROOT..."
     branch="$(git -C "$MPBARBOSA_COM_ROOT" rev-parse --abbrev-ref HEAD)"
     if [ "$branch" = "HEAD" ]; then
         die "mpbarbosa.com is in detached HEAD state. Check out a branch before deploying."
@@ -192,14 +207,14 @@ sync_target_repo() {
 }
 
 run_preflight() {
-    echo "==> [3/6] Running production preflight..."
+    echo "==> [3/7] Running production preflight..."
     cd "$PROJECT_ROOT"
     "$SCRIPT_DIR/deploy-preflight.sh"
     echo "==> Preflight complete."
 }
 
 stage_payload() {
-    echo "==> [4/6] Staging deployment payload..."
+    echo "==> [4/7] Staging deployment payload..."
 
     PAYLOAD_STAGE_DIR="$(stage_deploy_payload "$PROJECT_ROOT")"
 
@@ -207,23 +222,23 @@ stage_payload() {
 }
 
 sync_to_target() {
-    echo "==> [5/6] Syncing payload to $DEPLOY_TARGET..."
+    echo "==> [5/7] Syncing payload to $DEPLOY_TARGET..."
     mkdir -p "$DEPLOY_TARGET"
     rsync -av --delete "$PAYLOAD_STAGE_DIR/" "$DEPLOY_TARGET/"
     echo "==> Sync complete."
 }
 
 git_commit_and_push() {
-    echo "==> [6/6] Checking for changes in $MPBARBOSA_COM_ROOT/$DEPLOY_SUBTREE..."
+    echo "==> [6/7] Checking for changes in $MPBARBOSA_COM_ROOT/$DEPLOY_SUBTREE..."
     cd "$MPBARBOSA_COM_ROOT"
 
-    if [ -z "$(git status --porcelain -- "$DEPLOY_SUBTREE")" ]; then
+    echo "==> Staging deployment subtree..."
+    git add -A -f -- "$DEPLOY_SUBTREE"
+
+    if git diff --cached --quiet -- "$DEPLOY_SUBTREE"; then
         echo "==> No agora_na_copa_2026 changes to commit. Nothing to push."
         return 0
     fi
-
-    echo "==> Staging deployment subtree..."
-    git add -A -- "$DEPLOY_SUBTREE"
 
     echo "==> Committing deployment..."
     git commit -m "$COMMIT_MESSAGE"
@@ -232,6 +247,41 @@ git_commit_and_push() {
     git push
 
     echo "==> Changes pushed successfully."
+}
+
+should_redeploy_live_app() {
+    if [ "${AGORA_SKIP_LIVE_REDEPLOY:-0}" = "1" ]; then
+        return 1
+    fi
+
+    if [ ! -f "$LIVE_REDEPLOY_SCRIPT" ]; then
+        return 1
+    fi
+
+    if [ ! -d "$LIVE_DEPLOY_DIR" ]; then
+        return 1
+    fi
+
+    if [ ! -f "/etc/systemd/system/${LIVE_SERVICE_NAME}.service" ]; then
+        return 1
+    fi
+
+    return 0
+}
+
+maybe_redeploy_live_app() {
+    if [ "${AGORA_SKIP_LIVE_REDEPLOY:-0}" = "1" ]; then
+        echo "==> Live app redeploy skipped (AGORA_SKIP_LIVE_REDEPLOY=1)."
+        return 0
+    fi
+
+    if ! should_redeploy_live_app; then
+        echo "==> No live production install detected on this host. Skipping app-directory sync."
+        return 0
+    fi
+
+    echo "==> [7/7] Syncing live app at $LIVE_DEPLOY_DIR..."
+    "$LIVE_REDEPLOY_SCRIPT"
 }
 
 main() {
@@ -244,6 +294,7 @@ main() {
     stage_payload
     sync_to_target
     git_commit_and_push
+    maybe_redeploy_live_app
     echo ""
     echo "✓ Deployment complete."
 }

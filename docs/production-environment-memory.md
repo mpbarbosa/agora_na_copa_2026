@@ -28,7 +28,7 @@ Generated: 2026-06-14T03:44:37.428+00:00
 - `npm start` - runs the production bundle
 - `npm run lint` - runs `tsc --noEmit`
 - `npm run test:e2e` - runs Playwright end-to-end tests
-- `npm run deploy` - runs `./scripts/deploy.sh`
+- `npm run deploy` - runs `./scripts/deploy.sh`, which publishes the staging subtree and also redeploys `/var/www/agora_na_copa_2026` on this production host unless `AGORA_SKIP_LIVE_REDEPLOY=1`
 - `npm run deploy:preflight` - runs `./scripts/deploy-preflight.sh`
 
 ## Notes for future memory use

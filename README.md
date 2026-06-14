@@ -41,6 +41,6 @@ If port `3000` is already in use, the dev server automatically moves to the next
 ## Deployment helpers
 
 - `./scripts/deploy-preflight.sh` - build and validate the deployable production payload
-- `./scripts/deploy.sh` - sync the validated payload to the sibling `mpbarbosa.com` repository and push only the `agora_na_copa_2026` subtree
+- `./scripts/deploy.sh` - sync the validated payload to the sibling `mpbarbosa.com` repository, push only the `agora_na_copa_2026` subtree, and on production hosts also redeploy `/var/www/agora_na_copa_2026`
 - `./shell_scripts/01_setup_app_directory.sh` - sync the staged payload from `mpbarbosa.com/agora_na_copa_2026` or a local built `dist/` into `/var/www/agora_na_copa_2026`
 - See `scripts/README.md` for the script workflow summary
