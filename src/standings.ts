@@ -28,7 +28,13 @@ function addResult(tally: MatchTally, scored: number, conceded: number): void {
 }
 
 function countsForStandings(match: Match) {
+  const teamASeed = seedStandings.find((row) => row.code === match.teamA.code);
+  const teamBSeed = seedStandings.find((row) => row.code === match.teamB.code);
+
   return (
+    teamASeed &&
+    teamBSeed &&
+    teamASeed.group === teamBSeed.group &&
     match.stageName === "Group Stage" &&
     (match.status === "LIVE" || match.status === "FINISHED") &&
     match.score
