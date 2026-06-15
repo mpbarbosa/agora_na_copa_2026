@@ -10,6 +10,7 @@ interface TeamPitchBoardProps {
   };
   opponentName?: string;
   mirror?: boolean;
+  theme?: "classic-light" | "stadium-dark";
 }
 
 const getPositionLabel = (position: Position) => {
@@ -102,10 +103,17 @@ const PlayerPortrait: React.FC<PlayerPortraitProps> = ({
   );
 };
 
-export const TeamPitchBoard: React.FC<TeamPitchBoardProps> = ({ team, opponentName, mirror = false }) => {
+export const TeamPitchBoard: React.FC<TeamPitchBoardProps> = ({
+  team,
+  opponentName,
+  mirror = false,
+  theme = "stadium-dark",
+}) => {
   const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
   const [expandedPlayer, setExpandedPlayer] = useState<Player | null>(null);
+  const [featuredPlayer, setFeaturedPlayer] = useState<Player | null>(null);
   const selectedPlayerSocials = selectedPlayer ? getPlayerSocialEntries(selectedPlayer) : [];
+  const featuredPlayerSocials = featuredPlayer ? getPlayerSocialEntries(featuredPlayer) : [];
 
   useEffect(() => {
     setSelectedPlayer((current) => {
@@ -117,20 +125,40 @@ export const TeamPitchBoard: React.FC<TeamPitchBoardProps> = ({ team, opponentNa
       const nextPlayer = team.lineup.find((player) => isSamePlayer(player, current)) ?? null;
       return nextPlayer?.pictureUrl ? nextPlayer : null;
     });
+    setFeaturedPlayer((current) => {
+      if (!current) return null;
+      return team.lineup.find((player) => isSamePlayer(player, current)) ?? null;
+    });
   }, [team.lineup]);
 
   useEffect(() => {
-    if (!expandedPlayer) return;
+    if (!expandedPlayer && !featuredPlayer) return;
 
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
         setExpandedPlayer(null);
+        setFeaturedPlayer(null);
       }
     };
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [expandedPlayer]);
+  }, [expandedPlayer, featuredPlayer]);
+
+  const overlayCardClasses =
+    theme === "classic-light"
+      ? "border-slate-200 bg-white text-slate-900"
+      : "border-white/10 bg-[#121414] text-white";
+  const overlayMutedClasses =
+    theme === "classic-light" ? "text-slate-600" : "text-slate-300";
+  const overlayAccentButtonClasses =
+    theme === "classic-light"
+      ? "border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100"
+      : "border-white/10 bg-white/5 text-slate-100 hover:bg-white/10";
+  const overlayDetailClasses =
+    theme === "classic-light"
+      ? "border-slate-200 bg-slate-50"
+      : "border-white/10 bg-white/5";
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6" id="pitch-main-content">
@@ -308,6 +336,17 @@ export const TeamPitchBoard: React.FC<TeamPitchBoardProps> = ({ team, opponentNa
                   </div>
                 )}
 
+                <div className="mt-4">
+                  <button
+                    type="button"
+                    id="btn-open-player-overlay-card"
+                    onClick={() => setFeaturedPlayer(selectedPlayer)}
+                    className="w-full rounded-xl border border-[#ffd700]/25 bg-[#ffd700]/10 px-3 py-2 font-mono text-[10px] font-bold uppercase tracking-widest text-[#ffd700] transition hover:bg-[#ffd700]/15 focus:outline-none focus:ring-2 focus:ring-[#ffd700]/50"
+                  >
+                    Abrir card completo do jogador
+                  </button>
+                </div>
+
                 {opponentName && (
                   <div className="mt-4 p-3 bg-white/5 rounded-lg border border-white/5" id="pundit-quote">
                     <p className="text-sm text-white/85 italic font-archivo leading-6">
@@ -398,6 +437,149 @@ export const TeamPitchBoard: React.FC<TeamPitchBoardProps> = ({ team, opponentNa
               alt={`Foto ampliada de ${expandedPlayer.name}`}
               className="block h-auto max-h-[calc(92vh-1.5rem)] w-auto max-w-[calc(92vw-1.5rem)] rounded-xl object-contain"
             />
+          </div>
+        </div>
+      )}
+
+      {featuredPlayer && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 p-4 backdrop-blur-md"
+          id="player-feature-overlay"
+          onClick={() => setFeaturedPlayer(null)}
+        >
+          <div
+            className={`relative w-full max-w-2xl overflow-hidden rounded-3xl border shadow-2xl ${overlayCardClasses}`}
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div
+              className="border-b px-5 py-4"
+              style={{
+                background: `linear-gradient(135deg, ${team.primaryColor}22, ${team.secondaryColor}22)`,
+                borderColor: theme === "classic-light" ? "rgb(226 232 240)" : "rgb(255 255 255 / 0.08)",
+              }}
+            >
+              <button
+                type="button"
+                id="btn-close-player-feature-overlay"
+                onClick={() => setFeaturedPlayer(null)}
+                className={`absolute right-4 top-4 rounded-full border px-3 py-1 font-mono text-[10px] font-bold uppercase tracking-wider transition ${overlayAccentButtonClasses}`}
+              >
+                Fechar
+              </button>
+              <p className={`font-mono text-[10px] uppercase tracking-[0.25em] ${overlayMutedClasses}`}>
+                Card completo do jogador
+              </p>
+              <h4 className="mt-2 pr-20 font-anton text-3xl uppercase tracking-wide">
+                {featuredPlayer.name}
+              </h4>
+              <p className={`mt-1 font-archivo text-sm ${overlayMutedClasses}`}>
+                {team.name}
+                {featuredPlayer.club ? ` • ${featuredPlayer.club}` : ""}
+              </p>
+            </div>
+
+            <div className="grid gap-0 lg:grid-cols-[1.1fr_0.9fr]">
+              <div className="border-b p-4 lg:border-b-0 lg:border-r" style={{ borderColor: theme === "classic-light" ? "rgb(226 232 240)" : "rgb(255 255 255 / 0.08)" }}>
+                <div
+                  className={`flex min-h-[320px] items-center justify-center overflow-hidden rounded-3xl border ${
+                    theme === "classic-light"
+                      ? "border-slate-200 bg-slate-50"
+                      : "border-white/10 bg-[#161919]"
+                  }`}
+                >
+                  <PlayerPortrait
+                    player={featuredPlayer}
+                    primaryColor={team.primaryColor}
+                    secondaryColor={team.secondaryColor}
+                    className="h-full w-full"
+                    fallbackTextClassName="text-6xl"
+                    imageClassName="h-full max-h-[420px] w-full object-contain p-4"
+                    showNumberBadge
+                    numberBadgeClassName="absolute bottom-4 right-4 rounded-full border border-white/10 bg-black/80 px-3 py-1 font-mono text-xs font-black text-[#ffd700]"
+                  />
+                </div>
+                {featuredPlayer.pictureUrl && (
+                  <button
+                    type="button"
+                    id="btn-open-player-feature-picture"
+                    onClick={() => setExpandedPlayer(featuredPlayer)}
+                    className={`mt-3 inline-flex rounded-full border px-3 py-1.5 font-mono text-[10px] font-bold uppercase tracking-wider transition ${overlayAccentButtonClasses}`}
+                  >
+                    Abrir foto em tamanho real
+                  </button>
+                )}
+              </div>
+
+              <div className="p-5">
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-3" id="player-feature-overlay-stats">
+                  {[
+                    { label: "Camisa", value: featuredPlayer.number },
+                    { label: "Posição", value: getPositionLabel(featuredPlayer.position) },
+                    { label: "Seleção", value: team.name },
+                  ].map((stat) => (
+                    <div
+                      key={stat.label}
+                      className={`rounded-2xl border px-3 py-3 ${
+                        theme === "classic-light"
+                          ? "border-slate-200 bg-slate-50"
+                          : "border-white/10 bg-white/5"
+                      }`}
+                    >
+                      <p className="font-anton text-lg uppercase text-[#00e476]">{stat.value}</p>
+                      <p className={`mt-1 font-mono text-[10px] uppercase tracking-wider ${overlayMutedClasses}`}>
+                        {stat.label}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="mt-4 space-y-2 text-sm font-archivo" id="player-feature-overlay-details">
+                <div className={`flex items-center justify-between rounded-2xl border px-3 py-3 ${overlayDetailClasses}`}>
+                    <span className={overlayMutedClasses}>Clube atual</span>
+                    <span className="font-semibold">{featuredPlayer.club || "Seleção Nacional"}</span>
+                  </div>
+                <div className={`flex items-center justify-between rounded-2xl border px-3 py-3 ${overlayDetailClasses}`}>
+                    <span className={overlayMutedClasses}>Leitura tática</span>
+                    <span className="font-semibold text-right">Titular confirmado • Papel crucial</span>
+                  </div>
+                  {opponentName && (
+                  <div className={`rounded-2xl border px-3 py-3 ${overlayDetailClasses}`}>
+                      <p className={overlayMutedClasses}>Contexto da partida</p>
+                      <p className="mt-1 leading-6">
+                        Contra a {opponentName}, {featuredPlayer.name} aparece como peça-chave para o
+                        plano de jogo da {team.name}.
+                      </p>
+                    </div>
+                  )}
+                </div>
+
+                {featuredPlayerSocials.length > 0 && (
+                  <div className="mt-5" id="player-feature-overlay-social-links">
+                    <p className={`font-mono text-[10px] uppercase tracking-wider ${overlayMutedClasses}`}>
+                      Redes oficiais
+                    </p>
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      {featuredPlayerSocials.map(([platform, url]) => (
+                        <a
+                          key={platform}
+                          id={`player-feature-overlay-social-link-${platform}`}
+                          href={url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className={`rounded-full border px-3 py-1.5 font-mono text-[10px] font-bold uppercase tracking-wider transition ${
+                            theme === "classic-light"
+                              ? "border-slate-200 bg-slate-50 text-slate-700 hover:border-[#065f2c]/30 hover:text-[#065f2c]"
+                              : "border-white/10 bg-white/5 text-white hover:border-[#ffd700]/40 hover:text-[#ffd700]"
+                          }`}
+                        >
+                          {SOCIAL_PLATFORM_LABELS[platform]}
+                        </a>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
         </div>
       )}

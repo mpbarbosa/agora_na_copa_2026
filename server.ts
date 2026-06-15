@@ -1173,8 +1173,18 @@ const getTeamLineupsPayload = async (
         return [
           match.id,
           {
-            teamA: buildTeamLineupEntryCore(match.teamA.lineup, fifaMatch, liveMatch?.HomeTeam),
-            teamB: buildTeamLineupEntryCore(match.teamB.lineup, fifaMatch, liveMatch?.AwayTeam),
+            teamA: buildTeamLineupEntryCore(
+              match.teamA.code,
+              match.teamA.lineup,
+              fifaMatch,
+              liveMatch?.HomeTeam,
+            ),
+            teamB: buildTeamLineupEntryCore(
+              match.teamB.code,
+              match.teamB.lineup,
+              fifaMatch,
+              liveMatch?.AwayTeam,
+            ),
           },
         ];
       }),

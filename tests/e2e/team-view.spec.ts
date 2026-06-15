@@ -365,6 +365,30 @@ test.describe("Team view", () => {
     );
   });
 
+  test("opens the full player overlay card from the selected player panel", async ({
+    page,
+  }) => {
+    await mockTeamView(page);
+
+    await page.goto("/");
+    await page.click("#btn-nav-selecoes");
+    await page.click("#btn-team-card-bra");
+    await expect(page.locator("#team-lineup-view")).toBeVisible();
+
+    await page.locator('[id^="squad-player-row-"]').filter({ hasText: "Atacante Teste" }).click();
+    await expect(page.locator("#selected-player-info")).toContainText("Atacante Teste");
+
+    await page.click("#btn-open-player-overlay-card");
+    await expect(page.locator("#player-feature-overlay")).toBeVisible();
+    await expect(page.locator("#player-feature-overlay")).toContainText("Atacante Teste");
+    await expect(page.locator("#player-feature-overlay")).toContainText("MARROCOS");
+    await expect(page.locator("#player-feature-overlay-social-link-instagram")).toHaveAttribute(
+      "href",
+      "https://instagram.com/atacanteteste",
+    );
+    await expect(page.locator("#btn-open-player-feature-picture")).toBeVisible();
+  });
+
   test("renders corrected FIFA-enriched Belgium fallback lineup data in the team view", async ({
     page,
   }) => {

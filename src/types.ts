@@ -126,6 +126,13 @@ export interface CommentaryEvent {
   type: "GOAL" | "YELLOW_CARD" | "RED_CARD" | "SUBSTITUTION" | "WHISTLE" | "COMMENT";
   text: string;
   team?: "A" | "B";
+  playerMentions?: Array<{
+    id?: string;
+    name: string;
+    number?: number;
+    position?: Position;
+    pictureUrl?: string;
+  }>;
 }
 
 // --- Tournament-wide data (groups, stadiums, bracket, news) ---

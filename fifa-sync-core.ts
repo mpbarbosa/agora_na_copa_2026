@@ -8,6 +8,7 @@ import type {
   MatchStatus,
   Player,
 } from "./src/types";
+import { getPlayerMetadataSupplement } from "./src/utils/playerMetadata";
 
 export interface FifaLocalizedText {
   Locale?: string;
@@ -462,21 +463,33 @@ const findMatchingFifaPlayer = (
 const mergeLineupWithLocalMetadata = (
   players: Player[],
   fallbackLineup: Player[],
+  teamCode: string,
 ): Player[] =>
   players.map((player) => {
     const fallbackPlayer = findMatchingLineupPlayer(player, fallbackLineup);
-    if (!fallbackPlayer) return player;
+    const metadataSupplement = getPlayerMetadataSupplement(teamCode, player.name);
+    if (!fallbackPlayer) {
+      return {
+        ...player,
+        socials: player.socials ?? metadataSupplement?.socials,
+      };
+    }
 
     return {
       ...player,
       club: player.club ?? fallbackPlayer.club,
       pictureUrl: player.pictureUrl ?? fallbackPlayer.pictureUrl,
+      socials:
+        player.socials ??
+        fallbackPlayer.socials ??
+        metadataSupplement?.socials,
     };
   });
 
 const enrichFallbackLineupWithFifaPictures = (
   fallbackLineup: Player[],
   fifaTeam: FifaLiveTeam | undefined,
+  teamCode: string,
 ): Player[] => {
   const fifaPlayers = fifaTeam?.Players;
   if (!fifaPlayers || fifaPlayers.length === 0) return fallbackLineup;
@@ -493,6 +506,9 @@ const enrichFallbackLineupWithFifaPictures = (
       ...player,
       number: fifaPlayer.ShirtNumber || player.number,
       pictureUrl: pictureUrl ?? player.pictureUrl,
+      socials:
+        player.socials ??
+        getPlayerMetadataSupplement(teamCode, player.name)?.socials,
     };
   });
 };
@@ -507,15 +523,38 @@ const buildPlayerNameMap = (team: FifaLiveTeam | undefined) => {
   );
 };
 
+const buildFifaPlayerMap = (team: FifaLiveTeam | undefined) => {
+  const players = team?.Players || [];
+  return new Map(players.map((player) => [player.IdPlayer, player]));
+};
+
+const toIncidentPlayerMention = (
+  fifaPlayer: FifaLivePlayer | undefined,
+  fallbackName: string,
+) => ({
+  id: fifaPlayer?.IdPlayer,
+  name: fallbackName,
+  number:
+    typeof fifaPlayer?.ShirtNumber === "number" ? fifaPlayer.ShirtNumber : undefined,
+  position:
+    typeof fifaPlayer?.Position === "number"
+      ? FIFA_POSITION_TO_LOCAL[fifaPlayer.Position] ?? Position.MF
+      : undefined,
+  pictureUrl: getFifaPlayerPictureUrl(fifaPlayer),
+});
+
 export const getIncidentsFromLiveFifa = (
   fifaMatch: FifaLiveMatch,
 ): CommentaryEvent[] => {
   const homePlayerNames = buildPlayerNameMap(fifaMatch.HomeTeam);
   const awayPlayerNames = buildPlayerNameMap(fifaMatch.AwayTeam);
+  const homePlayers = buildFifaPlayerMap(fifaMatch.HomeTeam);
+  const awayPlayers = buildFifaPlayerMap(fifaMatch.AwayTeam);
 
   const buildGoalIncidents = (
     goals: FifaLiveGoal[] | undefined,
     playerNames: Map<string, string>,
+    players: Map<string, FifaLivePlayer>,
     team: "A" | "B",
   ) =>
     (goals || []).map((goal, index) => {
@@ -529,6 +568,7 @@ export const getIncidentsFromLiveFifa = (
         type: "GOAL" as const,
         text: `${playerName} marcou.`,
         team,
+        playerMentions: [toIncidentPlayerMention(goal.IdPlayer ? players.get(goal.IdPlayer) : undefined, playerName)],
         period: goal.Period,
       };
     });
@@ -536,6 +576,7 @@ export const getIncidentsFromLiveFifa = (
   const buildBookingIncidents = (
     bookings: FifaLiveBooking[] | undefined,
     playerNames: Map<string, string>,
+    players: Map<string, FifaLivePlayer>,
     team: "A" | "B",
   ) =>
     (bookings || [])
@@ -554,6 +595,12 @@ export const getIncidentsFromLiveFifa = (
             ? `${playerName} foi expulso.`
             : `${playerName} recebeu amarelo.`,
           team,
+          playerMentions: [
+            toIncidentPlayerMention(
+              booking.IdPlayer ? players.get(booking.IdPlayer) : undefined,
+              playerName,
+            ),
+          ],
           period: booking.Period,
         };
       });
@@ -561,6 +608,7 @@ export const getIncidentsFromLiveFifa = (
   const buildSubstitutionIncidents = (
     substitutions: FifaLiveSubstitution[] | undefined,
     playerNames: Map<string, string>,
+    players: Map<string, FifaLivePlayer>,
     team: "A" | "B",
   ) =>
     (substitutions || []).map((substitution, index) => {
@@ -585,23 +633,35 @@ export const getIncidentsFromLiveFifa = (
         type: "SUBSTITUTION" as const,
         text: `Sai ${playerOffName}, entra ${playerOnName}.`,
         team,
+        playerMentions: [
+          toIncidentPlayerMention(
+            substitution.IdPlayerOff ? players.get(substitution.IdPlayerOff) : undefined,
+            playerOffName,
+          ),
+          toIncidentPlayerMention(
+            substitution.IdPlayerOn ? players.get(substitution.IdPlayerOn) : undefined,
+            playerOnName,
+          ),
+        ],
         period: substitution.Period,
       };
     });
 
   return [
-    ...buildGoalIncidents(fifaMatch.HomeTeam?.Goals, homePlayerNames, "A"),
-    ...buildGoalIncidents(fifaMatch.AwayTeam?.Goals, awayPlayerNames, "B"),
-    ...buildBookingIncidents(fifaMatch.HomeTeam?.Bookings, homePlayerNames, "A"),
-    ...buildBookingIncidents(fifaMatch.AwayTeam?.Bookings, awayPlayerNames, "B"),
+    ...buildGoalIncidents(fifaMatch.HomeTeam?.Goals, homePlayerNames, homePlayers, "A"),
+    ...buildGoalIncidents(fifaMatch.AwayTeam?.Goals, awayPlayerNames, awayPlayers, "B"),
+    ...buildBookingIncidents(fifaMatch.HomeTeam?.Bookings, homePlayerNames, homePlayers, "A"),
+    ...buildBookingIncidents(fifaMatch.AwayTeam?.Bookings, awayPlayerNames, awayPlayers, "B"),
     ...buildSubstitutionIncidents(
       fifaMatch.HomeTeam?.Substitutions,
       homePlayerNames,
+      homePlayers,
       "A",
     ),
     ...buildSubstitutionIncidents(
       fifaMatch.AwayTeam?.Substitutions,
       awayPlayerNames,
+      awayPlayers,
       "B",
     ),
   ]
@@ -763,6 +823,7 @@ export const getStartingLineupFromLiveFifa = (
 // XI and falling back to the local matches.json lineup when FIFA hasn't
 // published one yet (e.g. more than ~1h before kickoff) or is unavailable.
 export const buildTeamLineupEntry = (
+  teamCode: string,
   fallbackLineup: Player[],
   fifaMatch: FifaCalendarMatch | undefined,
   fifaTeam: FifaLiveTeam | undefined,
@@ -771,7 +832,7 @@ export const buildTeamLineupEntry = (
 
   if (starters) {
     return {
-      players: mergeLineupWithLocalMetadata(starters, fallbackLineup),
+      players: mergeLineupWithLocalMetadata(starters, fallbackLineup, teamCode),
       source: "fifa",
       note: "Escalação oficial divulgada pela FIFA.",
       fifaMatchId: fifaMatch?.IdMatch,
@@ -780,7 +841,7 @@ export const buildTeamLineupEntry = (
   }
 
   return {
-    players: enrichFallbackLineupWithFifaPictures(fallbackLineup, fifaTeam),
+    players: enrichFallbackLineupWithFifaPictures(fallbackLineup, fifaTeam, teamCode),
     source: "fallback",
     note: fifaMatch
       ? "Escalação oficial da FIFA ainda não divulgada; exibindo dados locais."

@@ -55,6 +55,7 @@ const createPlayer = (overrides: Partial<Player> & Pick<Player, "id" | "name" | 
   y: overrides.y ?? 50,
   club: overrides.club,
   pictureUrl: overrides.pictureUrl,
+  socials: overrides.socials,
 });
 
 test("getMatchStatusFromFifa maps FIFA status codes into local match statuses", () => {
@@ -261,6 +262,10 @@ test("buildMatchStateEntry includes sorted FIFA incidents from live data", () =>
       },
     ],
   );
+  assert.deepEqual(
+    entry.incidents?.[3]?.playerMentions?.map((mention) => mention.name),
+    ["BACUNA", "MARGARETHA"],
+  );
 });
 
 test("buildMatchStateEntry falls back to local match state when FIFA data is unavailable", () => {
@@ -382,6 +387,7 @@ test("buildTeamLineupEntry matches fallback players by name before shirt number 
   };
 
   const entry = buildTeamLineupEntry(
+    "BEL",
     fallbackLineup,
     { IdMatch: "400021478", Date: "2026-06-15T20:00:00Z" },
     fifaTeam,
@@ -427,4 +433,280 @@ test("buildTeamLineupEntry matches fallback players by name before shirt number 
   );
   assert.equal(casteels?.pictureUrl, undefined);
   assert.equal(faes?.pictureUrl, undefined);
+});
+
+test("buildTeamLineupEntry preserves local socials when FIFA starters replace fallback players", () => {
+  const fallbackLineup = [
+    createPlayer({
+      id: "cv1",
+      name: "Vozinha",
+      number: 1,
+      position: Position.GK,
+      club: "Gil Vicente",
+      socials: {
+        instagram: "https://instagram.com/vozinha1",
+      },
+    }),
+    createPlayer({
+      id: "cv2",
+      name: "Stopira",
+      number: 5,
+      position: Position.DF,
+    }),
+    createPlayer({
+      id: "cv3",
+      name: "Kevin Pina",
+      number: 8,
+      position: Position.MF,
+    }),
+    createPlayer({
+      id: "cv4",
+      name: "Bebé",
+      number: 21,
+      position: Position.FW,
+    }),
+    createPlayer({
+      id: "cv5",
+      name: "Roberto Lopes",
+      number: 4,
+      position: Position.DF,
+    }),
+    createPlayer({
+      id: "cv6",
+      name: "Logan Costa",
+      number: 3,
+      position: Position.DF,
+    }),
+    createPlayer({
+      id: "cv7",
+      name: "João Paulo",
+      number: 2,
+      position: Position.DF,
+    }),
+    createPlayer({
+      id: "cv8",
+      name: "Deroy Duarte",
+      number: 6,
+      position: Position.MF,
+    }),
+    createPlayer({
+      id: "cv9",
+      name: "Jovane Cabral",
+      number: 10,
+      position: Position.MF,
+    }),
+    createPlayer({
+      id: "cv10",
+      name: "Ryan Mendes",
+      number: 7,
+      position: Position.FW,
+    }),
+    createPlayer({
+      id: "cv11",
+      name: "Willy Semedo",
+      number: 11,
+      position: Position.FW,
+    }),
+  ];
+
+  const fifaTeam: FifaLiveTeam = {
+    Tactics: "4-3-3",
+    Players: [
+      {
+        IdPlayer: "vozinha-fifa",
+        PlayerName: [{ Locale: "en", Description: "Josimar Dias Vozinha" }],
+        ShortName: [{ Locale: "en", Description: "VOZINHA" }],
+        ShirtNumber: 1,
+        Position: 0,
+        PlayerPicture: { PictureUrl: "https://digitalhub.fifa.com/VOZINHA" },
+      },
+      {
+        IdPlayer: "stopira-fifa",
+        PlayerName: [{ Locale: "en", Description: "Stopira" }],
+        ShortName: [{ Locale: "en", Description: "STOPIRA" }],
+        ShirtNumber: 5,
+        Position: 1,
+      },
+      {
+        IdPlayer: "pina-fifa",
+        PlayerName: [{ Locale: "en", Description: "Kevin Pina" }],
+        ShortName: [{ Locale: "en", Description: "K PINA" }],
+        ShirtNumber: 8,
+        Position: 2,
+      },
+      {
+        IdPlayer: "bebe-fifa",
+        PlayerName: [{ Locale: "en", Description: "Bebe" }],
+        ShortName: [{ Locale: "en", Description: "BEBE" }],
+        ShirtNumber: 21,
+        Position: 3,
+      },
+      {
+        IdPlayer: "lopes-fifa",
+        PlayerName: [{ Locale: "en", Description: "Roberto Lopes" }],
+        ShortName: [{ Locale: "en", Description: "R LOPES" }],
+        ShirtNumber: 4,
+        Position: 1,
+      },
+      {
+        IdPlayer: "costa-fifa",
+        PlayerName: [{ Locale: "en", Description: "Logan Costa" }],
+        ShortName: [{ Locale: "en", Description: "L COSTA" }],
+        ShirtNumber: 3,
+        Position: 1,
+      },
+      {
+        IdPlayer: "joaopaulo-fifa",
+        PlayerName: [{ Locale: "en", Description: "Joao Paulo" }],
+        ShortName: [{ Locale: "en", Description: "J PAULO" }],
+        ShirtNumber: 2,
+        Position: 1,
+      },
+      {
+        IdPlayer: "duarte-fifa",
+        PlayerName: [{ Locale: "en", Description: "Deroy Duarte" }],
+        ShortName: [{ Locale: "en", Description: "D DUARTE" }],
+        ShirtNumber: 6,
+        Position: 2,
+      },
+      {
+        IdPlayer: "cabral-fifa",
+        PlayerName: [{ Locale: "en", Description: "Jovane Cabral" }],
+        ShortName: [{ Locale: "en", Description: "J CABRAL" }],
+        ShirtNumber: 10,
+        Position: 2,
+      },
+      {
+        IdPlayer: "mendes-fifa",
+        PlayerName: [{ Locale: "en", Description: "Ryan Mendes" }],
+        ShortName: [{ Locale: "en", Description: "R MENDES" }],
+        ShirtNumber: 7,
+        Position: 3,
+      },
+      {
+        IdPlayer: "semedo-fifa",
+        PlayerName: [{ Locale: "en", Description: "Willy Semedo" }],
+        ShortName: [{ Locale: "en", Description: "W SEMEDO" }],
+        ShirtNumber: 11,
+        Position: 3,
+      },
+    ],
+  };
+
+  const entry = buildTeamLineupEntry(
+    "CPV",
+    fallbackLineup,
+    { IdMatch: "400021999", Date: "2026-06-15T20:00:00Z" },
+    fifaTeam,
+  );
+
+  assert.equal(entry.source, "fifa");
+
+  const vozinha = entry.players.find((player) => player.name === "VOZINHA");
+  assert.equal(vozinha?.club, "Gil Vicente");
+  assert.deepEqual(vozinha?.socials, {
+    instagram: "https://instagram.com/vozinha1",
+  });
+  assert.equal(vozinha?.pictureUrl, "https://digitalhub.fifa.com/VOZINHA");
+});
+
+test("buildTeamLineupEntry adds supplemental socials for FIFA starters missing from local lineup", () => {
+  const fallbackLineup = [
+    createPlayer({
+      id: "sau1",
+      name: "Mohammed Al-Owais",
+      number: 21,
+      position: Position.GK,
+    }),
+    createPlayer({
+      id: "sau2",
+      name: "Saud Abdulhamid",
+      number: 12,
+      position: Position.DF,
+    }),
+    createPlayer({
+      id: "sau3",
+      name: "Hassan Kadesh",
+      number: 14,
+      position: Position.DF,
+    }),
+    createPlayer({
+      id: "sau4",
+      name: "Ali Al-Bulaihi",
+      number: 5,
+      position: Position.DF,
+    }),
+    createPlayer({
+      id: "sau5",
+      name: "Yasser Al-Shahrani",
+      number: 13,
+      position: Position.DF,
+    }),
+    createPlayer({
+      id: "sau6",
+      name: "Mohamed Kanno",
+      number: 23,
+      position: Position.MF,
+    }),
+    createPlayer({
+      id: "sau7",
+      name: "Nasser Al-Dawsari",
+      number: 8,
+      position: Position.MF,
+    }),
+    createPlayer({
+      id: "sau8",
+      name: "Salem Al-Dawsari",
+      number: 10,
+      position: Position.MF,
+    }),
+    createPlayer({
+      id: "sau9",
+      name: "Firas Al-Buraikan",
+      number: 9,
+      position: Position.FW,
+    }),
+    createPlayer({
+      id: "sau10",
+      name: "Saleh Al-Shehri",
+      number: 11,
+      position: Position.FW,
+    }),
+    createPlayer({
+      id: "sau11",
+      name: "Abdulrahman Ghareeb",
+      number: 7,
+      position: Position.FW,
+    }),
+  ];
+
+  const fifaTeam: FifaLiveTeam = {
+    Tactics: "4-3-3",
+    Players: [
+      { IdPlayer: "sau-gk", PlayerName: [{ Locale: "en", Description: "Mohammed Al-Owais" }], ShortName: [{ Locale: "en", Description: "AL-OWAIS" }], ShirtNumber: 21, Position: 0 },
+      { IdPlayer: "sau-rb", PlayerName: [{ Locale: "en", Description: "Saud Abdulhamid" }], ShortName: [{ Locale: "en", Description: "ABDULHAMID" }], ShirtNumber: 12, Position: 1 },
+      { IdPlayer: "sau-cb1", PlayerName: [{ Locale: "en", Description: "Abdulilah Alamri" }], ShortName: [{ Locale: "en", Description: "ALAMRI" }], ShirtNumber: 4, Position: 1, PlayerPicture: { PictureUrl: "https://images.fifa.test/alamri.png" } },
+      { IdPlayer: "sau-cb2", PlayerName: [{ Locale: "en", Description: "Ali Al-Bulaihi" }], ShortName: [{ Locale: "en", Description: "AL-BULAIHI" }], ShirtNumber: 5, Position: 1 },
+      { IdPlayer: "sau-lb", PlayerName: [{ Locale: "en", Description: "Yasser Al-Shahrani" }], ShortName: [{ Locale: "en", Description: "AL-SHAHRANI" }], ShirtNumber: 13, Position: 1 },
+      { IdPlayer: "sau-mf1", PlayerName: [{ Locale: "en", Description: "Mohamed Kanno" }], ShortName: [{ Locale: "en", Description: "KANNO" }], ShirtNumber: 23, Position: 2 },
+      { IdPlayer: "sau-mf2", PlayerName: [{ Locale: "en", Description: "Nasser Al-Dawsari" }], ShortName: [{ Locale: "en", Description: "AL-DAWSARI" }], ShirtNumber: 8, Position: 2 },
+      { IdPlayer: "sau-mf3", PlayerName: [{ Locale: "en", Description: "Salem Al-Dawsari" }], ShortName: [{ Locale: "en", Description: "AL-DAWSARI" }], ShirtNumber: 10, Position: 2 },
+      { IdPlayer: "sau-fw1", PlayerName: [{ Locale: "en", Description: "Firas Al-Buraikan" }], ShortName: [{ Locale: "en", Description: "AL-BURAIKAN" }], ShirtNumber: 9, Position: 3 },
+      { IdPlayer: "sau-fw2", PlayerName: [{ Locale: "en", Description: "Saleh Al-Shehri" }], ShortName: [{ Locale: "en", Description: "AL-SHEHRI" }], ShirtNumber: 11, Position: 3 },
+      { IdPlayer: "sau-fw3", PlayerName: [{ Locale: "en", Description: "Abdulrahman Ghareeb" }], ShortName: [{ Locale: "en", Description: "GHAREEB" }], ShirtNumber: 7, Position: 3 },
+    ],
+  };
+
+  const entry = buildTeamLineupEntry(
+    "KSA",
+    fallbackLineup,
+    { IdMatch: "400021600", Date: "2026-06-15T20:00:00Z" },
+    fifaTeam,
+  );
+
+  assert.equal(entry.source, "fifa");
+  const alamri = entry.players.find((player) => player.name === "ALAMRI");
+  assert.deepEqual(alamri?.socials, {
+    instagram: "https://instagram.com/aalamri32",
+  });
 });

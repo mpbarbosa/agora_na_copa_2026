@@ -459,7 +459,12 @@ export const TeamLineupView: React.FC<TeamLineupViewProps> = ({ team, theme, onB
 
               {teamView.lineup && teamView.lineup.players.length > 0 ? (
                 <div className="mt-5">
-                  <TeamPitchBoard team={{ ...teamView.team, lineup: teamView.lineup.players }} mirror={false} />
+                  <TeamPitchBoard
+                    team={{ ...teamView.team, lineup: teamView.lineup.players }}
+                    opponentName={featuredMatch?.opponent.name}
+                    mirror={false}
+                    theme={theme}
+                  />
                 </div>
               ) : (
                 <div

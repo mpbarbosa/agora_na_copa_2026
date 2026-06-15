@@ -842,7 +842,7 @@
       "secondaryColor": "#cf2027",
       "group": "Grupo H",
       "lineup": [
-        { "id": "cv1", "name": "Vozinha", "number": 1, "position": "GK", "x": 50, "y": 12, "club": "Gil Vicente" },
+        { "id": "cv1", "name": "Vozinha", "number": 1, "position": "GK", "x": 50, "y": 12, "club": "Gil Vicente", "socials": { "instagram": "https://instagram.com/vozinha1" } },
         { "id": "cv2", "name": "Steven Moreira", "number": 22, "position": "DF", "x": 15, "y": 30, "club": "Columbus Crew" },
         { "id": "cv3", "name": "Logan Costa", "number": 4, "position": "DF", "x": 38, "y": 25, "club": "Toulouse" },
         { "id": "cv4", "name": "Roberto Lopes", "number": 3, "position": "DF", "x": 62, "y": 25, "club": "Shamrock Rovers" },
@@ -937,7 +937,7 @@
       "secondaryColor": "#ffffff",
       "group": "Grupo H",
       "lineup": [
-        { "id": "sau1", "name": "Mohammed Al-Owais", "number": 21, "position": "GK", "x": 50, "y": 88, "club": "Al-Hilal" },
+        { "id": "sau1", "name": "Mohammed Al-Owais", "number": 21, "position": "GK", "x": 50, "y": 88, "club": "Al-Hilal", "socials": { "instagram": "https://instagram.com/alowais_33" } },
         { "id": "sau2", "name": "Saud Abdulhamid", "number": 12, "position": "DF", "x": 15, "y": 70, "club": "Roma" },
         { "id": "sau3", "name": "Hassan Kadesh", "number": 14, "position": "DF", "x": 38, "y": 75, "club": "Al-Ittihad" },
         { "id": "sau4", "name": "Ali Al-Bulaihi", "number": 5, "position": "DF", "x": 62, "y": 75, "club": "Al-Hilal" },
