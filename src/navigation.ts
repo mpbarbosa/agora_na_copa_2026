@@ -35,7 +35,7 @@ export const NAV_ITEMS: NavItem[] = [
   {
     id: "noticias",
     label: "Notícias",
-    status: "comingSoon",
+    status: "live",
     description: "Feed de novidades sobre seleções, sedes e ingressos.",
   },
   {
