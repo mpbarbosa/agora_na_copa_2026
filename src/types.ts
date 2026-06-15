@@ -13,6 +13,7 @@ export interface Player {
   x: number; // 0 to 100 on visual pitch
   y: number; // 0 to 100 on visual pitch
   club?: string;
+  pictureUrl?: string;
 }
 
 export interface Broadcaster {

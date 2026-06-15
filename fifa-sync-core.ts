@@ -51,6 +51,11 @@ export interface FifaLiveTeam {
   Players?: FifaLivePlayer[];
 }
 
+export interface FifaPlayerPicture {
+  Id?: string | null;
+  PictureUrl?: string | null;
+}
+
 export interface FifaLivePlayer {
   IdPlayer: string;
   PlayerName?: FifaLocalizedText[];
@@ -58,6 +63,7 @@ export interface FifaLivePlayer {
   ShirtNumber?: number | null;
   Position?: number | null;
   Captain?: boolean | null;
+  PlayerPicture?: FifaPlayerPicture | null;
 }
 
 export interface FifaLiveGoal {
@@ -357,6 +363,91 @@ export const getBestPlayerName = (
   fallback = "",
 ) => getLocalizedDescription(entries, "pt") || fallback;
 
+const normalizePlayerName = (name: string) => normalizeText(name);
+
+const findMatchingLineupPlayer = (
+  player: Pick<Player, "name" | "number">,
+  lineup: Player[],
+) => {
+  const normalizedName = normalizePlayerName(player.name);
+
+  return (
+    lineup.find(
+      (candidate) =>
+        candidate.number === player.number &&
+        normalizePlayerName(candidate.name) === normalizedName,
+    ) ||
+    lineup.find((candidate) => candidate.number === player.number) ||
+    lineup.find(
+      (candidate) => normalizePlayerName(candidate.name) === normalizedName,
+    )
+  );
+};
+
+const getFifaPlayerPictureUrl = (player: FifaLivePlayer | undefined) =>
+  player?.PlayerPicture?.PictureUrl || undefined;
+
+const findMatchingFifaPlayer = (
+  player: Pick<Player, "name" | "number">,
+  fifaPlayers: FifaLivePlayer[],
+) => {
+  const normalizedName = normalizePlayerName(player.name);
+
+  return (
+    fifaPlayers.find((candidate) => {
+      const candidateName = getBestPlayerName(
+        candidate.ShortName,
+        getBestPlayerName(candidate.PlayerName, "Jogador"),
+      );
+
+      return (
+        (candidate.ShirtNumber || 0) === player.number &&
+        normalizePlayerName(candidateName) === normalizedName
+      );
+    }) ||
+    fifaPlayers.find((candidate) => (candidate.ShirtNumber || 0) === player.number) ||
+    fifaPlayers.find((candidate) => {
+      const candidateName = getBestPlayerName(
+        candidate.ShortName,
+        getBestPlayerName(candidate.PlayerName, "Jogador"),
+      );
+      return normalizePlayerName(candidateName) === normalizedName;
+    })
+  );
+};
+
+const mergeLineupWithLocalMetadata = (
+  players: Player[],
+  fallbackLineup: Player[],
+): Player[] =>
+  players.map((player) => {
+    const fallbackPlayer = findMatchingLineupPlayer(player, fallbackLineup);
+    if (!fallbackPlayer) return player;
+
+    return {
+      ...player,
+      club: player.club ?? fallbackPlayer.club,
+      pictureUrl: player.pictureUrl ?? fallbackPlayer.pictureUrl,
+    };
+  });
+
+const enrichFallbackLineupWithFifaPictures = (
+  fallbackLineup: Player[],
+  fifaTeam: FifaLiveTeam | undefined,
+): Player[] => {
+  const fifaPlayers = fifaTeam?.Players;
+  if (!fifaPlayers || fifaPlayers.length === 0) return fallbackLineup;
+
+  return fallbackLineup.map((player) => {
+    const fifaPlayer = findMatchingFifaPlayer(player, fifaPlayers);
+    const pictureUrl = getFifaPlayerPictureUrl(fifaPlayer);
+
+    return pictureUrl && player.pictureUrl !== pictureUrl
+      ? { ...player, pictureUrl }
+      : player;
+  });
+};
+
 const buildPlayerNameMap = (team: FifaLiveTeam | undefined) => {
   const players = team?.Players || [];
   return new Map(
@@ -615,6 +706,7 @@ export const getStartingLineupFromLiveFifa = (
     position: FIFA_POSITION_TO_LOCAL[player.Position ?? 2] ?? Position.MF,
     x: coords[index]?.x ?? 50,
     y: coords[index]?.y ?? 50,
+    pictureUrl: getFifaPlayerPictureUrl(player),
   }));
 };
 
@@ -630,7 +722,7 @@ export const buildTeamLineupEntry = (
 
   if (starters) {
     return {
-      players: starters,
+      players: mergeLineupWithLocalMetadata(starters, fallbackLineup),
       source: "fifa",
       note: "Escalação oficial divulgada pela FIFA.",
       fifaMatchId: fifaMatch?.IdMatch,
@@ -639,7 +731,7 @@ export const buildTeamLineupEntry = (
   }
 
   return {
-    players: fallbackLineup,
+    players: enrichFallbackLineupWithFifaPictures(fallbackLineup, fifaTeam),
     source: "fallback",
     note: fifaMatch
       ? "Escalação oficial da FIFA ainda não divulgada; exibindo dados locais."

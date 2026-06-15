@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Player, Position } from "../types";
 
 interface TeamPitchBoardProps {
@@ -12,8 +12,110 @@ interface TeamPitchBoardProps {
   mirror?: boolean;
 }
 
+const getPositionLabel = (position: Position) => {
+  if (position === Position.GK) return "Goleiro";
+  if (position === Position.DF) return "Defensor";
+  if (position === Position.MF) return "Meio-Campista";
+  return "Atacante";
+};
+
+const normalizePlayerName = (name: string) =>
+  name
+    .normalize("NFD")
+    .replace(/\p{Diacritic}/gu, "")
+    .replace(/[^A-Za-z0-9]/g, "")
+    .toLowerCase();
+
+const isSamePlayer = (candidate: Player, target: Player) =>
+  candidate.id === target.id ||
+  (candidate.number === target.number &&
+    normalizePlayerName(candidate.name) === normalizePlayerName(target.name)) ||
+  candidate.number === target.number;
+
+interface PlayerPortraitProps {
+  player: Player;
+  primaryColor: string;
+  secondaryColor: string;
+  className: string;
+  fallbackTextClassName?: string;
+  imageClassName?: string;
+  showNumberBadge?: boolean;
+  numberBadgeClassName?: string;
+}
+
+const PlayerPortrait: React.FC<PlayerPortraitProps> = ({
+  player,
+  primaryColor,
+  secondaryColor,
+  className,
+  fallbackTextClassName = "",
+  imageClassName = "h-full w-full object-cover",
+  showNumberBadge = false,
+  numberBadgeClassName = "",
+}) => {
+  const [imageFailed, setImageFailed] = useState(false);
+
+  useEffect(() => {
+    setImageFailed(false);
+  }, [player.pictureUrl]);
+
+  const showImage = Boolean(player.pictureUrl) && !imageFailed;
+
+  return (
+    <div className={`relative overflow-hidden ${className}`}>
+      {showImage ? (
+        <img
+          src={player.pictureUrl}
+          alt={`Foto de ${player.name}`}
+          className={imageClassName}
+          loading="lazy"
+          decoding="async"
+          onError={() => setImageFailed(true)}
+        />
+      ) : (
+        <div
+          className={`flex h-full w-full items-center justify-center font-bold font-mono text-white ${fallbackTextClassName}`}
+          style={{ background: `linear-gradient(135deg, ${primaryColor}, ${secondaryColor})` }}
+        >
+          {player.number}
+        </div>
+      )}
+
+      {showImage && showNumberBadge && (
+        <span className={numberBadgeClassName}>{player.number}</span>
+      )}
+    </div>
+  );
+};
+
 export const TeamPitchBoard: React.FC<TeamPitchBoardProps> = ({ team, opponentName, mirror = false }) => {
   const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
+  const [expandedPlayer, setExpandedPlayer] = useState<Player | null>(null);
+
+  useEffect(() => {
+    setSelectedPlayer((current) => {
+      if (!current) return null;
+      return team.lineup.find((player) => isSamePlayer(player, current)) ?? null;
+    });
+    setExpandedPlayer((current) => {
+      if (!current) return null;
+      const nextPlayer = team.lineup.find((player) => isSamePlayer(player, current)) ?? null;
+      return nextPlayer?.pictureUrl ? nextPlayer : null;
+    });
+  }, [team.lineup]);
+
+  useEffect(() => {
+    if (!expandedPlayer) return;
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setExpandedPlayer(null);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [expandedPlayer]);
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6" id="pitch-main-content">
@@ -97,7 +199,7 @@ export const TeamPitchBoard: React.FC<TeamPitchBoardProps> = ({ team, opponentNa
           })}
         </div>
         <div className="p-2 text-white/70 font-mono text-xs text-center w-full" id="pitch-instruction">
-          * Clique em um jogador para visualizar detalhes táticos e clube atual
+          * Clique em um jogador para visualizar foto, detalhes táticos e clube atual
         </div>
       </div>
 
@@ -109,27 +211,53 @@ export const TeamPitchBoard: React.FC<TeamPitchBoardProps> = ({ team, opponentNa
             <div className="flex flex-col h-full justify-between space-y-4" id="selected-player-info">
               <div>
                 <div className="flex items-center space-x-3 mb-3">
-                  <div
-                    className="w-12 h-12 rounded-full flex items-center justify-center text-xl font-bold font-mono border-2 border-white/20"
-                    style={{ background: `linear-gradient(135deg, ${team.primaryColor}, ${team.secondaryColor})` }}
-                  >
-                    {selectedPlayer.number}
-                  </div>
+                  {selectedPlayer.pictureUrl ? (
+                    <button
+                      type="button"
+                      id="btn-expand-player-picture"
+                      onClick={() => setExpandedPlayer(selectedPlayer)}
+                      className="shrink-0 rounded-2xl transition hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-[#ffd700]/70"
+                      aria-label={`Ampliar foto de ${selectedPlayer.name}`}
+                    >
+                      <PlayerPortrait
+                        player={selectedPlayer}
+                        primaryColor={team.primaryColor}
+                        secondaryColor={team.secondaryColor}
+                        className="h-20 w-20 rounded-2xl border border-white/15 bg-black/30 shadow-lg"
+                        fallbackTextClassName="text-2xl"
+                        imageClassName="h-full w-full object-contain object-top p-1"
+                        showNumberBadge
+                        numberBadgeClassName="absolute bottom-1 right-1 rounded-full border border-white/10 bg-black/80 px-2 py-0.5 font-mono text-[10px] font-black text-[#ffd700]"
+                      />
+                    </button>
+                  ) : (
+                    <PlayerPortrait
+                      player={selectedPlayer}
+                      primaryColor={team.primaryColor}
+                      secondaryColor={team.secondaryColor}
+                      className="h-20 w-20 shrink-0 rounded-2xl border border-white/15 bg-black/30 shadow-lg"
+                      fallbackTextClassName="text-2xl"
+                      imageClassName="h-full w-full object-contain object-top p-1"
+                      showNumberBadge
+                      numberBadgeClassName="absolute bottom-1 right-1 rounded-full border border-white/10 bg-black/80 px-2 py-0.5 font-mono text-[10px] font-black text-[#ffd700]"
+                    />
+                  )}
                   <div>
                     <h4 className="font-anton text-lg tracking-wider text-white uppercase">{selectedPlayer.name}</h4>
                     <p className="text-white/75 text-sm font-archivo">{selectedPlayer.club || "Seleção Nacional"}</p>
                   </div>
                 </div>
 
+                {selectedPlayer.pictureUrl && (
+                  <p className="mb-3 text-[10px] font-mono uppercase tracking-wider text-white/45">
+                    Clique na foto para ampliar
+                  </p>
+                )}
+
                 <div className="space-y-2 text-sm text-white/80 font-archivo" id="player-meta-grid">
                   <div className="flex justify-between py-1.5 border-b border-white/5">
                     <span className="text-white/65 font-mono">POSIÇÃO</span>
-                    <span className="font-semibold text-[#00e476]">
-                      {selectedPlayer.position === Position.GK && "Goleiro"}
-                      {selectedPlayer.position === Position.DF && "Defensor"}
-                      {selectedPlayer.position === Position.MF && "Meio-Campista"}
-                      {selectedPlayer.position === Position.FW && "Atacante"}
-                    </span>
+                    <span className="font-semibold text-[#00e476]">{getPositionLabel(selectedPlayer.position)}</span>
                   </div>
 
                   <div className="flex justify-between py-1.5 border-b border-white/5">
@@ -165,7 +293,7 @@ export const TeamPitchBoard: React.FC<TeamPitchBoardProps> = ({ team, opponentNa
               <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 mb-2 stroke-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" />
               </svg>
-              <p className="text-sm">Selecione qualquer jogador no campo para examinar detalhes táticos.</p>
+              <p className="text-sm">Selecione qualquer jogador no campo para examinar foto e detalhes táticos.</p>
             </div>
           )}
         </div>
@@ -188,6 +316,13 @@ export const TeamPitchBoard: React.FC<TeamPitchBoardProps> = ({ team, opponentNa
                   }`}
                 >
                   <div className="flex items-center space-x-2">
+                    <PlayerPortrait
+                      player={p}
+                      primaryColor={team.primaryColor}
+                      secondaryColor={team.secondaryColor}
+                      className="h-8 w-8 shrink-0 rounded-full border border-white/10 bg-white/5"
+                      fallbackTextClassName="text-[11px]"
+                    />
                     <span className="font-mono text-xs text-[#00e476] w-5 text-right">{p.number}</span>
                     <span className="font-archivo text-sm text-white font-medium">{p.name}</span>
                   </div>
@@ -202,6 +337,33 @@ export const TeamPitchBoard: React.FC<TeamPitchBoardProps> = ({ team, opponentNa
           </div>
         </div>
       </div>
+
+      {expandedPlayer?.pictureUrl && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 p-4 backdrop-blur-md"
+          id="player-picture-overlay"
+          onClick={() => setExpandedPlayer(null)}
+        >
+          <div
+            className="relative max-h-[92vh] max-w-[92vw] rounded-2xl border border-white/10 bg-[#050505]/95 p-3 shadow-2xl"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <button
+              type="button"
+              id="btn-close-player-picture-overlay"
+              onClick={() => setExpandedPlayer(null)}
+              className="absolute right-3 top-3 rounded-full border border-white/10 bg-black/70 px-3 py-1 font-mono text-[10px] font-bold uppercase tracking-wider text-white transition hover:bg-black/90"
+            >
+              Fechar
+            </button>
+            <img
+              src={expandedPlayer.pictureUrl}
+              alt={`Foto ampliada de ${expandedPlayer.name}`}
+              className="block h-auto max-h-[calc(92vh-1.5rem)] w-auto max-w-[calc(92vw-1.5rem)] rounded-xl object-contain"
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 };
