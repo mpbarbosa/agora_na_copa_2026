@@ -40,6 +40,7 @@ const DEFAULT_BROADCAST_COUNTRY = "BR";
 const DEFAULT_BROADCAST_LANGUAGE = "pt";
 const BROADCAST_GUIDE_CACHE_TTL_MS = 5 * 60 * 1000;
 const TEAM_LINEUPS_CACHE_TTL_MS = 5 * 60 * 1000;
+const LIVE_TEAM_LINEUPS_CACHE_TTL_MS = 10 * 1000;
 const LIVE_MATCH_STATE_CACHE_TTL_MS = 10 * 1000;
 const UPCOMING_SOON_MATCH_STATE_CACHE_TTL_MS = 30 * 1000;
 const STABLE_MATCH_STATE_CACHE_TTL_MS = 5 * 60 * 1000;
@@ -138,6 +139,7 @@ interface MatchOverlaysResponse {
 
 interface TeamLineupsResponse {
   language: string;
+  refreshAfterMs: number;
   lineups: Record<string, { teamA: LineupEntry; teamB: LineupEntry }>;
 }
 
@@ -763,6 +765,17 @@ const getMatchStateCacheTtlMs = (states: Record<string, MatchStateEntry>) => {
     : STABLE_MATCH_STATE_CACHE_TTL_MS;
 };
 
+const getTeamLineupCacheTtlMs = (
+  matchedFifa: Array<{ match: Match; fifaMatch: FifaCalendarMatch | undefined }>,
+  liveByMatchId: Map<string, FifaLiveMatchCore>,
+) =>
+  matchedFifa.some(({ match, fifaMatch }) => {
+    const liveMatch = fifaMatch ? liveByMatchId.get(fifaMatch.IdMatch) : undefined;
+    return buildMatchStateEntryCore(match, fifaMatch, liveMatch).status === "LIVE";
+  })
+    ? LIVE_TEAM_LINEUPS_CACHE_TTL_MS
+    : TEAM_LINEUPS_CACHE_TTL_MS;
+
 const serializeErrorMessage = (error: unknown) =>
   error instanceof Error ? error.message : String(error);
 
@@ -1105,12 +1118,16 @@ const getTeamLineupsPayload = async (
       }),
     );
 
-    const payload: TeamLineupsResponse = { language, lineups };
+    const payload: TeamLineupsResponse = {
+      language,
+      refreshAfterMs: getTeamLineupCacheTtlMs(matchedFifa, liveByMatchId),
+      lineups,
+    };
 
     teamLineupsCache = {
       key: cacheKey,
       createdAt: Date.now(),
-      expiresAt: Date.now() + TEAM_LINEUPS_CACHE_TTL_MS,
+      expiresAt: Date.now() + payload.refreshAfterMs,
       payload,
     };
     fifaSyncDiagnostics.teamLineups.lastSuccessAt = new Date().toISOString();

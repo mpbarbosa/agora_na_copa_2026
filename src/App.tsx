@@ -17,6 +17,11 @@ import { Sun, Moon } from "lucide-react";
 const APP_VERSION = packageInfo.version;
 const TEAM_LINEUPS_REFRESH_INTERVAL_MS = 5 * 60 * 1000;
 
+interface TeamLineupsApiResponse {
+  refreshAfterMs: number;
+  lineups: TeamLineupsMap;
+}
+
 export default function App() {
   const [theme, setTheme] = useState<"classic-light" | "stadium-dark">(
     "classic-light",
@@ -28,29 +33,79 @@ export default function App() {
 
   useEffect(() => {
     let active = true;
+    let timeoutId: number | undefined;
+    let requestInFlight = false;
+
+    const clearScheduledLoad = () => {
+      if (timeoutId) {
+        window.clearTimeout(timeoutId);
+        timeoutId = undefined;
+      }
+    };
+
+    const isPageVisible = () =>
+      typeof document === "undefined" || document.visibilityState === "visible";
+
+    const scheduleNextLoad = (refreshAfterMs?: number) => {
+      if (!isPageVisible()) {
+        return;
+      }
+
+      const delay =
+        typeof refreshAfterMs === "number" && refreshAfterMs > 0
+          ? refreshAfterMs
+          : TEAM_LINEUPS_REFRESH_INTERVAL_MS;
+
+      clearScheduledLoad();
+      timeoutId = window.setTimeout(() => {
+        void loadTeamLineups();
+      }, delay);
+    };
 
     const loadTeamLineups = async () => {
+      if (!active || requestInFlight) {
+        return;
+      }
+
+      requestInFlight = true;
+
       try {
         const response = await fetch("/api/team-lineups");
         if (!response.ok) {
           throw new Error("Falha ao atualizar escalações da FIFA.");
         }
 
-        const data: { lineups: TeamLineupsMap } = await response.json();
-        if (active) {
-          setTeamLineups(data.lineups);
-        }
+        const data: TeamLineupsApiResponse = await response.json();
+        if (!active) return;
+
+        setTeamLineups(data.lineups);
+        scheduleNextLoad(data.refreshAfterMs);
       } catch (error) {
         console.error(error);
+        scheduleNextLoad();
+      } finally {
+        requestInFlight = false;
       }
     };
 
+    const handlePageVisible = () => {
+      if (!active || !isPageVisible()) {
+        return;
+      }
+
+      clearScheduledLoad();
+      void loadTeamLineups();
+    };
+
     void loadTeamLineups();
-    const interval = window.setInterval(loadTeamLineups, TEAM_LINEUPS_REFRESH_INTERVAL_MS);
+    window.addEventListener("focus", handlePageVisible);
+    document.addEventListener("visibilitychange", handlePageVisible);
 
     return () => {
       active = false;
-      window.clearInterval(interval);
+      clearScheduledLoad();
+      window.removeEventListener("focus", handlePageVisible);
+      document.removeEventListener("visibilitychange", handlePageVisible);
     };
   }, []);
 
