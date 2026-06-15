@@ -31,6 +31,46 @@ test.describe("Navigation shell", () => {
     expect(consoleErrors).toEqual([]);
   });
 
+  test("Ao Vivo nav draws attention when there is a live match", async ({ page }) => {
+    await page.route("**/api/match-overlays", async (route) => {
+      await route.fulfill({
+        contentType: "application/json",
+        body: JSON.stringify({
+          refreshAfterMs: 60000,
+          overlays: {
+            "bra-mar-2026": {
+              broadcastGuide: {
+                broadcasters: [],
+                source: "fallback",
+                note: "Teste do destaque ao vivo.",
+                updatedAt: "2026-06-15T20:30:00.000Z",
+              },
+              matchState: {
+                status: "LIVE",
+                score: {
+                  teamA: 1,
+                  teamB: 0,
+                },
+                matchTime: "12'",
+                source: "fifa",
+                note: "Partida em andamento.",
+                updatedAt: "2026-06-15T20:30:00.000Z",
+              },
+            },
+          },
+        }),
+      });
+    });
+
+    await page.goto("/");
+
+    await expect(page.locator("#btn-nav-partidas")).toHaveAttribute(
+      "data-live-attention",
+      "true",
+    );
+    await expect(page.locator("#btn-nav-partidas #nav-live-indicator")).toBeVisible();
+  });
+
   test("match selector switches the active match", async ({ page }) => {
     await page.goto("/");
 

@@ -35,6 +35,7 @@ export default function App() {
   const [teamLineups, setTeamLineups] = useState<TeamLineupsMap>({});
   const [standingsFocusGroupSlug, setStandingsFocusGroupSlug] = useState<string | null>(null);
   const isPartidasViewActive = activeNavId === "partidas" && lineupTeam === null;
+  const hasLiveMatch = matches.some((match) => match.status === "LIVE");
 
   const handleSelectNav = (navId: string) => {
     setActiveNavId(navId);
@@ -234,22 +235,52 @@ export default function App() {
             id="main-nav"
           >
             {NAV_ITEMS.map((item) => (
-              <button
-                key={item.id}
-                id={`btn-nav-${item.id}`}
-                onClick={() => handleSelectNav(item.id)}
-                className={`px-3.5 py-2 min-h-11 rounded-md text-[13px] md:text-sm leading-none font-anton transition-all uppercase tracking-wide ${
-                  activeNavId === item.id
-                    ? theme === "classic-light"
-                      ? "bg-white text-slate-950 shadow-sm font-semibold"
-                      : "bg-[#171a1c] text-[#ffd84d] shadow-sm font-semibold"
-                    : theme === "classic-light"
-                      ? "text-slate-700 hover:bg-white hover:text-slate-950"
-                      : "text-slate-100 hover:bg-white/10 hover:text-white"
-                }`}
-              >
-                {item.label}
-              </button>
+              (() => {
+                const isActive = activeNavId === item.id;
+                const hasLiveAttention = item.id === "partidas" && hasLiveMatch;
+
+                return (
+                  <button
+                    key={item.id}
+                    id={`btn-nav-${item.id}`}
+                    onClick={() => handleSelectNav(item.id)}
+                    data-live-attention={hasLiveAttention ? "true" : "false"}
+                    className={`relative px-3.5 py-2 min-h-11 rounded-md text-[13px] md:text-sm leading-none font-anton transition-all uppercase tracking-wide ${
+                      isActive
+                        ? theme === "classic-light"
+                          ? "bg-white text-slate-950 shadow-sm font-semibold"
+                          : "bg-[#171a1c] text-[#ffd84d] shadow-sm font-semibold"
+                        : theme === "classic-light"
+                          ? "text-slate-700 hover:bg-white hover:text-slate-950"
+                          : "text-slate-100 hover:bg-white/10 hover:text-white"
+                    } ${
+                      hasLiveAttention
+                        ? theme === "classic-light"
+                          ? "ring-1 ring-[#009c3b]/25 shadow-[0_0_0_1px_rgba(0,156,59,0.08),0_0_18px_rgba(0,156,59,0.18)]"
+                          : "ring-1 ring-[#00e476]/25 shadow-[0_0_0_1px_rgba(0,228,118,0.1),0_0_18px_rgba(0,228,118,0.2)]"
+                        : ""
+                    }`}
+                  >
+                    <span className="inline-flex items-center gap-2">
+                      {hasLiveAttention && (
+                        <span className="relative flex h-2.5 w-2.5" id="nav-live-indicator">
+                          <span
+                            className={`absolute inline-flex h-full w-full animate-ping rounded-full opacity-75 ${
+                              theme === "classic-light" ? "bg-[#009c3b]" : "bg-[#00e476]"
+                            }`}
+                          ></span>
+                          <span
+                            className={`relative inline-flex h-2.5 w-2.5 rounded-full ${
+                              theme === "classic-light" ? "bg-[#009c3b]" : "bg-[#00e476]"
+                            }`}
+                          ></span>
+                        </span>
+                      )}
+                      <span className={hasLiveAttention ? "animate-pulse" : ""}>{item.label}</span>
+                    </span>
+                  </button>
+                );
+              })()
             ))}
           </nav>
 
