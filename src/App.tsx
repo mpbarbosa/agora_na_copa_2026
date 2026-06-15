@@ -8,6 +8,7 @@ import { StandingsView } from "./components/StandingsView";
 import { VenueMapView } from "./components/VenueMapView";
 import { NewsView } from "./components/NewsView";
 import { BracketView } from "./components/BracketView";
+import { FanZoneView } from "./components/FanZoneView";
 import { NAV_ITEMS } from "./navigation";
 import { Sun, Moon } from "lucide-react";
 
@@ -133,6 +134,8 @@ export default function App() {
           <NewsView theme={theme} />
         ) : activeNavItem.status === "live" && activeNavItem.id === "chaveamento" ? (
           <BracketView theme={theme} />
+        ) : activeNavItem.status === "live" && activeNavItem.id === "fanzone" ? (
+          <FanZoneView theme={theme} />
         ) : (
           <ComingSoonView theme={theme} item={activeNavItem} />
         )}

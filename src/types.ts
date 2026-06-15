@@ -161,3 +161,12 @@ export interface NewsArticle {
   date: string;
   imageUrl?: string;
 }
+
+export interface TriviaQuestion {
+  id: string;
+  category: string;
+  question: string;
+  options: string[];
+  correctOptionIndex: number;
+  explanation: string;
+}

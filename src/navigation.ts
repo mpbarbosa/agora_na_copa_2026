@@ -41,7 +41,7 @@ export const NAV_ITEMS: NavItem[] = [
   {
     id: "fanzone",
     label: "Fan Zone",
-    status: "comingSoon",
-    description: "Quiz, palpites com IA e minijogos para o torcedor.",
+    status: "live",
+    description: "Quiz e minijogos para o torcedor acompanhar a Copa em clima de resenha.",
   },
 ];

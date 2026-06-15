@@ -28,7 +28,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
-PREVIEW_PORT=9011
+PREVIEW_PORT=""
 PREVIEW_LOG="/tmp/agora-na-copa-preflight.log"
 INSTALL_LOG="/tmp/agora-na-copa-preflight-install.log"
 BUILD_LOG="/tmp/agora-na-copa-preflight-build.log"
@@ -46,8 +46,12 @@ trap cleanup EXIT
 
 cd "$PROJECT_ROOT"
 
+PREVIEW_PORT="$(node -e "const net = require('node:net'); const server = net.createServer(); server.listen(0, '127.0.0.1', () => { const address = server.address(); if (!address || typeof address === 'string') process.exit(1); process.stdout.write(String(address.port)); server.close(); });")"
+
 echo "🚀 Production Deployment Pre-flight Checklist"
 echo "=============================================="
+echo ""
+echo "Using preview port: $PREVIEW_PORT"
 echo ""
 
 echo "✓ Checking Node.js version..."
@@ -126,7 +130,7 @@ FIRST_JS_ROUTE="/${FIRST_JS_ASSET#dist/}"
 echo ""
 echo "✓ Testing production server locally..."
 echo "  Starting production server on port $PREVIEW_PORT..."
-PORT="$PREVIEW_PORT" NODE_ENV=production npm start > "$PREVIEW_LOG" 2>&1 &
+PORT="$PREVIEW_PORT" STRICT_PORT=true NODE_ENV=production npm start > "$PREVIEW_LOG" 2>&1 &
 PREVIEW_PID=$!
 
 sleep 3
@@ -151,6 +155,14 @@ if curl -fsSI "http://localhost:$PREVIEW_PORT$FIRST_JS_ROUTE" >/dev/null; then
 else
     echo "    ❌ Built JS asset not accessible"
     echo "    Route tested: $FIRST_JS_ROUTE"
+    echo "    See log: $PREVIEW_LOG"
+    exit 1
+fi
+
+if curl -fsS "http://localhost:$PREVIEW_PORT/api/questions" | node -e "const fs=require('fs'); const data=JSON.parse(fs.readFileSync(0,'utf8')); if (!Array.isArray(data) || data.length === 0) process.exit(1);" >/dev/null; then
+    echo "    ✅ Trivia API returns a non-empty question set"
+else
+    echo "    ❌ Trivia API returned no questions"
     echo "    See log: $PREVIEW_LOG"
     exit 1
 fi

@@ -9,6 +9,7 @@ import {
   findCalendarMatch as findCalendarMatchCore,
   normalizeBroadcasters as normalizeBroadcastersCore,
 } from "./fifa-sync-core";
+import { triviaQuestions } from "./src/data/questions";
 import matchesData from "./src/matches.json";
 import type {
   Broadcaster,
@@ -17,6 +18,7 @@ import type {
   MatchOverlayEntry,
   MatchStateEntry,
   MatchStatus,
+  TriviaQuestion,
 } from "./src/types";
 
 dotenv.config();
@@ -122,6 +124,8 @@ interface MatchOverlaysResponse {
   refreshAfterMs: number;
   overlays: Record<string, MatchOverlayEntry>;
 }
+
+const TRIVIA_QUESTIONS = triviaQuestions as TriviaQuestion[];
 
 interface FifaSyncServiceDiagnostics {
   lastAttemptAt: string | null;
@@ -979,6 +983,11 @@ app.get("/api/fifa-sync-status", (_req, res) => {
       activeLiveMatchIds: fifaSyncDiagnostics.matchStates.activeLiveMatchIds,
     },
   });
+});
+
+app.get("/api/questions", (_req, res) => {
+  res.set("Cache-Control", "no-store");
+  res.json(TRIVIA_QUESTIONS);
 });
 
 // Serve frontend build files in production or proxy to Vite in development
