@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import {
+  buildTeamLineupEntry,
   buildMatchStateEntry,
   findCalendarMatch,
   getMatchStatusFromFifa,
@@ -9,8 +10,9 @@ import {
   SPORTV_URL,
   type FifaCalendarMatch,
   type FifaLiveMatch,
+  type FifaLiveTeam,
 } from "../fifa-sync-core";
-import type { Match } from "../src/types";
+import { Position, type Match, type Player } from "../src/types";
 
 const createMatch = (overrides: Partial<Match> = {}): Match => ({
   id: "ger-cuw-2026",
@@ -42,6 +44,17 @@ const createMatch = (overrides: Partial<Match> = {}): Match => ({
   countdownTargetSeconds: 0,
   broadcasters: [],
   ...overrides,
+});
+
+const createPlayer = (overrides: Partial<Player> & Pick<Player, "id" | "name" | "number">): Player => ({
+  id: overrides.id,
+  name: overrides.name,
+  number: overrides.number,
+  position: overrides.position ?? Position.MF,
+  x: overrides.x ?? 50,
+  y: overrides.y ?? 50,
+  club: overrides.club,
+  pictureUrl: overrides.pictureUrl,
 });
 
 test("getMatchStatusFromFifa maps FIFA status codes into local match statuses", () => {
@@ -291,4 +304,127 @@ test("normalizeBroadcasters normalizes sportv URLs and deduplicates repeated cha
   assert.equal(broadcasters[0]?.link, SPORTV_URL);
   assert.equal(broadcasters[0]?.type, "TV PAGA");
   assert.equal(broadcasters[1]?.type, "YOUTUBE");
+});
+
+test("buildTeamLineupEntry matches fallback players by name before shirt number only", () => {
+  const fallbackLineup = [
+    createPlayer({
+      id: "bel-10",
+      name: "Romelu Lukaku",
+      number: 10,
+    }),
+    createPlayer({
+      id: "bel-11",
+      name: "Leandro Trossard",
+      number: 11,
+    }),
+    createPlayer({
+      id: "bel-22",
+      name: "Jérémy Doku",
+      number: 22,
+    }),
+    createPlayer({
+      id: "bel-1",
+      name: "Koen Casteels",
+      number: 1,
+    }),
+    createPlayer({
+      id: "bel-4",
+      name: "Wout Faes",
+      number: 4,
+    }),
+  ];
+
+  const fifaTeam: FifaLiveTeam = {
+    Tactics: "4-2-3-1",
+    Players: [
+      {
+        IdPlayer: "358112",
+        PlayerName: [{ Locale: "en", Description: "Romelu LUKAKU" }],
+        ShortName: [{ Locale: "en", Description: "LUKAKU" }],
+        ShirtNumber: 9,
+        Position: 3,
+        PlayerPicture: { PictureUrl: "https://digitalhub.fifa.com/LUKAKU-Romelu_358112" },
+      },
+      {
+        IdPlayer: "448355",
+        PlayerName: [{ Locale: "en", Description: "Leandro TROSSARD" }],
+        ShortName: [{ Locale: "en", Description: "TROSSARD" }],
+        ShirtNumber: 10,
+        Position: 2,
+        PlayerPicture: { PictureUrl: "https://digitalhub.fifa.com/TROSSARD-Leandro_448355" },
+      },
+      {
+        IdPlayer: "448341",
+        PlayerName: [{ Locale: "en", Description: "Jeremy DOKU" }],
+        ShortName: [{ Locale: "en", Description: "DOKU" }],
+        ShirtNumber: 11,
+        Position: 3,
+        PlayerPicture: { PictureUrl: "https://digitalhub.fifa.com/DOKU-Jeremy_448341" },
+      },
+      {
+        IdPlayer: "courtois",
+        PlayerName: [{ Locale: "en", Description: "Thibaut COURTOIS" }],
+        ShortName: [{ Locale: "en", Description: "COURTOIS" }],
+        ShirtNumber: 1,
+        Position: 0,
+        PlayerPicture: { PictureUrl: "https://digitalhub.fifa.com/COURTOIS-Thibaut" },
+      },
+      {
+        IdPlayer: "mechele",
+        PlayerName: [{ Locale: "en", Description: "Brandon MECHELE" }],
+        ShortName: [{ Locale: "en", Description: "MECHELE" }],
+        ShirtNumber: 4,
+        Position: 1,
+        PlayerPicture: { PictureUrl: "https://digitalhub.fifa.com/MECHELE-Brandon" },
+      },
+    ],
+  };
+
+  const entry = buildTeamLineupEntry(
+    fallbackLineup,
+    { IdMatch: "400021478", Date: "2026-06-15T20:00:00Z" },
+    fifaTeam,
+  );
+
+  assert.equal(entry.source, "fallback");
+
+  const lukaku = entry.players.find((player) => player.name === "Romelu Lukaku");
+  const trossard = entry.players.find((player) => player.name === "Leandro Trossard");
+  const doku = entry.players.find((player) => player.name === "Jérémy Doku");
+  const casteels = entry.players.find((player) => player.name === "Koen Casteels");
+  const faes = entry.players.find((player) => player.name === "Wout Faes");
+
+  assert.deepEqual(
+    {
+      number: lukaku?.number,
+      pictureUrl: lukaku?.pictureUrl,
+    },
+    {
+      number: 9,
+      pictureUrl: "https://digitalhub.fifa.com/LUKAKU-Romelu_358112",
+    },
+  );
+  assert.deepEqual(
+    {
+      number: trossard?.number,
+      pictureUrl: trossard?.pictureUrl,
+    },
+    {
+      number: 10,
+      pictureUrl: "https://digitalhub.fifa.com/TROSSARD-Leandro_448355",
+    },
+  );
+  assert.deepEqual(
+    {
+      number: doku?.number,
+      pictureUrl: doku?.pictureUrl,
+    },
+    {
+      number: 11,
+      pictureUrl: "https://digitalhub.fifa.com/DOKU-Jeremy_448341",
+    },
+  );
+  assert.equal(casteels?.pictureUrl, undefined);
+  assert.equal(faes?.pictureUrl, undefined);
 });

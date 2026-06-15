@@ -166,6 +166,121 @@ async function mockTeamView(page: Page) {
   });
 }
 
+async function mockBelgiumFallbackTeamView(page: Page) {
+  await page.route("**/api/team-view/BEL", async (route) => {
+    await route.fulfill({
+      contentType: "application/json",
+      body: JSON.stringify({
+        updatedAt: "2026-06-15T19:00:00.000Z",
+        refreshAfterMs: 60000,
+        source: "fallback",
+        note: "Painel da Bélgica com enriquecimento FIFA sobre dados locais.",
+        team: {
+          name: "BÉLGICA",
+          code: "BEL",
+          flagSvg: "belgium",
+          primaryColor: "#000000",
+          secondaryColor: "#fae042",
+          group: "Grupo H",
+        },
+        standings: {
+          rank: 2,
+          groupSize: 4,
+          row: {
+            id: "bel",
+            name: "BÉLGICA",
+            code: "BEL",
+            flagSvg: "belgium",
+            primaryColor: "#000000",
+            secondaryColor: "#fae042",
+            group: "Grupo H",
+            points: 3,
+            played: 1,
+            won: 1,
+            drawn: 0,
+            lost: 0,
+            goalsFor: 2,
+            goalsAgainst: 1,
+            goalDifference: 1,
+            dataSource: "result",
+          },
+        },
+        currentMatch: null,
+        nextMatch: null,
+        lastMatch: null,
+        lineup: {
+          players: [
+            {
+              id: "bel-1",
+              name: "Koen Casteels",
+              number: 1,
+              position: "GK",
+              x: 50,
+              y: 90,
+            },
+            {
+              id: "bel-4",
+              name: "Wout Faes",
+              number: 4,
+              position: "DF",
+              x: 35,
+              y: 72,
+            },
+            {
+              id: "bel-11",
+              name: "Jérémy Doku",
+              number: 11,
+              position: "FW",
+              x: 24,
+              y: 26,
+              pictureUrl: "https://digitalhub.fifa.com/transform/df41be47-900d-41fe-90eb-b493f7609869/DOKU-Jeremy_448341",
+            },
+            {
+              id: "bel-9",
+              name: "Romelu Lukaku",
+              number: 9,
+              position: "FW",
+              x: 50,
+              y: 18,
+              pictureUrl: "https://digitalhub.fifa.com/transform/302b7fb7-6964-4a52-8db4-9c12778b80fa/LUKAKU-Romelu_358112",
+            },
+            {
+              id: "bel-10",
+              name: "Leandro Trossard",
+              number: 10,
+              position: "MF",
+              x: 65,
+              y: 30,
+              pictureUrl: "https://digitalhub.fifa.com/transform/78476568-5abb-4047-b6c0-fd9651e0f39d/TROSSARD-Leandro_448355",
+            },
+          ],
+          source: "fallback",
+          note: "Escalação oficial da FIFA ainda não divulgada; exibindo dados locais.",
+          fifaMatchId: "400021478",
+          updatedAt: "2026-06-15T19:00:00.000Z",
+        },
+        leaders: {
+          topScorers: [],
+          yellowCards: [],
+          redCards: [],
+          teamSummary: {
+            id: "bel",
+            teamCode: "BEL",
+            teamName: "BÉLGICA",
+            teamFlagSvg: "belgium",
+            matchesPlayed: 1,
+            wins: 1,
+            goalsFor: 2,
+            goalsAgainst: 1,
+            cleanSheets: 0,
+          },
+        },
+        broadcastGuide: null,
+      }),
+    });
+  });
+}
+
 test.describe("Team view", () => {
   test("opens the full team page from a match flag click", async ({ page }) => {
     await mockTeamView(page);
@@ -222,5 +337,56 @@ test.describe("Team view", () => {
     await expect(page.locator("#team-lineup-view")).toBeVisible();
     await expect(page.locator("#team-view-standings-card")).toBeVisible();
     await expect(page.locator("#team-view-performance-card")).toBeVisible();
+  });
+
+  test("renders corrected FIFA-enriched Belgium fallback lineup data in the team view", async ({
+    page,
+  }) => {
+    await mockBelgiumFallbackTeamView(page);
+
+    await page.goto("/");
+    await page.click("#btn-nav-grupos");
+    await page.click("#standings-row-bel button[aria-label^='Ver escalação']");
+
+    await expect(page.locator("#team-lineup-view")).toBeVisible();
+    await expect(page.locator("#team-lineup-title")).toContainText("BÉLGICA");
+    await expect(page.locator("#team-lineup-board-card")).toContainText(
+      "Escalação estimada (dados locais)",
+    );
+
+    await expect(page.locator("#squad-player-row-bel-9")).toContainText("9");
+    await expect(page.locator("#squad-player-row-bel-9")).toContainText("Romelu Lukaku");
+    await expect(page.locator("#squad-player-row-bel-10")).toContainText("10");
+    await expect(page.locator("#squad-player-row-bel-10")).toContainText("Leandro Trossard");
+    await expect(page.locator("#squad-player-row-bel-11")).toContainText("11");
+    await expect(page.locator("#squad-player-row-bel-11")).toContainText("Jérémy Doku");
+
+    await expect(page.locator("#squad-player-row-bel-9 img")).toHaveAttribute(
+      "src",
+      /LUKAKU-Romelu_358112/,
+    );
+    await expect(page.locator("#squad-player-row-bel-10 img")).toHaveAttribute(
+      "src",
+      /TROSSARD-Leandro_448355/,
+    );
+    await expect(page.locator("#squad-player-row-bel-11 img")).toHaveAttribute(
+      "src",
+      /DOKU-Jeremy_448341/,
+    );
+
+    await expect(page.locator("#squad-player-row-bel-1 img")).toHaveCount(0);
+    await expect(page.locator("#squad-player-row-bel-4 img")).toHaveCount(0);
+
+    await page.click("#squad-player-row-bel-9");
+    await expect(page.locator("#selected-player-info")).toContainText("Romelu Lukaku");
+    await expect(page.locator("#player-meta-grid")).toContainText("Atacante");
+    await expect(page.locator("#btn-expand-player-picture")).toBeVisible();
+
+    await page.click("#btn-expand-player-picture");
+    await expect(page.locator("#player-picture-overlay")).toBeVisible();
+    await expect(page.locator("#player-picture-overlay img")).toHaveAttribute(
+      "src",
+      /LUKAKU-Romelu_358112/,
+    );
   });
 });

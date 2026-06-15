@@ -5,6 +5,7 @@ import { NAV_ITEMS } from "../../src/navigation";
 const NAV_VIEW_IDS: Record<string, string> = {
   partidas: "#match-detail-view",
   grupos: "#standings-view",
+  selecoes: "#teams-view",
   lideres: "#tournament-leaders-view",
   chaveamento: "#bracket-view",
   estadios: "#venue-map-view",

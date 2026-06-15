@@ -4,6 +4,7 @@ import matchesData from "./matches.json";
 import type { Match, TeamRef } from "./types";
 import { MatchDetailView } from "./components/MatchDetailView";
 import { StandingsView } from "./components/StandingsView";
+import { TeamsView } from "./components/TeamsView";
 import { TournamentLeadersView } from "./components/TournamentLeadersView";
 import { VenueMapView } from "./components/VenueMapView";
 import { NewsView } from "./components/NewsView";
@@ -131,6 +132,8 @@ export default function App() {
         );
       case "grupos":
         return <StandingsView matches={matches} theme={theme} onSelectTeamLineup={setLineupTeam} />;
+      case "selecoes":
+        return <TeamsView matches={matches} theme={theme} onSelectTeamLineup={setLineupTeam} />;
       case "lideres":
         return <TournamentLeadersView theme={theme} onSelectTeamLineup={setLineupTeam} />;
       case "estadios":
