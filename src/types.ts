@@ -5,6 +5,15 @@ export enum Position {
   FW = "FW"
 }
 
+export interface PlayerSocials {
+  instagram?: string;
+  x?: string;
+  tiktok?: string;
+  youtube?: string;
+  facebook?: string;
+  site?: string;
+}
+
 export interface Player {
   id: string;
   name: string;
@@ -14,6 +23,7 @@ export interface Player {
   y: number; // 0 to 100 on visual pitch
   club?: string;
   pictureUrl?: string;
+  socials?: PlayerSocials;
 }
 
 export interface Broadcaster {

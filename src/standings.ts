@@ -27,14 +27,58 @@ function addResult(tally: MatchTally, scored: number, conceded: number): void {
   else tally.lost += 1;
 }
 
-function countsForStandings(match: Match) {
-  const teamASeed = seedStandings.find((row) => row.code === match.teamA.code);
-  const teamBSeed = seedStandings.find((row) => row.code === match.teamB.code);
+function createSeedRowFromMatchTeam(team: Match["teamA"]): StandingsRow {
+  return {
+    id: team.code.toLowerCase(),
+    name: team.name,
+    code: team.code,
+    flagSvg: team.flagSvg,
+    primaryColor: team.primaryColor,
+    secondaryColor: team.secondaryColor,
+    group: team.group,
+    points: 0,
+    played: 0,
+    won: 0,
+    drawn: 0,
+    lost: 0,
+    goalsFor: 0,
+    goalsAgainst: 0,
+    goalDifference: 0,
+    dataSource: "seed",
+  };
+}
+
+export function getCanonicalSeedStandings(
+  matches: Match[] = matchesData as Match[],
+): StandingsRow[] {
+  const canonicalRows = new Map(
+    seedStandings.map((row) => [
+      row.code,
+      {
+        ...row,
+      } satisfies StandingsRow,
+    ]),
+  );
+
+  for (const match of matches) {
+    for (const team of [match.teamA, match.teamB]) {
+      if (!canonicalRows.has(team.code)) {
+        canonicalRows.set(team.code, createSeedRowFromMatchTeam(team));
+      }
+    }
+  }
+
+  return Array.from(canonicalRows.values());
+}
+
+function countsForStandings(match: Match, groupByCode: Map<string, string>) {
+  const teamAGroup = groupByCode.get(match.teamA.code);
+  const teamBGroup = groupByCode.get(match.teamB.code);
 
   return (
-    teamASeed &&
-    teamBSeed &&
-    teamASeed.group === teamBSeed.group &&
+    Boolean(teamAGroup) &&
+    Boolean(teamBGroup) &&
+    teamAGroup === teamBGroup &&
     match.stageName === "Group Stage" &&
     (match.status === "LIVE" || match.status === "FINISHED") &&
     match.score
@@ -45,10 +89,14 @@ function countsForStandings(match: Match) {
 // matches in matches.json (matched by team code), so the Grupos view updates
 // as live scores arrive without needing to hand-edit the seed data.
 export function computeStandings(matches: Match[] = matchesData as Match[]): StandingsRow[] {
+  const canonicalSeedStandings = getCanonicalSeedStandings(matches);
+  const groupByCode = new Map(
+    canonicalSeedStandings.map((row) => [row.code, row.group]),
+  );
   const tallies = new Map<string, MatchTally>();
 
   for (const match of matches) {
-    if (!countsForStandings(match)) continue;
+    if (!countsForStandings(match, groupByCode)) continue;
 
     const tallyA = tallies.get(match.teamA.code) ?? emptyTally();
     const tallyB = tallies.get(match.teamB.code) ?? emptyTally();
@@ -58,7 +106,7 @@ export function computeStandings(matches: Match[] = matchesData as Match[]): Sta
     tallies.set(match.teamB.code, tallyB);
   }
 
-  return seedStandings.map((row) => {
+  return canonicalSeedStandings.map((row) => {
     const tally = tallies.get(row.code);
     if (!tally) return row;
 

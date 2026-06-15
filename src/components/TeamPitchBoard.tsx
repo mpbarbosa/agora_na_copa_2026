@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Player, Position } from "../types";
+import { Player, Position, type PlayerSocials } from "../types";
 
 interface TeamPitchBoardProps {
   team: {
@@ -31,6 +31,20 @@ const isSamePlayer = (candidate: Player, target: Player) =>
   (candidate.number === target.number &&
     normalizePlayerName(candidate.name) === normalizePlayerName(target.name)) ||
   candidate.number === target.number;
+
+const SOCIAL_PLATFORM_LABELS: Record<keyof PlayerSocials, string> = {
+  instagram: "Instagram",
+  x: "X",
+  tiktok: "TikTok",
+  youtube: "YouTube",
+  facebook: "Facebook",
+  site: "Site oficial",
+};
+
+const getPlayerSocialEntries = (player: Player) =>
+  (
+    Object.entries(player.socials ?? {}) as Array<[keyof PlayerSocials, string | undefined]>
+  ).filter((entry): entry is [keyof PlayerSocials, string] => Boolean(entry[1]));
 
 interface PlayerPortraitProps {
   player: Player;
@@ -91,6 +105,7 @@ const PlayerPortrait: React.FC<PlayerPortraitProps> = ({
 export const TeamPitchBoard: React.FC<TeamPitchBoardProps> = ({ team, opponentName, mirror = false }) => {
   const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
   const [expandedPlayer, setExpandedPlayer] = useState<Player | null>(null);
+  const selectedPlayerSocials = selectedPlayer ? getPlayerSocialEntries(selectedPlayer) : [];
 
   useEffect(() => {
     setSelectedPlayer((current) => {
@@ -270,6 +285,28 @@ export const TeamPitchBoard: React.FC<TeamPitchBoardProps> = ({ team, opponentNa
                     <span className="font-semibold text-white">Crucial • Titular Confirmado</span>
                   </div>
                 </div>
+
+                {selectedPlayerSocials.length > 0 && (
+                  <div className="mt-4" id="player-social-links">
+                    <p className="text-white/65 font-mono text-[10px] uppercase tracking-wider">
+                      Redes oficiais
+                    </p>
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      {selectedPlayerSocials.map(([platform, url]) => (
+                        <a
+                          key={platform}
+                          id={`player-social-link-${platform}`}
+                          href={url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 font-mono text-[10px] font-bold uppercase tracking-wider text-white transition hover:border-[#ffd700]/40 hover:text-[#ffd700]"
+                        >
+                          {SOCIAL_PLATFORM_LABELS[platform]}
+                        </a>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
                 {opponentName && (
                   <div className="mt-4 p-3 bg-white/5 rounded-lg border border-white/5" id="pundit-quote">

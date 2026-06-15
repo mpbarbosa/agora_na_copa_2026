@@ -49,6 +49,12 @@ import {
   IranFlag,
   QatarFlag,
   UzbekistanFlag,
+  SwitzerlandFlag,
+  IraqFlag,
+  NorwayFlag,
+  AustriaFlag,
+  JordanFlag,
+  DrCongoFlag,
 } from "./flags";
 
 interface FlagIconProps {
@@ -107,6 +113,12 @@ const FLAGS: Record<string, React.FC<{ className?: string }>> = {
   iran: IranFlag,
   qatar: QatarFlag,
   uzbekistan: UzbekistanFlag,
+  switzerland: SwitzerlandFlag,
+  iraq: IraqFlag,
+  norway: NorwayFlag,
+  austria: AustriaFlag,
+  jordan: JordanFlag,
+  drcongo: DrCongoFlag,
 };
 
 export const FlagIcon: React.FC<FlagIconProps> = ({ flag, className = "w-16 h-12", onClick }) => {

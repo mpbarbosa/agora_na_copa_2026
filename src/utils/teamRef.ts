@@ -1,8 +1,8 @@
-import { standings } from "../data/tournament";
+import { getCanonicalSeedStandings } from "../standings";
 import type { TeamRef } from "../types";
 
 const TEAM_REFS_BY_CODE = new Map(
-  standings.map((team) => [
+  getCanonicalSeedStandings().map((team) => [
     team.code,
     {
       name: team.name,

@@ -5,6 +5,27 @@ const GROUP_IDS = Array.from({ length: 12 }, (_, index) => {
   return `grupo-${letter}`;
 });
 
+type GroupExpectation = {
+  group: string;
+  id: string;
+  teamCodes: string[];
+};
+
+const GROUP_EXPECTATIONS: GroupExpectation[] = [
+  { group: "Grupo A", id: "standings-group-grupo-a", teamCodes: ["CZE", "KOR", "MEX", "RSA"] },
+  { group: "Grupo B", id: "standings-group-grupo-b", teamCodes: ["BIH", "CAN", "QAT", "SUI"] },
+  { group: "Grupo C", id: "standings-group-grupo-c", teamCodes: ["BRA", "HAI", "MAR", "SCO"] },
+  { group: "Grupo D", id: "standings-group-grupo-d", teamCodes: ["AUS", "PAR", "TUR", "USA"] },
+  { group: "Grupo E", id: "standings-group-grupo-e", teamCodes: ["CIV", "CUW", "ECU", "GER"] },
+  { group: "Grupo F", id: "standings-group-grupo-f", teamCodes: ["JPN", "NED", "SWE", "TUN"] },
+  { group: "Grupo G", id: "standings-group-grupo-g", teamCodes: ["BEL", "EGY", "IRN", "NZL"] },
+  { group: "Grupo H", id: "standings-group-grupo-h", teamCodes: ["CPV", "ESP", "KSA", "URU"] },
+  { group: "Grupo I", id: "standings-group-grupo-i", teamCodes: ["FRA", "IRQ", "NOR", "SEN"] },
+  { group: "Grupo J", id: "standings-group-grupo-j", teamCodes: ["ALG", "ARG", "AUT", "JOR"] },
+  { group: "Grupo K", id: "standings-group-grupo-k", teamCodes: ["COD", "COL", "POR", "UZB"] },
+  { group: "Grupo L", id: "standings-group-grupo-l", teamCodes: ["CRO", "ENG", "GHA", "PAN"] },
+];
+
 test.describe("Standings view (Grupos)", () => {
   test("refreshes the group table after a match update", async ({ page }) => {
     const consoleErrors: string[] = [];
@@ -103,13 +124,39 @@ test.describe("Standings view (Grupos)", () => {
 
     for (const groupId of GROUP_IDS) {
       const card = page.locator(`#standings-group-${groupId}`);
+      const expectation = GROUP_EXPECTATIONS.find(
+        (groupExpectation) => groupExpectation.id === `standings-group-${groupId}`,
+      );
 
       await expect(card).toBeVisible();
       await expect(card.locator("thead th")).toHaveCount(9);
-      await expect(card.locator("tbody tr")).toHaveCount(4);
+      await expect(card.locator("tbody tr")).toHaveCount(expectation?.teamCodes.length ?? 0);
     }
 
     expect(consoleErrors).toEqual([]);
+  });
+
+  test("renders the expected team set for every group", async ({ page }) => {
+    await page.goto("/");
+    await page.click("#btn-nav-grupos");
+
+    await expect(page.locator("#standings-view")).toBeVisible();
+
+    for (const expectation of GROUP_EXPECTATIONS) {
+      const card = page.locator(`#${expectation.id}`);
+
+      await expect(card).toBeVisible();
+      await expect(card.locator("h3")).toHaveText(expectation.group);
+
+      const teamCells = card.locator('tbody tr td:first-child span[title]');
+      await expect(teamCells).toHaveCount(expectation.teamCodes.length);
+
+      const renderedCodes = await teamCells.evaluateAll((nodes) =>
+        nodes.map((node) => node.textContent?.trim() || ""),
+      );
+
+      expect(renderedCodes.slice().sort()).toEqual(expectation.teamCodes);
+    }
   });
 
   test("renders correctly in dark theme", async ({ page }) => {

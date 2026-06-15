@@ -110,6 +110,10 @@ async function mockTeamView(page: Page) {
               y: 18,
               club: "Clube Teste",
               pictureUrl: "https://images.fifa.test/fw.png",
+              socials: {
+                instagram: "https://instagram.com/atacanteteste",
+                x: "https://x.com/atacanteteste",
+              },
             },
           ],
           source: "fifa",
@@ -337,6 +341,28 @@ test.describe("Team view", () => {
     await expect(page.locator("#team-lineup-view")).toBeVisible();
     await expect(page.locator("#team-view-standings-card")).toBeVisible();
     await expect(page.locator("#team-view-performance-card")).toBeVisible();
+  });
+
+  test("shows player social links in the player card when they are available", async ({
+    page,
+  }) => {
+    await mockTeamView(page);
+
+    await page.goto("/");
+    await page.click("#team-a-display button[aria-label^='Ver escalação']");
+    await expect(page.locator("#team-lineup-view")).toBeVisible();
+    await page.locator('[id^="squad-player-row-"]').filter({ hasText: "Atacante Teste" }).click();
+
+    await expect(page.locator("#selected-player-info")).toContainText("Atacante Teste");
+    await expect(page.locator("#player-social-links")).toBeVisible();
+    await expect(page.locator("#player-social-link-instagram")).toHaveAttribute(
+      "href",
+      "https://instagram.com/atacanteteste",
+    );
+    await expect(page.locator("#player-social-link-x")).toHaveAttribute(
+      "href",
+      "https://x.com/atacanteteste",
+    );
   });
 
   test("renders corrected FIFA-enriched Belgium fallback lineup data in the team view", async ({

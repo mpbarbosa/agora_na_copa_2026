@@ -54,14 +54,16 @@ export const standings: StandingsRow[] = [
   }),
 
   // Grupo B
+  team("sui", "SUÍÇA", "SUI", "switzerland", "#d52b1e", "#ffffff", "Grupo B", {
+    points: 1, played: 1, won: 0, drawn: 1, lost: 0, goalsFor: 1, goalsAgainst: 1, goalDifference: 0,
+  }),
   team("can", "CANADÁ", "CAN", "canada", "#ff0000", "#ffffff", "Grupo B", {
     points: 1, played: 1, won: 0, drawn: 1, lost: 0, goalsFor: 1, goalsAgainst: 1, goalDifference: 0,
   }),
+  team("qat", "CATAR", "QAT", "qatar", "#8d1b3d", "#ffffff", "Grupo B", null),
   team("bih", "BÓSNIA E HERZEGOVINA", "BIH", "bosnia", "#002395", "#fecb00", "Grupo B", {
     points: 1, played: 1, won: 0, drawn: 1, lost: 0, goalsFor: 1, goalsAgainst: 1, goalDifference: 0,
   }),
-  team("cro", "CROÁCIA", "CRO", "croatia", "#ff0000", "#ffffff", "Grupo B", null),
-  team("gha", "GANA", "GHA", "ghana", "#006b3f", "#fcd116", "Grupo B", null),
 
   // Grupo C
   team("bra", "BRASIL", "BRA", "brazil", "#009c3b", "#ffdf00", "Grupo C", {
@@ -104,40 +106,40 @@ export const standings: StandingsRow[] = [
   team("tun", "TUNÍSIA", "TUN", "tunisia", "#e70013", "#ffffff", "Grupo F", null),
 
   // Grupo G
-  team("por", "PORTUGAL", "POR", "portugal", "#006600", "#ff0000", "Grupo G", null),
-  team("col", "COLÔMBIA", "COL", "colombia", "#fcd116", "#003893", "Grupo G", null),
-  team("nga", "NIGÉRIA", "NGA", "nigeria", "#008751", "#ffffff", "Grupo G", null),
-  team("crc", "COSTA RICA", "CRC", "costarica", "#002b7f", "#ce1126", "Grupo G", null),
+  team("bel", "BÉLGICA", "BEL", "belgium", "#000000", "#fae042", "Grupo G", null),
+  team("egy", "EGITO", "EGY", "egypt", "#ce1126", "#000000", "Grupo G", null),
+  team("irn", "IRÃ", "IRN", "iran", "#239f40", "#da0000", "Grupo G", null),
+  team("nzl", "NOVA ZELÂNDIA", "NZL", "newzealand", "#00247d", "#c8102e", "Grupo G", null),
 
   // Grupo H
   team("esp", "ESPANHA", "ESP", "spain", "#c60b1e", "#ffc400", "Grupo H", null),
-  team("ita", "ITÁLIA", "ITA", "italy", "#009246", "#ce2b37", "Grupo H", null),
-  team("egy", "EGITO", "EGY", "egypt", "#ce1126", "#000000", "Grupo H", null),
-  team("nzl", "NOVA ZELÂNDIA", "NZL", "newzealand", "#00247d", "#c8102e", "Grupo H", null),
+  team("cpv", "CABO VERDE", "CPV", "capeverde", "#0057b8", "#cf2027", "Grupo H", null),
+  team("ksa", "ARÁBIA SAUDITA", "KSA", "saudiarabia", "#006c35", "#ffffff", "Grupo H", null),
+  team("uru", "URUGUAI", "URU", "uruguay", "#0038a8", "#fcd116", "Grupo H", null),
 
   // Grupo I
   team("fra", "FRANÇA", "FRA", "france", "#002395", "#ed2939", "Grupo I", null),
   team("sen", "SENEGAL", "SEN", "senegal", "#00853f", "#fdef42", "Grupo I", null),
-  team("uru", "URUGUAI", "URU", "uruguay", "#0038a8", "#fcd116", "Grupo I", null),
-  team("pan", "PANAMÁ", "PAN", "panama", "#db1730", "#0033a0", "Grupo I", null),
+  team("irq", "IRAQUE", "IRQ", "iraq", "#ce1126", "#000000", "Grupo I", null),
+  team("nor", "NORUEGA", "NOR", "norway", "#ba0c2f", "#00205b", "Grupo I", null),
 
   // Grupo J
   team("arg", "ARGENTINA", "ARG", "argentina", "#74acdf", "#ffffff", "Grupo J", null),
   team("alg", "ARGÉLIA", "ALG", "algeria", "#006233", "#d21034", "Grupo J", null),
-  team("eng", "INGLATERRA", "ENG", "england", "#ce1124", "#ffffff", "Grupo J", null),
-  team("uzb", "UZBEQUISTÃO", "UZB", "uzbekistan", "#0099b5", "#1eb53a", "Grupo J", null),
+  team("aut", "ÁUSTRIA", "AUT", "austria", "#ed2939", "#ffffff", "Grupo J", null),
+  team("jor", "JORDÂNIA", "JOR", "jordan", "#007a3d", "#ce1126", "Grupo J", null),
 
   // Grupo K
-  team("bel", "BÉLGICA", "BEL", "belgium", "#000000", "#fae042", "Grupo K", null),
-  team("ven", "VENEZUELA", "VEN", "venezuela", "#ffcc00", "#cf142b", "Grupo K", null),
-  team("cmr", "CAMARÕES", "CMR", "cameroon", "#007a5e", "#ce1126", "Grupo K", null),
-  team("ksa", "ARÁBIA SAUDITA", "KSA", "saudiarabia", "#006c35", "#ffffff", "Grupo K", null),
+  team("por", "PORTUGAL", "POR", "portugal", "#006600", "#ff0000", "Grupo K", null),
+  team("cod", "RD CONGO", "COD", "drcongo", "#00a3e0", "#ef3340", "Grupo K", null),
+  team("uzb", "UZBEQUISTÃO", "UZB", "uzbekistan", "#0099b5", "#1eb53a", "Grupo K", null),
+  team("col", "COLÔMBIA", "COL", "colombia", "#fcd116", "#003893", "Grupo K", null),
 
   // Grupo L
-  team("pol", "POLÔNIA", "POL", "poland", "#dc143c", "#ffffff", "Grupo L", null),
-  team("irn", "IRÃ", "IRN", "iran", "#239f40", "#da0000", "Grupo L", null),
-  team("qat", "CATAR", "QAT", "qatar", "#8d1b3d", "#ffffff", "Grupo L", null),
-  team("jam", "JAMAICA", "JAM", "jamaica", "#009b3a", "#fed100", "Grupo L", null),
+  team("eng", "INGLATERRA", "ENG", "england", "#ce1124", "#ffffff", "Grupo L", null),
+  team("cro", "CROÁCIA", "CRO", "croatia", "#ff0000", "#ffffff", "Grupo L", null),
+  team("gha", "GANA", "GHA", "ghana", "#006b3f", "#fcd116", "Grupo L", null),
+  team("pan", "PANAMÁ", "PAN", "panama", "#db1730", "#0033a0", "Grupo L", null),
 ];
 
 export const stadiums: Stadium[] = [
