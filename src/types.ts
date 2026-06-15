@@ -190,3 +190,44 @@ export interface TriviaQuestion {
   correctOptionIndex: number;
   explanation: string;
 }
+
+export interface TournamentPlayerLeader {
+  id: string;
+  name: string;
+  teamCode: string;
+  teamName: string;
+  teamFlagSvg: string;
+  shirtNumber?: number;
+  pictureUrl?: string;
+  goals: number;
+  yellowCards: number;
+  redCards: number;
+}
+
+export interface TournamentTeamLeader {
+  id: string;
+  teamCode: string;
+  teamName: string;
+  teamFlagSvg: string;
+  matchesPlayed: number;
+  wins: number;
+  goalsFor: number;
+  goalsAgainst: number;
+  cleanSheets: number;
+}
+
+export interface TournamentLeadersResponse {
+  updatedAt: string;
+  source: "fifa" | "fallback" | "mixed";
+  note: string;
+  playerLeaders: {
+    topScorers: TournamentPlayerLeader[];
+    yellowCards: TournamentPlayerLeader[];
+    redCards: TournamentPlayerLeader[];
+  };
+  teamLeaders: {
+    bestAttack: TournamentTeamLeader[];
+    bestDefense: TournamentTeamLeader[];
+    cleanSheets: TournamentTeamLeader[];
+  };
+}

@@ -21,6 +21,9 @@ import type {
   MatchOverlayEntry,
   MatchStateEntry,
   MatchStatus,
+  TournamentLeadersResponse,
+  TournamentPlayerLeader,
+  TournamentTeamLeader,
   TriviaQuestion,
 } from "./src/types";
 
@@ -44,8 +47,12 @@ const UPCOMING_SOON_WINDOW_MS = 6 * 60 * 60 * 1000;
 const BACKGROUND_WARM_FAILURE_RETRY_MS = 30 * 1000;
 const CIRCUIT_BREAKER_FAILURE_THRESHOLD = 3;
 const CIRCUIT_BREAKER_OPEN_MS = 60 * 1000;
+const TOURNAMENT_LEADER_LIMIT = 5;
 const APP_MATCHES = matchesData as Match[];
 const APP_MATCHES_BY_ID = new Map(APP_MATCHES.map((match) => [match.id, match]));
+const GOAL_INCIDENT_SUFFIX = " marcou.";
+const YELLOW_CARD_INCIDENT_SUFFIX = " recebeu amarelo.";
+const RED_CARD_INCIDENT_SUFFIX = " foi expulso.";
 
 app.use(express.json());
 
@@ -250,6 +257,258 @@ const getLocalizedDescription = (entries: FifaLocalizedText[] | undefined, langu
     entries[0]?.Description ||
     ""
   );
+};
+
+interface PlayerLeaderMetadata {
+  name: string;
+  shirtNumber?: number;
+  pictureUrl?: string;
+}
+
+const buildPlayerLeaderKey = (teamCode: string, playerName: string) =>
+  `${teamCode}:${normalizeText(playerName)}`;
+
+const parseIncidentPlayerName = (state: MatchStateEntry["incidents"][number]) => {
+  if (state.type === "GOAL" && state.text.endsWith(GOAL_INCIDENT_SUFFIX)) {
+    return state.text.slice(0, -GOAL_INCIDENT_SUFFIX.length).trim();
+  }
+
+  if (state.type === "YELLOW_CARD" && state.text.endsWith(YELLOW_CARD_INCIDENT_SUFFIX)) {
+    return state.text.slice(0, -YELLOW_CARD_INCIDENT_SUFFIX.length).trim();
+  }
+
+  if (state.type === "RED_CARD" && state.text.endsWith(RED_CARD_INCIDENT_SUFFIX)) {
+    return state.text.slice(0, -RED_CARD_INCIDENT_SUFFIX.length).trim();
+  }
+
+  return null;
+};
+
+const upsertPlayerLeaderMetadata = (
+  metadataByPlayerKey: Map<string, PlayerLeaderMetadata>,
+  teamCode: string,
+  player: {
+    name: string;
+    number?: number;
+    pictureUrl?: string;
+  },
+) => {
+  const playerKey = buildPlayerLeaderKey(teamCode, player.name);
+  const current = metadataByPlayerKey.get(playerKey);
+
+  if (!current) {
+    metadataByPlayerKey.set(playerKey, {
+      name: player.name,
+      shirtNumber: player.number,
+      pictureUrl: player.pictureUrl,
+    });
+    return;
+  }
+
+  metadataByPlayerKey.set(playerKey, {
+    name: current.name || player.name,
+    shirtNumber: current.shirtNumber ?? player.number,
+    pictureUrl: current.pictureUrl ?? player.pictureUrl,
+  });
+};
+
+const buildPlayerLeaderMetadataMap = (lineupsPayload: TeamLineupsResponse) => {
+  const metadataByPlayerKey = new Map<string, PlayerLeaderMetadata>();
+
+  APP_MATCHES.forEach((match) => {
+    const lineupEntry = lineupsPayload.lineups[match.id];
+    const teamALineup = lineupEntry?.teamA.players ?? match.teamA.lineup;
+    const teamBLineup = lineupEntry?.teamB.players ?? match.teamB.lineup;
+
+    teamALineup.forEach((player) => {
+      upsertPlayerLeaderMetadata(metadataByPlayerKey, match.teamA.code, player);
+    });
+    teamBLineup.forEach((player) => {
+      upsertPlayerLeaderMetadata(metadataByPlayerKey, match.teamB.code, player);
+    });
+  });
+
+  return metadataByPlayerKey;
+};
+
+const resolveTournamentLeadersSource = (
+  states: Record<string, MatchStateEntry>,
+): TournamentLeadersResponse["source"] => {
+  const sources = new Set(Object.values(states).map((state) => state.source));
+  if (sources.size === 1) {
+    return sources.has("fifa") ? "fifa" : "fallback";
+  }
+
+  return "mixed";
+};
+
+const getTournamentLeadersNote = (source: TournamentLeadersResponse["source"]) => {
+  if (source === "fifa") {
+    return "Ranking calculado a partir de placares e lances oficiais da FIFA.";
+  }
+
+  if (source === "fallback") {
+    return "Ranking calculado a partir do fallback local do aplicativo.";
+  }
+
+  return "Ranking calculado com mix de dados oficiais da FIFA e fallback local.";
+};
+
+const sortPlayerLeaders = (
+  leaders: TournamentPlayerLeader[],
+  metric: keyof Pick<TournamentPlayerLeader, "goals" | "yellowCards" | "redCards">,
+) =>
+  [...leaders]
+    .filter((leader) => leader[metric] > 0)
+    .sort((a, b) => {
+      const metricDiff = b[metric] - a[metric];
+      if (metricDiff !== 0) return metricDiff;
+
+      const nameDiff = a.name.localeCompare(b.name, "pt-BR");
+      if (nameDiff !== 0) return nameDiff;
+
+      return a.teamName.localeCompare(b.teamName, "pt-BR");
+    })
+    .slice(0, TOURNAMENT_LEADER_LIMIT);
+
+const getTournamentLeadersPayload = async (
+  language: string,
+): Promise<TournamentLeadersResponse> => {
+  const [matchStatesPayload, lineupsPayload] = await Promise.all([
+    getMatchStatesPayload(language),
+    getTeamLineupsPayload(language),
+  ]);
+
+  const metadataByPlayerKey = buildPlayerLeaderMetadataMap(lineupsPayload);
+  const playerLeaders = new Map<string, TournamentPlayerLeader>();
+  const teamLeaders = new Map<string, TournamentTeamLeader>();
+
+  APP_MATCHES.forEach((match) => {
+    const state = matchStatesPayload.states[match.id];
+    if (!state) return;
+
+    const teams = [
+      { team: match.teamA, score: state.score?.teamA ?? null, conceded: state.score?.teamB ?? null },
+      { team: match.teamB, score: state.score?.teamB ?? null, conceded: state.score?.teamA ?? null },
+    ];
+
+    teams.forEach(({ team, score, conceded }) => {
+      const current = teamLeaders.get(team.code) ?? {
+        id: team.code.toLowerCase(),
+        teamCode: team.code,
+        teamName: team.name,
+        teamFlagSvg: team.flagSvg,
+        matchesPlayed: 0,
+        wins: 0,
+        goalsFor: 0,
+        goalsAgainst: 0,
+        cleanSheets: 0,
+      };
+
+      if (state.status !== "PRE_GAME" && score !== null && conceded !== null) {
+        current.matchesPlayed += 1;
+        current.goalsFor += score;
+        current.goalsAgainst += conceded;
+        current.wins += score > conceded ? 1 : 0;
+        current.cleanSheets += conceded === 0 ? 1 : 0;
+      }
+
+      teamLeaders.set(team.code, current);
+    });
+
+    (state.incidents || []).forEach((incident) => {
+      if (
+        !incident.team ||
+        (incident.type !== "GOAL" &&
+          incident.type !== "YELLOW_CARD" &&
+          incident.type !== "RED_CARD")
+      ) {
+        return;
+      }
+
+      const playerName = parseIncidentPlayerName(incident);
+      if (!playerName) return;
+
+      const team = incident.team === "A" ? match.teamA : match.teamB;
+      const playerKey = buildPlayerLeaderKey(team.code, playerName);
+      const metadata = metadataByPlayerKey.get(playerKey);
+      const current = playerLeaders.get(playerKey) ?? {
+        id: `${team.code.toLowerCase()}-${normalizeText(playerName).toLowerCase()}`,
+        name: metadata?.name ?? playerName,
+        teamCode: team.code,
+        teamName: team.name,
+        teamFlagSvg: team.flagSvg,
+        shirtNumber: metadata?.shirtNumber,
+        pictureUrl: metadata?.pictureUrl,
+        goals: 0,
+        yellowCards: 0,
+        redCards: 0,
+      };
+
+      if (incident.type === "GOAL") current.goals += 1;
+      if (incident.type === "YELLOW_CARD") current.yellowCards += 1;
+      if (incident.type === "RED_CARD") current.redCards += 1;
+
+      playerLeaders.set(playerKey, current);
+    });
+  });
+
+  const teamLeaderRows = Array.from(teamLeaders.values()).filter(
+    (leader) => leader.matchesPlayed > 0,
+  );
+  const updatedAt =
+    Object.values(matchStatesPayload.states)
+      .map((state) => state.updatedAt)
+      .filter(Boolean)
+      .sort()
+      .at(-1) || new Date().toISOString();
+  const source = resolveTournamentLeadersSource(matchStatesPayload.states);
+
+  return {
+    updatedAt,
+    source,
+    note: getTournamentLeadersNote(source),
+    playerLeaders: {
+      topScorers: sortPlayerLeaders(Array.from(playerLeaders.values()), "goals"),
+      yellowCards: sortPlayerLeaders(Array.from(playerLeaders.values()), "yellowCards"),
+      redCards: sortPlayerLeaders(Array.from(playerLeaders.values()), "redCards"),
+    },
+    teamLeaders: {
+      bestAttack: [...teamLeaderRows]
+        .sort((a, b) => {
+          const goalsDiff = b.goalsFor - a.goalsFor;
+          if (goalsDiff !== 0) return goalsDiff;
+
+          const matchesDiff = a.matchesPlayed - b.matchesPlayed;
+          if (matchesDiff !== 0) return matchesDiff;
+
+          return a.teamName.localeCompare(b.teamName, "pt-BR");
+        })
+        .slice(0, TOURNAMENT_LEADER_LIMIT),
+      bestDefense: [...teamLeaderRows]
+        .sort((a, b) => {
+          const concededDiff = a.goalsAgainst - b.goalsAgainst;
+          if (concededDiff !== 0) return concededDiff;
+
+          const cleanSheetDiff = b.cleanSheets - a.cleanSheets;
+          if (cleanSheetDiff !== 0) return cleanSheetDiff;
+
+          return a.teamName.localeCompare(b.teamName, "pt-BR");
+        })
+        .slice(0, TOURNAMENT_LEADER_LIMIT),
+      cleanSheets: [...teamLeaderRows]
+        .sort((a, b) => {
+          const cleanSheetDiff = b.cleanSheets - a.cleanSheets;
+          if (cleanSheetDiff !== 0) return cleanSheetDiff;
+
+          const concededDiff = a.goalsAgainst - b.goalsAgainst;
+          if (concededDiff !== 0) return concededDiff;
+
+          return a.teamName.localeCompare(b.teamName, "pt-BR");
+        })
+        .slice(0, TOURNAMENT_LEADER_LIMIT),
+    },
+  };
 };
 
 const SPORTV_URL = "https://ge.globo.com/sportv/";
@@ -1067,6 +1326,23 @@ app.get("/api/team-lineups", async (req, res) => {
     res
       .status(502)
       .json({ error: error?.message || "Erro ao carregar escalações da FIFA" });
+  }
+});
+
+app.get("/api/tournament-leaders", async (req, res) => {
+  try {
+    const language =
+      typeof req.query.language === "string" && req.query.language.trim()
+        ? req.query.language.trim()
+        : DEFAULT_BROADCAST_LANGUAGE;
+
+    res.set("Cache-Control", "no-store");
+    res.json(await getTournamentLeadersPayload(language));
+  } catch (error: any) {
+    console.error("FIFA API Error in /api/tournament-leaders:", error);
+    res
+      .status(502)
+      .json({ error: error?.message || "Erro ao carregar líderes do torneio" });
   }
 });
 

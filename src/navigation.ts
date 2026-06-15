@@ -16,6 +16,11 @@ export const NAV_ITEMS: NavItem[] = [
     description: "Tabelas de classificação dos 12 grupos do torneio.",
   },
   {
+    id: "lideres",
+    label: "Líderes",
+    description: "Artilharia, disciplina e destaques coletivos da Copa.",
+  },
+  {
     id: "chaveamento",
     label: "Chaveamento",
     description: "Mata-mata interativo até a grande final.",
