@@ -31,7 +31,18 @@ export default function App() {
   const [activeNavId, setActiveNavId] = useState<string>(NAV_ITEMS[0].id);
   const [lineupTeam, setLineupTeam] = useState<TeamRef | null>(null);
   const [teamLineups, setTeamLineups] = useState<TeamLineupsMap>({});
+  const [standingsFocusGroup, setStandingsFocusGroup] = useState<string | null>(null);
   const isPartidasViewActive = activeNavId === "partidas" && lineupTeam === null;
+
+  const handleSelectNav = (navId: string) => {
+    setActiveNavId(navId);
+    setStandingsFocusGroup(null);
+  };
+
+  const handleOpenStandingsGroup = (group: string) => {
+    setStandingsFocusGroup(group);
+    setActiveNavId("grupos");
+  };
 
   useEffect(() => {
     if (!isPartidasViewActive) {
@@ -127,11 +138,19 @@ export default function App() {
             setMatches={setMatches}
             theme={theme}
             onSelectTeamLineup={setLineupTeam}
+            onOpenStandingsGroup={handleOpenStandingsGroup}
             teamLineups={teamLineups}
           />
         );
       case "grupos":
-        return <StandingsView matches={matches} theme={theme} onSelectTeamLineup={setLineupTeam} />;
+      return (
+        <StandingsView
+          matches={matches}
+          theme={theme}
+          onSelectTeamLineup={setLineupTeam}
+          focusGroup={standingsFocusGroup}
+        />
+      );
       case "selecoes":
         return <TeamsView matches={matches} theme={theme} onSelectTeamLineup={setLineupTeam} />;
       case "lideres":
@@ -151,6 +170,7 @@ export default function App() {
             setMatches={setMatches}
             theme={theme}
             onSelectTeamLineup={setLineupTeam}
+            onOpenStandingsGroup={handleOpenStandingsGroup}
             teamLineups={teamLineups}
           />
         );
@@ -209,7 +229,7 @@ export default function App() {
               <button
                 key={item.id}
                 id={`btn-nav-${item.id}`}
-                onClick={() => setActiveNavId(item.id)}
+                onClick={() => handleSelectNav(item.id)}
                 className={`px-3.5 py-2 min-h-11 rounded-md text-[13px] md:text-sm leading-none font-anton transition-all uppercase tracking-wide ${
                   activeNavId === item.id
                     ? theme === "classic-light"

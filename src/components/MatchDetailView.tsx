@@ -171,6 +171,14 @@ function formatMinuteLabel(minute: number) {
   return `${Math.max(1, minute)}'`;
 }
 
+function getMatchGroupLabel(match: Match) {
+  if (match.stageName !== "Group Stage") {
+    return null;
+  }
+
+  return match.teamA.group === match.teamB.group ? match.teamA.group : match.teamA.group || null;
+}
+
 interface MatchOverlaysApiResponse {
   refreshAfterMs?: number;
   overlays: Record<string, MatchOverlayEntry>;
@@ -181,6 +189,7 @@ interface MatchDetailViewProps {
   setMatches: Dispatch<SetStateAction<Match[]>>;
   theme: "classic-light" | "stadium-dark";
   onSelectTeamLineup: (team: TeamRef) => void;
+  onOpenStandingsGroup: (group: string) => void;
   teamLineups: TeamLineupsMap;
 }
 
@@ -189,6 +198,7 @@ export function MatchDetailView({
   setMatches,
   theme,
   onSelectTeamLineup,
+  onOpenStandingsGroup,
   teamLineups,
 }: MatchDetailViewProps) {
   const [matchOverlays, setMatchOverlays] = useState<
@@ -246,6 +256,7 @@ export function MatchDetailView({
           currentOverlay?.matchState.source === "fifa"
       ? "FIFA oficial"
       : "Fallback local";
+  const currentMatchGroupLabel = getMatchGroupLabel(currentMatch);
 
   // Live clock showing the current Horário de Brasília (BRT, UTC-3)
   const [currentTime, setCurrentTime] = useState<Date>(new Date());
@@ -916,6 +927,22 @@ export function MatchDetailView({
                 {currentMatch.kickoffDate}
               </div>
 
+              {currentMatchGroupLabel && (
+                <button
+                  type="button"
+                  onClick={() => onOpenStandingsGroup(currentMatchGroupLabel)}
+                  className={`rounded-full border px-3 py-1 font-mono text-[10px] font-bold uppercase tracking-[0.22em] ${
+                    theme === "classic-light"
+                      ? "border-slate-200 bg-slate-100 text-slate-700 hover:border-[#009c3b]/30 hover:bg-[#009c3b]/10 hover:text-[#007a2f]"
+                      : "border-white/10 bg-white/5 text-slate-100 hover:border-[#00e476]/25 hover:bg-[#00e476]/10 hover:text-[#a7e6bf]"
+                  }`}
+                  id="scoreboard-group-label"
+                  aria-label={`Abrir tabela do ${currentMatchGroupLabel}`}
+                >
+                  {currentMatchGroupLabel}
+                </button>
+              )}
+
               {/* Countdown Ticking section (Ex: "Faltam: 15:02:03") */}
               <div
                 className="flex flex-col items-center"
@@ -939,10 +966,10 @@ export function MatchDetailView({
                 {/* HORÁRIO DE BRASÍLIA Badge with live clock */}
                 {currentMatch.status !== "FINISHED" && (
                   <span
-                    className={`mt-2 flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-mono tracking-widest font-black uppercase ${
+                    className={`mt-2 flex items-center gap-2 px-3 py-1.5 text-xs font-mono tracking-widest font-black uppercase ${
                       theme === "classic-light"
-                        ? "text-slate-800 bg-slate-100"
-                        : "text-white bg-white/15"
+                        ? "text-slate-800"
+                        : "text-white"
                     }`}
                   >
                     <span className={theme === "classic-light" ? "text-slate-800" : "text-white"}>HORÁRIO DE BRASÍLIA</span>

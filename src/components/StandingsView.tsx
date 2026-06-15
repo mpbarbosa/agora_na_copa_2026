@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import type { Match, TeamRef } from "../types";
 import { computeStandings, groupStandings } from "../standings";
 import { FlagIcon } from "./FlagIcon";
@@ -7,6 +7,7 @@ interface StandingsViewProps {
   matches: Match[];
   theme: "classic-light" | "stadium-dark";
   onSelectTeamLineup: (team: TeamRef) => void;
+  focusGroup?: string | null;
 }
 
 const COLUMNS = [
@@ -22,7 +23,12 @@ const COLUMNS = [
 
 const groupSlug = (group: string) => group.replace(/\s+/g, "-").toLowerCase();
 
-export function StandingsView({ matches, theme, onSelectTeamLineup }: StandingsViewProps) {
+export function StandingsView({
+  matches,
+  theme,
+  onSelectTeamLineup,
+  focusGroup = null,
+}: StandingsViewProps) {
   const groups = useMemo(() => groupStandings(computeStandings(matches)), [matches]);
 
   const cardClasses =
@@ -37,6 +43,26 @@ export function StandingsView({ matches, theme, onSelectTeamLineup }: StandingsV
     theme === "classic-light"
       ? "border-l-[#10b981]"
       : "border-l-[#00ff85]";
+
+  useEffect(() => {
+    if (!focusGroup) {
+      return;
+    }
+
+    const element = document.getElementById(`standings-group-${groupSlug(focusGroup)}`);
+    if (!element) {
+      return;
+    }
+
+    const frameId = window.requestAnimationFrame(() => {
+      element.scrollIntoView({ behavior: "smooth", block: "start" });
+      if (element instanceof HTMLElement) {
+        element.focus({ preventScroll: true });
+      }
+    });
+
+    return () => window.cancelAnimationFrame(frameId);
+  }, [focusGroup]);
 
   return (
     <div className="mx-auto mt-8 max-w-7xl px-4 2xl:max-w-[1600px]" id="standings-view">
@@ -56,12 +82,21 @@ export function StandingsView({ matches, theme, onSelectTeamLineup }: StandingsV
       >
         {groups.map(({ group, rows }) => {
           const seedCount = rows.filter((row) => row.dataSource === "seed").length;
+          const isFocusedGroup = focusGroup === group;
 
           return (
             <div
               key={group}
               id={`standings-group-${groupSlug(group)}`}
-              className={`rounded-2xl border p-4 ${cardClasses}`}
+              tabIndex={-1}
+              data-focused={isFocusedGroup ? "true" : "false"}
+              className={`rounded-2xl border p-4 outline-none ${
+                isFocusedGroup
+                  ? theme === "classic-light"
+                    ? "ring-2 ring-[#009c3b]/40 ring-offset-2 ring-offset-[#f4f7f6]"
+                    : "ring-2 ring-[#00e476]/40 ring-offset-2 ring-offset-[#0a0c0c]"
+                  : ""
+              } ${cardClasses}`}
             >
               <h3
                 className={`font-anton text-lg uppercase tracking-wide ${headingClasses}`}

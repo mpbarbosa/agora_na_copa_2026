@@ -25,6 +25,7 @@ test.describe("Navigation shell", () => {
     await expect(page.locator("#btn-nav-partidas")).toHaveClass(/font-semibold/);
     await expect(page.locator("#match-detail-view")).toBeVisible();
     await expect(page.locator("#core-live-scoreboard")).toBeVisible();
+    await expect(page.locator("#scoreboard-group-label")).toContainText(/Grupo [A-L]/);
     await expect(page.locator("#broadcast-section-title")).toBeVisible();
 
     expect(consoleErrors).toEqual([]);
@@ -99,5 +100,23 @@ test.describe("Navigation shell", () => {
     }
 
     expect(consoleErrors).toEqual([]);
+  });
+
+  test("scoreboard group badge opens Grupos focused on the current group", async ({ page }) => {
+    await page.goto("/");
+
+    const groupLabel = (await page.locator("#scoreboard-group-label").textContent())?.trim();
+    expect(groupLabel).toBeTruthy();
+
+    const groupId = groupLabel!.replace(/\s+/g, "-").toLowerCase();
+
+    await page.click("#scoreboard-group-label");
+
+    await expect(page.locator("#btn-nav-grupos")).toHaveClass(/font-semibold/);
+    await expect(page.locator("#standings-view")).toBeVisible();
+    await expect(page.locator(`#standings-group-${groupId}`)).toHaveAttribute(
+      "data-focused",
+      "true",
+    );
   });
 });
