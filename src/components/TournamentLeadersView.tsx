@@ -201,7 +201,6 @@ interface TeamLeaderListProps {
   entries: TournamentTeamLeader[];
   valueFor: (entry: TournamentTeamLeader) => string;
   detailFor: (entry: TournamentTeamLeader) => string;
-  onSelectTeam: (entry: TournamentTeamLeader) => void;
   onOpenTeamView: (entry: TournamentTeamLeader) => void;
 }
 
@@ -210,7 +209,6 @@ function TeamLeaderList({
   entries,
   valueFor,
   detailFor,
-  onSelectTeam,
   onOpenTeamView,
 }: TeamLeaderListProps) {
   if (entries.length === 0) {
@@ -257,7 +255,7 @@ function TeamLeaderList({
               <button
                 type="button"
                 id={`btn-leader-team-${entry.id}`}
-                onClick={() => onSelectTeam(entry)}
+                onClick={() => onOpenTeamView(entry)}
                 className={`truncate font-anton text-left text-sm uppercase tracking-wide transition hover:opacity-80 ${
                   theme === "classic-light"
                     ? "text-slate-900 hover:text-[#065f2c]"
@@ -294,7 +292,6 @@ export function TournamentLeadersView({ theme, onSelectTeamLineup }: TournamentL
   const [leaders, setLeaders] = useState<TournamentLeadersResponse | null>(null);
   const [status, setStatus] = useState<LoadStatus>("loading");
   const [selectedPlayer, setSelectedPlayer] = useState<TournamentPlayerLeader | null>(null);
-  const [selectedTeam, setSelectedTeam] = useState<TournamentTeamLeader | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -326,18 +323,17 @@ export function TournamentLeadersView({ theme, onSelectTeamLineup }: TournamentL
   }, []);
 
   useEffect(() => {
-    if (!selectedPlayer && !selectedTeam) return;
+    if (!selectedPlayer) return;
 
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
         setSelectedPlayer(null);
-        setSelectedTeam(null);
       }
     };
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [selectedPlayer, selectedTeam]);
+  }, [selectedPlayer]);
 
   const headingClasses = theme === "classic-light" ? "text-slate-900" : "text-white";
   const mutedClasses = theme === "classic-light" ? "text-slate-600" : "text-slate-300";
@@ -420,7 +416,6 @@ export function TournamentLeadersView({ theme, onSelectTeamLineup }: TournamentL
                 entries={leaders.teamLeaders.bestAttack}
                 valueFor={(entry) => `${entry.goalsFor} gol${entry.goalsFor === 1 ? "" : "s"}`}
                 detailFor={(entry) => `${entry.matchesPlayed} jogo${entry.matchesPlayed === 1 ? "" : "s"} • ${entry.wins} vitória${entry.wins === 1 ? "" : "s"}`}
-                onSelectTeam={setSelectedTeam}
                 onOpenTeamView={(entry) => onSelectTeamLineup(toLeaderTeamRef(entry))}
               />
             </LeaderCard>
@@ -431,7 +426,6 @@ export function TournamentLeadersView({ theme, onSelectTeamLineup }: TournamentL
                 entries={leaders.teamLeaders.bestDefense}
                 valueFor={(entry) => `${entry.goalsAgainst} sofrido${entry.goalsAgainst === 1 ? "" : "s"}`}
                 detailFor={(entry) => `${entry.cleanSheets} clean sheet${entry.cleanSheets === 1 ? "" : "s"} • ${entry.matchesPlayed} jogo${entry.matchesPlayed === 1 ? "" : "s"}`}
-                onSelectTeam={setSelectedTeam}
                 onOpenTeamView={(entry) => onSelectTeamLineup(toLeaderTeamRef(entry))}
               />
             </LeaderCard>
@@ -442,7 +436,6 @@ export function TournamentLeadersView({ theme, onSelectTeamLineup }: TournamentL
                 entries={leaders.teamLeaders.cleanSheets}
                 valueFor={(entry) => `${entry.cleanSheets} clean sheet${entry.cleanSheets === 1 ? "" : "s"}`}
                 detailFor={(entry) => `${entry.goalsAgainst} gol${entry.goalsAgainst === 1 ? "" : "s"} sofrido${entry.goalsAgainst === 1 ? "" : "s"} • ${entry.matchesPlayed} jogo${entry.matchesPlayed === 1 ? "" : "s"}`}
-                onSelectTeam={setSelectedTeam}
                 onOpenTeamView={(entry) => onSelectTeamLineup(toLeaderTeamRef(entry))}
               />
             </LeaderCard>
@@ -608,121 +601,6 @@ export function TournamentLeadersView({ theme, onSelectTeamLineup }: TournamentL
         </div>
       )}
 
-      {selectedTeam && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 p-4 backdrop-blur-md"
-          id="leaders-team-overlay"
-          onClick={() => setSelectedTeam(null)}
-        >
-          <div
-            className={`relative w-full max-w-md rounded-3xl border p-5 shadow-2xl ${
-              theme === "classic-light"
-                ? "border-slate-200 bg-white text-slate-900"
-                : "border-white/10 bg-[#121414] text-white"
-            }`}
-            onClick={(event) => event.stopPropagation()}
-          >
-            <button
-              type="button"
-              onClick={() => setSelectedTeam(null)}
-              className={`absolute right-4 top-4 rounded-full border px-3 py-1 font-mono text-[10px] font-bold uppercase tracking-wider ${
-                theme === "classic-light"
-                  ? "border-slate-200 bg-slate-50 text-slate-700"
-                  : "border-white/10 bg-white/5 text-slate-100"
-              }`}
-            >
-              Fechar
-            </button>
-
-            <div
-              className={`mb-4 flex min-h-[220px] items-center justify-center rounded-3xl border ${
-                theme === "classic-light"
-                  ? "border-slate-200 bg-slate-50"
-                  : "border-white/10 bg-[#161919]"
-              }`}
-            >
-              <div className="flex h-36 w-52 items-center justify-center rounded-3xl bg-white p-4 shadow-sm">
-                <FlagIcon flag={selectedTeam.teamFlagSvg} className="h-full w-full object-contain" />
-              </div>
-            </div>
-
-            <div className="flex items-center gap-3">
-              <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-white p-2">
-                <FlagIcon flag={selectedTeam.teamFlagSvg} className="h-full w-full object-contain" />
-              </div>
-              <div className="min-w-0">
-                <p className="truncate font-anton text-2xl uppercase tracking-wide">
-                  {selectedTeam.teamName}
-                </p>
-                <p
-                  className={`mt-1 font-archivo text-sm ${
-                    theme === "classic-light" ? "text-slate-600" : "text-slate-300"
-                  }`}
-                >
-                  Código FIFA {selectedTeam.teamCode}
-                </p>
-              </div>
-            </div>
-
-            <div className="mt-5 grid grid-cols-2 gap-3">
-              {[
-                { label: "Jogos", value: selectedTeam.matchesPlayed },
-                { label: "Vitórias", value: selectedTeam.wins },
-                { label: "Gols pró", value: selectedTeam.goalsFor },
-                { label: "Gols contra", value: selectedTeam.goalsAgainst },
-                { label: "Clean sheets", value: selectedTeam.cleanSheets },
-              ].map((stat) => (
-                <div
-                  key={stat.label}
-                  className={`rounded-2xl border px-3 py-3 ${
-                    theme === "classic-light"
-                      ? "border-slate-200 bg-slate-50"
-                      : "border-white/10 bg-white/5"
-                  }`}
-                >
-                  <p className="font-anton text-2xl uppercase text-[#00e476] dark:text-[#00e476]">
-                    {stat.value}
-                  </p>
-                  <p
-                    className={`mt-1 font-mono text-[10px] uppercase tracking-wider ${
-                      theme === "classic-light" ? "text-slate-500" : "text-slate-400"
-                    }`}
-                  >
-                    {stat.label}
-                  </p>
-                </div>
-              ))}
-            </div>
-
-            <div
-              className={`mt-4 rounded-2xl border px-4 py-4 font-archivo text-sm leading-6 ${
-                theme === "classic-light"
-                  ? "border-slate-200 bg-slate-50 text-slate-700"
-                  : "border-white/10 bg-[#161919] text-slate-100"
-              }`}
-            >
-              Resumo coletivo oficial da campanha de {selectedTeam.teamName}. Clique fora do card ou
-              pressione <span className="font-mono">Esc</span> para fechar.
-            </div>
-
-            <button
-              type="button"
-              id="btn-open-team-view-from-leaders-overlay"
-              onClick={() => {
-                onSelectTeamLineup(toLeaderTeamRef(selectedTeam));
-                setSelectedTeam(null);
-              }}
-              className={`mt-4 w-full rounded-2xl border px-4 py-3 font-mono text-[11px] font-bold uppercase tracking-wider transition ${
-                theme === "classic-light"
-                  ? "border-slate-200 bg-slate-900 text-white hover:bg-slate-800"
-                  : "border-white/10 bg-white text-slate-950 hover:bg-slate-100"
-              }`}
-            >
-              Abrir painel completo da seleção
-            </button>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

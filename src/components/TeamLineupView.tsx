@@ -284,36 +284,11 @@ export const TeamLineupView: React.FC<TeamLineupViewProps> = ({ team, theme, onB
 
   useEffect(() => {
     let active = true;
-    let timeoutId: number | undefined;
-    let requestInFlight = false;
-
-    const clearScheduledLoad = () => {
-      if (timeoutId) {
-        window.clearTimeout(timeoutId);
-        timeoutId = undefined;
-      }
-    };
-
-    const isPageVisible = () =>
-      typeof document === "undefined" || document.visibilityState === "visible";
-
-    const scheduleNextLoad = (refreshAfterMs?: number) => {
-      if (!isPageVisible()) {
-        return;
-      }
-
-      clearScheduledLoad();
-      timeoutId = window.setTimeout(() => {
-        void loadTeamView();
-      }, refreshAfterMs && refreshAfterMs > 0 ? refreshAfterMs : 5 * 60 * 1000);
-    };
 
     const loadTeamView = async () => {
-      if (!active || requestInFlight) {
+      if (!active) {
         return;
       }
-
-      requestInFlight = true;
 
       try {
         const response = await fetch(`/api/team-view/${encodeURIComponent(team.code)}`);
@@ -326,38 +301,20 @@ export const TeamLineupView: React.FC<TeamLineupViewProps> = ({ team, theme, onB
 
         setTeamView(data);
         setStatus("ready");
-        scheduleNextLoad(data.refreshAfterMs);
       } catch (error) {
         console.error(error);
         if (!active) return;
 
         setStatus("error");
-        scheduleNextLoad();
-      } finally {
-        requestInFlight = false;
       }
-    };
-
-    const handlePageVisible = () => {
-      if (!active || !isPageVisible()) {
-        return;
-      }
-
-      clearScheduledLoad();
-      void loadTeamView();
     };
 
     setStatus("loading");
     setTeamView(null);
     void loadTeamView();
-    window.addEventListener("focus", handlePageVisible);
-    document.addEventListener("visibilitychange", handlePageVisible);
 
     return () => {
       active = false;
-      clearScheduledLoad();
-      window.removeEventListener("focus", handlePageVisible);
-      document.removeEventListener("visibilitychange", handlePageVisible);
     };
   }, [team.code]);
 

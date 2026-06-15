@@ -177,7 +177,7 @@ test.describe("Leaders view (Líderes)", () => {
     await expect(page.locator("#team-view-standings-card")).toBeVisible();
   });
 
-  test("opens the full team page from the leaders team overlay", async ({ page }) => {
+  test("opens the full team page directly from a team leaderboard click", async ({ page }) => {
     await page.route("**/api/tournament-leaders", async (route) => {
       await route.fulfill({
         contentType: "application/json",
@@ -292,9 +292,6 @@ test.describe("Leaders view (Líderes)", () => {
     await page.goto("/");
     await page.click("#btn-nav-lideres");
     await page.click("#btn-leader-team-bra");
-
-    await expect(page.locator("#leaders-team-overlay")).toBeVisible();
-    await page.click("#btn-open-team-view-from-leaders-overlay");
 
     await expect(page.locator("#team-lineup-view")).toBeVisible();
     await expect(page.locator("#team-lineup-title")).toContainText("BRASIL");

@@ -30,8 +30,13 @@ export default function App() {
   const [activeNavId, setActiveNavId] = useState<string>(NAV_ITEMS[0].id);
   const [lineupTeam, setLineupTeam] = useState<TeamRef | null>(null);
   const [teamLineups, setTeamLineups] = useState<TeamLineupsMap>({});
+  const isPartidasViewActive = activeNavId === "partidas" && lineupTeam === null;
 
   useEffect(() => {
+    if (!isPartidasViewActive) {
+      return;
+    }
+
     let active = true;
     let timeoutId: number | undefined;
     let requestInFlight = false;
@@ -107,7 +112,7 @@ export default function App() {
       window.removeEventListener("focus", handlePageVisible);
       document.removeEventListener("visibilitychange", handlePageVisible);
     };
-  }, []);
+  }, [isPartidasViewActive]);
 
   const activeNavItem =
     NAV_ITEMS.find((item) => item.id === activeNavId) || NAV_ITEMS[0];
