@@ -14,9 +14,11 @@ test.describe("Venue map view (Estádios)", () => {
     await expect(page.locator("#venue-map-canvas")).toBeVisible();
     await expect(page.locator('.venue-map-marker[data-venue-id="vancouver"]')).toBeVisible();
 
-    await page.locator('.venue-map-marker[data-venue-id="vancouver"]').click({
-      force: true,
-    });
+    await page
+      .locator('.venue-map-marker[data-venue-id="vancouver"]')
+      .evaluate((element) => {
+        (element.closest(".leaflet-marker-icon") as HTMLElement | null)?.click();
+      });
 
     await expect(page.locator("#venue-detail-title")).toHaveText("BC Place de Vancouver");
     await expect(page.locator("#venue-hosted-match-aus-tur-2026")).toBeVisible();
@@ -36,9 +38,11 @@ test.describe("Venue map view (Estádios)", () => {
 
     await expect(page.locator("#venue-map-view")).toBeVisible();
     await expect(page.locator('.venue-map-marker[data-venue-id="seattle"]')).toBeVisible();
-    await page.locator('.venue-map-marker[data-venue-id="seattle"]').click({
-      force: true,
-    });
+    await page
+      .locator('.venue-map-marker[data-venue-id="seattle"]')
+      .evaluate((element) => {
+        (element.closest(".leaflet-marker-icon") as HTMLElement | null)?.click();
+      });
 
     await expect(page.locator("#venue-detail-title")).toHaveText("Estádio de Seattle");
     await expect(page.locator("#venue-hosted-matches")).toContainText(

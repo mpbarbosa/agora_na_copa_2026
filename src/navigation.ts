@@ -23,7 +23,7 @@ export const NAV_ITEMS: NavItem[] = [
   {
     id: "chaveamento",
     label: "Chaveamento",
-    status: "comingSoon",
+    status: "live",
     description: "Mata-mata interativo até a grande final.",
   },
   {

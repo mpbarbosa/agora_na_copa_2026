@@ -7,6 +7,7 @@ import { ComingSoonView } from "./components/ComingSoonView";
 import { StandingsView } from "./components/StandingsView";
 import { VenueMapView } from "./components/VenueMapView";
 import { NewsView } from "./components/NewsView";
+import { BracketView } from "./components/BracketView";
 import { NAV_ITEMS } from "./navigation";
 import { Sun, Moon } from "lucide-react";
 
@@ -130,6 +131,8 @@ export default function App() {
           <VenueMapView matches={matches} theme={theme} />
         ) : activeNavItem.status === "live" && activeNavItem.id === "noticias" ? (
           <NewsView theme={theme} />
+        ) : activeNavItem.status === "live" && activeNavItem.id === "chaveamento" ? (
+          <BracketView theme={theme} />
         ) : (
           <ComingSoonView theme={theme} item={activeNavItem} />
         )}
