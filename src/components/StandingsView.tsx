@@ -1,11 +1,12 @@
 import { useMemo } from "react";
-import type { Match } from "../types";
+import type { Match, TeamRef } from "../types";
 import { computeStandings, groupStandings } from "../standings";
 import { FlagIcon } from "./FlagIcon";
 
 interface StandingsViewProps {
   matches: Match[];
   theme: "classic-light" | "stadium-dark";
+  onSelectTeamLineup: (team: TeamRef) => void;
 }
 
 const COLUMNS = [
@@ -21,7 +22,7 @@ const COLUMNS = [
 
 const groupSlug = (group: string) => group.replace(/\s+/g, "-").toLowerCase();
 
-export function StandingsView({ matches, theme }: StandingsViewProps) {
+export function StandingsView({ matches, theme, onSelectTeamLineup }: StandingsViewProps) {
   const groups = useMemo(() => groupStandings(computeStandings(matches)), [matches]);
 
   const cardClasses =
@@ -108,7 +109,11 @@ export function StandingsView({ matches, theme }: StandingsViewProps) {
                       >
                         <td className={`whitespace-nowrap py-1.5 pl-2 font-archivo ${headingClasses}`}>
                           <div className="flex items-center gap-2">
-                            <FlagIcon flag={row.flagSvg} className="h-4 w-6" />
+                            <FlagIcon
+                              flag={row.flagSvg}
+                              className="h-4 w-6"
+                              onClick={() => onSelectTeamLineup(row)}
+                            />
                             <span title={row.name}>{row.code}</span>
                           </div>
                         </td>

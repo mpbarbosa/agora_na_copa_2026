@@ -1,17 +1,20 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import packageInfo from "../package.json";
 import matchesData from "./matches.json";
-import type { Match } from "./types";
+import type { Match, TeamRef } from "./types";
 import { MatchDetailView } from "./components/MatchDetailView";
 import { StandingsView } from "./components/StandingsView";
 import { VenueMapView } from "./components/VenueMapView";
 import { NewsView } from "./components/NewsView";
 import { BracketView } from "./components/BracketView";
 import { FanZoneView } from "./components/FanZoneView";
+import { TeamLineupView } from "./components/TeamLineupView";
+import { findTeamLineup, type TeamLineupsMap } from "./utils/teamLineup";
 import { NAV_ITEMS } from "./navigation";
 import { Sun, Moon } from "lucide-react";
 
 const APP_VERSION = packageInfo.version;
+const TEAM_LINEUPS_REFRESH_INTERVAL_MS = 5 * 60 * 1000;
 
 export default function App() {
   const [theme, setTheme] = useState<"classic-light" | "stadium-dark">(
@@ -19,6 +22,36 @@ export default function App() {
   );
   const [matches, setMatches] = useState<Match[]>(() => matchesData as Match[]);
   const [activeNavId, setActiveNavId] = useState<string>(NAV_ITEMS[0].id);
+  const [lineupTeam, setLineupTeam] = useState<TeamRef | null>(null);
+  const [teamLineups, setTeamLineups] = useState<TeamLineupsMap>({});
+
+  useEffect(() => {
+    let active = true;
+
+    const loadTeamLineups = async () => {
+      try {
+        const response = await fetch("/api/team-lineups");
+        if (!response.ok) {
+          throw new Error("Falha ao atualizar escalações da FIFA.");
+        }
+
+        const data: { lineups: TeamLineupsMap } = await response.json();
+        if (active) {
+          setTeamLineups(data.lineups);
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    void loadTeamLineups();
+    const interval = window.setInterval(loadTeamLineups, TEAM_LINEUPS_REFRESH_INTERVAL_MS);
+
+    return () => {
+      active = false;
+      window.clearInterval(interval);
+    };
+  }, []);
 
   const activeNavItem =
     NAV_ITEMS.find((item) => item.id === activeNavId) || NAV_ITEMS[0];
@@ -26,11 +59,19 @@ export default function App() {
   const renderActiveView = () => {
     switch (activeNavItem.id) {
       case "partidas":
-        return <MatchDetailView matches={matches} setMatches={setMatches} theme={theme} />;
+        return (
+          <MatchDetailView
+            matches={matches}
+            setMatches={setMatches}
+            theme={theme}
+            onSelectTeamLineup={setLineupTeam}
+            teamLineups={teamLineups}
+          />
+        );
       case "grupos":
-        return <StandingsView matches={matches} theme={theme} />;
+        return <StandingsView matches={matches} theme={theme} onSelectTeamLineup={setLineupTeam} />;
       case "estadios":
-        return <VenueMapView matches={matches} theme={theme} />;
+        return <VenueMapView matches={matches} theme={theme} onSelectTeamLineup={setLineupTeam} />;
       case "noticias":
         return <NewsView theme={theme} />;
       case "chaveamento":
@@ -38,7 +79,15 @@ export default function App() {
       case "fanzone":
         return <FanZoneView theme={theme} />;
       default:
-        return <MatchDetailView matches={matches} setMatches={setMatches} theme={theme} />;
+        return (
+          <MatchDetailView
+            matches={matches}
+            setMatches={setMatches}
+            theme={theme}
+            onSelectTeamLineup={setLineupTeam}
+            teamLineups={teamLineups}
+          />
+        );
     }
   };
 
@@ -141,7 +190,24 @@ export default function App() {
       </header>
 
       {/* VIEW AREA RESPONDING TO SELECTED NAV ITEM */}
-      <main id="view-container">{renderActiveView()}</main>
+      <main id="view-container">
+        {lineupTeam ? (
+          (() => {
+            const lineupResult = findTeamLineup(lineupTeam.code, matches, teamLineups);
+            return (
+              <TeamLineupView
+                team={lineupTeam}
+                lineup={lineupResult?.players ?? null}
+                lineupSource={lineupResult?.source}
+                theme={theme}
+                onBack={() => setLineupTeam(null)}
+              />
+            );
+          })()
+        ) : (
+          renderActiveView()
+        )}
+      </main>
 
       {/* FOOTER METADATA DETAIL */}
       <footer

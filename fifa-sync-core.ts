@@ -1,9 +1,12 @@
+import { Position } from "./src/types";
 import type {
   Broadcaster,
   CommentaryEvent,
+  LineupEntry,
   Match,
   MatchStateEntry,
   MatchStatus,
+  Player,
 } from "./src/types";
 
 export interface FifaLocalizedText {
@@ -41,6 +44,7 @@ export interface FifaLiveTeam {
   TeamName?: FifaLocalizedText[];
   Abbreviation?: string;
   Score?: number | null;
+  Tactics?: string | null;
   Goals?: FifaLiveGoal[];
   Bookings?: FifaLiveBooking[];
   Substitutions?: FifaLiveSubstitution[];
@@ -51,6 +55,9 @@ export interface FifaLivePlayer {
   IdPlayer: string;
   PlayerName?: FifaLocalizedText[];
   ShortName?: FifaLocalizedText[];
+  ShirtNumber?: number | null;
+  Position?: number | null;
+  Captain?: boolean | null;
 }
 
 export interface FifaLiveGoal {
@@ -345,7 +352,7 @@ const getMinuteSortValue = (minute: string | null | undefined) => {
   return values.reduce((total, value) => total + value, 0);
 };
 
-const getBestPlayerName = (
+export const getBestPlayerName = (
   entries: FifaLocalizedText[] | undefined,
   fallback = "",
 ) => getLocalizedDescription(entries, "pt") || fallback;
@@ -510,6 +517,134 @@ export const buildMatchStateEntry = (
         : "Placar e status oficiais da FIFA com atualização ao vivo."
       : "Placar e status oficiais da FIFA.",
     fifaMatchId: fifaMatch.IdMatch,
+    updatedAt: new Date().toISOString(),
+  };
+};
+
+const FIFA_POSITION_TO_LOCAL: Record<number, Position> = {
+  0: Position.GK,
+  1: Position.DF,
+  2: Position.MF,
+  3: Position.FW,
+};
+
+// Distance (in y%) between consecutive outfield rows, GK closest to its own
+// goal line (y=88) and the last row closest to the opponent's goal (y=18).
+const GK_Y = 88;
+const FIRST_ROW_Y = 72;
+const LAST_ROW_Y = 18;
+
+// Parses a FIFA "Tactics" formation string (e.g. "4-1-2-3") into an array of
+// outfield row sizes. Returns null when the string is missing, malformed, or
+// doesn't add up to 10 outfield players (i.e. 11 with the goalkeeper).
+export const parseFormation = (tactics: string | null | undefined): number[] | null => {
+  if (!tactics) return null;
+
+  const rows = tactics.split("-").map((part) => Number.parseInt(part, 10));
+  if (rows.length < 2 || rows.some((count) => !Number.isFinite(count) || count <= 0)) {
+    return null;
+  }
+
+  const total = rows.reduce((sum, count) => sum + count, 0);
+  return total === 10 ? rows : null;
+};
+
+// Maps a parsed formation to pitch coordinates for the goalkeeper followed by
+// each outfield row, ordered to match the FIFA starting-XI player ordering
+// (GK, then defenders, then midfield rows, then forwards).
+export const getFormationCoordinates = (formation: number[]): { x: number; y: number }[] => {
+  const coords: { x: number; y: number }[] = [{ x: 50, y: GK_Y }];
+  const rowCount = formation.length;
+
+  formation.forEach((count, rowIndex) => {
+    const y =
+      rowCount === 1
+        ? Math.round((FIRST_ROW_Y + LAST_ROW_Y) / 2)
+        : Math.round(FIRST_ROW_Y - (rowIndex * (FIRST_ROW_Y - LAST_ROW_Y)) / (rowCount - 1));
+
+    for (let i = 0; i < count; i++) {
+      const x = count === 1 ? 50 : Math.round(12 + (i * (88 - 12)) / (count - 1));
+      coords.push({ x, y });
+    }
+  });
+
+  return coords;
+};
+
+// Derives the starting XI from a FIFA live-match team payload. FIFA orders
+// the squad GK first, then defenders, midfielders, and forwards, with the
+// first 11 entries forming the starting lineup whose position counts match
+// the team's `Tactics` formation. Returns null when the squad/tactics data
+// isn't usable (e.g. lineup not announced yet, formation not parseable).
+export const getStartingLineupFromLiveFifa = (
+  team: FifaLiveTeam | undefined,
+): Player[] | null => {
+  const players = team?.Players;
+  if (!players || players.length < 11) return null;
+
+  const formation = parseFormation(team?.Tactics);
+  if (!formation) return null;
+
+  const starters = players.slice(0, 11);
+  const counts = [0, 0, 0, 0];
+  for (const player of starters) {
+    if (typeof player.Position === "number" && player.Position >= 0 && player.Position <= 3) {
+      counts[player.Position] += 1;
+    }
+  }
+
+  const expectedForwards = formation[formation.length - 1];
+  const expectedDefenders = formation[0];
+  const expectedMidfielders = formation.slice(1, -1).reduce((sum, count) => sum + count, 0);
+
+  if (
+    counts[0] !== 1 ||
+    counts[1] !== expectedDefenders ||
+    counts[2] !== expectedMidfielders ||
+    counts[3] !== expectedForwards
+  ) {
+    return null;
+  }
+
+  const coords = getFormationCoordinates(formation);
+
+  return starters.map((player, index) => ({
+    id: player.IdPlayer,
+    name: getBestPlayerName(player.ShortName, getBestPlayerName(player.PlayerName, "Jogador")),
+    number: player.ShirtNumber || 0,
+    position: FIFA_POSITION_TO_LOCAL[player.Position ?? 2] ?? Position.MF,
+    x: coords[index]?.x ?? 50,
+    y: coords[index]?.y ?? 50,
+  }));
+};
+
+// Builds a LineupEntry for one team, preferring the FIFA-announced starting
+// XI and falling back to the local matches.json lineup when FIFA hasn't
+// published one yet (e.g. more than ~1h before kickoff) or is unavailable.
+export const buildTeamLineupEntry = (
+  fallbackLineup: Player[],
+  fifaMatch: FifaCalendarMatch | undefined,
+  fifaTeam: FifaLiveTeam | undefined,
+): LineupEntry => {
+  const starters = getStartingLineupFromLiveFifa(fifaTeam);
+
+  if (starters) {
+    return {
+      players: starters,
+      source: "fifa",
+      note: "Escalação oficial divulgada pela FIFA.",
+      fifaMatchId: fifaMatch?.IdMatch,
+      updatedAt: new Date().toISOString(),
+    };
+  }
+
+  return {
+    players: fallbackLineup,
+    source: "fallback",
+    note: fifaMatch
+      ? "Escalação oficial da FIFA ainda não divulgada; exibindo dados locais."
+      : "Dados oficiais da FIFA indisponíveis para esta partida no momento; exibindo dados locais.",
+    fifaMatchId: fifaMatch?.IdMatch,
     updatedAt: new Date().toISOString(),
   };
 };

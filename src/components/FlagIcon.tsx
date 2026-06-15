@@ -54,6 +54,7 @@ import {
 interface FlagIconProps {
   flag: string;
   className?: string;
+  onClick?: () => void;
 }
 
 const FLAGS: Record<string, React.FC<{ className?: string }>> = {
@@ -108,14 +109,28 @@ const FLAGS: Record<string, React.FC<{ className?: string }>> = {
   uzbekistan: UzbekistanFlag,
 };
 
-export const FlagIcon: React.FC<FlagIconProps> = ({ flag, className = "w-16 h-12" }) => {
+export const FlagIcon: React.FC<FlagIconProps> = ({ flag, className = "w-16 h-12", onClick }) => {
   const Flag = FLAGS[flag.toLowerCase()];
-  if (Flag) {
-    return <Flag className={className} />;
-  }
-  return (
+  const content = Flag ? (
+    <Flag className={className} />
+  ) : (
     <div className={`flex items-center justify-center bg-gray-500 rounded text-white text-xs ${className}`}>
       {flag}
     </div>
+  );
+
+  if (!onClick) {
+    return content;
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-label={`Ver escalação de ${flag}`}
+      className="cursor-pointer transition-transform hover:scale-105 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#ffd700] rounded"
+    >
+      {content}
+    </button>
   );
 };

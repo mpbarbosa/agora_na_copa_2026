@@ -6,14 +6,17 @@ import { createServer as createViteServer } from "vite";
 import dotenv from "dotenv";
 import {
   buildMatchStateEntry as buildMatchStateEntryCore,
+  buildTeamLineupEntry as buildTeamLineupEntryCore,
   findCalendarMatch as findCalendarMatchCore,
   normalizeBroadcasters as normalizeBroadcastersCore,
 } from "./fifa-sync-core";
+import type { FifaLiveMatch as FifaLiveMatchCore } from "./fifa-sync-core";
 import { triviaQuestions } from "./src/data/questions";
 import matchesData from "./src/matches.json";
 import type {
   Broadcaster,
   BroadcastGuideEntry,
+  LineupEntry,
   Match,
   MatchOverlayEntry,
   MatchStateEntry,
@@ -33,6 +36,7 @@ const FIFA_SEASON_ID = "285023";
 const DEFAULT_BROADCAST_COUNTRY = "BR";
 const DEFAULT_BROADCAST_LANGUAGE = "pt";
 const BROADCAST_GUIDE_CACHE_TTL_MS = 5 * 60 * 1000;
+const TEAM_LINEUPS_CACHE_TTL_MS = 5 * 60 * 1000;
 const LIVE_MATCH_STATE_CACHE_TTL_MS = 10 * 1000;
 const UPCOMING_SOON_MATCH_STATE_CACHE_TTL_MS = 30 * 1000;
 const STABLE_MATCH_STATE_CACHE_TTL_MS = 5 * 60 * 1000;
@@ -125,6 +129,11 @@ interface MatchOverlaysResponse {
   overlays: Record<string, MatchOverlayEntry>;
 }
 
+interface TeamLineupsResponse {
+  language: string;
+  lineups: Record<string, { teamA: LineupEntry; teamB: LineupEntry }>;
+}
+
 const TRIVIA_QUESTIONS = triviaQuestions as TriviaQuestion[];
 
 interface FifaSyncServiceDiagnostics {
@@ -165,12 +174,22 @@ let matchStatesCache:
     }
   | null = null;
 
+let teamLineupsCache:
+  | {
+      key: string;
+      createdAt: number;
+      expiresAt: number;
+      payload: TeamLineupsResponse;
+    }
+  | null = null;
+
 const fifaSyncDiagnostics: {
   broadcastGuide: FifaSyncServiceDiagnostics;
   matchStates: FifaSyncServiceDiagnostics & {
     activeLiveMatchIds: string[];
     lastRefreshAfterMs: number | null;
   };
+  teamLineups: FifaSyncServiceDiagnostics;
   backgroundWarm: BackgroundWarmDiagnostics;
 } = {
   broadcastGuide: {
@@ -192,6 +211,15 @@ const fifaSyncDiagnostics: {
     circuitOpenUntil: null,
     activeLiveMatchIds: [],
     lastRefreshAfterMs: null,
+  },
+  teamLineups: {
+    lastAttemptAt: null,
+    lastSuccessAt: null,
+    lastError: null,
+    lastServedStaleAt: null,
+    staleServeCount: 0,
+    consecutiveFailureCount: 0,
+    circuitOpenUntil: null,
   },
   backgroundWarm: {
     lastStartedAt: null,
@@ -546,7 +574,7 @@ const fetchCalendarMatches = async (language: string) => {
 };
 
 const fetchLiveMatch = async (matchId: string, language: string) =>
-  fetchJson<FifaLiveMatch>(
+  fetchJson<FifaLiveMatchCore>(
     `${FIFA_API_BASE_URL}/live/football/${encodeURIComponent(matchId)}?language=${encodeURIComponent(language)}`
   );
 
@@ -751,6 +779,101 @@ const getMatchStatesPayload = async (
   }
 };
 
+const getTeamLineupsPayload = async (
+  language: string,
+): Promise<TeamLineupsResponse> => {
+  const cacheKey = language;
+  fifaSyncDiagnostics.teamLineups.lastAttemptAt = new Date().toISOString();
+
+  if (
+    teamLineupsCache &&
+    teamLineupsCache.key === cacheKey &&
+    teamLineupsCache.expiresAt > Date.now()
+  ) {
+    return teamLineupsCache.payload;
+  }
+
+  if (isCircuitOpen(fifaSyncDiagnostics.teamLineups)) {
+    if (teamLineupsCache?.key === cacheKey) {
+      markStaleServe(fifaSyncDiagnostics.teamLineups);
+      console.warn(`Team lineups circuit open for ${cacheKey}; serving stale cache.`);
+      return teamLineupsCache.payload;
+    }
+
+    throw new Error("FIFA team-lineup fetch temporarily paused after repeated failures.");
+  }
+
+  try {
+    const calendarMatches = await fetchCalendarMatches(language);
+    const matchedFifa = APP_MATCHES.map((match) => ({
+      match,
+      fifaMatch: findCalendarMatchCore(match, calendarMatches, language),
+    }));
+
+    const liveResults = await Promise.all(
+      matchedFifa.map(async ({ fifaMatch }) => {
+        if (!fifaMatch?.IdMatch) return null;
+
+        try {
+          return await fetchLiveMatch(fifaMatch.IdMatch, language);
+        } catch (error) {
+          console.error(
+            `FIFA live endpoint error for lineup of match ${fifaMatch.IdMatch}:`,
+            error,
+          );
+          return null;
+        }
+      }),
+    );
+
+    const liveByMatchId = new Map(
+      liveResults
+        .filter((liveMatch): liveMatch is FifaLiveMatchCore => Boolean(liveMatch?.IdMatch))
+        .map((liveMatch) => [liveMatch.IdMatch, liveMatch]),
+    );
+
+    const lineups = Object.fromEntries(
+      matchedFifa.map(({ match, fifaMatch }) => {
+        const liveMatch = fifaMatch ? liveByMatchId.get(fifaMatch.IdMatch) : undefined;
+
+        return [
+          match.id,
+          {
+            teamA: buildTeamLineupEntryCore(match.teamA.lineup, fifaMatch, liveMatch?.HomeTeam),
+            teamB: buildTeamLineupEntryCore(match.teamB.lineup, fifaMatch, liveMatch?.AwayTeam),
+          },
+        ];
+      }),
+    );
+
+    const payload: TeamLineupsResponse = { language, lineups };
+
+    teamLineupsCache = {
+      key: cacheKey,
+      createdAt: Date.now(),
+      expiresAt: Date.now() + TEAM_LINEUPS_CACHE_TTL_MS,
+      payload,
+    };
+    fifaSyncDiagnostics.teamLineups.lastSuccessAt = new Date().toISOString();
+    resetFailureState(fifaSyncDiagnostics.teamLineups);
+
+    return payload;
+  } catch (error) {
+    recordFailureState(fifaSyncDiagnostics.teamLineups, error);
+
+    if (teamLineupsCache?.key === cacheKey) {
+      markStaleServe(fifaSyncDiagnostics.teamLineups);
+      console.warn(
+        `Serving stale team lineups cache for ${cacheKey} after FIFA error:`,
+        error,
+      );
+      return teamLineupsCache.payload;
+    }
+
+    throw error;
+  }
+};
+
 const getMatchOverlaysPayload = async (
   country: string,
   language: string,
@@ -802,10 +925,10 @@ const warmDefaultFifaCaches = async () => {
   fifaSyncDiagnostics.backgroundWarm.lastStartedAt = new Date().toISOString();
 
   try {
-    const payload = await getMatchOverlaysPayload(
-      DEFAULT_BROADCAST_COUNTRY,
-      DEFAULT_BROADCAST_LANGUAGE,
-    );
+    const [payload] = await Promise.all([
+      getMatchOverlaysPayload(DEFAULT_BROADCAST_COUNTRY, DEFAULT_BROADCAST_LANGUAGE),
+      getTeamLineupsPayload(DEFAULT_BROADCAST_LANGUAGE),
+    ]);
 
     fifaSyncDiagnostics.backgroundWarm.lastSucceededAt =
       new Date().toISOString();
@@ -930,6 +1053,23 @@ app.get("/api/match-overlays", async (req, res) => {
   }
 });
 
+app.get("/api/team-lineups", async (req, res) => {
+  try {
+    const language =
+      typeof req.query.language === "string" && req.query.language.trim()
+        ? req.query.language.trim()
+        : DEFAULT_BROADCAST_LANGUAGE;
+
+    res.set("Cache-Control", "no-store");
+    res.json(await getTeamLineupsPayload(language));
+  } catch (error: any) {
+    console.error("FIFA API Error in /api/team-lineups:", error);
+    res
+      .status(502)
+      .json({ error: error?.message || "Erro ao carregar escalações da FIFA" });
+  }
+});
+
 app.get("/api/fifa-sync-status", (_req, res) => {
   const now = Date.now();
   const broadcastGuideFallbackCount = broadcastGuideCache
@@ -940,6 +1080,11 @@ app.get("/api/fifa-sync-status", (_req, res) => {
   const matchStateFallbackCount = matchStatesCache
     ? Object.values(matchStatesCache.payload.states).filter(
         (state) => state.source === "fallback",
+      ).length
+    : 0;
+  const teamLineupFallbackCount = teamLineupsCache
+    ? Object.values(teamLineupsCache.payload.lineups).filter(
+        (lineup) => lineup.teamA.source === "fallback" || lineup.teamB.source === "fallback",
       ).length
     : 0;
 
@@ -975,6 +1120,20 @@ app.get("/api/fifa-sync-status", (_req, res) => {
           ? Math.max(0, matchStatesCache.expiresAt - now)
           : null,
         fallbackMatchCount: matchStateFallbackCount,
+      },
+      teamLineups: {
+        ...fifaSyncDiagnostics.teamLineups,
+        circuitOpen: isCircuitOpen(fifaSyncDiagnostics.teamLineups),
+        circuitOpenRemainingMs: (() => {
+          const openUntilMs = getCircuitOpenUntilMs(fifaSyncDiagnostics.teamLineups);
+          return openUntilMs ? Math.max(0, openUntilMs - now) : null;
+        })(),
+        cacheKey: teamLineupsCache?.key || null,
+        cacheAgeMs: teamLineupsCache ? now - teamLineupsCache.createdAt : null,
+        cacheExpiresInMs: teamLineupsCache
+          ? Math.max(0, teamLineupsCache.expiresAt - now)
+          : null,
+        fallbackMatchCount: teamLineupFallbackCount,
       },
       backgroundWarm: fifaSyncDiagnostics.backgroundWarm,
     },

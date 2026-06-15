@@ -3,12 +3,13 @@ import { divIcon, type DivIcon, type LatLngBoundsExpression } from "leaflet";
 import { MapContainer, Marker, TileLayer, Tooltip, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import { stadiums } from "../data/tournament";
-import type { Match, Stadium } from "../types";
+import type { Match, Stadium, TeamRef } from "../types";
 import { FlagIcon } from "./FlagIcon";
 
 interface VenueMapViewProps {
   matches: Match[];
   theme: "classic-light" | "stadium-dark";
+  onSelectTeamLineup: (team: TeamRef) => void;
 }
 
 interface VenueWithMatches extends Stadium {
@@ -90,7 +91,7 @@ function FocusSelectedVenue({ venue }: { venue: VenueWithMatches }) {
   return null;
 }
 
-export function VenueMapView({ matches, theme }: VenueMapViewProps) {
+export function VenueMapView({ matches, theme, onSelectTeamLineup }: VenueMapViewProps) {
   const venues = useMemo(() => getVenueData(matches), [matches]);
   const [selectedVenueId, setSelectedVenueId] = useState<string>(venues[0].id);
 
@@ -359,7 +360,11 @@ export function VenueMapView({ matches, theme }: VenueMapViewProps) {
                     <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                       <div className="flex flex-wrap items-center gap-3">
                         <div className="flex items-center gap-2">
-                          <FlagIcon flag={match.teamA.flagSvg} className="h-4 w-6" />
+                          <FlagIcon
+                            flag={match.teamA.flagSvg}
+                            className="h-4 w-6"
+                            onClick={() => onSelectTeamLineup(match.teamA)}
+                          />
                           <span className={`font-anton text-sm uppercase tracking-wide ${headingClasses}`}>
                             {match.teamA.code}
                           </span>
@@ -368,7 +373,11 @@ export function VenueMapView({ matches, theme }: VenueMapViewProps) {
                           x
                         </span>
                         <div className="flex items-center gap-2">
-                          <FlagIcon flag={match.teamB.flagSvg} className="h-4 w-6" />
+                          <FlagIcon
+                            flag={match.teamB.flagSvg}
+                            className="h-4 w-6"
+                            onClick={() => onSelectTeamLineup(match.teamB)}
+                          />
                           <span className={`font-anton text-sm uppercase tracking-wide ${headingClasses}`}>
                             {match.teamB.code}
                           </span>

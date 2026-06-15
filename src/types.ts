@@ -46,6 +46,14 @@ export interface MatchStateEntry {
   updatedAt: string;
 }
 
+export interface LineupEntry {
+  players: Player[];
+  source: "fifa" | "fallback";
+  note: string;
+  fifaMatchId?: string;
+  updatedAt: string;
+}
+
 export interface MatchOverlayEntry {
   broadcastGuide: BroadcastGuideEntry;
   matchState: MatchStateEntry;
@@ -88,6 +96,17 @@ export interface Match {
   matchTime?: string; // live match clock label from FIFA, e.g. "44'"
   countdownTargetSeconds: number; // calculated relative to simulated start or exact countdown
   broadcasters: Broadcaster[];
+}
+
+// Minimal reference to a national team, used to open the standalone
+// Team Lineup page from any flag click across the app.
+export interface TeamRef {
+  name: string;
+  code: string;
+  flagSvg: string;
+  primaryColor: string;
+  secondaryColor: string;
+  group?: string;
 }
 
 export interface CommentaryEvent {

@@ -10,8 +10,10 @@ import {
   MatchStatus,
   MatchOverlayEntry,
   CommentaryEvent,
+  TeamRef,
 } from "../types";
 import matchesData from "../matches.json";
+import type { TeamLineupsMap } from "../utils/teamLineup";
 import { FlagIcon } from "./FlagIcon";
 import { PitchLineup } from "./PitchLineup";
 import { MapPin, Settings, Edit3, Goal, ShieldAlert, CircleDot } from "lucide-react";
@@ -178,12 +180,16 @@ interface MatchDetailViewProps {
   matches: Match[];
   setMatches: Dispatch<SetStateAction<Match[]>>;
   theme: "classic-light" | "stadium-dark";
+  onSelectTeamLineup: (team: TeamRef) => void;
+  teamLineups: TeamLineupsMap;
 }
 
 export function MatchDetailView({
   matches,
   setMatches,
   theme,
+  onSelectTeamLineup,
+  teamLineups,
 }: MatchDetailViewProps) {
   const [matchOverlays, setMatchOverlays] = useState<
     Record<string, MatchOverlayEntry>
@@ -827,6 +833,7 @@ export function MatchDetailView({
                 <FlagIcon
                   flag={currentMatch.teamA.flagSvg}
                   className="w-full h-full object-contain"
+                  onClick={() => onSelectTeamLineup(currentMatch.teamA)}
                 />
               </div>
               <h2
@@ -956,6 +963,7 @@ export function MatchDetailView({
                 <FlagIcon
                   flag={currentMatch.teamB.flagSvg}
                   className="w-full h-full object-contain"
+                  onClick={() => onSelectTeamLineup(currentMatch.teamB)}
                 />
               </div>
               <h2
@@ -1015,6 +1023,47 @@ export function MatchDetailView({
 
       {/* VIEWPORT AREA RESPONDING TO SELECTED TABS */}
       <div className="max-w-5xl mx-auto px-4 mt-6" id="applet-main-body">
+        {/* TAB SWITCHER: Onde Assistir vs Escalação */}
+        <div
+          className={`mb-4 inline-flex items-center gap-1 rounded-lg border p-1 ${
+            theme === "classic-light"
+              ? "bg-slate-100 border-slate-200"
+              : "bg-white/10 border-white/15"
+          }`}
+          id="match-detail-tabs"
+        >
+          <button
+            id="btn-tab-broadcast"
+            onClick={() => setActiveTab("broadcast")}
+            className={`px-3.5 py-2 min-h-11 rounded-md text-[13px] md:text-sm leading-none font-anton transition-all uppercase tracking-wide ${
+              activeTab === "broadcast"
+                ? theme === "classic-light"
+                  ? "bg-white text-slate-950 shadow-sm font-semibold"
+                  : "bg-[#171a1c] text-[#ffd84d] shadow-sm font-semibold"
+                : theme === "classic-light"
+                  ? "text-slate-700 hover:bg-white hover:text-slate-950"
+                  : "text-slate-100 hover:bg-white/10 hover:text-white"
+            }`}
+          >
+            Onde Assistir
+          </button>
+          <button
+            id="btn-tab-lineup"
+            onClick={() => setActiveTab("lineup")}
+            className={`px-3.5 py-2 min-h-11 rounded-md text-[13px] md:text-sm leading-none font-anton transition-all uppercase tracking-wide ${
+              activeTab === "lineup"
+                ? theme === "classic-light"
+                  ? "bg-white text-slate-950 shadow-sm font-semibold"
+                  : "bg-[#171a1c] text-[#ffd84d] shadow-sm font-semibold"
+                : theme === "classic-light"
+                  ? "text-slate-700 hover:bg-white hover:text-slate-950"
+                  : "text-slate-100 hover:bg-white/10 hover:text-white"
+            }`}
+          >
+            Escalação
+          </button>
+        </div>
+
         {/* TAB 1: ONDE ASSISTIR BROADCAST GUIDE */}
         {activeTab === "broadcast" && (
           <div
@@ -1326,7 +1375,11 @@ export function MatchDetailView({
               </div>
 
               {/* Soccer Dynamic Pitch Lineup Board */}
-              <PitchLineup match={currentMatch} />
+              <PitchLineup
+                match={currentMatch}
+                onSelectTeamLineup={onSelectTeamLineup}
+                lineupEntry={teamLineups[currentMatch.id]}
+              />
             </div>
           </div>
         )}
