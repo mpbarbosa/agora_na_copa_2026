@@ -1,13 +1,16 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { FlagIcon } from "./FlagIcon";
 import type {
+  TeamRef,
   TournamentLeadersResponse,
   TournamentPlayerLeader,
   TournamentTeamLeader,
 } from "../types";
+import { resolveTeamRefByCode } from "../utils/teamRef";
 
 interface TournamentLeadersViewProps {
   theme: "classic-light" | "stadium-dark";
+  onSelectTeamLineup: (team: TeamRef) => void;
 }
 
 type LoadStatus = "loading" | "ready" | "error";
@@ -90,9 +93,16 @@ interface PlayerLeaderListProps {
   entries: TournamentPlayerLeader[];
   valueFor: (entry: TournamentPlayerLeader) => string;
   onSelectPlayer: (entry: TournamentPlayerLeader) => void;
+  onOpenTeamView: (entry: TournamentPlayerLeader) => void;
 }
 
-function PlayerLeaderList({ theme, entries, valueFor, onSelectPlayer }: PlayerLeaderListProps) {
+function PlayerLeaderList({
+  theme,
+  entries,
+  valueFor,
+  onSelectPlayer,
+  onOpenTeamView,
+}: PlayerLeaderListProps) {
   if (entries.length === 0) {
     return <EmptyState theme={theme} text="A FIFA ainda não registrou ocorrências suficientes para este ranking." />;
   }
@@ -138,7 +148,15 @@ function PlayerLeaderList({ theme, entries, valueFor, onSelectPlayer }: PlayerLe
 
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2">
-              <FlagIcon flag={entry.teamFlagSvg} className="h-4 w-6 shrink-0" />
+              <button
+                type="button"
+                id={`btn-open-player-team-view-${entry.id}`}
+                onClick={() => onOpenTeamView(entry)}
+                className="shrink-0 rounded transition hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-[#ffd84d]/70"
+                aria-label={`Abrir painel completo de ${entry.teamName}`}
+              >
+                <FlagIcon flag={entry.teamFlagSvg} className="h-4 w-6 shrink-0" />
+              </button>
               <button
                 type="button"
                 onClick={() => onSelectPlayer(entry)}
@@ -153,7 +171,18 @@ function PlayerLeaderList({ theme, entries, valueFor, onSelectPlayer }: PlayerLe
               </button>
             </div>
             <p className={`mt-1 truncate font-archivo text-sm ${mutedClasses}`}>
-              {entry.teamName}
+              <button
+                type="button"
+                id={`btn-open-player-team-name-${entry.id}`}
+                onClick={() => onOpenTeamView(entry)}
+                className={`truncate transition hover:opacity-80 ${
+                  theme === "classic-light"
+                    ? "hover:text-[#065f2c]"
+                    : "hover:text-[#ffd84d]"
+                }`}
+              >
+                {entry.teamName}
+              </button>
               {typeof entry.shirtNumber === "number" ? ` • Camisa ${entry.shirtNumber}` : ""}
             </p>
           </div>
@@ -173,9 +202,17 @@ interface TeamLeaderListProps {
   valueFor: (entry: TournamentTeamLeader) => string;
   detailFor: (entry: TournamentTeamLeader) => string;
   onSelectTeam: (entry: TournamentTeamLeader) => void;
+  onOpenTeamView: (entry: TournamentTeamLeader) => void;
 }
 
-function TeamLeaderList({ theme, entries, valueFor, detailFor, onSelectTeam }: TeamLeaderListProps) {
+function TeamLeaderList({
+  theme,
+  entries,
+  valueFor,
+  detailFor,
+  onSelectTeam,
+  onOpenTeamView,
+}: TeamLeaderListProps) {
   if (entries.length === 0) {
     return <EmptyState theme={theme} text="Ainda não há partidas suficientes para montar este ranking coletivo." />;
   }
@@ -207,9 +244,15 @@ function TeamLeaderList({ theme, entries, valueFor, detailFor, onSelectTeam }: T
           </div>
 
           <div className="flex min-w-0 flex-1 items-center gap-3">
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-white p-2">
+            <button
+              type="button"
+              id={`btn-open-team-view-${entry.id}`}
+              onClick={() => onOpenTeamView(entry)}
+              className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-white p-2 transition hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-[#ffd84d]/70"
+              aria-label={`Abrir painel completo de ${entry.teamName}`}
+            >
               <FlagIcon flag={entry.teamFlagSvg} className="h-full w-full object-contain" />
-            </div>
+            </button>
             <div className="min-w-0">
               <button
                 type="button"
@@ -238,7 +281,16 @@ function TeamLeaderList({ theme, entries, valueFor, detailFor, onSelectTeam }: T
   );
 }
 
-export function TournamentLeadersView({ theme }: TournamentLeadersViewProps) {
+const toLeaderTeamRef = (
+  entry: Pick<TournamentTeamLeader, "teamCode" | "teamName" | "teamFlagSvg">,
+) =>
+  resolveTeamRefByCode(entry.teamCode, {
+    name: entry.teamName,
+    code: entry.teamCode,
+    flagSvg: entry.teamFlagSvg,
+  });
+
+export function TournamentLeadersView({ theme, onSelectTeamLineup }: TournamentLeadersViewProps) {
   const [leaders, setLeaders] = useState<TournamentLeadersResponse | null>(null);
   const [status, setStatus] = useState<LoadStatus>("loading");
   const [selectedPlayer, setSelectedPlayer] = useState<TournamentPlayerLeader | null>(null);
@@ -336,6 +388,7 @@ export function TournamentLeadersView({ theme }: TournamentLeadersViewProps) {
                 entries={leaders.playerLeaders.topScorers}
                 valueFor={(entry) => `${entry.goals} gol${entry.goals === 1 ? "" : "s"}`}
                 onSelectPlayer={setSelectedPlayer}
+                onOpenTeamView={(entry) => onSelectTeamLineup(toLeaderTeamRef(entry))}
               />
             </LeaderCard>
 
@@ -345,6 +398,7 @@ export function TournamentLeadersView({ theme }: TournamentLeadersViewProps) {
                 entries={leaders.playerLeaders.yellowCards}
                 valueFor={(entry) => `${entry.yellowCards} amarelo${entry.yellowCards === 1 ? "" : "s"}`}
                 onSelectPlayer={setSelectedPlayer}
+                onOpenTeamView={(entry) => onSelectTeamLineup(toLeaderTeamRef(entry))}
               />
             </LeaderCard>
 
@@ -354,6 +408,7 @@ export function TournamentLeadersView({ theme }: TournamentLeadersViewProps) {
                 entries={leaders.playerLeaders.redCards}
                 valueFor={(entry) => `${entry.redCards} vermelho${entry.redCards === 1 ? "" : "s"}`}
                 onSelectPlayer={setSelectedPlayer}
+                onOpenTeamView={(entry) => onSelectTeamLineup(toLeaderTeamRef(entry))}
               />
             </LeaderCard>
           </div>
@@ -366,6 +421,7 @@ export function TournamentLeadersView({ theme }: TournamentLeadersViewProps) {
                 valueFor={(entry) => `${entry.goalsFor} gol${entry.goalsFor === 1 ? "" : "s"}`}
                 detailFor={(entry) => `${entry.matchesPlayed} jogo${entry.matchesPlayed === 1 ? "" : "s"} • ${entry.wins} vitória${entry.wins === 1 ? "" : "s"}`}
                 onSelectTeam={setSelectedTeam}
+                onOpenTeamView={(entry) => onSelectTeamLineup(toLeaderTeamRef(entry))}
               />
             </LeaderCard>
 
@@ -376,6 +432,7 @@ export function TournamentLeadersView({ theme }: TournamentLeadersViewProps) {
                 valueFor={(entry) => `${entry.goalsAgainst} sofrido${entry.goalsAgainst === 1 ? "" : "s"}`}
                 detailFor={(entry) => `${entry.cleanSheets} clean sheet${entry.cleanSheets === 1 ? "" : "s"} • ${entry.matchesPlayed} jogo${entry.matchesPlayed === 1 ? "" : "s"}`}
                 onSelectTeam={setSelectedTeam}
+                onOpenTeamView={(entry) => onSelectTeamLineup(toLeaderTeamRef(entry))}
               />
             </LeaderCard>
 
@@ -386,6 +443,7 @@ export function TournamentLeadersView({ theme }: TournamentLeadersViewProps) {
                 valueFor={(entry) => `${entry.cleanSheets} clean sheet${entry.cleanSheets === 1 ? "" : "s"}`}
                 detailFor={(entry) => `${entry.goalsAgainst} gol${entry.goalsAgainst === 1 ? "" : "s"} sofrido${entry.goalsAgainst === 1 ? "" : "s"} • ${entry.matchesPlayed} jogo${entry.matchesPlayed === 1 ? "" : "s"}`}
                 onSelectTeam={setSelectedTeam}
+                onOpenTeamView={(entry) => onSelectTeamLineup(toLeaderTeamRef(entry))}
               />
             </LeaderCard>
           </div>
@@ -455,21 +513,46 @@ export function TournamentLeadersView({ theme }: TournamentLeadersViewProps) {
 
               <div className="min-w-0 pt-1">
                 <div className="flex items-center gap-2">
-                  <FlagIcon flag={selectedPlayer.teamFlagSvg} className="h-5 w-7 shrink-0" />
+                  <button
+                    type="button"
+                    id="btn-open-player-overlay-team-view-flag"
+                    onClick={() => {
+                      onSelectTeamLineup(toLeaderTeamRef(selectedPlayer));
+                      setSelectedPlayer(null);
+                    }}
+                    className="shrink-0 rounded transition hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-[#ffd84d]/70"
+                    aria-label={`Abrir painel completo de ${selectedPlayer.teamName}`}
+                  >
+                    <FlagIcon flag={selectedPlayer.teamFlagSvg} className="h-5 w-7 shrink-0" />
+                  </button>
                   <p className="truncate font-anton text-xl uppercase tracking-wide">
                     {selectedPlayer.name}
                   </p>
                 </div>
-                <p
+                <div
                   className={`mt-2 font-archivo text-sm ${
                     theme === "classic-light" ? "text-slate-600" : "text-slate-300"
                   }`}
                 >
-                  {selectedPlayer.teamName}
+                  <button
+                    type="button"
+                    id="btn-open-player-overlay-team-view-name"
+                    onClick={() => {
+                      onSelectTeamLineup(toLeaderTeamRef(selectedPlayer));
+                      setSelectedPlayer(null);
+                    }}
+                    className={`transition hover:opacity-80 ${
+                      theme === "classic-light"
+                        ? "hover:text-[#065f2c]"
+                        : "hover:text-[#ffd84d]"
+                    }`}
+                  >
+                    {selectedPlayer.teamName}
+                  </button>
                   {typeof selectedPlayer.shirtNumber === "number"
                     ? ` • Camisa ${selectedPlayer.shirtNumber}`
                     : ""}
-                </p>
+                </div>
               </div>
             </div>
 
@@ -621,6 +704,22 @@ export function TournamentLeadersView({ theme }: TournamentLeadersViewProps) {
               Resumo coletivo oficial da campanha de {selectedTeam.teamName}. Clique fora do card ou
               pressione <span className="font-mono">Esc</span> para fechar.
             </div>
+
+            <button
+              type="button"
+              id="btn-open-team-view-from-leaders-overlay"
+              onClick={() => {
+                onSelectTeamLineup(toLeaderTeamRef(selectedTeam));
+                setSelectedTeam(null);
+              }}
+              className={`mt-4 w-full rounded-2xl border px-4 py-3 font-mono text-[11px] font-bold uppercase tracking-wider transition ${
+                theme === "classic-light"
+                  ? "border-slate-200 bg-slate-900 text-white hover:bg-slate-800"
+                  : "border-white/10 bg-white text-slate-950 hover:bg-slate-100"
+              }`}
+            >
+              Abrir painel completo da seleção
+            </button>
           </div>
         </div>
       )}

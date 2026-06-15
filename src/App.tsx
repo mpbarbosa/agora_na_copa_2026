@@ -10,7 +10,7 @@ import { NewsView } from "./components/NewsView";
 import { BracketView } from "./components/BracketView";
 import { FanZoneView } from "./components/FanZoneView";
 import { TeamLineupView } from "./components/TeamLineupView";
-import { findTeamLineup, type TeamLineupsMap } from "./utils/teamLineup";
+import type { TeamLineupsMap } from "./utils/teamLineup";
 import { NAV_ITEMS } from "./navigation";
 import { Sun, Moon } from "lucide-react";
 
@@ -127,7 +127,7 @@ export default function App() {
       case "grupos":
         return <StandingsView matches={matches} theme={theme} onSelectTeamLineup={setLineupTeam} />;
       case "lideres":
-        return <TournamentLeadersView theme={theme} />;
+        return <TournamentLeadersView theme={theme} onSelectTeamLineup={setLineupTeam} />;
       case "estadios":
         return <VenueMapView matches={matches} theme={theme} onSelectTeamLineup={setLineupTeam} />;
       case "noticias":
@@ -250,18 +250,11 @@ export default function App() {
       {/* VIEW AREA RESPONDING TO SELECTED NAV ITEM */}
       <main id="view-container">
         {lineupTeam ? (
-          (() => {
-            const lineupResult = findTeamLineup(lineupTeam.code, matches, teamLineups);
-            return (
-              <TeamLineupView
-                team={lineupTeam}
-                lineup={lineupResult?.players ?? null}
-                lineupSource={lineupResult?.source}
-                theme={theme}
-                onBack={() => setLineupTeam(null)}
-              />
-            );
-          })()
+          <TeamLineupView
+            team={lineupTeam}
+            theme={theme}
+            onBack={() => setLineupTeam(null)}
+          />
         ) : (
           renderActiveView()
         )}

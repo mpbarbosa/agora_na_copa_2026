@@ -13,6 +13,7 @@ import {
 import type { FifaLiveMatch as FifaLiveMatchCore } from "./fifa-sync-core";
 import { triviaQuestions } from "./src/data/questions";
 import matchesData from "./src/matches.json";
+import { computeStandings, groupStandings } from "./src/standings";
 import type {
   Broadcaster,
   BroadcastGuideEntry,
@@ -24,7 +25,11 @@ import type {
   TournamentLeadersResponse,
   TournamentPlayerLeader,
   TournamentTeamLeader,
+  TeamRef,
+  TeamViewMatchSummary,
+  TeamViewResponse,
   TriviaQuestion,
+  StandingsRow,
 } from "./src/types";
 
 dotenv.config();
@@ -356,6 +361,32 @@ const getTournamentLeadersNote = (source: TournamentLeadersResponse["source"]) =
   return "Ranking calculado com mix de dados oficiais da FIFA e fallback local.";
 };
 
+interface AggregatedTournamentLeaders {
+  updatedAt: string;
+  source: TournamentLeadersResponse["source"];
+  note: string;
+  playerLeaders: TournamentPlayerLeader[];
+  teamLeaders: TournamentTeamLeader[];
+}
+
+const TEAM_VIEW_REFRESH_INTERVAL_MS = 5 * 60 * 1000;
+
+const toTeamRef = (team: {
+  name: string;
+  code: string;
+  flagSvg: string;
+  primaryColor: string;
+  secondaryColor: string;
+  group?: string;
+}): TeamRef => ({
+  name: team.name,
+  code: team.code,
+  flagSvg: team.flagSvg,
+  primaryColor: team.primaryColor,
+  secondaryColor: team.secondaryColor,
+  group: team.group,
+});
+
 const sortPlayerLeaders = (
   leaders: TournamentPlayerLeader[],
   metric: keyof Pick<TournamentPlayerLeader, "goals" | "yellowCards" | "redCards">,
@@ -370,12 +401,11 @@ const sortPlayerLeaders = (
       if (nameDiff !== 0) return nameDiff;
 
       return a.teamName.localeCompare(b.teamName, "pt-BR");
-    })
-    .slice(0, TOURNAMENT_LEADER_LIMIT);
+    });
 
-const getTournamentLeadersPayload = async (
+const aggregateTournamentLeaders = async (
   language: string,
-): Promise<TournamentLeadersResponse> => {
+): Promise<AggregatedTournamentLeaders> => {
   const [matchStatesPayload, lineupsPayload] = await Promise.all([
     getMatchStatesPayload(language),
     getTeamLineupsPayload(language),
@@ -470,45 +500,77 @@ const getTournamentLeadersPayload = async (
     updatedAt,
     source,
     note: getTournamentLeadersNote(source),
+    playerLeaders: Array.from(playerLeaders.values()),
+    teamLeaders: teamLeaderRows,
+  };
+};
+
+const sortBestAttackLeaders = (leaders: TournamentTeamLeader[]) =>
+  [...leaders]
+    .sort((a, b) => {
+      const goalsDiff = b.goalsFor - a.goalsFor;
+      if (goalsDiff !== 0) return goalsDiff;
+
+      const matchesDiff = a.matchesPlayed - b.matchesPlayed;
+      if (matchesDiff !== 0) return matchesDiff;
+
+      return a.teamName.localeCompare(b.teamName, "pt-BR");
+    })
+    .slice(0, TOURNAMENT_LEADER_LIMIT);
+
+const sortBestDefenseLeaders = (leaders: TournamentTeamLeader[]) =>
+  [...leaders]
+    .sort((a, b) => {
+      const concededDiff = a.goalsAgainst - b.goalsAgainst;
+      if (concededDiff !== 0) return concededDiff;
+
+      const cleanSheetDiff = b.cleanSheets - a.cleanSheets;
+      if (cleanSheetDiff !== 0) return cleanSheetDiff;
+
+      return a.teamName.localeCompare(b.teamName, "pt-BR");
+    })
+    .slice(0, TOURNAMENT_LEADER_LIMIT);
+
+const sortCleanSheetLeaders = (leaders: TournamentTeamLeader[]) =>
+  [...leaders]
+    .sort((a, b) => {
+      const cleanSheetDiff = b.cleanSheets - a.cleanSheets;
+      if (cleanSheetDiff !== 0) return cleanSheetDiff;
+
+      const concededDiff = a.goalsAgainst - b.goalsAgainst;
+      if (concededDiff !== 0) return concededDiff;
+
+      return a.teamName.localeCompare(b.teamName, "pt-BR");
+    })
+    .slice(0, TOURNAMENT_LEADER_LIMIT);
+
+const getTournamentLeadersPayload = async (
+  language: string,
+): Promise<TournamentLeadersResponse> => {
+  const aggregated = await aggregateTournamentLeaders(language);
+
+  return {
+    updatedAt: aggregated.updatedAt,
+    source: aggregated.source,
+    note: aggregated.note,
     playerLeaders: {
-      topScorers: sortPlayerLeaders(Array.from(playerLeaders.values()), "goals"),
-      yellowCards: sortPlayerLeaders(Array.from(playerLeaders.values()), "yellowCards"),
-      redCards: sortPlayerLeaders(Array.from(playerLeaders.values()), "redCards"),
+      topScorers: sortPlayerLeaders(aggregated.playerLeaders, "goals").slice(
+       0,
+       TOURNAMENT_LEADER_LIMIT,
+      ),
+      yellowCards: sortPlayerLeaders(aggregated.playerLeaders, "yellowCards").slice(
+       0,
+       TOURNAMENT_LEADER_LIMIT,
+      ),
+      redCards: sortPlayerLeaders(aggregated.playerLeaders, "redCards").slice(
+       0,
+       TOURNAMENT_LEADER_LIMIT,
+      ),
     },
     teamLeaders: {
-      bestAttack: [...teamLeaderRows]
-        .sort((a, b) => {
-          const goalsDiff = b.goalsFor - a.goalsFor;
-          if (goalsDiff !== 0) return goalsDiff;
-
-          const matchesDiff = a.matchesPlayed - b.matchesPlayed;
-          if (matchesDiff !== 0) return matchesDiff;
-
-          return a.teamName.localeCompare(b.teamName, "pt-BR");
-        })
-        .slice(0, TOURNAMENT_LEADER_LIMIT),
-      bestDefense: [...teamLeaderRows]
-        .sort((a, b) => {
-          const concededDiff = a.goalsAgainst - b.goalsAgainst;
-          if (concededDiff !== 0) return concededDiff;
-
-          const cleanSheetDiff = b.cleanSheets - a.cleanSheets;
-          if (cleanSheetDiff !== 0) return cleanSheetDiff;
-
-          return a.teamName.localeCompare(b.teamName, "pt-BR");
-        })
-        .slice(0, TOURNAMENT_LEADER_LIMIT),
-      cleanSheets: [...teamLeaderRows]
-        .sort((a, b) => {
-          const cleanSheetDiff = b.cleanSheets - a.cleanSheets;
-          if (cleanSheetDiff !== 0) return cleanSheetDiff;
-
-          const concededDiff = a.goalsAgainst - b.goalsAgainst;
-          if (concededDiff !== 0) return concededDiff;
-
-          return a.teamName.localeCompare(b.teamName, "pt-BR");
-        })
-        .slice(0, TOURNAMENT_LEADER_LIMIT),
+      bestAttack: sortBestAttackLeaders(aggregated.teamLeaders),
+      bestDefense: sortBestDefenseLeaders(aggregated.teamLeaders),
+      cleanSheets: sortCleanSheetLeaders(aggregated.teamLeaders),
     },
   };
 };
@@ -1177,6 +1239,271 @@ const getMatchOverlaysPayload = async (
   };
 };
 
+const TEAM_STANDINGS_BY_CODE = (() => {
+  const entries = new Map<string, TeamViewResponse["standings"]>();
+  groupStandings(computeStandings(APP_MATCHES)).forEach(({ rows }) => {
+    rows.forEach((row, index) => {
+      entries.set(row.code, {
+        rank: index + 1,
+        groupSize: rows.length,
+        row,
+      });
+    });
+  });
+  return entries;
+})();
+
+interface TeamMatchReference {
+  match: Match;
+  team: Match["teamA"];
+  opponent: Match["teamA"];
+  isTeamA: boolean;
+}
+
+const getMatchKickoffMs = (match: Match) => {
+  const kickoffMs = new Date(match.kickoffTimestamp).getTime();
+  return Number.isNaN(kickoffMs) ? 0 : kickoffMs;
+};
+
+const getTeamViewNote = (source: TeamViewResponse["source"]) => {
+  if (source === "fifa") {
+    return "Painel da seleção abastecido por dados oficiais da FIFA sempre que disponíveis.";
+  }
+
+  if (source === "fallback") {
+    return "Painel da seleção usando dados locais do aplicativo enquanto a FIFA não publica todos os detalhes.";
+  }
+
+  return "Painel da seleção combinando dados oficiais da FIFA com fallback local do aplicativo.";
+};
+
+const buildFallbackLineupEntry = (players: LineupEntry["players"]): LineupEntry => ({
+  players,
+  source: "fallback",
+  note: "Escalação estimada a partir da base local do aplicativo.",
+  updatedAt: new Date().toISOString(),
+});
+
+const resolveTeamViewSource = (
+  sources: Array<BroadcastGuideEntry["source"] | MatchStateEntry["source"] | TeamViewResponse["source"] | undefined>,
+): TeamViewResponse["source"] => {
+  let hasMixed = false;
+  const baseSources = new Set<"fifa" | "fallback">();
+
+  sources.forEach((source) => {
+    if (!source) return;
+    if (source === "mixed") {
+      hasMixed = true;
+      return;
+    }
+    baseSources.add(source);
+  });
+
+  if (hasMixed || baseSources.size > 1) {
+    return "mixed";
+  }
+
+  if (baseSources.size === 1) {
+    return baseSources.has("fifa") ? "fifa" : "fallback";
+  }
+
+  return "fallback";
+};
+
+const findTeamRefByCode = (teamCode: string): TeamRef | null => {
+  const standingsEntry = TEAM_STANDINGS_BY_CODE.get(teamCode)?.row;
+  if (standingsEntry) {
+    return toTeamRef(standingsEntry);
+  }
+
+  for (const match of APP_MATCHES) {
+    if (match.teamA.code === teamCode) {
+      return toTeamRef(match.teamA);
+    }
+    if (match.teamB.code === teamCode) {
+      return toTeamRef(match.teamB);
+    }
+  }
+
+  return null;
+};
+
+const getTeamMatchReferences = (teamCode: string): TeamMatchReference[] =>
+  APP_MATCHES.filter((match) => match.teamA.code === teamCode || match.teamB.code === teamCode).map(
+    (match) => {
+      const isTeamA = match.teamA.code === teamCode;
+      return {
+        match,
+        team: isTeamA ? match.teamA : match.teamB,
+        opponent: isTeamA ? match.teamB : match.teamA,
+        isTeamA,
+      };
+    },
+  );
+
+const buildTeamViewMatchSummary = (
+  reference: TeamMatchReference,
+  state: MatchStateEntry | undefined,
+  guide: BroadcastGuideEntry | undefined,
+): TeamViewMatchSummary => ({
+  matchId: reference.match.id,
+  team: toTeamRef(reference.team),
+  opponent: toTeamRef(reference.opponent),
+  stageName: reference.match.stageName,
+  stadiumName: reference.match.stadiumName,
+  city: reference.match.city,
+  kickoffTime: reference.match.kickoffTime,
+  kickoffDate: reference.match.kickoffDate,
+  kickoffTimestamp: reference.match.kickoffTimestamp,
+  officialMatchUrl: reference.match.officialMatchUrl,
+  status: state?.status ?? reference.match.status,
+  matchTime: state?.matchTime,
+  score: state?.score
+    ? {
+        team: reference.isTeamA ? state.score.teamA : state.score.teamB,
+        opponent: reference.isTeamA ? state.score.teamB : state.score.teamA,
+      }
+    : undefined,
+  broadcasters: guide?.broadcasters ?? reference.match.broadcasters,
+  source: state?.source ?? "fallback",
+  note: state?.note ?? "Dados locais do aplicativo.",
+  fifaMatchId: state?.fifaMatchId ?? guide?.fifaMatchId,
+  updatedAt: state?.updatedAt ?? guide?.updatedAt ?? new Date().toISOString(),
+});
+
+const buildTeamViewPayload = async (
+  teamCode: string,
+  country: string,
+  language: string,
+): Promise<TeamViewResponse | null> => {
+  const normalizedTeamCode = teamCode.trim().toUpperCase();
+  const team = findTeamRefByCode(normalizedTeamCode);
+  if (!team) {
+    return null;
+  }
+
+  const [matchStatesPayload, teamLineupsPayload, broadcastGuidePayload, aggregatedLeaders] =
+    await Promise.all([
+      getMatchStatesPayload(language),
+      getTeamLineupsPayload(language),
+      getBroadcastGuidePayload(country, language),
+      aggregateTournamentLeaders(language),
+    ]);
+
+  const standings = TEAM_STANDINGS_BY_CODE.get(normalizedTeamCode) ?? null;
+  const teamMatches = getTeamMatchReferences(normalizedTeamCode).sort(
+    (a, b) => getMatchKickoffMs(a.match) - getMatchKickoffMs(b.match),
+  );
+
+  const currentMatchReference =
+    teamMatches.find(
+      (reference) => matchStatesPayload.states[reference.match.id]?.status === "LIVE",
+    ) ?? null;
+  const nextMatchReference =
+    teamMatches.find(
+      (reference) => matchStatesPayload.states[reference.match.id]?.status === "PRE_GAME",
+    ) ?? null;
+  const lastMatchReference =
+    [...teamMatches]
+      .reverse()
+      .find(
+        (reference) => matchStatesPayload.states[reference.match.id]?.status === "FINISHED",
+      ) ?? null;
+
+  const currentMatch = currentMatchReference
+    ? buildTeamViewMatchSummary(
+        currentMatchReference,
+        matchStatesPayload.states[currentMatchReference.match.id],
+        broadcastGuidePayload.guides[currentMatchReference.match.id],
+      )
+    : null;
+  const nextMatch = nextMatchReference
+    ? buildTeamViewMatchSummary(
+        nextMatchReference,
+        matchStatesPayload.states[nextMatchReference.match.id],
+        broadcastGuidePayload.guides[nextMatchReference.match.id],
+      )
+    : null;
+  const lastMatch = lastMatchReference
+    ? buildTeamViewMatchSummary(
+        lastMatchReference,
+        matchStatesPayload.states[lastMatchReference.match.id],
+        broadcastGuidePayload.guides[lastMatchReference.match.id],
+      )
+    : null;
+
+  const lineupReference =
+    currentMatchReference ?? nextMatchReference ?? lastMatchReference ?? teamMatches[0] ?? null;
+  const lineup = lineupReference
+    ? lineupReference.isTeamA
+      ? teamLineupsPayload.lineups[lineupReference.match.id]?.teamA ??
+        buildFallbackLineupEntry(lineupReference.team.lineup)
+      : teamLineupsPayload.lineups[lineupReference.match.id]?.teamB ??
+        buildFallbackLineupEntry(lineupReference.team.lineup)
+    : null;
+  const featuredGuideReference = currentMatchReference ?? nextMatchReference ?? null;
+  const broadcastGuide = featuredGuideReference
+    ? broadcastGuidePayload.guides[featuredGuideReference.match.id] ?? null
+    : null;
+
+  const topScorers = sortPlayerLeaders(
+    aggregatedLeaders.playerLeaders.filter((leader) => leader.teamCode === normalizedTeamCode),
+    "goals",
+  ).slice(0, 3);
+  const yellowCards = sortPlayerLeaders(
+    aggregatedLeaders.playerLeaders.filter((leader) => leader.teamCode === normalizedTeamCode),
+    "yellowCards",
+  ).slice(0, 3);
+  const redCards = sortPlayerLeaders(
+    aggregatedLeaders.playerLeaders.filter((leader) => leader.teamCode === normalizedTeamCode),
+    "redCards",
+  ).slice(0, 3);
+  const teamSummary =
+    aggregatedLeaders.teamLeaders.find((leader) => leader.teamCode === normalizedTeamCode) ??
+    null;
+
+  const updatedAtCandidates = [
+    lineup?.updatedAt,
+    currentMatch?.updatedAt,
+    nextMatch?.updatedAt,
+    lastMatch?.updatedAt,
+    broadcastGuide?.updatedAt,
+    aggregatedLeaders.updatedAt,
+  ].filter(Boolean) as string[];
+  const source = resolveTeamViewSource([
+    lineup?.source,
+    currentMatch?.source,
+    nextMatch?.source,
+    lastMatch?.source,
+    broadcastGuide?.source,
+    aggregatedLeaders.source,
+  ]);
+
+  return {
+    updatedAt: updatedAtCandidates.sort().at(-1) ?? new Date().toISOString(),
+    refreshAfterMs: Math.min(
+      matchStatesPayload.refreshAfterMs,
+      teamLineupsPayload.refreshAfterMs,
+      TEAM_VIEW_REFRESH_INTERVAL_MS,
+    ),
+    source,
+    note: getTeamViewNote(source),
+    team,
+    standings,
+    currentMatch,
+    nextMatch,
+    lastMatch,
+    lineup,
+    leaders: {
+      topScorers,
+      yellowCards,
+      redCards,
+      teamSummary,
+    },
+    broadcastGuide,
+  };
+};
+
 const scheduleBackgroundWarm = (delayMs: number) => {
   if (backgroundWarmTimeout) {
     clearTimeout(backgroundWarmTimeout);
@@ -1360,6 +1687,33 @@ app.get("/api/tournament-leaders", async (req, res) => {
     res
       .status(502)
       .json({ error: error?.message || "Erro ao carregar líderes do torneio" });
+  }
+});
+
+app.get("/api/team-view/:teamCode", async (req, res) => {
+  try {
+    const country =
+      typeof req.query.country === "string" && req.query.country.trim()
+        ? req.query.country.trim().toUpperCase()
+        : DEFAULT_BROADCAST_COUNTRY;
+    const language =
+      typeof req.query.language === "string" && req.query.language.trim()
+        ? req.query.language.trim()
+        : DEFAULT_BROADCAST_LANGUAGE;
+
+    const payload = await buildTeamViewPayload(req.params.teamCode, country, language);
+    if (!payload) {
+      res.status(404).json({ error: "Seleção não encontrada" });
+      return;
+    }
+
+    res.set("Cache-Control", "no-store");
+    res.json(payload);
+  } catch (error: any) {
+    console.error("FIFA API Error in /api/team-view/:teamCode:", error);
+    res
+      .status(502)
+      .json({ error: error?.message || "Erro ao carregar painel completo da seleção" });
   }
 });
 

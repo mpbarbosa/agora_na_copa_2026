@@ -231,3 +231,53 @@ export interface TournamentLeadersResponse {
     cleanSheets: TournamentTeamLeader[];
   };
 }
+
+export interface TeamViewStandingsEntry {
+  rank: number;
+  groupSize: number;
+  row: StandingsRow;
+}
+
+export interface TeamViewMatchSummary {
+  matchId: string;
+  team: TeamRef;
+  opponent: TeamRef;
+  stageName: string;
+  stadiumName: string;
+  city: string;
+  kickoffTime: string;
+  kickoffDate: string;
+  kickoffTimestamp: string;
+  officialMatchUrl?: string;
+  status: MatchStatus;
+  matchTime?: string;
+  score?: {
+    team: number;
+    opponent: number;
+  };
+  broadcasters: Broadcaster[];
+  source: "fifa" | "fallback";
+  note: string;
+  fifaMatchId?: string;
+  updatedAt: string;
+}
+
+export interface TeamViewResponse {
+  updatedAt: string;
+  refreshAfterMs: number;
+  source: "fifa" | "fallback" | "mixed";
+  note: string;
+  team: TeamRef;
+  standings: TeamViewStandingsEntry | null;
+  currentMatch: TeamViewMatchSummary | null;
+  nextMatch: TeamViewMatchSummary | null;
+  lastMatch: TeamViewMatchSummary | null;
+  lineup: LineupEntry | null;
+  leaders: {
+    topScorers: TournamentPlayerLeader[];
+    yellowCards: TournamentPlayerLeader[];
+    redCards: TournamentPlayerLeader[];
+    teamSummary: TournamentTeamLeader | null;
+  };
+  broadcastGuide: BroadcastGuideEntry | null;
+}
