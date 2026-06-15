@@ -103,18 +103,25 @@ test.describe("Navigation shell", () => {
   });
 
   test("scoreboard group badge opens Grupos focused on the current group", async ({ page }) => {
+    await page.route("**/api/match-overlays", async (route) => {
+      await route.fulfill({
+        contentType: "application/json",
+        body: JSON.stringify({
+          refreshAfterMs: 60000,
+          overlays: {},
+        }),
+      });
+    });
+
     await page.goto("/");
-
-    const groupLabel = (await page.locator("#scoreboard-group-label").textContent())?.trim();
-    expect(groupLabel).toBeTruthy();
-
-    const groupId = groupLabel!.replace(/\s+/g, "-").toLowerCase();
+    await page.click("#match-selector-chips-finished #btn-match-bra-mar-2026");
+    await expect(page.locator("#scoreboard-group-label")).toHaveText("Grupo C");
 
     await page.click("#scoreboard-group-label");
 
     await expect(page.locator("#btn-nav-grupos")).toHaveClass(/font-semibold/);
     await expect(page.locator("#standings-view")).toBeVisible();
-    await expect(page.locator(`#standings-group-${groupId}`)).toHaveAttribute(
+    await expect(page.locator("#standings-group-grupo-c")).toHaveAttribute(
       "data-focused",
       "true",
     );
