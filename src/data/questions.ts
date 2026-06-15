@@ -37,9 +37,9 @@ export const triviaQuestions: TriviaQuestion[] = [
     id: "broadcast-core",
     category: "Transmissão",
     question: "Qual aba do app concentra o guia de onde assistir e o feed de lances?",
-    options: ["Notícias", "Partidas", "Fan Zone", "Estádios"],
+    options: ["Notícias", "Ao Vivo", "Fan Zone", "Estádios"],
     correctOptionIndex: 1,
     explanation:
-      "A aba Partidas reúne o cronômetro, as emissoras e os lances oficiais da FIFA.",
+      "A aba Ao Vivo reúne o cronômetro, as emissoras e os lances oficiais da FIFA.",
   },
 ];

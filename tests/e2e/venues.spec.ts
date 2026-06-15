@@ -49,4 +49,16 @@ test.describe("Venue map view (Estádios)", () => {
 
     expect(consoleErrors).toEqual([]);
   });
+
+  test("shows the Rotas do Mundial map on mobile", async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 812 });
+    await page.goto("/");
+    await page.click("#btn-nav-estadios");
+
+    await expect(page.locator("#venue-map-view")).toBeVisible();
+    await expect(page.locator("#venue-map-canvas")).toBeVisible();
+    await expect(page.locator("#venue-map-canvas .leaflet-container")).toBeVisible();
+    await expect(page.locator("#venue-mobile-list")).toBeVisible();
+    await expect(page.locator("#venue-card-vancouver")).toBeVisible();
+  });
 });

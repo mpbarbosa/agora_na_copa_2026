@@ -14,7 +14,7 @@ const NAV_VIEW_IDS: Record<string, string> = {
 };
 
 test.describe("Navigation shell", () => {
-  test("loads with the Partidas view by default", async ({ page }) => {
+  test("loads with the Ao Vivo view by default", async ({ page }) => {
     const consoleErrors: string[] = [];
     page.on("console", (msg) => {
       if (msg.type() === "error") consoleErrors.push(msg.text());

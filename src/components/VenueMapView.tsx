@@ -167,7 +167,7 @@ export function VenueMapView({ matches, theme, onSelectTeamLineup }: VenueMapVie
           </div>
 
           <div
-            className={`venue-map-surface ${themeClass} mt-4 hidden overflow-hidden rounded-[28px] border md:block ${
+            className={`venue-map-surface ${themeClass} mt-4 overflow-hidden rounded-[28px] border ${
               theme === "classic-light"
                 ? "border-slate-200 bg-slate-50"
                 : "border-white/10 bg-[#0d1011]"
@@ -181,7 +181,7 @@ export function VenueMapView({ matches, theme, onSelectTeamLineup }: VenueMapVie
               maxZoom={8}
               scrollWheelZoom
               zoomSnap={0.25}
-              className="h-[400px] w-full lg:h-[480px] 2xl:h-[560px]"
+              className="h-[320px] w-full sm:h-[360px] lg:h-[480px] 2xl:h-[560px]"
             >
               <TileLayer
                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
@@ -220,7 +220,7 @@ export function VenueMapView({ matches, theme, onSelectTeamLineup }: VenueMapVie
             </MapContainer>
           </div>
 
-          <p className={`mt-3 hidden font-archivo text-sm leading-6 md:block ${mutedClasses}`}>
+          <p className={`mt-3 font-archivo text-sm leading-6 ${mutedClasses}`}>
             Explore as 16 sedes em escala real, com zoom livre entre Canadá, Estados
             Unidos e México.
           </p>
