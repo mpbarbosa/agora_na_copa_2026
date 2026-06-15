@@ -36,6 +36,7 @@ If port `3000` is already in use, the dev server automatically moves to the next
 - `npm run build` - build the frontend and bundle the server
 - `npm start` - run the production build
 - `npm run lint` - type-check the project with TypeScript
+- `npm run test:unit` - run the Node test suite for FIFA sync logic
 - `npm run test:e2e` - run the Playwright zsh update end-to-end test
 
 ## Deployment helpers

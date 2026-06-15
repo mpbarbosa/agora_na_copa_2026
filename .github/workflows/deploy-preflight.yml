@@ -1,0 +1,74 @@
+name: Deploy Preflight
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-preflight-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  preflight:
+    name: Production deploy preflight
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Resolve Playwright Chromium path
+        id: playwright-path
+        run: |
+          echo "executable_path=$(node -e 'const { chromium } = require(\"playwright\"); process.stdout.write(chromium.executablePath())')" >> "$GITHUB_OUTPUT"
+
+      - name: Run deploy preflight
+        env:
+          PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH: ${{ steps.playwright-path.outputs.executable_path }}
+        run: npm run deploy:preflight
+
+      - name: Upload preflight logs on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: deploy-preflight-logs
+          path: |
+            /tmp/agora-na-copa-preflight.log
+            /tmp/agora-na-copa-preflight-install.log
+            /tmp/agora-na-copa-preflight-build.log
+            /tmp/agora-na-copa-preflight-e2e.log
+          if-no-files-found: ignore
+
+      - name: Upload Playwright report on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: deploy-preflight-playwright-report
+          path: playwright-report
+          if-no-files-found: ignore
+
+      - name: Upload Playwright test results on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: deploy-preflight-test-results
+          path: test-results
+          if-no-files-found: ignore
