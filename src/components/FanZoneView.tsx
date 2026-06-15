@@ -100,8 +100,8 @@ export function FanZoneView({ theme }: FanZoneViewProps) {
       ? "bg-slate-50 border-slate-200"
       : "bg-white/5 border-white/10";
   const headingClasses = theme === "classic-light" ? "text-slate-900" : "text-white";
-  const mutedClasses = theme === "classic-light" ? "text-slate-500" : "text-slate-300";
-  const subtleClasses = theme === "classic-light" ? "text-slate-400" : "text-slate-500";
+  const mutedClasses = theme === "classic-light" ? "text-slate-600" : "text-slate-300";
+  const subtleClasses = theme === "classic-light" ? "text-slate-500" : "text-slate-400";
   const idleButtonClasses =
     theme === "classic-light"
       ? "border-slate-200 bg-white text-slate-700 hover:border-slate-300"
@@ -235,7 +235,7 @@ export function FanZoneView({ theme }: FanZoneViewProps) {
                       ? idleButtonClasses
                       : shouldHighlightCorrect
                         ? theme === "classic-light"
-                          ? "border-[#009c3b] bg-[#009c3b]/8 text-[#007a2f]"
+                          ? "border-[#009c3b] bg-[#009c3b]/10 text-[#065f2c]"
                           : "border-[#00e476] bg-[#00e476]/10 text-[#a7e6bf]"
                         : isSelected
                           ? theme === "classic-light"
@@ -264,7 +264,7 @@ export function FanZoneView({ theme }: FanZoneViewProps) {
                       className={`font-mono text-[11px] uppercase tracking-wider ${
                         isCorrect
                           ? theme === "classic-light"
-                            ? "text-[#007a2f]"
+                            ? "text-[#065f2c]"
                             : "text-[#a7e6bf]"
                           : theme === "classic-light"
                             ? "text-[#9f1239]"
@@ -373,7 +373,7 @@ export function FanZoneView({ theme }: FanZoneViewProps) {
                   className={`font-mono text-[11px] uppercase tracking-wider ${
                     lastPenaltyResult.goal
                       ? theme === "classic-light"
-                        ? "text-[#007a2f]"
+                        ? "text-[#065f2c]"
                         : "text-[#a7e6bf]"
                       : theme === "classic-light"
                         ? "text-[#9f1239]"

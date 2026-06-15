@@ -3,7 +3,6 @@ import packageInfo from "../package.json";
 import matchesData from "./matches.json";
 import type { Match } from "./types";
 import { MatchDetailView } from "./components/MatchDetailView";
-import { ComingSoonView } from "./components/ComingSoonView";
 import { StandingsView } from "./components/StandingsView";
 import { VenueMapView } from "./components/VenueMapView";
 import { NewsView } from "./components/NewsView";
@@ -23,6 +22,25 @@ export default function App() {
 
   const activeNavItem =
     NAV_ITEMS.find((item) => item.id === activeNavId) || NAV_ITEMS[0];
+
+  const renderActiveView = () => {
+    switch (activeNavItem.id) {
+      case "partidas":
+        return <MatchDetailView matches={matches} setMatches={setMatches} theme={theme} />;
+      case "grupos":
+        return <StandingsView matches={matches} theme={theme} />;
+      case "estadios":
+        return <VenueMapView matches={matches} theme={theme} />;
+      case "noticias":
+        return <NewsView theme={theme} />;
+      case "chaveamento":
+        return <BracketView theme={theme} />;
+      case "fanzone":
+        return <FanZoneView theme={theme} />;
+      default:
+        return <MatchDetailView matches={matches} setMatches={setMatches} theme={theme} />;
+    }
+  };
 
   return (
     <div
@@ -123,23 +141,7 @@ export default function App() {
       </header>
 
       {/* VIEW AREA RESPONDING TO SELECTED NAV ITEM */}
-      <main id="view-container">
-        {activeNavItem.status === "live" && activeNavItem.id === "partidas" ? (
-          <MatchDetailView matches={matches} setMatches={setMatches} theme={theme} />
-        ) : activeNavItem.status === "live" && activeNavItem.id === "grupos" ? (
-          <StandingsView matches={matches} theme={theme} />
-        ) : activeNavItem.status === "live" && activeNavItem.id === "estadios" ? (
-          <VenueMapView matches={matches} theme={theme} />
-        ) : activeNavItem.status === "live" && activeNavItem.id === "noticias" ? (
-          <NewsView theme={theme} />
-        ) : activeNavItem.status === "live" && activeNavItem.id === "chaveamento" ? (
-          <BracketView theme={theme} />
-        ) : activeNavItem.status === "live" && activeNavItem.id === "fanzone" ? (
-          <FanZoneView theme={theme} />
-        ) : (
-          <ComingSoonView theme={theme} item={activeNavItem} />
-        )}
-      </main>
+      <main id="view-container">{renderActiveView()}</main>
 
       {/* FOOTER METADATA DETAIL */}
       <footer

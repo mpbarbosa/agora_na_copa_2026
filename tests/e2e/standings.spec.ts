@@ -54,6 +54,41 @@ test.describe("Standings view (Grupos)", () => {
     expect(consoleErrors).toEqual([]);
   });
 
+  test("manual simulator events update Grupos immediately", async ({ page }) => {
+    await page.route("**/api/match-overlays", async (route) => {
+      await route.fulfill({
+        contentType: "application/json",
+        body: JSON.stringify({
+          refreshAfterMs: 60000,
+          overlays: {},
+        }),
+      });
+    });
+
+    await page.goto("/");
+    await page.click("#match-selector-chips-finished #btn-match-bra-mar-2026");
+    await page.click("#btn-edit-match");
+    await page.fill("#input-kickoff-time", "21:00");
+    await page.fill("#input-countdown-seconds", "600");
+    await page.click("#btn-apply-match-config");
+
+    await page.click("#btn-sim-start-live");
+    await page.click("#btn-sim-goal-a");
+    await page.click("#btn-sim-yellow-a");
+    await page.click("#btn-sim-red-b");
+
+    await expect(page.locator("#match-incidents-panel")).toContainText("GOL");
+    await expect(page.locator("#match-incidents-panel")).toContainText("AM");
+    await expect(page.locator("#match-incidents-panel")).toContainText("VM");
+
+    await page.click("#btn-nav-grupos");
+
+    await expect(page.locator("#standings-cell-bra-played")).toHaveText("1");
+    await expect(page.locator("#standings-cell-bra-points")).toHaveText("3");
+    await expect(page.locator("#standings-cell-bra-goalsFor")).toHaveText("1");
+    await expect(page.locator("#standings-cell-mar-points")).toHaveText("0");
+  });
+
   test("renders all 12 group tables with headers and rows", async ({ page }) => {
     const consoleErrors: string[] = [];
     page.on("console", (msg) => {

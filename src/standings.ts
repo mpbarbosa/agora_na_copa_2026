@@ -28,7 +28,11 @@ function addResult(tally: MatchTally, scored: number, conceded: number): void {
 }
 
 function countsForStandings(match: Match) {
-  return (match.status === "LIVE" || match.status === "FINISHED") && match.score;
+  return (
+    match.stageName === "Group Stage" &&
+    (match.status === "LIVE" || match.status === "FINISHED") &&
+    match.score
+  );
 }
 
 // Reconciles the tournament.ts seed roster with any scored LIVE/FINISHED

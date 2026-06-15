@@ -113,11 +113,11 @@ export function BracketView({ theme }: BracketViewProps) {
       ? "bg-white border-slate-200"
       : "bg-[#161919] border-white/10";
   const headingClasses = theme === "classic-light" ? "text-slate-900" : "text-white";
-  const mutedClasses = theme === "classic-light" ? "text-slate-500" : "text-slate-300";
-  const subtleClasses = theme === "classic-light" ? "text-slate-400" : "text-slate-500";
+  const mutedClasses = theme === "classic-light" ? "text-slate-600" : "text-slate-300";
+  const subtleClasses = theme === "classic-light" ? "text-slate-500" : "text-slate-400";
   const activePickClasses =
     theme === "classic-light"
-      ? "border-[#009c3b] bg-[#009c3b]/8 text-[#007a2f]"
+      ? "border-[#009c3b] bg-[#009c3b]/10 text-[#065f2c]"
       : "border-[#00e476] bg-[#00e476]/10 text-[#a7e6bf]";
   const idlePickClasses =
     theme === "classic-light"
@@ -145,7 +145,7 @@ export function BracketView({ theme }: BracketViewProps) {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 mt-8" id="bracket-view">
+    <div className="mx-auto mt-8 max-w-7xl px-4 2xl:max-w-[1700px]" id="bracket-view">
       <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div>
           <h2
@@ -189,7 +189,7 @@ export function BracketView({ theme }: BracketViewProps) {
           </div>
 
           <span
-            className={`inline-flex rounded-full border px-3 py-1 font-mono text-[10px] uppercase tracking-wider ${
+            className={`inline-flex w-full rounded-full border px-3 py-1 font-mono text-[10px] uppercase tracking-wider sm:w-auto ${
               theme === "classic-light"
                 ? "border-slate-200 bg-slate-50 text-slate-600"
                 : "border-white/10 bg-white/5 text-slate-200"
@@ -200,7 +200,7 @@ export function BracketView({ theme }: BracketViewProps) {
           </span>
         </div>
 
-        <div className="mt-6 grid grid-cols-1 gap-4 xl:grid-cols-5" id="bracket-stage-grid">
+        <div className="mt-6 grid grid-cols-1 gap-4 xl:grid-cols-5 2xl:gap-5" id="bracket-stage-grid">
           {STAGES.map((stage) => {
             const stageNodes = getStageNodes(nodes, stage);
 
@@ -208,7 +208,7 @@ export function BracketView({ theme }: BracketViewProps) {
               <section
                 key={stage}
                 id={`bracket-stage-${stage.toLowerCase()}`}
-                className={`rounded-3xl border p-4 ${stageClasses}`}
+                className={`h-full rounded-3xl border p-4 ${stageClasses}`}
               >
                 <div className="mb-4">
                   <h3 className={`font-anton text-lg uppercase tracking-wide ${headingClasses}`}>
@@ -228,7 +228,7 @@ export function BracketView({ theme }: BracketViewProps) {
                       id={`bracket-match-${node.id}`}
                       className={`rounded-2xl border p-3 ${matchClasses}`}
                     >
-                      <div className="flex items-start justify-between gap-3">
+                      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                         <div>
                           <p className={`font-mono text-[10px] uppercase tracking-wider ${subtleClasses}`}>
                             {node.id}
@@ -241,7 +241,7 @@ export function BracketView({ theme }: BracketViewProps) {
                           <span
                             className={`inline-flex rounded-full border px-2 py-1 font-mono text-[10px] uppercase tracking-wider ${
                               theme === "classic-light"
-                                ? "border-[#009c3b]/20 bg-[#009c3b]/8 text-[#007a2f]"
+                                ? "border-[#009c3b]/20 bg-[#009c3b]/10 text-[#065f2c]"
                                 : "border-[#00e476]/20 bg-[#00e476]/10 text-[#a7e6bf]"
                             }`}
                           >
@@ -262,7 +262,7 @@ export function BracketView({ theme }: BracketViewProps) {
                               type="button"
                               disabled={!label}
                               onClick={() => handleAdvance(node.id, slot)}
-                              className={`min-h-11 rounded-2xl border px-3 py-3 text-left font-archivo text-sm leading-5 transition ${
+                              className={`min-h-11 rounded-2xl border px-3 py-3 text-left font-archivo text-sm leading-5 break-words transition ${
                                 !label
                                   ? disabledPickClasses
                                   : isActive

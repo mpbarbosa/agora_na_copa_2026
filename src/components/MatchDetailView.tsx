@@ -1,13 +1,20 @@
-import { useState, useEffect, type Dispatch, type SetStateAction } from "react";
+import {
+  useState,
+  useEffect,
+  useRef,
+  type Dispatch,
+  type SetStateAction,
+} from "react";
 import {
   Match,
   MatchStatus,
   MatchOverlayEntry,
   CommentaryEvent,
 } from "../types";
+import matchesData from "../matches.json";
 import { FlagIcon } from "./FlagIcon";
 import { PitchLineup } from "./PitchLineup";
-import { MapPin, Settings, Edit3 } from "lucide-react";
+import { MapPin, Settings, Edit3, Goal, ShieldAlert, CircleDot } from "lucide-react";
 
 // Header match-selector groups, split by match status
 const MATCH_STATUS_GROUPS: { status: MatchStatus; label: string }[] = [
@@ -21,6 +28,21 @@ const HEADER_MATCH_STATUS_GROUPS = MATCH_STATUS_GROUPS.filter(
 );
 
 const DEFAULT_MATCH_OVERLAY_REFRESH_INTERVAL_MS = 15 * 1000;
+const DEMO_MATCH_ID = "bra-mar-2026";
+const INITIAL_MATCHES_BY_ID = new Map(
+  (matchesData as Match[]).map((match) => [match.id, match]),
+);
+
+interface SimulatedMatchState {
+  status: MatchStatus;
+  score?: {
+    teamA: number;
+    teamB: number;
+  };
+  matchTime?: string;
+  incidents: CommentaryEvent[];
+  updatedAt: string;
+}
 
 // Live match takes priority; otherwise the soonest match that hasn't kicked off yet
 function getInitialMatchId(matches: Match[]): string {
@@ -105,7 +127,7 @@ function getIncidentAccentClass(
 }
 
 function getMatchCountdownSeconds(match: Match, now: Date, customSeconds: number) {
-  if (match.id === "bra-mar-2026") {
+  if (match.id === DEMO_MATCH_ID) {
     return Math.max(0, customSeconds);
   }
 
@@ -119,6 +141,32 @@ function getMatchCountdownSeconds(match: Match, now: Date, customSeconds: number
   }
 
   return Math.max(0, Math.floor((kickoffTime - now.getTime()) / 1000));
+}
+
+function applySimulatedState(match: Match, simulation: SimulatedMatchState | undefined): Match {
+  if (!simulation) {
+    return match;
+  }
+
+  return {
+    ...match,
+    status: simulation.status,
+    score: simulation.score,
+    matchTime: simulation.matchTime,
+  };
+}
+
+function parseMinuteLabel(value: string | undefined) {
+  if (!value) {
+    return 0;
+  }
+
+  const parsed = Number.parseInt(value.replace(/\D/g, ""), 10);
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
+function formatMinuteLabel(minute: number) {
+  return `${Math.max(1, minute)}'`;
 }
 
 interface MatchOverlaysApiResponse {
@@ -140,6 +188,9 @@ export function MatchDetailView({
   const [matchOverlays, setMatchOverlays] = useState<
     Record<string, MatchOverlayEntry>
   >({});
+  const [simulatedMatchStates, setSimulatedMatchStates] = useState<
+    Record<string, SimulatedMatchState>
+  >({});
   const [selectedMatchId, setSelectedMatchId] = useState<string>(() =>
     getInitialMatchId(matches),
   );
@@ -155,11 +206,17 @@ export function MatchDetailView({
   const [customCountdownSeconds, setCustomCountdownSeconds] = useState(
     15 * 3600 + 2 * 60 + 3,
   ); // 15:02:03 default
+  const simulatedMatchStatesRef = useRef(simulatedMatchStates);
+  useEffect(() => {
+    simulatedMatchStatesRef.current = simulatedMatchStates;
+  }, [simulatedMatchStates]);
   const currentMatch =
     matches.find((m) => m.id === selectedMatchId) || matches[0];
+  const currentSimulatedState = simulatedMatchStates[currentMatch.id];
   const currentOverlay = matchOverlays[currentMatch.id];
   const visibleBroadcasters = currentMatch.broadcasters;
-  const currentIncidents = currentOverlay?.matchState.incidents || [];
+  const currentIncidents =
+    currentSimulatedState?.incidents || currentOverlay?.matchState.incidents || [];
   const visibleIncidents = currentIncidents.slice(-8).reverse();
   const hasCurrentMatchScore = Boolean(currentMatch.score);
   const currentMatchScoreText = currentMatch.score
@@ -169,6 +226,7 @@ export function MatchDetailView({
     `${currentMatch.stadiumName}, ${currentMatch.city}`,
   )}`;
   const currentOverlayUpdatedAt = [
+    currentSimulatedState?.updatedAt,
     currentOverlay?.broadcastGuide.updatedAt,
     currentOverlay?.matchState.updatedAt,
   ]
@@ -176,8 +234,10 @@ export function MatchDetailView({
     .sort()
     .at(-1);
   const currentOverlaySourceLabel =
-    currentOverlay?.broadcastGuide.source === "fifa" &&
-    currentOverlay?.matchState.source === "fifa"
+    currentSimulatedState
+      ? "Simulação local"
+      : currentOverlay?.broadcastGuide.source === "fifa" &&
+          currentOverlay?.matchState.source === "fifa"
       ? "FIFA oficial"
       : "Fallback local";
 
@@ -262,15 +322,18 @@ export function MatchDetailView({
         setMatchOverlays(data.overlays);
         setMatches((prev) =>
           prev.map((match) =>
-            data.overlays[match.id]
-              ? {
-                  ...match,
-                  broadcasters: data.overlays[match.id].broadcastGuide.broadcasters,
-                  status: data.overlays[match.id].matchState.status,
-                  score: data.overlays[match.id].matchState.score,
-                  matchTime: data.overlays[match.id].matchState.matchTime,
-                }
-              : match,
+            applySimulatedState(
+              data.overlays[match.id]
+                ? {
+                    ...match,
+                    broadcasters: data.overlays[match.id].broadcastGuide.broadcasters,
+                    status: data.overlays[match.id].matchState.status,
+                    score: data.overlays[match.id].matchState.score,
+                    matchTime: data.overlays[match.id].matchState.matchTime,
+                  }
+                : match,
+              simulatedMatchStatesRef.current[match.id],
+            ),
           ),
         );
         scheduleNextLoad(data.refreshAfterMs);
@@ -340,18 +403,163 @@ export function MatchDetailView({
 
   // Custom edit mode to test different lineups
   const handleUpdateKickoff = () => {
+    const updatedAt = new Date().toISOString();
+
     setMatches((prev) =>
       prev.map((m) => {
         if (m.id === currentMatch.id) {
           return {
             ...m,
             kickoffTime: customKickoffTime,
+            status: m.id === DEMO_MATCH_ID ? "PRE_GAME" : m.status,
+            score: m.id === DEMO_MATCH_ID ? undefined : m.score,
+            matchTime: m.id === DEMO_MATCH_ID ? undefined : m.matchTime,
+            countdownTargetSeconds:
+              m.id === DEMO_MATCH_ID ? customCountdownSeconds : m.countdownTargetSeconds,
           };
         }
         return m;
       }),
     );
-    setShowConfig(false);
+
+    if (currentMatch.id === DEMO_MATCH_ID) {
+      setSimulatedMatchStates((prev) => ({
+        ...prev,
+        [currentMatch.id]: {
+          status: "PRE_GAME",
+          score: undefined,
+          matchTime: undefined,
+          incidents: [],
+          updatedAt,
+        },
+      }));
+    }
+
+  };
+
+  const updateSimulatedCurrentMatch = (
+    buildNextState: (base: SimulatedMatchState | undefined) => SimulatedMatchState,
+  ) => {
+    const nextState = buildNextState(simulatedMatchStatesRef.current[currentMatch.id]);
+
+    setSimulatedMatchStates((prev) => ({
+      ...prev,
+      [currentMatch.id]: nextState,
+    }));
+    simulatedMatchStatesRef.current = {
+      ...simulatedMatchStatesRef.current,
+      [currentMatch.id]: nextState,
+    };
+
+    setMatches((prev) =>
+      prev.map((match) =>
+        match.id === currentMatch.id ? applySimulatedState(match, nextState) : match,
+      ),
+    );
+  };
+
+  const createIncident = (
+    type: CommentaryEvent["type"],
+    team: "A" | "B",
+    minute: number,
+  ): CommentaryEvent => {
+    const teamName = team === "A" ? currentMatch.teamA.name : currentMatch.teamB.name;
+
+    const texts: Record<CommentaryEvent["type"], string> = {
+      GOAL: `Gol da simulação para ${teamName}. A tabela do grupo foi recalculada na hora.`,
+      YELLOW_CARD: `Cartão amarelo para ${teamName} na pressão da simulação.`,
+      RED_CARD: `Cartão vermelho para ${teamName} em lance recriado localmente.`,
+      SUBSTITUTION: `Substituição simulada para ${teamName}.`,
+      WHISTLE: `Apito simulado em ${teamName}.`,
+      COMMENT: `Atualização local para ${teamName}.`,
+    };
+
+    return {
+      id: `sim-${currentMatch.id}-${type}-${team}-${minute}-${Date.now()}`,
+      time: formatMinuteLabel(minute),
+      type,
+      team,
+      text: texts[type],
+    };
+  };
+
+  const handleStartSimulation = () => {
+    updateSimulatedCurrentMatch((base) => ({
+      status: "LIVE",
+      score: base?.score ?? currentMatch.score ?? { teamA: 0, teamB: 0 },
+      matchTime: base?.matchTime ?? currentMatch.matchTime ?? "01'",
+      incidents: base?.incidents ?? [],
+      updatedAt: new Date().toISOString(),
+    }));
+  };
+
+  const handleSimulatedGoal = (team: "A" | "B") => {
+    updateSimulatedCurrentMatch((base) => {
+      const nextMinute = parseMinuteLabel(base?.matchTime ?? currentMatch.matchTime) + 4;
+      const previousScore = base?.score ?? currentMatch.score ?? { teamA: 0, teamB: 0 };
+      const nextScore = {
+        teamA: previousScore.teamA + (team === "A" ? 1 : 0),
+        teamB: previousScore.teamB + (team === "B" ? 1 : 0),
+      };
+
+      return {
+        status: "LIVE",
+        score: nextScore,
+        matchTime: formatMinuteLabel(nextMinute),
+        incidents: [...(base?.incidents ?? []), createIncident("GOAL", team, nextMinute)],
+        updatedAt: new Date().toISOString(),
+      };
+    });
+  };
+
+  const handleSimulatedCard = (
+    type: "YELLOW_CARD" | "RED_CARD",
+    team: "A" | "B",
+  ) => {
+    updateSimulatedCurrentMatch((base) => {
+      const nextMinute = parseMinuteLabel(base?.matchTime ?? currentMatch.matchTime) + 2;
+
+      return {
+        status: base?.status === "FINISHED" ? "FINISHED" : "LIVE",
+        score: base?.score ?? currentMatch.score,
+        matchTime:
+          base?.status === "FINISHED" ? undefined : formatMinuteLabel(nextMinute),
+        incidents: [...(base?.incidents ?? []), createIncident(type, team, nextMinute)],
+        updatedAt: new Date().toISOString(),
+      };
+    });
+  };
+
+  const handleFinishSimulation = () => {
+    updateSimulatedCurrentMatch((base) => ({
+      status: "FINISHED",
+      score: base?.score ?? currentMatch.score ?? { teamA: 0, teamB: 0 },
+      matchTime: undefined,
+      incidents: base?.incidents ?? [],
+      updatedAt: new Date().toISOString(),
+    }));
+  };
+
+  const handleResetSimulation = () => {
+    const initialMatch = INITIAL_MATCHES_BY_ID.get(currentMatch.id);
+    if (!initialMatch) {
+      return;
+    }
+
+    setSimulatedMatchStates((prev) => {
+      const next = { ...prev };
+      delete next[currentMatch.id];
+      return next;
+    });
+    simulatedMatchStatesRef.current = Object.fromEntries(
+      Object.entries(simulatedMatchStatesRef.current).filter(
+        ([matchId]) => matchId !== currentMatch.id,
+      ),
+    );
+
+    setMatches((prev) =>
+      prev.map((match) => (match.id === currentMatch.id ? { ...initialMatch } : match)),
+    );
   };
 
   return (
@@ -498,6 +706,86 @@ export function MatchDetailView({
               <span className="text-xs text-slate-600 dark:text-slate-300 italic">
                 Previsão convertida: {formatCountdown(customCountdownSeconds)}
               </span>
+            </div>
+          </div>
+          <div
+            className="mt-4 rounded-xl border border-slate-100 dark:border-white/5 p-4"
+            id="simulation-controls-panel"
+          >
+            <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+              <div>
+                <p className="font-anton text-sm tracking-wider uppercase text-slate-800 dark:text-white">
+                  Simulador de placar e disciplina
+                </p>
+                <p className="text-xs font-archivo text-slate-600 dark:text-slate-300 leading-5">
+                  Use o duelo Brasil x Marrocos para validar o cronômetro demo e ver o
+                  Grupos reagir a gols e cartões em tempo real.
+                </p>
+              </div>
+              <button
+                id="btn-reset-simulation"
+                type="button"
+                onClick={handleResetSimulation}
+                className="px-3 py-2 border rounded font-mono text-[11px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-white/10"
+              >
+                Resetar demo local
+              </button>
+            </div>
+
+            <div className="mt-4 grid grid-cols-2 gap-3 md:grid-cols-3">
+              <button
+                id="btn-sim-start-live"
+                type="button"
+                onClick={handleStartSimulation}
+                className="flex min-h-11 items-center justify-center gap-2 rounded-lg bg-[#004d2c] px-3 py-2 font-anton text-xs uppercase tracking-wider text-white hover:bg-[#00391f]"
+              >
+                <CircleDot size={14} />
+                Iniciar ao vivo
+              </button>
+              <button
+                id="btn-sim-goal-a"
+                type="button"
+                onClick={() => handleSimulatedGoal("A")}
+                className="flex min-h-11 items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 font-anton text-xs uppercase tracking-wider text-slate-800 hover:bg-slate-50 dark:border-white/10 dark:bg-[#161919] dark:text-white dark:hover:bg-white/10"
+              >
+                <Goal size={14} />
+                Gol {currentMatch.teamA.code}
+              </button>
+              <button
+                id="btn-sim-goal-b"
+                type="button"
+                onClick={() => handleSimulatedGoal("B")}
+                className="flex min-h-11 items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 font-anton text-xs uppercase tracking-wider text-slate-800 hover:bg-slate-50 dark:border-white/10 dark:bg-[#161919] dark:text-white dark:hover:bg-white/10"
+              >
+                <Goal size={14} />
+                Gol {currentMatch.teamB.code}
+              </button>
+              <button
+                id="btn-sim-yellow-a"
+                type="button"
+                onClick={() => handleSimulatedCard("YELLOW_CARD", "A")}
+                className="flex min-h-11 items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 font-anton text-xs uppercase tracking-wider text-slate-800 hover:bg-slate-50 dark:border-white/10 dark:bg-[#161919] dark:text-white dark:hover:bg-white/10"
+              >
+                <ShieldAlert size={14} />
+                Amarelo {currentMatch.teamA.code}
+              </button>
+              <button
+                id="btn-sim-red-b"
+                type="button"
+                onClick={() => handleSimulatedCard("RED_CARD", "B")}
+                className="flex min-h-11 items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 font-anton text-xs uppercase tracking-wider text-slate-800 hover:bg-slate-50 dark:border-white/10 dark:bg-[#161919] dark:text-white dark:hover:bg-white/10"
+              >
+                <ShieldAlert size={14} />
+                Vermelho {currentMatch.teamB.code}
+              </button>
+              <button
+                id="btn-sim-finish-match"
+                type="button"
+                onClick={handleFinishSimulation}
+                className="flex min-h-11 items-center justify-center gap-2 rounded-lg bg-[#1f2937] px-3 py-2 font-anton text-xs uppercase tracking-wider text-white hover:bg-[#111827]"
+              >
+                Encerrar jogo
+              </button>
             </div>
           </div>
           <div className="mt-3 flex justify-end">
@@ -859,10 +1147,16 @@ export function MatchDetailView({
                             : "text-slate-300"
                         }`}
                       >
-                        {currentOverlay?.matchState.source === "fifa"
+                        {currentSimulatedState
+                          ? "Feed da simulação local"
+                          : currentOverlay?.matchState.source === "fifa"
                           ? "Feed oficial da FIFA"
                           : "Aguardando lances oficiais da FIFA"}{" "}
-                        • {formatOverlayUpdatedAt(currentOverlay?.matchState.updatedAt)}
+                        •{" "}
+                        {formatOverlayUpdatedAt(
+                          currentSimulatedState?.updatedAt ??
+                            currentOverlay?.matchState.updatedAt,
+                        )}
                       </p>
                     </div>
                   </div>

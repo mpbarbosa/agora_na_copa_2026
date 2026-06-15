@@ -45,9 +45,8 @@ test.describe("Venue map view (Estádios)", () => {
       });
 
     await expect(page.locator("#venue-detail-title")).toHaveText("Estádio de Seattle");
-    await expect(page.locator("#venue-hosted-matches")).toContainText(
-      "ainda não recebeu nenhuma das partidas em destaque",
-    );
+    await expect(page.locator("#venue-hosted-match-egy-nzl-2026")).toBeVisible();
+    await expect(page.locator("#venue-hosted-match-irn-nzl-2026")).toBeVisible();
 
     expect(consoleErrors).toEqual([]);
   });

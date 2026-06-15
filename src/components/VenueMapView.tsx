@@ -106,8 +106,8 @@ export function VenueMapView({ matches, theme }: VenueMapViewProps) {
       ? "bg-slate-50 border-slate-200"
       : "bg-white/5 border-white/10";
   const headingClasses = theme === "classic-light" ? "text-slate-900" : "text-white";
-  const mutedClasses = theme === "classic-light" ? "text-slate-500" : "text-slate-300";
-  const subtleClasses = theme === "classic-light" ? "text-slate-400" : "text-slate-500";
+  const mutedClasses = theme === "classic-light" ? "text-slate-600" : "text-slate-300";
+  const subtleClasses = theme === "classic-light" ? "text-slate-500" : "text-slate-400";
   const selectedListClasses =
     theme === "classic-light"
       ? "border-[#009c3b] bg-[#009c3b]/6"
@@ -120,7 +120,7 @@ export function VenueMapView({ matches, theme }: VenueMapViewProps) {
     theme === "classic-light" ? "venue-map-theme-light" : "venue-map-theme-dark";
 
   return (
-    <div className="max-w-7xl mx-auto px-4 mt-8" id="venue-map-view">
+    <div className="mx-auto mt-8 max-w-7xl px-4 2xl:max-w-[1600px]" id="venue-map-view">
       <h2
         className={`font-anton text-2xl md:text-3xl uppercase tracking-wider ${headingClasses}`}
         id="venue-map-title"
@@ -131,7 +131,10 @@ export function VenueMapView({ matches, theme }: VenueMapViewProps) {
         16 sedes • mapa real com OpenStreetMap • exploração por cidade anfitriã
       </p>
 
-      <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1.35fr)_minmax(340px,0.8fr)] gap-5">
+      <div
+        className="grid grid-cols-1 gap-5 xl:grid-cols-[minmax(0,1.35fr)_minmax(340px,0.8fr)] 2xl:grid-cols-[minmax(0,1.5fr)_minmax(380px,0.75fr)]"
+        id="venue-layout-grid"
+      >
         <section className={`rounded-3xl border p-4 md:p-5 ${cardClasses}`} id="venue-map-shell">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
@@ -177,7 +180,7 @@ export function VenueMapView({ matches, theme }: VenueMapViewProps) {
               maxZoom={8}
               scrollWheelZoom
               zoomSnap={0.25}
-              className="h-[480px] w-full"
+              className="h-[400px] w-full lg:h-[480px] 2xl:h-[560px]"
             >
               <TileLayer
                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
@@ -290,7 +293,7 @@ export function VenueMapView({ matches, theme }: VenueMapViewProps) {
             </span>
           </div>
 
-          <div className="mt-5 grid grid-cols-2 gap-3">
+          <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2" id="venue-detail-stats">
             <div className={`rounded-2xl border px-4 py-3 ${softCardClasses}`}>
               <p className={`font-mono text-[10px] uppercase tracking-wider ${subtleClasses}`}>
                 Capacidade
@@ -353,8 +356,8 @@ export function VenueMapView({ matches, theme }: VenueMapViewProps) {
                         : "border-white/10 bg-[#121414]"
                     }`}
                   >
-                    <div className="flex items-center justify-between gap-3">
-                      <div className="flex items-center gap-3">
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                      <div className="flex flex-wrap items-center gap-3">
                         <div className="flex items-center gap-2">
                           <FlagIcon flag={match.teamA.flagSvg} className="h-4 w-6" />
                           <span className={`font-anton text-sm uppercase tracking-wide ${headingClasses}`}>
@@ -371,7 +374,9 @@ export function VenueMapView({ matches, theme }: VenueMapViewProps) {
                           </span>
                         </div>
                       </div>
-                      <span className={`font-mono text-[10px] uppercase tracking-wider ${mutedClasses}`}>
+                      <span
+                        className={`self-start font-mono text-[10px] uppercase tracking-wider sm:self-auto ${mutedClasses}`}
+                      >
                         {match.stageName}
                       </span>
                     </div>

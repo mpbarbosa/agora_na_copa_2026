@@ -32,12 +32,12 @@ export function NewsView({ theme }: NewsViewProps) {
     theme === "classic-light"
       ? "bg-white border-slate-200 shadow-sm"
       : "bg-[#121414] border-white/10";
-  const mutedClasses = theme === "classic-light" ? "text-slate-500" : "text-slate-300";
-  const subtleClasses = theme === "classic-light" ? "text-slate-400" : "text-slate-500";
+  const mutedClasses = theme === "classic-light" ? "text-slate-600" : "text-slate-300";
+  const subtleClasses = theme === "classic-light" ? "text-slate-500" : "text-slate-400";
   const headingClasses = theme === "classic-light" ? "text-slate-900" : "text-white";
   const activeFilterClasses =
     theme === "classic-light"
-      ? "border-[#009c3b] bg-[#009c3b]/8 text-[#007a2f]"
+      ? "border-[#009c3b] bg-[#009c3b]/10 text-[#065f2c]"
       : "border-[#00e476] bg-[#00e476]/10 text-[#a7e6bf]";
   const idleFilterClasses =
     theme === "classic-light"

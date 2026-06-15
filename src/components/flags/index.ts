@@ -42,6 +42,7 @@ export { EgyptFlag } from "./Egypt";
 export { GhanaFlag } from "./Ghana";
 export { NigeriaFlag } from "./Nigeria";
 export { CameroonFlag } from "./Cameroon";
+export { CapeVerdeFlag } from "./CapeVerde";
 export { SaudiArabiaFlag } from "./SaudiArabia";
 export { IranFlag } from "./Iran";
 export { QatarFlag } from "./Qatar";
