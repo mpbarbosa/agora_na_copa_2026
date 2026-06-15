@@ -23,6 +23,8 @@ interface TeamLineupsApiResponse {
   lineups: TeamLineupsMap;
 }
 
+const getGroupSlug = (group: string) => group.replace(/\s+/g, "-").toLowerCase();
+
 export default function App() {
   const [theme, setTheme] = useState<"classic-light" | "stadium-dark">(
     "classic-light",
@@ -31,16 +33,22 @@ export default function App() {
   const [activeNavId, setActiveNavId] = useState<string>(NAV_ITEMS[0].id);
   const [lineupTeam, setLineupTeam] = useState<TeamRef | null>(null);
   const [teamLineups, setTeamLineups] = useState<TeamLineupsMap>({});
-  const [standingsFocusGroup, setStandingsFocusGroup] = useState<string | null>(null);
+  const [standingsFocusGroupSlug, setStandingsFocusGroupSlug] = useState<string | null>(null);
   const isPartidasViewActive = activeNavId === "partidas" && lineupTeam === null;
 
   const handleSelectNav = (navId: string) => {
     setActiveNavId(navId);
-    setStandingsFocusGroup(null);
+    if (navId !== "grupos") {
+      setStandingsFocusGroupSlug(null);
+    }
   };
 
   const handleOpenStandingsGroup = (group: string) => {
-    setStandingsFocusGroup(group);
+    const groupSlug = getGroupSlug(group);
+    setStandingsFocusGroupSlug(groupSlug);
+    if (typeof window !== "undefined") {
+      window.location.hash = `standings-group-${groupSlug}`;
+    }
     setActiveNavId("grupos");
   };
 
@@ -148,7 +156,7 @@ export default function App() {
           matches={matches}
           theme={theme}
           onSelectTeamLineup={setLineupTeam}
-          focusGroup={standingsFocusGroup}
+          focusGroupSlug={standingsFocusGroupSlug}
         />
       );
       case "selecoes":

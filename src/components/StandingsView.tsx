@@ -7,7 +7,7 @@ interface StandingsViewProps {
   matches: Match[];
   theme: "classic-light" | "stadium-dark";
   onSelectTeamLineup: (team: TeamRef) => void;
-  focusGroup?: string | null;
+  focusGroupSlug?: string | null;
 }
 
 const COLUMNS = [
@@ -27,7 +27,7 @@ export function StandingsView({
   matches,
   theme,
   onSelectTeamLineup,
-  focusGroup = null,
+  focusGroupSlug = null,
 }: StandingsViewProps) {
   const groups = useMemo(() => groupStandings(computeStandings(matches)), [matches]);
 
@@ -43,13 +43,18 @@ export function StandingsView({
     theme === "classic-light"
       ? "border-l-[#10b981]"
       : "border-l-[#00ff85]";
+  const resolvedFocusGroupSlug =
+    focusGroupSlug ||
+    (typeof window !== "undefined" && window.location.hash.startsWith("#standings-group-")
+      ? window.location.hash.replace("#standings-group-", "")
+      : null);
 
   useEffect(() => {
-    if (!focusGroup) {
+    if (!resolvedFocusGroupSlug) {
       return;
     }
 
-    const element = document.getElementById(`standings-group-${groupSlug(focusGroup)}`);
+    const element = document.getElementById(`standings-group-${resolvedFocusGroupSlug}`);
     if (!element) {
       return;
     }
@@ -62,7 +67,7 @@ export function StandingsView({
     });
 
     return () => window.cancelAnimationFrame(frameId);
-  }, [focusGroup]);
+  }, [resolvedFocusGroupSlug]);
 
   return (
     <div className="mx-auto mt-8 max-w-7xl px-4 2xl:max-w-[1600px]" id="standings-view">
@@ -82,7 +87,7 @@ export function StandingsView({
       >
         {groups.map(({ group, rows }) => {
           const seedCount = rows.filter((row) => row.dataSource === "seed").length;
-          const isFocusedGroup = focusGroup === group;
+          const isFocusedGroup = resolvedFocusGroupSlug === groupSlug(group);
 
           return (
             <div
