@@ -267,90 +267,42 @@ const formatPopulation = (n: number) => {
   return n.toLocaleString("pt-BR");
 };
 
-const formatArea = (n: number) =>
-  `${Math.round(n).toLocaleString("pt-BR")} km²`;
-
-function CountryInfoCard({
+function CountryPillStrip({
   theme,
   info,
 }: {
   theme: TeamLineupViewProps["theme"];
   info: CountryInfoResponse;
 }) {
-  const mutedClasses = theme === "classic-light" ? "text-slate-600" : "text-slate-300";
-  const headingClasses = theme === "classic-light" ? "text-slate-900" : "text-white";
+  const mutedClasses = theme === "classic-light" ? "text-slate-500" : "text-slate-400";
+  const headingClasses = theme === "classic-light" ? "text-slate-800" : "text-white";
   const pillClasses =
     theme === "classic-light"
-      ? "border-slate-100 bg-slate-50"
-      : "border-white/5 bg-white/5";
-  const divider = theme === "classic-light" ? "border-slate-100" : "border-white/10";
+      ? "border-slate-200 bg-slate-100"
+      : "border-white/10 bg-white/5";
 
-  const truncatedExtract =
-    info.extract.length > 420 ? `${info.extract.slice(0, 420).trimEnd()}…` : info.extract;
-
-  const facts = [
-    info.capital    ? { label: "Capital",   value: info.capital }                        : null,
-    info.population ? { label: "População", value: formatPopulation(info.population) }   : null,
-    info.areaSqKm   ? { label: "Área",      value: formatArea(info.areaSqKm) }           : null,
-    info.language   ? { label: "Idioma",    value: info.language }                       : null,
-    info.government ? { label: "Governo",   value: info.government }                     : null,
-    info.currency   ? { label: "Moeda",     value: info.currency }                       : null,
+  const pills = [
+    info.capital    ? { label: "Capital",   value: info.capital }                      : null,
+    info.population ? { label: "População", value: formatPopulation(info.population) } : null,
+    info.language   ? { label: "Idioma",    value: info.language }                     : null,
   ].filter(Boolean) as { label: string; value: string }[];
 
+  if (pills.length === 0) return null;
+
   return (
-    <section
-      className={`rounded-3xl border p-5 ${theme === "classic-light" ? "bg-white border-slate-200 shadow-sm" : "bg-[#121414] border-white/10"}`}
-      id="team-view-country-card"
-    >
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <h3 className={`font-anton text-xl uppercase tracking-wide ${headingClasses}`}>
-            Sobre o País
-          </h3>
-          <p className={`mt-1 font-mono text-[10px] uppercase tracking-wider ${mutedClasses}`}>
-            {info.description}
-          </p>
+    <div className="mt-4 flex flex-wrap gap-2" id="team-view-country-strip">
+      {pills.map(({ label, value }) => (
+        <div
+          key={label}
+          className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 ${pillClasses}`}
+        >
+          <span className={`font-mono text-[9px] uppercase tracking-wider ${mutedClasses}`}>
+            {label}
+          </span>
+          <span className={`font-mono text-[10px] font-bold ${headingClasses}`}>{value}</span>
         </div>
-        {(info.flagSvgUrl ?? info.thumbnailUrl) && (
-          <img
-            src={info.flagSvgUrl ?? info.thumbnailUrl!}
-            alt={`Bandeira de ${info.code}`}
-            className={`h-12 w-20 shrink-0 rounded-xl border object-cover ${divider}`}
-            loading="lazy"
-          />
-        )}
-      </div>
-
-      {facts.length > 0 && (
-        <div className="mt-4 grid grid-cols-3 gap-2">
-          {facts.map((f) => (
-            <div key={f.label} className={`rounded-2xl border px-3 py-3 ${pillClasses}`}>
-              <p className="font-anton text-base text-[#00e476]">{f.value}</p>
-              <p className={`mt-1 font-mono text-[10px] uppercase tracking-wider ${mutedClasses}`}>
-                {f.label}
-              </p>
-            </div>
-          ))}
-        </div>
-      )}
-
-      <p className={`mt-4 font-archivo text-sm leading-6 ${mutedClasses}`}>
-        {truncatedExtract}
-      </p>
-
-      <a
-        href={info.wikipediaUrl}
-        target="_blank"
-        rel="noopener noreferrer"
-        className={`mt-4 inline-flex rounded-full border px-4 py-2 font-mono text-[10px] font-bold uppercase tracking-wider transition ${
-          theme === "classic-light"
-            ? "border-slate-200 bg-slate-100 text-slate-700 hover:bg-slate-200"
-            : "border-white/10 bg-white/10 text-white hover:bg-white/15"
-        }`}
-      >
-        Ler mais na Wikipédia
-      </a>
-    </section>
+      ))}
+    </div>
   );
 }
 
@@ -500,6 +452,8 @@ export const TeamLineupView: React.FC<TeamLineupViewProps> = ({ team, theme, onB
           </div>
         </div>
       </section>
+
+      {countryInfo && <CountryPillStrip theme={theme} info={countryInfo} />}
 
       {status === "loading" && !teamView ? (
         <div className={`mt-6 rounded-3xl border p-6 ${cardClasses}`}>
@@ -731,9 +685,6 @@ export const TeamLineupView: React.FC<TeamLineupViewProps> = ({ team, theme, onB
               )}
             </section>
 
-            {countryInfo && (
-              <CountryInfoCard theme={theme} info={countryInfo} />
-            )}
           </div>
         </div>
       ) : null}
