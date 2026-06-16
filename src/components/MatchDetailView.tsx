@@ -1639,24 +1639,49 @@ export function MatchDetailView({
               </p>
               {currentMatch.status === "FINISHED" &&
               (MATCH_VIDEOS as Record<string, { embedUrl: string; title: string }[]>)[currentMatch.id]?.length ? (
-                <div className="flex flex-col gap-4" id="match-videos-list">
+                <div className="flex flex-col gap-3" id="match-videos-list">
                   {(MATCH_VIDEOS as Record<string, { embedUrl: string; title: string }[]>)[currentMatch.id].map(
-                    (video, idx) => (
-                      <div
-                        key={idx}
-                        className="relative w-full overflow-hidden rounded-xl"
-                        style={{ paddingTop: "56.25%" }}
-                      >
-                        <iframe
-                          className="absolute inset-0 h-full w-full"
-                          src={video.embedUrl}
-                          title={video.title}
-                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                          referrerPolicy="strict-origin-when-cross-origin"
-                          allowFullScreen
-                        />
-                      </div>
-                    ),
+                    (video, idx) => {
+                      const videoId = video.embedUrl.match(/\/embed\/([^?/]+)/)?.[1] ?? "";
+                      const watchUrl = `https://www.youtube.com/watch?v=${videoId}`;
+                      const thumbUrl = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
+                      return (
+                        <a
+                          key={idx}
+                          href={watchUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="group relative block w-full overflow-hidden rounded-xl"
+                          style={{ paddingTop: "56.25%" }}
+                          aria-label={`Assistir no YouTube: ${video.title}`}
+                        >
+                          <img
+                            src={thumbUrl}
+                            alt={video.title}
+                            className="absolute inset-0 h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
+                          />
+                          {/* dark scrim */}
+                          <div className="absolute inset-0 bg-black/40 group-hover:bg-black/30 transition-colors" />
+                          {/* play button */}
+                          <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
+                            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[#ff0000] shadow-lg group-hover:scale-110 transition-transform">
+                              <svg viewBox="0 0 24 24" className="h-6 w-6 translate-x-0.5 fill-white" aria-hidden="true">
+                                <path d="M8 5v14l11-7z" />
+                              </svg>
+                            </div>
+                            <span className="font-mono text-xs uppercase tracking-widest text-white/80">
+                              Assistir no YouTube
+                            </span>
+                          </div>
+                          {/* title strip */}
+                          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent px-3 py-2">
+                            <p className="font-anton text-sm uppercase leading-tight text-white line-clamp-1">
+                              {video.title}
+                            </p>
+                          </div>
+                        </a>
+                      );
+                    },
                   )}
                 </div>
               ) : (
