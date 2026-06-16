@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Player, Position, type PlayerSocials } from "../types";
+import { InstagramBrandIcon } from "./InstagramBrandIcon";
 
 interface TeamPitchBoardProps {
   team: {
@@ -40,6 +41,19 @@ const SOCIAL_PLATFORM_LABELS: Record<keyof PlayerSocials, string> = {
   youtube: "YouTube",
   facebook: "Facebook",
   site: "Site oficial",
+};
+
+const renderSocialPlatformLabel = (platform: keyof PlayerSocials) => {
+  if (platform === "instagram") {
+    return (
+      <>
+        <InstagramBrandIcon size={16} />
+        <span className="sr-only">{SOCIAL_PLATFORM_LABELS[platform]}</span>
+      </>
+    );
+  }
+
+  return SOCIAL_PLATFORM_LABELS[platform];
 };
 
 const getPlayerSocialEntries = (player: Player) =>
@@ -327,9 +341,9 @@ export const TeamPitchBoard: React.FC<TeamPitchBoardProps> = ({
                           href={url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 font-mono text-[10px] font-bold uppercase tracking-wider text-white transition hover:border-[#ffd700]/40 hover:text-[#ffd700]"
+                          className="inline-flex items-center justify-center rounded-full border border-white/10 bg-white/5 px-3 py-1.5 font-mono text-[10px] font-bold uppercase tracking-wider text-white transition hover:border-[#ffd700]/40 hover:text-[#ffd700]"
                         >
-                          {SOCIAL_PLATFORM_LABELS[platform]}
+                          {renderSocialPlatformLabel(platform)}
                         </a>
                       ))}
                     </div>
@@ -566,13 +580,13 @@ export const TeamPitchBoard: React.FC<TeamPitchBoardProps> = ({
                           href={url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className={`rounded-full border px-3 py-1.5 font-mono text-[10px] font-bold uppercase tracking-wider transition ${
+                          className={`inline-flex items-center justify-center rounded-full border px-3 py-1.5 font-mono text-[10px] font-bold uppercase tracking-wider transition ${
                             theme === "classic-light"
                               ? "border-slate-200 bg-slate-50 text-slate-700 hover:border-[#065f2c]/30 hover:text-[#065f2c]"
                               : "border-white/10 bg-white/5 text-white hover:border-[#ffd700]/40 hover:text-[#ffd700]"
                           }`}
                         >
-                          {SOCIAL_PLATFORM_LABELS[platform]}
+                          {renderSocialPlatformLabel(platform)}
                         </a>
                       ))}
                     </div>

@@ -424,4 +424,58 @@ test.describe("Navigation shell", () => {
     );
     await expect(page.locator('[id^="btn-incident-player-sim-bra-mar-2026-GOAL-A-"]')).toBeVisible();
   });
+
+  test("shows the full incidents feed and enables scrolling for long lists", async ({
+    page,
+  }) => {
+    await page.route("**/api/match-overlays", async (route) => {
+      await route.fulfill({
+        contentType: "application/json",
+        body: JSON.stringify({
+          refreshAfterMs: 60000,
+          overlays: {
+            "ksa-uru-2026": {
+              broadcastGuide: {
+                broadcasters: [],
+                source: "fallback",
+                note: "Feed longo para teste.",
+                updatedAt: "2026-06-15T21:00:00.000Z",
+              },
+              matchState: {
+                status: "LIVE",
+                incidents: [
+                  { id: "i1", time: "10'", type: "COMMENT", text: "Primeiro lance do feed.", team: "A" },
+                  { id: "i2", time: "12'", type: "COMMENT", text: "Segundo lance do feed.", team: "B" },
+                  { id: "i3", time: "15'", type: "YELLOW_CARD", text: "KANNO recebeu amarelo.", team: "A" },
+                  { id: "i4", time: "21'", type: "COMMENT", text: "Quarto lance do feed.", team: "B" },
+                  { id: "i5", time: "27'", type: "COMMENT", text: "Quinto lance do feed.", team: "A" },
+                  { id: "i6", time: "33'", type: "COMMENT", text: "Sexto lance do feed.", team: "B" },
+                  { id: "i7", time: "41'", type: "GOAL", text: "ALAMRI marcou.", team: "A" },
+                  { id: "i8", time: "44'", type: "YELLOW_CARD", text: "ALAMRI recebeu amarelo.", team: "A" },
+                  { id: "i9", time: "--'", type: "SUBSTITUTION", text: "Sai Darwin NUNEZ, entra Agustin CANOBBIO.", team: "B" },
+                  { id: "i10", time: "--'", type: "SUBSTITUTION", text: "Sai Matias VINA, entra Juan Manuel SANABRIA.", team: "B" },
+                ],
+                source: "fifa",
+                note: "Feed oficial da FIFA.",
+                updatedAt: "2026-06-15T21:00:00.000Z",
+              },
+            },
+          },
+        }),
+      });
+    });
+
+    await page.goto("/");
+    await page.click("#btn-match-ksa-uru-2026");
+
+    await expect(page.locator("#match-incidents-list")).toHaveAttribute(
+      "data-scrollable",
+      "true",
+    );
+    await expect(page.locator("#match-incidents-panel")).toContainText("Primeiro lance do feed.");
+    await expect(page.locator("#match-incidents-panel")).toContainText(
+      "Sai Matias VINA, entra Juan Manuel SANABRIA.",
+    );
+    await expect(page.locator("#match-incidents-list > div")).toHaveCount(10);
+  });
 });

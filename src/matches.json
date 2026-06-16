@@ -968,7 +968,7 @@
         { "id": "uy8", "name": "Nicolás de la Cruz", "number": 7, "position": "MF", "x": 70, "y": 50, "club": "Flamengo" },
         { "id": "uy9", "name": "Facundo Pellistri", "number": 11, "position": "FW", "x": 15, "y": 75, "club": "Panathinaikos" },
         { "id": "uy10", "name": "Darwin Núñez", "number": 9, "position": "FW", "x": 50, "y": 85, "club": "Liverpool" },
-        { "id": "uy11", "name": "Maximiliano Araújo", "number": 20, "position": "FW", "x": 85, "y": 75, "club": "Sporting" }
+        { "id": "uy11", "name": "Maximiliano Araújo", "number": 20, "position": "FW", "x": 85, "y": 75, "club": "Sporting", "socials": { "instagram": "https://instagram.com/maximilianoaraujo6" } }
       ]
     },
     "stadiumName": "Estádio de Miami",

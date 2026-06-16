@@ -21,6 +21,7 @@ import {
 import matchesData from "../matches.json";
 import type { TeamLineupsMap } from "../utils/teamLineup";
 import { getPlayerMetadataSupplement } from "../utils/playerMetadata";
+import { InstagramBrandIcon } from "./InstagramBrandIcon";
 import { FlagIcon } from "./FlagIcon";
 import { PitchLineup } from "./PitchLineup";
 import { MapPin, Settings, Edit3, Goal, ShieldAlert, CircleDot } from "lucide-react";
@@ -49,6 +50,19 @@ const SOCIAL_PLATFORM_LABELS: Record<keyof PlayerSocials, string> = {
   youtube: "YouTube",
   facebook: "Facebook",
   site: "Site oficial",
+};
+
+const renderSocialPlatformLabel = (platform: keyof PlayerSocials) => {
+  if (platform === "instagram") {
+    return (
+      <>
+        <InstagramBrandIcon size={16} />
+        <span className="sr-only">{SOCIAL_PLATFORM_LABELS[platform]}</span>
+      </>
+    );
+  }
+
+  return SOCIAL_PLATFORM_LABELS[platform];
 };
 
 interface IncidentPlayerSelection {
@@ -432,7 +446,8 @@ export function MatchDetailView({
   const visibleBroadcasters = currentMatch.broadcasters;
   const currentIncidents =
     currentSimulatedState?.incidents || currentOverlay?.matchState.incidents || [];
-  const visibleIncidents = currentIncidents.slice(-8).reverse();
+  const visibleIncidents = [...currentIncidents].reverse();
+  const shouldScrollIncidents = visibleIncidents.length > 6;
   const hasCurrentMatchScore = Boolean(currentMatch.score);
   const currentMatchScoreText = currentMatch.score
     ? `${currentMatch.score.teamA} x ${currentMatch.score.teamB}`
@@ -1646,7 +1661,15 @@ export function MatchDetailView({
                   </div>
 
                   {visibleIncidents.length > 0 ? (
-                    <div className="mt-4 flex flex-col gap-2">
+                    <div
+                      className={`mt-4 flex flex-col gap-2 pr-1 ${
+                        shouldScrollIncidents
+                          ? "max-h-[32rem] overflow-y-auto"
+                          : ""
+                      }`}
+                      id="match-incidents-list"
+                      data-scrollable={shouldScrollIncidents ? "true" : "false"}
+                    >
                       {visibleIncidents.map((incident) => (
                         <div
                           key={incident.id}
@@ -1962,13 +1985,13 @@ export function MatchDetailView({
                           href={url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className={`rounded-full border px-3 py-1.5 font-mono text-[10px] font-bold uppercase tracking-wider transition ${
+                          className={`inline-flex items-center justify-center rounded-full border px-3 py-1.5 font-mono text-[10px] font-bold uppercase tracking-wider transition ${
                             theme === "classic-light"
                               ? "border-slate-200 bg-slate-50 text-slate-700 hover:border-[#065f2c]/30 hover:text-[#065f2c]"
                               : "border-white/10 bg-white/5 text-white hover:border-[#ffd700]/40 hover:text-[#ffd700]"
                           }`}
                         >
-                          {SOCIAL_PLATFORM_LABELS[platform]}
+                          {renderSocialPlatformLabel(platform)}
                         </a>
                       ))}
                     </div>
