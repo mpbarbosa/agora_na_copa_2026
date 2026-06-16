@@ -1547,7 +1547,10 @@
           "x": 50,
           "y": 15,
           "club": "Real Madrid",
-          "pictureUrl": "https://digitalhub.fifa.com/transform/66f6087d-9563-4644-8f10-5614ef6e1e51/MBAPPE-Kylian_389867"
+          "pictureUrl": "https://digitalhub.fifa.com/transform/66f6087d-9563-4644-8f10-5614ef6e1e51/MBAPPE-Kylian_389867",
+          "socials": {
+            "instagram": "https://instagram.com/k.mbappe"
+          }
         },
         {
           "id": "f11",
