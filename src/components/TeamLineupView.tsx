@@ -267,6 +267,9 @@ const formatPopulation = (n: number) => {
   return n.toLocaleString("pt-BR");
 };
 
+const formatArea = (n: number) =>
+  `${Math.round(n).toLocaleString("pt-BR")} km²`;
+
 function CountryPillStrip({
   theme,
   info,
@@ -275,33 +278,87 @@ function CountryPillStrip({
   info: CountryInfoResponse;
 }) {
   const mutedClasses = theme === "classic-light" ? "text-slate-500" : "text-slate-400";
-  const headingClasses = theme === "classic-light" ? "text-slate-800" : "text-white";
+  const headingClasses = theme === "classic-light" ? "text-slate-900" : "text-white";
+  const cardClasses =
+    theme === "classic-light"
+      ? "border-slate-200 bg-white shadow-sm"
+      : "border-white/10 bg-[#121414]";
   const pillClasses =
     theme === "classic-light"
-      ? "border-slate-200 bg-slate-100"
-      : "border-white/10 bg-white/5";
+      ? "border-slate-100 bg-slate-50"
+      : "border-white/10 bg-white/10";
+  const linkClasses =
+    theme === "classic-light"
+      ? "border-slate-200 bg-slate-100 text-slate-700 hover:bg-slate-200"
+      : "border-white/10 bg-white/10 text-white hover:bg-white/15";
 
   const pills = [
-    info.capital    ? { label: "Capital",   value: info.capital }                      : null,
-    info.population ? { label: "População", value: formatPopulation(info.population) } : null,
-    info.language   ? { label: "Idioma",    value: info.language }                     : null,
+    info.capital    ? { label: "Capital",    value: info.capital }                        : null,
+    info.population ? { label: "População",  value: formatPopulation(info.population) }   : null,
+    info.areaSqKm   ? { label: "Área",       value: formatArea(info.areaSqKm) }           : null,
+    info.language   ? { label: "Idioma",     value: info.language }                       : null,
+    info.government ? { label: "Governo",    value: info.government }                     : null,
+    info.currency   ? { label: "Moeda",      value: info.currency }                       : null,
   ].filter(Boolean) as { label: string; value: string }[];
 
-  if (pills.length === 0) return null;
+  const extract = info.extract.length > 320
+    ? `${info.extract.slice(0, 320).trimEnd()}…`
+    : info.extract;
+
+  if (pills.length === 0 && !extract) return null;
 
   return (
-    <div className="mt-4 flex flex-wrap gap-2" id="team-view-country-strip">
-      {pills.map(({ label, value }) => (
-        <div
-          key={label}
-          className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 ${pillClasses}`}
-        >
-          <span className={`font-mono text-[9px] uppercase tracking-wider ${mutedClasses}`}>
-            {label}
-          </span>
-          <span className={`font-mono text-[10px] font-bold ${headingClasses}`}>{value}</span>
+    <div
+      className={`mt-4 rounded-3xl border p-5 ${cardClasses}`}
+      id="team-view-country-strip"
+    >
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <p className={`font-mono text-[10px] uppercase tracking-wider ${mutedClasses}`}>
+            Sobre o País
+          </p>
+          {info.description && (
+            <p className={`mt-1 font-archivo text-sm ${mutedClasses}`}>{info.description}</p>
+          )}
         </div>
-      ))}
+        {(info.flagSvgUrl ?? info.thumbnailUrl) && (
+          <img
+            src={info.flagSvgUrl ?? info.thumbnailUrl!}
+            alt={`Bandeira de ${info.code}`}
+            className={`h-10 w-16 shrink-0 rounded-xl border object-cover ${theme === "classic-light" ? "border-slate-100" : "border-white/10"}`}
+            loading="lazy"
+          />
+        )}
+      </div>
+
+      {pills.length > 0 && (
+        <div className="mt-3 flex flex-wrap gap-2">
+          {pills.map(({ label, value }) => (
+            <div
+              key={label}
+              className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 ${pillClasses}`}
+            >
+              <span className={`font-mono text-[9px] uppercase tracking-wider ${mutedClasses}`}>
+                {label}
+              </span>
+              <span className={`font-mono text-[10px] font-bold ${headingClasses}`}>{value}</span>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {extract && (
+        <p className={`mt-3 font-archivo text-sm leading-6 ${mutedClasses}`}>{extract}</p>
+      )}
+
+      <a
+        href={info.wikipediaUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        className={`mt-3 inline-flex rounded-full border px-4 py-1.5 font-mono text-[10px] font-bold uppercase tracking-wider transition ${linkClasses}`}
+      >
+        Ler mais na Wikipédia
+      </a>
     </div>
   );
 }
