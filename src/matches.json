@@ -1241,7 +1241,10 @@
           "x": 15,
           "y": 22,
           "club": "Barcelona",
-          "pictureUrl": "https://digitalhub.fifa.com/transform/b4def0b2-7d6f-4f3a-bcde-600b292096d6/RAPHINHA_433872"
+          "pictureUrl": "https://digitalhub.fifa.com/transform/b4def0b2-7d6f-4f3a-bcde-600b292096d6/RAPHINHA_433872",
+          "socials": {
+            "instagram": "https://instagram.com/raphainha"
+          }
         },
         {
           "id": "b9",
