@@ -1186,7 +1186,10 @@
           "x": 15,
           "y": 70,
           "club": "Juventus",
-          "pictureUrl": "https://digitalhub.fifa.com/transform/364f443f-83df-4e8e-803c-765feae146a3/DANILO_335656"
+          "pictureUrl": "https://digitalhub.fifa.com/transform/364f443f-83df-4e8e-803c-765feae146a3/DANILO_335656",
+          "socials": {
+            "instagram": "https://instagram.com/danilo"
+          }
         },
         {
           "id": "b3",
