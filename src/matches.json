@@ -2634,7 +2634,10 @@
           "x": 50,
           "y": 25,
           "club": "Inter Miami",
-          "pictureUrl": "https://digitalhub.fifa.com/transform/19823774-fac0-485a-8a8f-572e7324c6c2/MESSI-Lionel_229397"
+          "pictureUrl": "https://digitalhub.fifa.com/transform/19823774-fac0-485a-8a8f-572e7324c6c2/MESSI-Lionel_229397",
+          "socials": {
+            "instagram": "https://instagram.com/leomessi"
+          }
         },
         {
           "id": "a10",
