@@ -1196,7 +1196,10 @@
           "x": 38,
           "y": 75,
           "club": "PSG",
-          "pictureUrl": "https://digitalhub.fifa.com/transform/30069661-f88d-4ff7-9c4e-071a5cf3c093/MARQUINHOS_332946"
+          "pictureUrl": "https://digitalhub.fifa.com/transform/30069661-f88d-4ff7-9c4e-071a5cf3c093/MARQUINHOS_332946",
+          "socials": {
+            "instagram": "https://instagram.com/marquinhos_m5"
+          }
         },
         {
           "id": "b4",
