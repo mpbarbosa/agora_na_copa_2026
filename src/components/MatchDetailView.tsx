@@ -20,7 +20,7 @@ import {
 } from "../types";
 import { APP_MATCHES } from "../appMatches";
 import type { TeamLineupsMap } from "../utils/teamLineup";
-import { getPlayerMetadataSupplement } from "../utils/playerMetadata";
+import { enrichPlayerWithMetadata, getPlayerMetadataSupplement } from "../utils/playerMetadata";
 import { InstagramBrandIcon } from "./InstagramBrandIcon";
 import { FlagIcon } from "./FlagIcon";
 import { PitchLineup } from "./PitchLineup";
@@ -306,13 +306,15 @@ function buildIncidentPlayerSelections(
         token: incidentTokens[index] ?? mention.name,
         selection: {
           player: {
-            ...player,
-            club: player.club ?? fallbackPlayer?.club,
-            socials:
-              player.socials ??
-              fallbackPlayer?.socials ??
-              metadataSupplement?.socials,
-            pictureUrl: player.pictureUrl ?? fallbackPlayer?.pictureUrl,
+            ...enrichPlayerWithMetadata(team.code, {
+              ...player,
+              club: player.club ?? fallbackPlayer?.club,
+              socials:
+                player.socials ??
+                fallbackPlayer?.socials ??
+                metadataSupplement?.socials,
+              pictureUrl: player.pictureUrl ?? fallbackPlayer?.pictureUrl,
+            }),
           },
           team,
           opponentName,

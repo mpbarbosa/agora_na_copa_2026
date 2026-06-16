@@ -1,4 +1,4 @@
-import type { PlayerSocials } from "../types";
+import type { Player, PlayerSocials } from "../types";
 
 interface PlayerMetadataEntry {
   teamCode: string;
@@ -21,6 +21,13 @@ const PLAYER_METADATA: PlayerMetadataEntry[] = [
       instagram: "https://instagram.com/aalamri32",
     },
   },
+  {
+    teamCode: "IRN",
+    aliases: ["Ramin Rezaeian", "Rezaeian", "Ramin"],
+    socials: {
+      instagram: "https://instagram.com/raminrezaeian",
+    },
+  },
 ];
 
 export const getPlayerMetadataSupplement = (teamCode: string, playerName: string) => {
@@ -40,4 +47,24 @@ export const getPlayerMetadataSupplement = (teamCode: string, playerName: string
         socials: entry.socials,
       }
     : null;
+};
+
+export const enrichPlayerWithMetadata = (teamCode: string, player: Player): Player => {
+  const metadataSupplement = getPlayerMetadataSupplement(teamCode, player.name);
+  const mergedSocials =
+    metadataSupplement?.socials || player.socials
+      ? {
+          ...(metadataSupplement?.socials ?? {}),
+          ...(player.socials ?? {}),
+        }
+      : undefined;
+
+  if (!mergedSocials) {
+    return player;
+  }
+
+  return {
+    ...player,
+    socials: mergedSocials,
+  };
 };

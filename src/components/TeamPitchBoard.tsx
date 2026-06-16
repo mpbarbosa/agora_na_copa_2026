@@ -1,10 +1,12 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Player, Position, type PlayerSocials } from "../types";
+import { enrichPlayerWithMetadata } from "../utils/playerMetadata";
 import { InstagramBrandIcon } from "./InstagramBrandIcon";
 
 interface TeamPitchBoardProps {
   team: {
     name: string;
+    code: string;
     primaryColor: string;
     secondaryColor: string;
     lineup: Player[];
@@ -123,6 +125,10 @@ export const TeamPitchBoard: React.FC<TeamPitchBoardProps> = ({
   mirror = false,
   theme = "stadium-dark",
 }) => {
+  const enrichedLineup = useMemo(
+    () => team.lineup.map((player) => enrichPlayerWithMetadata(team.code, player)),
+    [team.code, team.lineup],
+  );
   const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
   const [expandedPlayer, setExpandedPlayer] = useState<Player | null>(null);
   const [featuredPlayer, setFeaturedPlayer] = useState<Player | null>(null);
@@ -132,18 +138,18 @@ export const TeamPitchBoard: React.FC<TeamPitchBoardProps> = ({
   useEffect(() => {
     setSelectedPlayer((current) => {
       if (!current) return null;
-      return team.lineup.find((player) => isSamePlayer(player, current)) ?? null;
+      return enrichedLineup.find((player) => isSamePlayer(player, current)) ?? null;
     });
     setExpandedPlayer((current) => {
       if (!current) return null;
-      const nextPlayer = team.lineup.find((player) => isSamePlayer(player, current)) ?? null;
+      const nextPlayer = enrichedLineup.find((player) => isSamePlayer(player, current)) ?? null;
       return nextPlayer?.pictureUrl ? nextPlayer : null;
     });
     setFeaturedPlayer((current) => {
       if (!current) return null;
-      return team.lineup.find((player) => isSamePlayer(player, current)) ?? null;
+      return enrichedLineup.find((player) => isSamePlayer(player, current)) ?? null;
     });
-  }, [team.lineup]);
+  }, [enrichedLineup]);
 
   useEffect(() => {
     if (!expandedPlayer && !featuredPlayer) return;
@@ -206,7 +212,7 @@ export const TeamPitchBoard: React.FC<TeamPitchBoardProps> = ({
           <div className="absolute bottom-4 right-4 w-4 h-4 border-l border-t border-white/30 rounded-tl-full"></div>
 
           {/* Draw Players */}
-          {team.lineup.map((player) => {
+          {enrichedLineup.map((player) => {
             const isSelected = selectedPlayer?.id === player.id;
             // Translate percentage coordinates to match standard directions.
             // When mirrored, flip vertically for a premium head-to-head depiction.
@@ -392,7 +398,7 @@ export const TeamPitchBoard: React.FC<TeamPitchBoardProps> = ({
         <div className="p-4 rounded-xl glassmorphic-card border border-white/10" id="full-squad-list-card">
           <h5 className="font-anton text-xs uppercase tracking-widest text-white/80 mb-2">ESCALAÇÃO COMPLETA ({team.name})</h5>
           <div className="max-h-[220px] overflow-y-auto pr-1 space-y-1" id="players-list-scrollable">
-            {team.lineup.map((p) => {
+            {enrichedLineup.map((p) => {
               const isSelected = selectedPlayer?.id === p.id;
               return (
                 <button

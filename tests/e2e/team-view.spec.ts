@@ -285,6 +285,106 @@ async function mockBelgiumFallbackTeamView(page: Page) {
   });
 }
 
+async function mockIranTeamView(page: Page) {
+  await page.route("**/api/team-view/IRN", async (route) => {
+    await route.fulfill({
+      contentType: "application/json",
+      body: JSON.stringify({
+        updatedAt: "2026-06-15T19:00:00.000Z",
+        refreshAfterMs: 60000,
+        source: "fifa",
+        note: "Painel do Irã com enriquecimento social por metadados.",
+        team: {
+          name: "IRÃ",
+          code: "IRN",
+          flagSvg: "iran",
+          primaryColor: "#239f40",
+          secondaryColor: "#da0000",
+          group: "Grupo G",
+        },
+        standings: {
+          rank: 2,
+          groupSize: 4,
+          row: {
+            id: "irn",
+            name: "IRÃ",
+            code: "IRN",
+            flagSvg: "iran",
+            primaryColor: "#239f40",
+            secondaryColor: "#da0000",
+            group: "Grupo G",
+            points: 1,
+            played: 1,
+            won: 0,
+            drawn: 1,
+            lost: 0,
+            goalsFor: 0,
+            goalsAgainst: 0,
+            goalDifference: 0,
+            dataSource: "result",
+          },
+        },
+        currentMatch: null,
+        nextMatch: {
+          matchId: "irn-nzl-2026",
+          team: {
+            name: "IRÃ",
+            code: "IRN",
+            flagSvg: "iran",
+            primaryColor: "#239f40",
+            secondaryColor: "#da0000",
+            group: "Grupo G",
+          },
+          opponent: {
+            name: "NOVA ZELÂNDIA",
+            code: "NZL",
+            flagSvg: "newzealand",
+            primaryColor: "#00247d",
+            secondaryColor: "#c8102e",
+            group: "Grupo G",
+          },
+          stageName: "Group Stage",
+          stadiumName: "Estádio de Los Angeles",
+          city: "LOS ANGELES",
+          kickoffTime: "22:00",
+          kickoffDate: "15 Junho, 2026",
+          kickoffTimestamp: "2026-06-15T22:00:00-03:00",
+          officialMatchUrl: "https://example.com/irn-nzl",
+          status: "PRE_GAME",
+          source: "fifa",
+          note: "Dados oficiais da FIFA.",
+          fifaMatchId: "fifa-irn-nzl",
+          updatedAt: "2026-06-15T19:00:00.000Z",
+        },
+        lastMatch: null,
+        lineup: {
+          players: [
+            {
+              id: "irn-ramin",
+              name: "Ramin Rezaeian",
+              number: 23,
+              position: "DF",
+              x: 85,
+              y: 70,
+              club: "Esteghlal",
+            },
+          ],
+          source: "fifa",
+          note: "Escalação oficial FIFA.",
+          updatedAt: "2026-06-15T19:00:00.000Z",
+        },
+        leaders: {
+          topScorers: [],
+          yellowCards: [],
+          redCards: [],
+          teamSummary: null,
+        },
+        broadcastGuide: null,
+      }),
+    });
+  });
+}
+
 test.describe("Team view", () => {
   test("opens the full team page from a match flag click", async ({ page }) => {
     await mockTeamView(page);
@@ -362,6 +462,26 @@ test.describe("Team view", () => {
     await expect(page.locator("#player-social-link-x")).toHaveAttribute(
       "href",
       "https://x.com/atacanteteste",
+    );
+  });
+
+  test("shows metadata-supplemented socials in the regular player card", async ({
+    page,
+  }) => {
+    await mockIranTeamView(page);
+
+    await page.goto("/");
+    await page.click("#btn-nav-selecoes");
+    await page.click("#btn-team-card-irn");
+    await expect(page.locator("#team-lineup-view")).toBeVisible();
+
+    await page.click("#player-irn-ramin");
+
+    await expect(page.locator("#selected-player-info")).toContainText("Ramin Rezaeian");
+    await expect(page.locator("#player-social-links")).toBeVisible();
+    await expect(page.locator("#player-social-link-instagram")).toHaveAttribute(
+      "href",
+      "https://instagram.com/raminrezaeian",
     );
   });
 
