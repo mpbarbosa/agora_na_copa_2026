@@ -5157,5 +5157,261 @@
         "link": "https://www.youtube.com/@CazeTV"
       }
     ]
+  },
+  {
+    "id": "irq-nor-2026",
+    "teamA": {
+      "name": "IRAQUE",
+      "code": "IRQ",
+      "flagSvg": "iraq",
+      "primaryColor": "#ce1126",
+      "secondaryColor": "#000000",
+      "group": "Grupo I",
+      "lineup": [
+        {
+          "id": "iq1",
+          "name": "J. Hassan",
+          "number": 12,
+          "position": "GK",
+          "x": 50,
+          "y": 88,
+          "club": "",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/a7f7a32a-4968-462b-9c34-e8a0d0530b99/JALAL-HASSAN_347085"
+        },
+        {
+          "id": "iq2",
+          "name": "H. Ali",
+          "number": 3,
+          "position": "DF",
+          "x": 15,
+          "y": 72,
+          "club": "",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/9c065420-c134-4227-aef3-d6d07f0a9b8d/HUSSEIN-ALI_479553"
+        },
+        {
+          "id": "iq3",
+          "name": "Z. Tahseen",
+          "number": 4,
+          "position": "DF",
+          "x": 35,
+          "y": 75,
+          "club": "",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/84a4d1c5-8fe9-4d23-bb47-5dddfdf566bf/ZAID-TAHSEEN_434025"
+        },
+        {
+          "id": "iq4",
+          "name": "A. Hashim",
+          "number": 5,
+          "position": "DF",
+          "x": 65,
+          "y": 75,
+          "club": "",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/a0dea4f6-7d64-4613-bdd0-558480ddbc80/AKAM-HASHIM_481183_"
+        },
+        {
+          "id": "iq5",
+          "name": "M. Doski",
+          "number": 23,
+          "position": "DF",
+          "x": 85,
+          "y": 72,
+          "club": "",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/c2ac4751-fd73-4685-8bb6-de4c07266fda/MERCHAS-DOSKI_479072"
+        },
+        {
+          "id": "iq6",
+          "name": "I. Bayesh",
+          "number": 8,
+          "position": "MF",
+          "x": 25,
+          "y": 50,
+          "club": "",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/390fdc3f-232a-445d-a80e-1c9cc8a67df7/IBRAHIM-BAYESH_433585"
+        },
+        {
+          "id": "iq7",
+          "name": "A. Alammari",
+          "number": 16,
+          "position": "MF",
+          "x": 50,
+          "y": 48,
+          "club": "",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/d80ff1d4-6bce-462b-bc11-6b4049fe9741/AMIR-ALAMMARI_433074"
+        },
+        {
+          "id": "iq8",
+          "name": "Z. Ismael",
+          "number": 24,
+          "position": "MF",
+          "x": 75,
+          "y": 50,
+          "club": "",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/062e505a-0067-4b87-963d-a0e7ad53decb/ZAID-ISMAEL_484270"
+        },
+        {
+          "id": "iq9",
+          "name": "A. Alhamadi",
+          "number": 9,
+          "position": "FW",
+          "x": 50,
+          "y": 25,
+          "club": "",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/00b5271a-9033-43ab-9073-7b2ec9e4426e/ALI-ALHAMADI_436628"
+        },
+        {
+          "id": "iq10",
+          "name": "A. Jasim",
+          "number": 17,
+          "position": "FW",
+          "x": 20,
+          "y": 22,
+          "club": "",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/75d61654-11c8-4646-8e47-7c4c977b29b6/ALI-JASIM_464457"
+        },
+        {
+          "id": "iq11",
+          "name": "A. Hussein",
+          "number": 18,
+          "position": "FW",
+          "x": 80,
+          "y": 22,
+          "club": "",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/388e5207-980c-407a-828c-270fbd4fdff6/AYMEN-HUSSEIN_395186"
+        }
+      ]
+    },
+    "teamB": {
+      "name": "NORUEGA",
+      "code": "NOR",
+      "flagSvg": "norway",
+      "primaryColor": "#ba0c2f",
+      "secondaryColor": "#00205b",
+      "group": "Grupo I",
+      "lineup": [
+        {
+          "id": "no1",
+          "name": "Ø. Nyland",
+          "number": 1,
+          "position": "GK",
+          "x": 50,
+          "y": 12,
+          "club": "Real Sociedad",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/4abc883f-1368-46d6-8849-308d06b641e6/NYLAND-Orjan_373235"
+        },
+        {
+          "id": "no2",
+          "name": "K. Ajer",
+          "number": 3,
+          "position": "DF",
+          "x": 22,
+          "y": 30,
+          "club": "Brentford",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/28de8091-50a6-4c54-9e7b-62788b087a3a/AJER-Kristoffer_483516"
+        },
+        {
+          "id": "no3",
+          "name": "D. Møller Wolfe",
+          "number": 5,
+          "position": "DF",
+          "x": 50,
+          "y": 28,
+          "club": "",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/27678ee5-00fb-4d48-ac88-402cab97d566/MOLLER-WOLFE-David_483505"
+        },
+        {
+          "id": "no4",
+          "name": "T. Heggem",
+          "number": 17,
+          "position": "DF",
+          "x": 78,
+          "y": 30,
+          "club": "",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/e7b048fd-7217-470a-9820-eb8b6eab0286/HEGGEM-Torbjorn_491244"
+        },
+        {
+          "id": "no5",
+          "name": "F. Aursnes",
+          "number": 14,
+          "position": "MF",
+          "x": 27,
+          "y": 48,
+          "club": "Benfica",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/5bf9f1d6-b7ec-4c50-9337-059f6eb0c097/AURSNES-Fredrik_483497"
+        },
+        {
+          "id": "no6",
+          "name": "S. Berge",
+          "number": 8,
+          "position": "MF",
+          "x": 50,
+          "y": 50,
+          "club": "Burnley",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/b7cf7654-f43e-4993-975e-5a2a0d5633f8/BERGE-Sander_404645"
+        },
+        {
+          "id": "no7",
+          "name": "M. Ødegaard",
+          "number": 10,
+          "position": "MF",
+          "x": 73,
+          "y": 48,
+          "club": "Arsenal",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/2b895db6-7f67-4436-b8da-54bdf0dd2e2b/ODEGAARD-Martin_400716"
+        },
+        {
+          "id": "no8",
+          "name": "A. Nusa",
+          "number": 20,
+          "position": "FW",
+          "x": 12,
+          "y": 72,
+          "club": "RB Leipzig",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/8522d4db-c622-4f88-9b98-62753ca74eec/NUSA-Antonio_483448"
+        },
+        {
+          "id": "no9",
+          "name": "A. Sørloth",
+          "number": 7,
+          "position": "FW",
+          "x": 38,
+          "y": 75,
+          "club": "Atlético Madrid",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/23bcc976-2dbc-4fe2-b844-1878ff0cd354/SORLOTH-Alexander_398588"
+        },
+        {
+          "id": "no10",
+          "name": "E. Haaland",
+          "number": 9,
+          "position": "FW",
+          "x": 62,
+          "y": 75,
+          "club": "Manchester City",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/ee269811-9f84-401f-99b8-e953a2704ebb/HAALAND-Erling_419652"
+        },
+        {
+          "id": "no11",
+          "name": "J. Ryerson",
+          "number": 26,
+          "position": "FW",
+          "x": 88,
+          "y": 72,
+          "club": "Borussia Dortmund",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/cf3ebe3b-012d-411b-af4e-ba0b59bb9e17/RYERSON-Julian_483496"
+        }
+      ]
+    },
+    "stadiumName": "Estádio de Boston",
+    "city": "BOSTON",
+    "stageName": "Group Stage",
+    "kickoffTime": "19:00",
+    "kickoffDate": "16 Junho, 2026",
+    "kickoffTimestamp": "2026-06-16T19:00:00-03:00",
+    "status": "LIVE",
+    "score": {
+      "teamA": 1,
+      "teamB": 2
+    },
+    "countdownTargetSeconds": 0,
+    "broadcasters": []
   }
 ]
