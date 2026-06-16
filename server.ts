@@ -11,8 +11,8 @@ import {
   normalizeBroadcasters as normalizeBroadcastersCore,
 } from "./fifa-sync-core";
 import type { FifaLiveMatch as FifaLiveMatchCore } from "./fifa-sync-core";
+import { APP_MATCHES } from "./src/appMatches";
 import { triviaQuestions } from "./src/data/questions";
-import matchesData from "./src/matches.json";
 import { computeStandings, groupStandings } from "./src/standings";
 import type {
   Broadcaster,
@@ -54,7 +54,6 @@ const BACKGROUND_WARM_FAILURE_RETRY_MS = 30 * 1000;
 const CIRCUIT_BREAKER_FAILURE_THRESHOLD = 3;
 const CIRCUIT_BREAKER_OPEN_MS = 60 * 1000;
 const TOURNAMENT_LEADER_LIMIT = 5;
-const APP_MATCHES = matchesData as Match[];
 const APP_MATCHES_BY_ID = new Map(APP_MATCHES.map((match) => [match.id, match]));
 const GOAL_INCIDENT_SUFFIX = " marcou.";
 const YELLOW_CARD_INCIDENT_SUFFIX = " recebeu amarelo.";

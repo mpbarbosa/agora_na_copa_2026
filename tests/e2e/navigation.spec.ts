@@ -3,7 +3,8 @@ import { test, expect } from "@playwright/test";
 import { NAV_ITEMS } from "../../src/navigation";
 
 const NAV_VIEW_IDS: Record<string, string> = {
-  partidas: "#match-detail-view",
+  "ao-vivo": "#match-detail-view",
+  partidas: "#partidas-view",
   grupos: "#standings-view",
   selecoes: "#teams-view",
   lideres: "#tournament-leaders-view",
@@ -22,7 +23,7 @@ test.describe("Navigation shell", () => {
 
     await page.goto("/");
 
-    await expect(page.locator("#btn-nav-partidas")).toHaveClass(/font-semibold/);
+    await expect(page.locator("#btn-nav-ao-vivo")).toHaveClass(/font-semibold/);
     await expect(page.locator("#match-detail-view")).toBeVisible();
     await expect(page.locator("#core-live-scoreboard")).toBeVisible();
     await expect(page.locator("#scoreboard-group-label")).toContainText(/Grupo [A-L]/);
@@ -64,11 +65,43 @@ test.describe("Navigation shell", () => {
 
     await page.goto("/");
 
-    await expect(page.locator("#btn-nav-partidas")).toHaveAttribute(
+    await expect(page.locator("#btn-nav-ao-vivo")).toHaveAttribute(
       "data-live-attention",
       "true",
     );
-    await expect(page.locator("#btn-nav-partidas #nav-live-indicator")).toBeVisible();
+    await expect(page.locator("#btn-nav-ao-vivo #nav-live-indicator")).toBeVisible();
+  });
+
+  test("Partidas nav sits between Ao Vivo and Grupos and opens the full fixtures viewer", async ({
+    page,
+  }) => {
+    await page.goto("/");
+
+    await expect(page.locator("#main-nav")).toContainText("Ao Vivo");
+    await expect(page.locator("#main-nav")).toContainText("Partidas");
+    await expect(page.locator("#main-nav")).toContainText("Grupos");
+
+    const navLabels = await page.locator("#main-nav > button").evaluateAll((buttons) =>
+      buttons.map((button) => button.textContent?.replace(/\s+/g, " ").trim() ?? ""),
+    );
+    const aoVivoIndex = navLabels.indexOf("Ao Vivo");
+    const partidasIndex = navLabels.indexOf("Partidas");
+    const gruposIndex = navLabels.indexOf("Grupos");
+
+    expect(aoVivoIndex).toBeGreaterThanOrEqual(0);
+    expect(partidasIndex).toBe(aoVivoIndex + 1);
+    expect(gruposIndex).toBe(partidasIndex + 1);
+
+    await page.click("#btn-nav-partidas");
+
+    await expect(page.locator("#partidas-view")).toBeVisible();
+    await expect(page.locator("#btn-partidas-filter-pre_game")).toContainText("Agendadas");
+    await expect(page.locator("#btn-partidas-filter-live")).toContainText("Ao vivo");
+    await expect(page.locator("#btn-partidas-filter-finished")).toContainText("Encerradas");
+    await expect(page.locator("#partidas-card-por-cod-2026")).toBeVisible();
+
+    await page.click("#btn-partidas-filter-finished");
+    await expect(page.locator("#partidas-card-ksa-uru-2026")).toBeVisible();
   });
 
   test("match selector switches the active match", async ({ page }) => {

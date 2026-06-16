@@ -18,7 +18,7 @@ import {
   type Player,
   type PlayerSocials,
 } from "../types";
-import matchesData from "../matches.json";
+import { APP_MATCHES } from "../appMatches";
 import type { TeamLineupsMap } from "../utils/teamLineup";
 import { getPlayerMetadataSupplement } from "../utils/playerMetadata";
 import { InstagramBrandIcon } from "./InstagramBrandIcon";
@@ -40,7 +40,7 @@ const HEADER_MATCH_STATUS_GROUPS = MATCH_STATUS_GROUPS.filter(
 const DEFAULT_MATCH_OVERLAY_REFRESH_INTERVAL_MS = 15 * 1000;
 const DEMO_MATCH_ID = "bra-mar-2026";
 const INITIAL_MATCHES_BY_ID = new Map(
-  (matchesData as Match[]).map((match) => [match.id, match]),
+  APP_MATCHES.map((match) => [match.id, match]),
 );
 
 const SOCIAL_PLATFORM_LABELS: Record<keyof PlayerSocials, string> = {

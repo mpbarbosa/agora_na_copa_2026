@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import packageInfo from "../package.json";
-import matchesData from "./matches.json";
+import { APP_MATCHES } from "./appMatches";
 import type { Match, TeamRef } from "./types";
 import { MatchDetailView } from "./components/MatchDetailView";
 import { StandingsView } from "./components/StandingsView";
@@ -11,6 +11,7 @@ import { NewsView } from "./components/NewsView";
 import { BracketView } from "./components/BracketView";
 import { FanZoneView } from "./components/FanZoneView";
 import { TeamLineupView } from "./components/TeamLineupView";
+import { PartidasView } from "./components/PartidasView";
 import type { TeamLineupsMap } from "./utils/teamLineup";
 import { NAV_ITEMS } from "./navigation";
 import { Sun, Moon } from "lucide-react";
@@ -29,12 +30,12 @@ export default function App() {
   const [theme, setTheme] = useState<"classic-light" | "stadium-dark">(
     "classic-light",
   );
-  const [matches, setMatches] = useState<Match[]>(() => matchesData as Match[]);
+  const [matches, setMatches] = useState<Match[]>(() => APP_MATCHES);
   const [activeNavId, setActiveNavId] = useState<string>(NAV_ITEMS[0].id);
   const [lineupTeam, setLineupTeam] = useState<TeamRef | null>(null);
   const [teamLineups, setTeamLineups] = useState<TeamLineupsMap>({});
   const [standingsFocusGroupSlug, setStandingsFocusGroupSlug] = useState<string | null>(null);
-  const isPartidasViewActive = activeNavId === "partidas" && lineupTeam === null;
+  const isAoVivoViewActive = activeNavId === "ao-vivo" && lineupTeam === null;
   const hasLiveMatch = matches.some((match) => match.status === "LIVE");
 
   const handleSelectNav = (navId: string) => {
@@ -54,7 +55,7 @@ export default function App() {
   };
 
   useEffect(() => {
-    if (!isPartidasViewActive) {
+    if (!isAoVivoViewActive) {
       return;
     }
 
@@ -133,14 +134,14 @@ export default function App() {
       window.removeEventListener("focus", handlePageVisible);
       document.removeEventListener("visibilitychange", handlePageVisible);
     };
-  }, [isPartidasViewActive]);
+  }, [isAoVivoViewActive]);
 
   const activeNavItem =
     NAV_ITEMS.find((item) => item.id === activeNavId) || NAV_ITEMS[0];
 
   const renderActiveView = () => {
     switch (activeNavItem.id) {
-      case "partidas":
+      case "ao-vivo":
         return (
           <MatchDetailView
             matches={matches}
@@ -151,15 +152,23 @@ export default function App() {
             teamLineups={teamLineups}
           />
         );
+      case "partidas":
+        return (
+          <PartidasView
+            matches={matches}
+            theme={theme}
+            onSelectTeamLineup={setLineupTeam}
+          />
+        );
       case "grupos":
-      return (
-        <StandingsView
-          matches={matches}
-          theme={theme}
-          onSelectTeamLineup={setLineupTeam}
-          focusGroupSlug={standingsFocusGroupSlug}
-        />
-      );
+        return (
+          <StandingsView
+            matches={matches}
+            theme={theme}
+            onSelectTeamLineup={setLineupTeam}
+            focusGroupSlug={standingsFocusGroupSlug}
+          />
+        );
       case "selecoes":
         return <TeamsView matches={matches} theme={theme} onSelectTeamLineup={setLineupTeam} />;
       case "lideres":
@@ -237,7 +246,7 @@ export default function App() {
             {NAV_ITEMS.map((item) => (
               (() => {
                 const isActive = activeNavId === item.id;
-                const hasLiveAttention = item.id === "partidas" && hasLiveMatch;
+                const hasLiveAttention = item.id === "ao-vivo" && hasLiveMatch;
 
                 return (
                   <button

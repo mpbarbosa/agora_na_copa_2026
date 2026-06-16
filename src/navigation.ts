@@ -6,9 +6,14 @@ export interface NavItem {
 
 export const NAV_ITEMS: NavItem[] = [
   {
-    id: "partidas",
+    id: "ao-vivo",
     label: "Ao Vivo",
     description: "Acompanhe o cronômetro, transmissões e lances de cada jogo.",
+  },
+  {
+    id: "partidas",
+    label: "Partidas",
+    description: "Veja todos os jogos encerrados, ao vivo e agendados da Copa.",
   },
   {
     id: "grupos",

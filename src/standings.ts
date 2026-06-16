@@ -1,6 +1,6 @@
 import type { Match, StandingsRow } from "./types";
 import { standings as seedStandings } from "./data/tournament";
-import matchesData from "./matches.json";
+import { APP_MATCHES } from "./appMatches";
 
 const POINTS_FOR_WIN = 3;
 const POINTS_FOR_DRAW = 1;
@@ -49,7 +49,7 @@ function createSeedRowFromMatchTeam(team: Match["teamA"]): StandingsRow {
 }
 
 export function getCanonicalSeedStandings(
-  matches: Match[] = matchesData as Match[],
+  matches: Match[] = APP_MATCHES,
 ): StandingsRow[] {
   const canonicalRows = new Map(
     seedStandings.map((row) => [
@@ -88,7 +88,7 @@ function countsForStandings(match: Match, groupByCode: Map<string, string>) {
 // Reconciles the tournament.ts seed roster with any scored LIVE/FINISHED
 // matches in matches.json (matched by team code), so the Grupos view updates
 // as live scores arrive without needing to hand-edit the seed data.
-export function computeStandings(matches: Match[] = matchesData as Match[]): StandingsRow[] {
+export function computeStandings(matches: Match[] = APP_MATCHES): StandingsRow[] {
   const canonicalSeedStandings = getCanonicalSeedStandings(matches);
   const groupByCode = new Map(
     canonicalSeedStandings.map((row) => [row.code, row.group]),

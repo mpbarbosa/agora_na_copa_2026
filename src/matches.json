@@ -555,10 +555,10 @@
     "kickoffDate": "14 Junho, 2026",
     "kickoffTimestamp": "2026-06-14T14:00:00-03:00",
     "officialMatchUrl": "https://www.fifa.com/pt/match-centre/match/17/285023/289273/400021464",
-    "status": "LIVE",
+    "status": "FINISHED",
     "score": {
-      "teamA": 1,
-      "teamB": 0
+      "teamA": 7,
+      "teamB": 1
     },
     "countdownTargetSeconds": 0,
     "broadcasters": [
@@ -674,8 +674,12 @@
     "kickoffDate": "14 Junho, 2026",
     "kickoffTimestamp": "2026-06-14T17:00:00-03:00",
     "officialMatchUrl": "https://www.fifa.com/pt/match-centre/match/17/285023/289273/400021470",
-    "status": "PRE_GAME",
-    "countdownTargetSeconds": 48638,
+    "status": "FINISHED",
+    "score": {
+      "teamA": 2,
+      "teamB": 2
+    },
+    "countdownTargetSeconds": 0,
     "broadcasters": [
       { "id": "getv11", "type": "STREAM", "name": "GETV", "iconColor": "#00e476", "link": "https://globoplay.globo.com/categorias/ge-tv/", "logoUrl": "https://extranets.fifa.com/TvStationPhotos/914.png" },
       { "id": "gb11", "type": "STREAM", "name": "Globoplay", "iconColor": "#00e476", "link": "https://globoplay.globo.com/tv-globo/ao-vivo/6120663/", "logoUrl": "https://extranets.fifa.com/TvStationPhotos/30.png" },
@@ -737,8 +741,12 @@
     "kickoffDate": "14 Junho, 2026",
     "kickoffTimestamp": "2026-06-14T20:00:00-03:00",
     "officialMatchUrl": "https://www.fifa.com/pt/match-centre/match/17/285023/289273/400021467",
-    "status": "PRE_GAME",
-    "countdownTargetSeconds": 58950,
+    "status": "FINISHED",
+    "score": {
+      "teamA": 1,
+      "teamB": 0
+    },
+    "countdownTargetSeconds": 0,
     "broadcasters": [
       { "id": "gb12", "type": "STREAM", "name": "Globoplay", "iconColor": "#00e476", "link": "https://globoplay.globo.com/tv-globo/ao-vivo/6120663/", "logoUrl": "https://extranets.fifa.com/TvStationPhotos/30.png" },
       { "id": "cz12", "type": "YOUTUBE", "name": "CazéTV", "iconColor": "#ed2939", "link": "https://www.youtube.com/@CazeTV", "logoUrl": "https://extranets.fifa.com/TvStationPhotos/451.png" },
@@ -797,12 +805,11 @@
     "kickoffDate": "14 Junho, 2026",
     "kickoffTimestamp": "2026-06-14T23:00:00-03:00",
     "officialMatchUrl": "https://www.fifa.com/pt/match-centre/match/17/285023/289273/400021474",
-    "status": "LIVE",
+    "status": "FINISHED",
     "score": {
-      "teamA": 3,
+      "teamA": 5,
       "teamB": 1
     },
-    "matchTime": "90'+1",
     "countdownTargetSeconds": 0,
     "broadcasters": [
       { "id": "gb13", "type": "STREAM", "name": "Globoplay", "iconColor": "#00e476", "link": "https://globoplay.globo.com/tv-globo/ao-vivo/6120663/", "logoUrl": "https://extranets.fifa.com/TvStationPhotos/30.png" },
@@ -861,7 +868,11 @@
     "kickoffTime": "13:00",
     "kickoffDate": "15 Junho, 2026",
     "kickoffTimestamp": "2026-06-15T13:00:00-03:00",
-    "status": "PRE_GAME",
+    "status": "FINISHED",
+    "score": {
+      "teamA": 0,
+      "teamB": 0
+    },
     "countdownTargetSeconds": 0,
     "broadcasters": [
       { "id": "g14", "type": "TV ABERTA", "name": "TV Globo", "iconColor": "#05ff85", "link": "https://redeglobo.globo.com/" },
@@ -919,7 +930,11 @@
     "kickoffTime": "16:00",
     "kickoffDate": "15 Junho, 2026",
     "kickoffTimestamp": "2026-06-15T16:00:00-03:00",
-    "status": "PRE_GAME",
+    "status": "FINISHED",
+    "score": {
+      "teamA": 1,
+      "teamB": 1
+    },
     "countdownTargetSeconds": 0,
     "broadcasters": [
       { "id": "g15", "type": "TV ABERTA", "name": "TV Globo", "iconColor": "#05ff85", "link": "https://redeglobo.globo.com/" },
@@ -977,7 +992,11 @@
     "kickoffTime": "19:00",
     "kickoffDate": "15 Junho, 2026",
     "kickoffTimestamp": "2026-06-15T19:00:00-03:00",
-    "status": "PRE_GAME",
+    "status": "FINISHED",
+    "score": {
+      "teamA": 1,
+      "teamB": 1
+    },
     "countdownTargetSeconds": 0,
     "broadcasters": [
       { "id": "g16", "type": "TV ABERTA", "name": "TV Globo", "iconColor": "#05ff85", "link": "https://redeglobo.globo.com/" },
@@ -988,7 +1007,7 @@
   {
     "id": "irn-nzl-2026",
     "teamA": {
-      "name": "RI DO IRÃ",
+      "name": "IRÃ",
       "code": "IRN",
       "flagSvg": "iran",
       "primaryColor": "#239f40",
