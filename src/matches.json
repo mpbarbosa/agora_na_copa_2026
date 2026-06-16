@@ -1043,7 +1043,7 @@
         { "id": "nz6", "name": "Joe Bell", "number": 6, "position": "MF", "x": 30, "y": 50, "club": "Viking FK" },
         { "id": "nz7", "name": "Marko Stamenic", "number": 8, "position": "MF", "x": 50, "y": 45, "club": "Olympiacos" },
         { "id": "nz8", "name": "Sarpreet Singh", "number": 10, "position": "MF", "x": 70, "y": 50, "club": "Leiria" },
-        { "id": "nz9", "name": "Elijah Just", "number": 11, "position": "FW", "x": 15, "y": 75, "club": "SKN St. Polten" },
+        { "id": "nz9", "name": "Elijah Just", "number": 11, "position": "FW", "x": 15, "y": 75, "club": "SKN St. Polten", "socials": { "instagram": "https://instagram.com/elijah_just" } },
         { "id": "nz10", "name": "Chris Wood", "number": 9, "position": "FW", "x": 50, "y": 85, "club": "Nottingham Forest" },
         { "id": "nz11", "name": "Ben Waine", "number": 17, "position": "FW", "x": 85, "y": 75, "club": "Plymouth Argyle" }
       ]
