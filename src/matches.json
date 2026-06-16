@@ -1272,6 +1272,19 @@
           "y": 10,
           "club": "Botafogo",
           "pictureUrl": "https://digitalhub.fifa.com/transform/a3fba875-a9c9-4d5b-aa92-ff7319d1177a/1443021717"
+        },
+        {
+          "id": "b12",
+          "name": "Neymar Jr",
+          "number": 21,
+          "position": "FW",
+          "x": 15,
+          "y": 10,
+          "club": "Al Hilal",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/4f7b2e5a-1c3d-4a8b-9e6f-2d5c7b3e1a4f/NEYMAR-Jr_190460",
+          "socials": {
+            "instagram": "https://instagram.com/neymarjr"
+          }
         }
       ]
     },
