@@ -279,13 +279,9 @@ function CountryPillStrip({
 }) {
   const mutedClasses = theme === "classic-light" ? "text-slate-500" : "text-slate-400";
   const headingClasses = theme === "classic-light" ? "text-slate-900" : "text-white";
-  const cardClasses =
-    theme === "classic-light"
-      ? "border-slate-200 bg-white shadow-sm"
-      : "border-white/10 bg-[#121414]";
   const pillClasses =
     theme === "classic-light"
-      ? "border-slate-100 bg-slate-50"
+      ? "border-slate-200 bg-slate-100"
       : "border-white/10 bg-white/10";
   const linkClasses =
     theme === "classic-light"
@@ -308,31 +304,15 @@ function CountryPillStrip({
   if (pills.length === 0 && !extract) return null;
 
   return (
-    <div
-      className={`mt-4 rounded-3xl border p-5 ${cardClasses}`}
-      id="team-view-country-strip"
-    >
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <p className={`font-mono text-[10px] uppercase tracking-wider ${mutedClasses}`}>
-            Sobre o País
-          </p>
-          {info.description && (
-            <p className={`mt-1 font-archivo text-sm ${mutedClasses}`}>{info.description}</p>
-          )}
-        </div>
-        {(info.flagSvgUrl ?? info.thumbnailUrl) && (
-          <img
-            src={info.flagSvgUrl ?? info.thumbnailUrl!}
-            alt={`Bandeira de ${info.code}`}
-            className={`h-10 w-16 shrink-0 rounded-xl border object-cover ${theme === "classic-light" ? "border-slate-100" : "border-white/10"}`}
-            loading="lazy"
-          />
-        )}
-      </div>
+    <div className="mt-3 px-1" id="team-view-country-strip">
+      {info.description && (
+        <p className={`font-mono text-[10px] uppercase tracking-wider ${mutedClasses}`}>
+          {info.description}
+        </p>
+      )}
 
       {pills.length > 0 && (
-        <div className="mt-3 flex flex-wrap gap-2">
+        <div className="mt-2 flex flex-wrap gap-2">
           {pills.map(({ label, value }) => (
             <div
               key={label}
@@ -348,7 +328,7 @@ function CountryPillStrip({
       )}
 
       {extract && (
-        <p className={`mt-3 font-archivo text-sm leading-6 ${mutedClasses}`}>{extract}</p>
+        <p className={`mt-2 font-archivo text-sm leading-6 ${mutedClasses}`}>{extract}</p>
       )}
 
       <a
