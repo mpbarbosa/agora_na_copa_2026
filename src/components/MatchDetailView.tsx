@@ -1639,50 +1639,56 @@ export function MatchDetailView({
               </p>
               {currentMatch.status === "FINISHED" &&
               (MATCH_VIDEOS as Record<string, { embedUrl: string; title: string }[]>)[currentMatch.id]?.length ? (
-                <div className="flex flex-col gap-3" id="match-videos-list">
-                  {(MATCH_VIDEOS as Record<string, { embedUrl: string; title: string }[]>)[currentMatch.id].map(
-                    (video, idx) => {
-                      const videoId = video.embedUrl.match(/\/embed\/([^?/]+)/)?.[1] ?? "";
-                      const watchUrl = `https://www.youtube.com/watch?v=${videoId}`;
-                      const thumbUrl = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
-                      return (
-                        <a
-                          key={idx}
-                          href={watchUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="group relative block w-full overflow-hidden rounded-xl"
-                          style={{ paddingTop: "56.25%" }}
-                          aria-label={`Assistir no YouTube: ${video.title}`}
-                        >
-                          <img
-                            src={thumbUrl}
-                            alt={video.title}
-                            className="absolute inset-0 h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
-                          />
-                          {/* dark scrim */}
-                          <div className="absolute inset-0 bg-black/40 group-hover:bg-black/30 transition-colors" />
-                          {/* play button */}
-                          <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
-                            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[#ff0000] shadow-lg group-hover:scale-110 transition-transform">
-                              <svg viewBox="0 0 24 24" className="h-6 w-6 translate-x-0.5 fill-white" aria-hidden="true">
-                                <path d="M8 5v14l11-7z" />
-                              </svg>
+                <div className="flex items-center gap-4" id="match-videos-list">
+                  {/* TV icon — same as broadcaster strip */}
+                  <div
+                    className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border ${
+                      theme === "classic-light"
+                        ? "bg-white border-slate-200"
+                        : "bg-[#161919] border-white/10"
+                    }`}
+                  >
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                      <path d="M8.91634 8.03187V11.2807C8.91634 11.4363 9.08307 11.5313 9.21161 11.4487L11.7423 9.82434C11.8632 9.74672 11.8632 9.56583 11.7423 9.4882L9.21161 7.8638C9.08307 7.78129 8.91634 7.8762 8.91634 8.03187Z" fill="#505B73" />
+                      <path fillRule="evenodd" clipRule="evenodd" d="M4.74967 5H15.2497C16.0321 5 16.6663 5.63426 16.6663 6.41667V12.75C16.6663 13.5324 16.0321 14.1667 15.2497 14.1667L13.333 14.1667V15H6.66634V14.1667L4.74967 14.1667C3.96727 14.1667 3.33301 13.5324 3.33301 12.75V6.41667C3.33301 5.63426 3.96727 5 4.74967 5ZM4.74967 6.25C4.65763 6.25 4.58301 6.32462 4.58301 6.41667V12.75C4.58301 12.842 4.65763 12.9167 4.74967 12.9167H15.2497C15.3417 12.9167 15.4163 12.842 15.4163 12.75V6.41667C15.4163 6.32462 15.3417 6.25 15.2497 6.25H4.74967Z" fill="#505B73" />
+                    </svg>
+                  </div>
+                  {/* Small thumbnail cards */}
+                  <div className="flex items-center gap-2 md:gap-3 overflow-x-auto">
+                    {(MATCH_VIDEOS as Record<string, { embedUrl: string; title: string }[]>)[currentMatch.id].map(
+                      (video, idx) => {
+                        const videoId = video.embedUrl.match(/\/embed\/([^?/]+)/)?.[1] ?? "";
+                        const watchUrl = `https://www.youtube.com/watch?v=${videoId}`;
+                        const thumbUrl = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
+                        return (
+                          <a
+                            key={idx}
+                            href={watchUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="group relative shrink-0 overflow-hidden rounded-xl border transition hover:-translate-y-0.5"
+                            style={{ width: 120, height: 68 }}
+                            aria-label={`Assistir no YouTube: ${video.title}`}
+                            title={video.title}
+                          >
+                            <img
+                              src={thumbUrl}
+                              alt={video.title}
+                              className="h-full w-full object-cover"
+                            />
+                            <div className="absolute inset-0 bg-black/30 group-hover:bg-black/20 transition-colors" />
+                            <div className="absolute inset-0 flex items-center justify-center">
+                              <div className="flex h-7 w-7 items-center justify-center rounded-full bg-[#ff0000] group-hover:scale-110 transition-transform">
+                                <svg viewBox="0 0 24 24" className="h-3 w-3 translate-x-px fill-white" aria-hidden="true">
+                                  <path d="M8 5v14l11-7z" />
+                                </svg>
+                              </div>
                             </div>
-                            <span className="font-mono text-xs uppercase tracking-widest text-white/80">
-                              Assistir no YouTube
-                            </span>
-                          </div>
-                          {/* title strip */}
-                          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent px-3 py-2">
-                            <p className="font-anton text-sm uppercase leading-tight text-white line-clamp-1">
-                              {video.title}
-                            </p>
-                          </div>
-                        </a>
-                      );
-                    },
-                  )}
+                          </a>
+                        );
+                      },
+                    )}
+                  </div>
                 </div>
               ) : (
                 <div
