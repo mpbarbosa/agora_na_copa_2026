@@ -419,6 +419,9 @@ export const TeamLineupView: React.FC<TeamLineupViewProps> = ({ team, theme, onB
       : "bg-white/10 text-white hover:bg-white/15";
 
   const featuredMatch = teamView?.currentMatch ?? teamView?.nextMatch ?? null;
+  const activeMatchCount = teamView
+    ? [teamView.currentMatch, teamView.nextMatch, teamView.lastMatch].filter(Boolean).length
+    : 0;
 
   return (
     <div className="mx-auto mt-8 max-w-7xl px-4 2xl:max-w-[1600px]" id="team-lineup-view">
@@ -511,11 +514,34 @@ export const TeamLineupView: React.FC<TeamLineupViewProps> = ({ team, theme, onB
       ) : teamView ? (
         <div className="mt-6 grid grid-cols-1 gap-6 xl:grid-cols-[1.6fr_1fr]">
           <div className="space-y-6">
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-3" id="team-view-matches">
-              <MatchSummaryCard theme={theme} title="Agora" match={teamView.currentMatch} />
-              <MatchSummaryCard theme={theme} title="Próxima" match={teamView.nextMatch} />
-              <MatchSummaryCard theme={theme} title="Última" match={teamView.lastMatch} />
-            </div>
+            {activeMatchCount === 0 ? (
+              <div
+                className={`rounded-2xl border px-5 py-4 ${cardClasses}`}
+                id="team-view-matches"
+              >
+                <p className={`font-mono text-[10px] uppercase tracking-wider ${mutedClasses}`}>Partidas</p>
+                <p className={`mt-1 font-archivo text-sm ${mutedClasses}`}>
+                  Agenda da seleção ainda sem registros para este torneio.
+                </p>
+              </div>
+            ) : (
+              <div
+                className={`grid grid-cols-1 gap-4 ${
+                  activeMatchCount === 2 ? "md:grid-cols-2" : activeMatchCount >= 3 ? "md:grid-cols-3" : ""
+                }`}
+                id="team-view-matches"
+              >
+                {teamView.currentMatch && (
+                  <MatchSummaryCard theme={theme} title="Agora" match={teamView.currentMatch} />
+                )}
+                {teamView.nextMatch && (
+                  <MatchSummaryCard theme={theme} title="Próxima" match={teamView.nextMatch} />
+                )}
+                {teamView.lastMatch && (
+                  <MatchSummaryCard theme={theme} title="Última" match={teamView.lastMatch} />
+                )}
+              </div>
+            )}
 
             <section className={`rounded-3xl border p-4 md:p-6 ${cardClasses}`} id="team-lineup-board-card">
               <div className="flex flex-wrap items-center justify-between gap-3">
