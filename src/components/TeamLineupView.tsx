@@ -305,12 +305,6 @@ function CountryPillStrip({
 
   return (
     <div className="mt-3 px-1" id="team-view-country-strip">
-      {info.description && (
-        <p className={`font-mono text-[10px] uppercase tracking-wider ${mutedClasses}`}>
-          {info.description}
-        </p>
-      )}
-
       {pills.length > 0 && (
         <div className="mt-2 flex flex-wrap gap-2">
           {pills.map(({ label, value }) => (
@@ -442,6 +436,11 @@ export const TeamLineupView: React.FC<TeamLineupViewProps> = ({ team, theme, onB
             <p className={`mt-1 font-mono text-[11px] uppercase tracking-wider ${mutedClasses}`}>
               {team.code} {team.group ? `• Grupo ${team.group.replace("Grupo ", "")}` : ""}
             </p>
+            {countryInfo?.description && (
+              <p className={`mt-0.5 font-archivo text-xs opacity-60 ${mutedClasses}`}>
+                {countryInfo.description}
+              </p>
+            )}
             {teamView && (
               <p className={`mt-1 font-mono text-[9px] uppercase tracking-wider opacity-40 ${mutedClasses}`}>
                 {formatUpdatedAt(teamView.updatedAt)}
