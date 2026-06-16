@@ -7,6 +7,7 @@ const NAV_VIEW_IDS: Record<string, string> = {
   partidas: "#partidas-view",
   grupos: "#standings-view",
   selecoes: "#teams-view",
+  jogadores: "#jogadores-view",
   lideres: "#tournament-leaders-view",
   chaveamento: "#bracket-view",
   estadios: "#venue-map-view",

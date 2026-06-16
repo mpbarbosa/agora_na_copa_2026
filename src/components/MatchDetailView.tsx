@@ -647,7 +647,10 @@ export function MatchDetailView({
 
   const selectedIncidentPlayer: IncidentPlayerSelection | null = storedIncidentPlayer
     ? {
-        player: resolvePlayerFromKey(storedIncidentPlayer.playerKey),
+        player: enrichPlayerWithMetadata(
+          storedIncidentPlayer.team.code,
+          resolvePlayerFromKey(storedIncidentPlayer.playerKey),
+        ),
         team: storedIncidentPlayer.team,
         opponentName: storedIncidentPlayer.opponentName,
       }
