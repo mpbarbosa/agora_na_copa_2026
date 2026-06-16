@@ -4,34 +4,59 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project
 
-"Agora na Copa 26" — a FIFA World Cup 2026 broadcast companion: live countdowns, broadcaster schedules (Globo, SportTV, CazéTV, FIFA+), and tactical lineups. Built with React 19 + Vite + TypeScript + Tailwind v4, served via an Express backend that also proxies Vite in dev.
+"Agora na Copa 26" — a FIFA World Cup 2026 broadcast companion: live countdowns, broadcaster schedules (Globo, SportTV, CazéTV, FIFA+), tactical lineups, standings, and bracket. Built with React 19 + Vite + TypeScript + Tailwind v4, served via an Express backend that also proxies Vite in dev.
 
 ## Commands
 
-- `npm run dev` — start the Express server (`server.ts` via `tsx`), which runs Vite in middleware mode for the frontend. Single command for full-stack dev (port 3000).
+- `npm run dev` — start the Express server (`server.ts` via `tsx`), which runs Vite in middleware mode. Single command for full-stack dev (port 3000; auto-walks to next free port unless `STRICT_PORT=true`).
 - `npm run build` — builds the frontend with Vite and bundles `server.ts` into `dist/server.cjs` with esbuild.
 - `npm start` — run the production build (`node dist/server.cjs`).
-- `npm run lint` — type-checks the whole project with `tsc --noEmit` (no separate test runner/linter is configured).
+- `npm run lint` — type-checks the whole project with `tsc --noEmit`.
+- `npm run test:unit` — runs unit tests via Node's built-in test runner (`tests/fifa-sync-core.test.ts`, `tests/standings.test.ts`).
+- `npm run test:e2e` — runs the Playwright e2e suite in `tests/e2e/` (boots dev server on port 3100).
+- `npx playwright test tests/e2e/<spec>.ts` — run a single Playwright spec.
 - `npm run clean` — removes `dist`.
-
-There is no test suite configured.
+- `npm run deploy:preflight` — builds + boots the production bundle locally and smoke-tests it before deploying.
+- `npm run deploy` — rsync to the production host and restart the systemd service.
 
 ## Architecture
 
-- **`server.ts`** — single Express server. In dev (`NODE_ENV !== "production"`), Vite runs in middleware mode inside this same server. In production it serves `dist/` statically with an SPA fallback.
+### Data flow
 
-- **`src/data.ts`** — all match/team/lineup/broadcaster data is hardcoded mock data (`mockMatches`, `mockCommentaries`). There is no database; adding a match means adding an entry to `mockMatches` with full `teamA`/`teamB` lineups (`Player[]` with `x`/`y` pitch coordinates 0–100), broadcasters, and historical stats.
+- **`src/matches.json`** is the source of truth for all curated match fixtures and full player lineups (23 players per team, with `x`/`y` pitch coordinates). `src/data.ts` only contains commentary strings now — not match data.
+- **`src/appMatches.ts`** assembles the full `APP_MATCHES` array by merging `matches.json` + supplemental FIFA fixtures + `data/bbcScheduledMatches.ts` schedule entries + `data/fifaMatchVenues.ts` official venue overrides.
+- **`src/data/tournament.ts`** holds the tournament-wide lightweight dataset: 48 `Team` seed standings, 16 `Stadium` records, `BracketNode` skeleton, and `NewsArticle` entries. No lineups, no broadcasters. Used by `StandingsView`, `BracketView`, `VenueMapView`.
+- **`src/standings.ts`** computes `StandingsRow[]` by reconciling `tournament.ts` seed stats with `FINISHED` match results from `APP_MATCHES`.
 
-- **`src/types.ts`** — central type definitions (`Match`, `Player`, `Position`, `Broadcaster`, `CommentaryEvent`). Update here first when changing data shapes shared between `data.ts`, components, and the API responses in `server.ts`.
+### Server
 
-- **`src/App.tsx`** — single top-level component holding most UI state (selected match, active tab, theme, live countdown timer, simulated commentary feed). Two tabs render the main views:
-  - `"broadcast"` — broadcaster links + live commentary feed (inline in `App.tsx`)
-  - `"lineup"` — `src/components/PitchLineup.tsx` (visual pitch with player positions from `x`/`y` coords)
+- **`server.ts`** — single Express server. Owns the API routes, loads `APP_MATCHES`, proxies Vite in dev, serves `dist/` statically in production.
+- **`fifa-sync-core.ts`** — pure FIFA API integration logic (match-finding, broadcaster normalization, lineup building, match-state building). Extracted from `server.ts` so it can be unit-tested independently. Imported by both `server.ts` and `tests/fifa-sync-core.test.ts`.
+- API endpoints: `/api/broadcast-guide`, `/api/match-states`, `/api/match-overlays`, `/api/match-lineup/:matchId`, `/api/team-view/:teamCode`, `/api/tournament-leaders`, `/api/standings`, `/api/questions`, `/api/predict`, `/api/fifa-sync-status`.
+- Every FIFA-sourced response carries `source: "fifa" | "fallback"`, a human-readable `note`, and `updatedAt`. Any new endpoint must follow this resilience shape and fall back gracefully when the FIFA API is unreachable.
 
-- **`src/components/FlagIcon.tsx`** + **`src/components/flags/`** — each country has a hand-drawn SVG flag component; `FlagIcon` maps a `flagSvg` string id (e.g. `"brazil"`) to the corresponding component. New teams need both a `data.ts` entry and a flag component registered in `FlagIcon.tsx`'s `FLAGS` map.
+### Frontend
 
-- Theming: light/dark toggle (`"classic-light"` / `"stadium-dark"`) is handled via Tailwind conditional classes throughout `App.tsx`, not via Tailwind's `dark:` media strategy alone — most components branch on the `theme` prop/state directly.
+- **`src/App.tsx`** — shell: global header (theme toggle) + top-level nav + routed view. Theme state (`"classic-light"` | `"stadium-dark"`) and match-selection state live here.
+- **`src/navigation.ts`** — `NAV_ITEMS` array (9 tabs: Ao Vivo, Partidas, Grupos, Seleções, Líderes, Chaveamento, Estádios, Notícias, Fan Zone). Each entry has `id`, `label`, `description`. Tabs without a shipped view render `ComingSoonView`.
+- **`src/types.ts`** — single source of truth for all TypeScript shapes (`Match`, `Player`, `Broadcaster`, `BroadcastGuideEntry`, `MatchStateEntry`, `Team`, `StandingsRow`, `Stadium`, `BracketNode`, `NewsArticle`, etc.). Extend here first before touching data or components.
 
-- Visual language (colors, fonts: Anton/Archivo Narrow/JetBrains Mono, glassmorphism conventions) is specified in `DESIGN.md` — consult it before adding new UI surfaces to stay consistent with the "stadium broadcast" aesthetic.
+### Components
 
+- **`src/components/MatchDetailView.tsx`** — the "Partidas" view: match selector, scoreboard, broadcast guide, live commentary, and pitch lineup.
+- **`src/components/PitchLineup.tsx`** — visual pitch rendering player positions from `x`/`y` coords.
+- **`src/components/FlagIcon.tsx`** + **`src/components/flags/`** — each country's hand-drawn SVG flag. A `flagSvg` string (e.g. `"brazil"`) must match a key in `FlagIcon`'s `FLAGS` map. New teams need both a flag component and a registration.
 - Path alias `@/*` maps to the repo root (configured in both `tsconfig.json` and `vite.config.ts`).
+
+## Key conventions
+
+- **Theming**: the theme prop (`"classic-light"` / `"stadium-dark"`) is passed explicitly through components and branched with `theme === "classic-light" ? ... : ...` ternaries. Do not rely on Tailwind `dark:` utilities alone.
+- **Brazilian Portuguese copy**: all user-facing text must be in pt-BR in the football-broadcast voice. Domain terms are defined in `CONTEXT.md` — check it before adding new labels.
+- **Visual language**: Anton for display text, Archivo Narrow for dense UI, JetBrains Mono for clocks and stats. Glassmorphism conventions from `src/index.css` and `DESIGN.md`. Consult `DESIGN.md` before adding new UI surfaces.
+- **New server dependencies**: add to `package.json` `dependencies` (not `devDependencies`) so `npm ci --omit=dev` works on the production host. Commit the updated `package-lock.json`.
+- **New env vars**: must work correctly when unset (the production `.env` is not updated automatically on deploy — new vars must have safe in-code defaults).
+- **esbuild constraint**: `npm run build` bundles `server.ts` with `--packages=external`. Runtime deps must be in `dependencies` and present after `npm ci --omit=dev`.
+
+## Deployment
+
+Single production instance running as a `systemd` service (`agora-na-copa-2026`) behind nginx on an AWS host. `npm run deploy` rsyncs `dist/`, `package.json`, `package-lock.json` to the host and restarts the service (no blue/green — brief downtime, in-memory caches reset). The production `.env` is preserved across deploys (not overwritten by rsync).
