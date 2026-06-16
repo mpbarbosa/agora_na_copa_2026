@@ -4979,7 +4979,10 @@
           "x": 70,
           "y": 44,
           "club": "Manchester United",
-          "pictureUrl": "https://digitalhub.fifa.com/transform/5e9b2c7f-1a3d-4f86-b5c8-9e2a7d4f6c1e/FERNANDES-Bruno_389966"
+          "pictureUrl": "https://digitalhub.fifa.com/transform/5e9b2c7f-1a3d-4f86-b5c8-9e2a7d4f6c1e/FERNANDES-Bruno_389966",
+          "socials": {
+            "instagram": "https://instagram.com/brunofernandes.10"
+          }
         },
         {
           "id": "p9",
