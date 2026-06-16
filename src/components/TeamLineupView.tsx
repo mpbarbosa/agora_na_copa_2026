@@ -431,10 +431,17 @@ export const TeamLineupView: React.FC<TeamLineupViewProps> = ({ team, theme, onB
         Voltar
       </button>
 
-      <section className={`rounded-3xl border p-5 md:p-6 ${cardClasses}`} id="team-lineup-header">
+      <section
+        className={`rounded-3xl border p-5 md:p-6 ${cardClasses}`}
+        id="team-lineup-header"
+        style={{ backgroundImage: `linear-gradient(135deg, ${team.primaryColor}18 0%, transparent 55%)` }}
+      >
         <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
           <div className="flex items-center gap-4">
-            <div className="flex h-16 w-24 items-center justify-center rounded-2xl border border-white/10 bg-white p-3 shadow-sm">
+            <div
+              className="flex h-16 w-24 items-center justify-center rounded-2xl bg-white p-3 shadow-sm"
+              style={{ border: `2px solid ${team.primaryColor}70` }}
+            >
               <FlagIcon flag={team.flagSvg} className="h-full w-full object-contain" />
             </div>
             <div>
@@ -445,46 +452,48 @@ export const TeamLineupView: React.FC<TeamLineupViewProps> = ({ team, theme, onB
                 {team.code} {team.group ? `• Grupo ${team.group.replace("Grupo ", "")}` : ""}
               </p>
               {teamView && (
-                <p className={`mt-2 font-archivo text-sm ${mutedClasses}`}>
-                  {teamView.note}
+                <p className={`mt-1 font-mono text-[9px] uppercase tracking-wider opacity-40 ${mutedClasses}`}>
+                  {formatUpdatedAt(teamView.updatedAt)}
                 </p>
               )}
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-3 md:min-w-[320px]">
-            <div className={`rounded-2xl border px-3 py-3 ${theme === "classic-light" ? "border-slate-100 bg-slate-50" : "border-white/5 bg-white/5"}`}>
-              <p className="font-anton text-xl text-[#00e476]">
-                {teamView?.standings ? `${teamView.standings.rank}º` : "--"}
-              </p>
-              <p className={`mt-1 font-mono text-[10px] uppercase tracking-wider ${mutedClasses}`}>
-                Posição no grupo
-              </p>
-            </div>
-            <div className={`rounded-2xl border px-3 py-3 ${theme === "classic-light" ? "border-slate-100 bg-slate-50" : "border-white/5 bg-white/5"}`}>
-              <p className="font-anton text-xl text-[#00e476]">
-                {teamView?.leaders.teamSummary?.goalsFor ?? teamView?.standings?.row.goalsFor ?? 0}
-              </p>
-              <p className={`mt-1 font-mono text-[10px] uppercase tracking-wider ${mutedClasses}`}>
-                Gols pró
-              </p>
-            </div>
-            <div className={`rounded-2xl border px-3 py-3 ${theme === "classic-light" ? "border-slate-100 bg-slate-50" : "border-white/5 bg-white/5"}`}>
-              <p className="font-anton text-xl text-[#00e476]">
-                {featuredMatch ? getStatusLabel(featuredMatch.status) : "AGENDA"}
-              </p>
-              <p className={`mt-1 font-mono text-[10px] uppercase tracking-wider ${mutedClasses}`}>
-                Radar da partida
-              </p>
-            </div>
-            <div className={`rounded-2xl border px-3 py-3 ${theme === "classic-light" ? "border-slate-100 bg-slate-50" : "border-white/5 bg-white/5"}`}>
-              <p className="font-anton text-sm text-[#00e476]">
-                {teamView ? formatUpdatedAt(teamView.updatedAt).replace("Atualizado ", "") : "--:--:--"}
-              </p>
-              <p className={`mt-1 font-mono text-[10px] uppercase tracking-wider ${mutedClasses}`}>
-                Última atualização
-              </p>
-            </div>
+            {[
+              {
+                label: "Posição no grupo",
+                value: teamView?.standings ? `${teamView.standings.rank}º` : "--",
+              },
+              {
+                label: "Pontos",
+                value: teamView?.standings?.row.points ?? "--",
+              },
+              {
+                label: "Gols pró",
+                value: teamView?.leaders.teamSummary?.goalsFor ?? teamView?.standings?.row.goalsFor ?? "--",
+              },
+              {
+                label: "Aproveitamento",
+                value: teamView?.standings
+                  ? getPerformanceRate(
+                      teamView.standings.row.won,
+                      teamView.standings.row.drawn,
+                      teamView.standings.row.played,
+                    )
+                  : "--",
+              },
+            ].map(({ label, value }) => (
+              <div
+                key={label}
+                className={`rounded-2xl border px-3 py-3 ${theme === "classic-light" ? "border-slate-100 bg-slate-50" : "border-white/5 bg-white/5"}`}
+              >
+                <p className="font-anton text-xl text-[#00e476]">{value}</p>
+                <p className={`mt-1 font-mono text-[10px] uppercase tracking-wider ${mutedClasses}`}>
+                  {label}
+                </p>
+              </div>
+            ))}
           </div>
         </div>
       </section>
