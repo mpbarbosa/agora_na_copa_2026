@@ -170,3 +170,11 @@
 .venue-map-surface .leaflet-tooltip-top::before {
   border-top-color: transparent;
 }
+
+.scrollbar-hidden {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.scrollbar-hidden::-webkit-scrollbar {
+  display: none;
+}

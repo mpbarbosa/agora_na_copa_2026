@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import packageInfo from "../package.json";
 import { APP_MATCHES } from "./appMatches";
 import type { Match, TeamRef } from "./types";
@@ -32,6 +32,11 @@ export default function App() {
   const isAoVivoViewActive = activeNavId === "ao-vivo" && lineupTeam === null;
   const teamLineups = useTeamLineups(isAoVivoViewActive);
   const hasLiveMatch = matches.some((match) => match.status === "LIVE");
+
+  useEffect(() => {
+    document.getElementById(`btn-nav-${activeNavId}`)
+      ?.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
+  }, [activeNavId]);
 
   const handleSelectNav = (navId: string) => {
     setActiveNavId(navId);
@@ -128,113 +133,118 @@ export default function App() {
         } sticky top-0 z-50`}
         id="app-header"
       >
-        <div className="max-w-7xl mx-auto px-4 py-3.5 flex flex-wrap items-center justify-between gap-4">
-          {/* Branding */}
-          <div className="flex items-center" id="app-branding">
-            <span
-              className={`font-anton text-lg uppercase tracking-wider ${
-                theme === "classic-light" ? "text-slate-900" : "text-white"
-              }`}
-            >
-              Agora na Copa{" "}
+        <div className="max-w-7xl mx-auto px-4">
+          {/* Row 1: Branding + Theme Toggle */}
+          <div className="py-3 flex items-center justify-between gap-4">
+            {/* Branding */}
+            <div className="flex items-center" id="app-branding">
               <span
-                className={
-                  theme === "classic-light"
-                    ? "text-[#009c3b]"
-                    : "text-[#00e476]"
-                }
+                className={`font-anton text-lg uppercase tracking-wider ${
+                  theme === "classic-light" ? "text-slate-900" : "text-white"
+                }`}
               >
-                26
+                Agora na Copa{" "}
+                <span
+                  className={
+                    theme === "classic-light"
+                      ? "text-[#009c3b]"
+                      : "text-[#00e476]"
+                  }
+                >
+                  26
+                </span>
               </span>
-            </span>
+            </div>
+
+            {/* Theme Toggle */}
+            <button
+              id="btn-toggle-theme"
+              onClick={() =>
+                setTheme(
+                  theme === "classic-light" ? "stadium-dark" : "classic-light",
+                )
+              }
+              title="Alternar estilo visual"
+              className="p-2 rounded-lg bg-[#1e2020]/5 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/10 transition"
+            >
+              {theme === "classic-light" ? (
+                <div className="flex items-center space-x-1.5">
+                  <Moon size={14} className="text-indigo-600" />
+                  <span className="text-xs font-mono font-bold uppercase">
+                    Escuro (Arena)
+                  </span>
+                </div>
+              ) : (
+                <div className="flex items-center space-x-1.5">
+                  <Sun size={14} className="text-amber-400" />
+                  <span className="text-xs font-mono font-bold uppercase text-amber-300">
+                    Claro (Estúdio)
+                  </span>
+                </div>
+              )}
+            </button>
           </div>
 
-          {/* Main Navigation */}
-          <nav
-            className={`flex flex-wrap items-center gap-1 rounded-lg border p-1 ${
-              theme === "classic-light"
-                ? "bg-slate-100 border-slate-200"
-                : "bg-white/10 border-white/15"
-            }`}
-            id="main-nav"
-          >
-            {NAV_ITEMS.map((item) => (
-              (() => {
-                const isActive = activeNavId === item.id;
-                const hasLiveAttention = item.id === "ao-vivo" && hasLiveMatch;
+          {/* Row 2: Scrollable Nav */}
+          <div className="pb-2 overflow-x-auto scrollbar-hidden">
+            <nav
+              className={`flex items-center gap-1 rounded-lg border p-1 w-max min-w-full ${
+                theme === "classic-light"
+                  ? "bg-slate-100 border-slate-200"
+                  : "bg-white/10 border-white/15"
+              }`}
+              id="main-nav"
+            >
+              {NAV_ITEMS.map((item) => (
+                (() => {
+                  const isActive = activeNavId === item.id;
+                  const hasLiveAttention = item.id === "ao-vivo" && hasLiveMatch;
 
-                return (
-                  <button
-                    key={item.id}
-                    id={`btn-nav-${item.id}`}
-                    onClick={() => handleSelectNav(item.id)}
-                    data-live-attention={hasLiveAttention ? "true" : "false"}
-                    className={`relative px-3.5 py-2 min-h-11 rounded-md text-[13px] md:text-sm leading-none font-anton transition-all uppercase tracking-wide ${
-                      isActive
-                        ? theme === "classic-light"
-                          ? "bg-white text-slate-950 shadow-sm font-semibold"
-                          : "bg-[#171a1c] text-[#ffd84d] shadow-sm font-semibold"
-                        : theme === "classic-light"
-                          ? "text-slate-700 hover:bg-white hover:text-slate-950"
-                          : "text-slate-100 hover:bg-white/10 hover:text-white"
-                    } ${
-                      hasLiveAttention
-                        ? theme === "classic-light"
-                          ? "ring-1 ring-[#009c3b]/25 shadow-[0_0_0_1px_rgba(0,156,59,0.08),0_0_18px_rgba(0,156,59,0.18)]"
-                          : "ring-1 ring-[#00e476]/25 shadow-[0_0_0_1px_rgba(0,228,118,0.1),0_0_18px_rgba(0,228,118,0.2)]"
-                        : ""
-                    }`}
-                  >
-                    <span className="inline-flex items-center gap-2">
-                      {hasLiveAttention && (
-                        <span className="relative flex h-2.5 w-2.5" id="nav-live-indicator">
-                          <span
-                            className={`absolute inline-flex h-full w-full animate-ping rounded-full opacity-75 ${
-                              theme === "classic-light" ? "bg-[#009c3b]" : "bg-[#00e476]"
-                            }`}
-                          ></span>
-                          <span
-                            className={`relative inline-flex h-2.5 w-2.5 rounded-full ${
-                              theme === "classic-light" ? "bg-[#009c3b]" : "bg-[#00e476]"
-                            }`}
-                          ></span>
-                        </span>
-                      )}
-                      <span className={hasLiveAttention ? "animate-pulse" : ""}>{item.label}</span>
-                    </span>
-                  </button>
-                );
-              })()
-            ))}
-          </nav>
-
-          {/* Theme Toggle */}
-          <button
-            id="btn-toggle-theme"
-            onClick={() =>
-              setTheme(
-                theme === "classic-light" ? "stadium-dark" : "classic-light",
-              )
-            }
-            title="Alternar estilo visual"
-            className="p-2 rounded-lg bg-[#1e2020]/5 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/10 transition"
-          >
-            {theme === "classic-light" ? (
-              <div className="flex items-center space-x-1.5">
-                <Moon size={14} className="text-indigo-600" />
-                <span className="text-xs font-mono font-bold uppercase">
-                  Escuro (Arena)
-                </span>
-              </div>
-            ) : (
-              <div className="flex items-center space-x-1.5">
-                <Sun size={14} className="text-amber-400" />
-                <span className="text-xs font-mono font-bold uppercase text-amber-300">
-                  Claro (Estúdio)
-                </span>
-              </div>
-            )}
-          </button>
+                  return (
+                    <button
+                      key={item.id}
+                      id={`btn-nav-${item.id}`}
+                      onClick={() => handleSelectNav(item.id)}
+                      data-live-attention={hasLiveAttention ? "true" : "false"}
+                      className={`relative px-3.5 py-2 min-h-11 rounded-md text-[13px] md:text-sm leading-none font-anton transition-all uppercase tracking-wide ${
+                        isActive
+                          ? theme === "classic-light"
+                            ? "bg-white text-slate-950 shadow-sm font-semibold"
+                            : "bg-[#171a1c] text-[#ffd84d] shadow-sm font-semibold"
+                          : theme === "classic-light"
+                            ? "text-slate-700 hover:bg-white hover:text-slate-950"
+                            : "text-slate-100 hover:bg-white/10 hover:text-white"
+                      } ${
+                        hasLiveAttention
+                          ? theme === "classic-light"
+                            ? "ring-1 ring-[#009c3b]/25 shadow-[0_0_0_1px_rgba(0,156,59,0.08),0_0_18px_rgba(0,156,59,0.18)]"
+                            : "ring-1 ring-[#00e476]/25 shadow-[0_0_0_1px_rgba(0,228,118,0.1),0_0_18px_rgba(0,228,118,0.2)]"
+                          : ""
+                      }`}
+                    >
+                      <span className="inline-flex items-center gap-2">
+                        {hasLiveAttention && (
+                          <span className="relative flex h-2.5 w-2.5" id="nav-live-indicator">
+                            <span
+                              className={`absolute inline-flex h-full w-full animate-ping rounded-full opacity-75 ${
+                                theme === "classic-light" ? "bg-[#009c3b]" : "bg-[#00e476]"
+                              }`}
+                            ></span>
+                            <span
+                              className={`relative inline-flex h-2.5 w-2.5 rounded-full ${
+                                theme === "classic-light" ? "bg-[#009c3b]" : "bg-[#00e476]"
+                              }`}
+                            ></span>
+                          </span>
+                        )}
+                        <span className={hasLiveAttention ? "animate-pulse" : ""}>{item.label}</span>
+                      </span>
+                    </button>
+                  );
+                })()
+              ))}
+            </nav>
+          </div>
         </div>
       </header>
 
