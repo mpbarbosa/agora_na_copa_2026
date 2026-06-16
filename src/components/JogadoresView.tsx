@@ -2,6 +2,8 @@ import React, { useMemo } from "react";
 import { APP_MATCHES } from "../appMatches";
 import type { Player } from "../types";
 import { FlagIcon } from "./FlagIcon";
+import { PlayerPortrait } from "./PlayerOverlayCard";
+import { InstagramBrandIcon } from "./InstagramBrandIcon";
 import { getPositionLabel } from "../utils/playerDisplay";
 
 interface JogadoresViewProps {
@@ -59,63 +61,118 @@ const POSITION_COLORS: Record<string, string> = {
 interface PlayerCardProps {
   player: Player;
   primaryColor: string;
+  secondaryColor: string;
 }
 
-const PlayerCard: React.FC<PlayerCardProps> = ({ player, primaryColor }) => {
+const PlayerCard: React.FC<PlayerCardProps> = ({ player, primaryColor, secondaryColor }) => {
   const posColor = POSITION_COLORS[player.position] ?? "#6b7280";
   const hasPhoto = Boolean(player.pictureUrl);
+  const hasInstagram = Boolean(player.socials?.instagram);
+  const initials = player.name.split(" ").map((w) => w[0]).join("").slice(0, 2).toUpperCase();
 
-  return (
-    <div
-      className="relative flex flex-col bg-[#fbf9fa] border-2 border-black rounded-sm overflow-hidden"
-      style={{ boxShadow: "3px 3px 0 #000" }}
-      id={`jogador-card-${player.id}`}
-    >
-      {/* Photo area */}
+  if (!hasPhoto) {
+    // ── Empty slot: álbum vazio aesthetic ──────────────────────────────────
+    return (
       <div
-        className="relative w-full aspect-[3/4] flex items-center justify-center overflow-hidden"
-        style={{
-          background: hasPhoto
-            ? "#e2e8f0"
-            : `linear-gradient(145deg, ${primaryColor}22 0%, ${primaryColor}08 100%)`,
-          borderBottom: "2px solid #000",
-        }}
+        className="relative flex flex-col bg-[#f5f4f2] border-2 border-dashed border-slate-300 rounded-sm overflow-hidden"
+        id={`jogador-card-${player.id}`}
       >
-        {hasPhoto ? (
-          <img
-            src={player.pictureUrl}
-            alt={player.name}
-            className="w-full h-full object-cover object-top"
-            loading="lazy"
-          />
-        ) : (
-          <span
-            className="font-anton text-5xl uppercase select-none"
-            style={{ color: `${primaryColor}55` }}
-          >
-            {player.name.split(" ").map((w) => w[0]).join("").slice(0, 2)}
-          </span>
-        )}
-
-        {/* Shirt number badge */}
+        {/* Slot photo area */}
         <div
-          className="absolute top-1.5 left-1.5 font-anton text-[11px] leading-none px-1.5 py-0.5 border border-black text-black bg-white"
-          style={{ boxShadow: "1px 1px 0 #000" }}
+          className="relative w-full aspect-[3/4] flex flex-col items-center justify-center gap-2 overflow-hidden"
+          style={{ background: `${primaryColor}08` }}
         >
-          #{player.number}
+          <span
+            className="font-anton text-4xl select-none leading-none"
+            style={{ color: `${primaryColor}35` }}
+          >
+            {initials}
+          </span>
+          {/* Muted number badge */}
+          <div className="absolute top-1.5 left-1.5 font-mono text-[10px] leading-none px-1.5 py-0.5 border border-dashed border-slate-300 text-slate-400 bg-transparent">
+            #{player.number}
+          </div>
+          {/* Muted position badge */}
+          <div
+            className="absolute top-1.5 right-1.5 font-mono text-[9px] font-bold leading-none px-1.5 py-0.5 border border-dashed border-slate-300"
+            style={{ color: `${posColor}99` }}
+          >
+            {player.position}
+          </div>
         </div>
 
-        {/* Position badge */}
+        {/* Info area — muted */}
+        <div className="px-2 py-2 flex flex-col gap-0.5">
+          <p className="font-anton text-[12px] uppercase leading-tight text-slate-400 line-clamp-2">
+            {player.name}
+          </p>
+          <p className="font-mono text-[9px] uppercase tracking-wider text-slate-300 leading-tight">
+            {getPositionLabel(player.position)}
+          </p>
+          {player.club && (
+            <p className="font-archivo text-[10px] text-slate-300 leading-tight truncate">
+              {player.club}
+            </p>
+          )}
+        </div>
+
+        {/* Muted accent strip */}
+        <div className="h-0.5 w-full mt-auto" style={{ background: `${primaryColor}30` }} />
+      </div>
+    );
+  }
+
+  // ── Filled sticker card ──────────────────────────────────────────────────
+  return (
+    <div
+      className="relative flex flex-col bg-white border-2 border-black rounded-sm overflow-hidden"
+      style={{ boxShadow: "4px 4px 0 #000" }}
+      id={`jogador-card-${player.id}`}
+    >
+      {/* Photo area with sticker inner frame */}
+      <div
+        className="relative w-full aspect-[3/4] overflow-hidden p-[5px]"
+        style={{ background: "#e8e6e3", borderBottom: "2px solid #000" }}
+      >
+        <PlayerPortrait
+          player={player}
+          primaryColor={primaryColor}
+          secondaryColor={secondaryColor}
+          className="w-full h-full rounded-[2px] overflow-hidden"
+          imageClassName="w-full h-full object-cover object-top"
+          fallbackTextClassName="text-4xl"
+        />
+
+        {/* Circular number badge — bottom-left, team color */}
         <div
-          className="absolute top-1.5 right-1.5 font-mono text-[9px] font-bold leading-none px-1.5 py-0.5 text-white border border-black"
+          className="absolute bottom-2 left-2 w-7 h-7 rounded-full border-2 border-black flex items-center justify-center font-anton text-[11px] text-white leading-none"
+          style={{ background: primaryColor, boxShadow: "1px 1px 0 #000" }}
+        >
+          {player.number}
+        </div>
+
+        {/* Position badge — top-right */}
+        <div
+          className="absolute top-2 right-2 font-mono text-[9px] font-bold leading-none px-1.5 py-0.5 text-white border border-black"
           style={{ background: posColor, boxShadow: "1px 1px 0 #000" }}
         >
           {player.position}
         </div>
+
+        {/* Instagram indicator — top-left */}
+        {hasInstagram && (
+          <div
+            className="absolute top-2 left-2 w-5 h-5 flex items-center justify-center border border-black bg-white rounded-full"
+            style={{ boxShadow: "1px 1px 0 #000" }}
+            title="Instagram verificado"
+          >
+            <InstagramBrandIcon size={11} />
+          </div>
+        )}
       </div>
 
       {/* Info area */}
-      <div className="px-2 py-2 flex flex-col gap-0.5">
+      <div className="px-2 pt-2 pb-1 flex flex-col gap-0.5">
         <p className="font-anton text-[13px] uppercase leading-tight text-black line-clamp-2">
           {player.name}
         </p>
@@ -123,17 +180,17 @@ const PlayerCard: React.FC<PlayerCardProps> = ({ player, primaryColor }) => {
           {getPositionLabel(player.position)}
         </p>
         {player.club && (
-          <p className="font-archivo text-[10px] text-slate-600 leading-tight truncate">
+          <p className="font-archivo text-[10px] text-slate-500 leading-tight truncate">
             {player.club}
           </p>
         )}
       </div>
 
       {/* Team color accent strip */}
-      <div className="h-1 w-full mt-auto" style={{ background: primaryColor }} />
+      <div className="h-1.5 w-full mt-auto border-t border-black" style={{ background: primaryColor }} />
     </div>
   );
-}
+};
 
 interface TeamSectionProps {
   team: TeamEntry;
@@ -181,7 +238,7 @@ const TeamSection: React.FC<TeamSectionProps> = ({ team, theme }) => {
       <div className={`p-3 ${sectionBg}`}>
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
           {players.map((player) => (
-            <PlayerCard key={player.id} player={player} primaryColor={team.primaryColor} />
+            <PlayerCard key={player.id} player={player} primaryColor={team.primaryColor} secondaryColor={team.secondaryColor} />
           ))}
         </div>
       </div>
