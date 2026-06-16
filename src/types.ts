@@ -298,8 +298,14 @@ export interface CountryInfoResponse {
   population: number | null;
   /** Area in km² (Wikidata) */
   areaSqKm: number | null;
-  /** Capital city name in Portuguese */
+  /** Capital city name in Portuguese (Wikidata P36) */
   capital: string | null;
+  /** Official language(s) in Portuguese (Wikidata P37) */
+  language: string | null;
+  /** Form of government in Portuguese (Wikidata P122) */
+  government: string | null;
+  /** Currency name in Portuguese (Wikidata P38) */
+  currency: string | null;
   source: "wikipedia" | "fallback";
   updatedAt: string;
 }

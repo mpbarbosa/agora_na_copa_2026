@@ -308,9 +308,12 @@ function CountryInfoCard({
     info.extract.length > 420 ? `${info.extract.slice(0, 420).trimEnd()}…` : info.extract;
 
   const facts = [
-    info.capital ? { label: "Capital", value: info.capital } : null,
-    info.population ? { label: "População", value: formatPopulation(info.population) } : null,
-    info.areaSqKm ? { label: "Área", value: formatArea(info.areaSqKm) } : null,
+    info.capital    ? { label: "Capital",   value: info.capital }                        : null,
+    info.population ? { label: "População", value: formatPopulation(info.population) }   : null,
+    info.areaSqKm   ? { label: "Área",      value: formatArea(info.areaSqKm) }           : null,
+    info.language   ? { label: "Idioma",    value: info.language }                       : null,
+    info.government ? { label: "Governo",   value: info.government }                     : null,
+    info.currency   ? { label: "Moeda",     value: info.currency }                       : null,
   ].filter(Boolean) as { label: string; value: string }[];
 
   return (

@@ -1527,6 +1527,9 @@ async function fetchCountryInfo(code: string): Promise<CountryInfoResponse | nul
       population: null,
       areaSqKm: null,
       capital: null,
+      language: null,
+      government: null,
+      currency: null,
       source: "fallback",
       updatedAt: now,
     };
@@ -1538,7 +1541,8 @@ async function fetchCountryInfo(code: string): Promise<CountryInfoResponse | nul
     content_urls?: { desktop?: { page?: string } };
   };
 
-  // Wikidata entity — population (P1082), area (P2046), capital (P36)
+  // Wikidata entity — P1082 population, P2046 area, P36 capital,
+  //                    P37 language, P122 government, P38 currency
   const wdUrl =
     `${WIKIDATA_API_BASE}?action=wbgetentities&ids=${wikidataId}` +
     `&languages=pt&props=claims&format=json`;
@@ -1548,7 +1552,20 @@ async function fetchCountryInfo(code: string): Promise<CountryInfoResponse | nul
 
   let population: number | null = null;
   let areaSqKm: number | null = null;
+  // QIDs to resolve in one batch label call
   let capitalQid: string | null = null;
+  let languageQids: string[] = [];
+  let governmentQid: string | null = null;
+  let currencyQid: string | null = null;
+
+  // Pick the active claim: preferred rank > claim with no end-time > last claim
+  const activeClaim = (arr: any[]) =>
+    arr.find((c: any) => c.rank === "preferred") ??
+    arr.find((c: any) => !c.qualifiers?.["P582"]) ??
+    arr.at(-1);
+
+  const qidOf = (claim: any): string | null =>
+    claim?.mainsnak?.datavalue?.value?.id ?? null;
 
   if (wdRes.ok) {
     const wd = (await wdRes.json()) as {
@@ -1556,42 +1573,63 @@ async function fetchCountryInfo(code: string): Promise<CountryInfoResponse | nul
     };
     const claims = wd.entities?.[wikidataId]?.claims ?? {};
 
-    // Population: preferred rank = most recent census; fall back to last entry
+    // Population: preferred rank = most recent census
     const popClaims: any[] = claims["P1082"] ?? [];
-    const popClaim =
+    const popAmount =
       (popClaims.find((c: any) => c.rank === "preferred") ?? popClaims.at(-1))
         ?.mainsnak?.datavalue?.value?.amount;
-    if (popClaim) population = Math.abs(parseInt(popClaim, 10));
+    if (popAmount) population = Math.abs(parseInt(popAmount, 10));
 
-    const areaClaim = claims["P2046"]?.[0]?.mainsnak?.datavalue?.value?.amount;
-    if (areaClaim) areaSqKm = Math.abs(parseFloat(areaClaim));
+    const areaAmount = claims["P2046"]?.[0]?.mainsnak?.datavalue?.value?.amount;
+    if (areaAmount) areaSqKm = Math.abs(parseFloat(areaAmount));
 
-    // Pick the current capital: Wikidata marks it with rank "preferred" when
-    // multiple historical entries exist; fall back to the one without P582.
-    const capitalClaims: any[] = claims["P36"] ?? [];
-    const preferred = capitalClaims.find((c: any) => c.rank === "preferred");
-    const currentCapital =
-      preferred ??
-      capitalClaims.find((c: any) => !c.qualifiers?.["P582"]) ??
-      capitalClaims.at(-1);
-    capitalQid = currentCapital?.mainsnak?.datavalue?.value?.id ?? null;
+    capitalQid = qidOf(activeClaim(claims["P36"] ?? []));
+
+    // Languages: take preferred-rank entries; if none, take those without P582
+    const langClaims: any[] = claims["P37"] ?? [];
+    const preferredLangs = langClaims.filter((c: any) => c.rank === "preferred");
+    const activeLangs =
+      preferredLangs.length > 0
+        ? preferredLangs
+        : langClaims.filter((c: any) => !c.qualifiers?.["P582"]);
+    languageQids = activeLangs.slice(0, 3).map(qidOf).filter(Boolean) as string[];
+
+    governmentQid = qidOf(activeClaim(claims["P122"] ?? []));
+    currencyQid   = qidOf(activeClaim(claims["P38"]  ?? []));
   }
 
-  // Resolve capital label (another Wikidata call)
+  // Batch-resolve all entity labels in a single Wikidata call
+  const allQids = [...new Set(
+    [capitalQid, ...languageQids, governmentQid, currencyQid].filter(Boolean)
+  )] as string[];
+
   let capital: string | null = null;
-  if (capitalQid) {
-    const capUrl =
-      `${WIKIDATA_API_BASE}?action=wbgetentities&ids=${capitalQid}` +
-      `&languages=pt&props=labels&format=json`;
-    const capRes = await fetch(capUrl, {
+  let language: string | null = null;
+  let government: string | null = null;
+  let currency: string | null = null;
+
+  if (allQids.length > 0) {
+    const labelsUrl =
+      `${WIKIDATA_API_BASE}?action=wbgetentities&ids=${allQids.join("|")}` +
+      `&languages=pt%7Cen&props=labels&format=json`;
+    const labelsRes = await fetch(labelsUrl, {
       headers: { "User-Agent": WIKIPEDIA_USER_AGENT },
     });
-    if (capRes.ok) {
-      const capData = (await capRes.json()) as {
+    if (labelsRes.ok) {
+      const labelsData = (await labelsRes.json()) as {
         entities?: Record<string, { labels?: Record<string, { value?: string }> }>;
       };
-      capital =
-        capData.entities?.[capitalQid]?.labels?.["pt"]?.value ?? null;
+      // Prefer pt label; fall back to en (e.g. "euro" has no pt label in Wikidata)
+      const labelOf = (qid: string | null) => {
+        if (!qid) return null;
+        const labels = labelsData.entities?.[qid]?.labels;
+        return labels?.["pt"]?.value ?? labels?.["en"]?.value ?? null;
+      };
+
+      capital    = labelOf(capitalQid);
+      language   = languageQids.map(labelOf).filter(Boolean).join(" / ") || null;
+      government = labelOf(governmentQid);
+      currency   = labelOf(currencyQid);
     }
   }
 
@@ -1606,6 +1644,9 @@ async function fetchCountryInfo(code: string): Promise<CountryInfoResponse | nul
     population,
     areaSqKm: areaSqKm ? Math.round(areaSqKm) : null,
     capital,
+    language,
+    government,
+    currency,
     source: "wikipedia",
     updatedAt: now,
   };
