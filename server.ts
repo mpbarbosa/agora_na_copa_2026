@@ -1523,6 +1523,7 @@ async function fetchCountryInfo(code: string): Promise<CountryInfoResponse | nul
       description: "",
       extract: "",
       thumbnailUrl: null,
+      flagSvgUrl: null,
       wikipediaUrl: `https://pt.wikipedia.org/wiki/${encodedTitle}`,
       population: null,
       areaSqKm: null,
@@ -1538,8 +1539,22 @@ async function fetchCountryInfo(code: string): Promise<CountryInfoResponse | nul
     description?: string;
     extract?: string;
     thumbnail?: { source?: string };
+    originalimage?: { source?: string };
     content_urls?: { desktop?: { page?: string } };
   };
+
+  // Extract direct SVG URL from the Wikimedia thumb path:
+  // .../commons/thumb/a/ab/Flag_of_X.svg/...px-....png → .../commons/a/ab/Flag_of_X.svg
+  const svgFromThumb = (url: string | undefined): string | null => {
+    if (!url) return null;
+    const m = url.match(
+      /^(https:\/\/upload\.wikimedia\.org\/wikipedia\/commons)\/thumb\/([^/]+\/[^/]+\/[^/]+\.svg)\//,
+    );
+    return m ? `${m[1]}/${m[2]}` : null;
+  };
+  const flagSvgUrl =
+    svgFromThumb(summary.originalimage?.source) ??
+    svgFromThumb(summary.thumbnail?.source);
 
   // Wikidata entity — P1082 population, P2046 area, P36 capital,
   //                    P37 language, P122 government, P38 currency
@@ -1638,6 +1653,7 @@ async function fetchCountryInfo(code: string): Promise<CountryInfoResponse | nul
     description: summary.description ?? "",
     extract: summary.extract ?? "",
     thumbnailUrl: summary.thumbnail?.source ?? null,
+    flagSvgUrl,
     wikipediaUrl:
       summary.content_urls?.desktop?.page ??
       `https://pt.wikipedia.org/wiki/${encodedTitle}`,

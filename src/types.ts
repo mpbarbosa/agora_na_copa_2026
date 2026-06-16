@@ -290,8 +290,10 @@ export interface CountryInfoResponse {
   description: string;
   /** Intro paragraph extracted from the Wikipedia article */
   extract: string;
-  /** Wikipedia thumbnail URL (usually the flag or coat of arms) */
+  /** Wikipedia thumbnail URL (resized PNG, usually the flag) */
   thumbnailUrl: string | null;
+  /** Direct Wikimedia Commons SVG URL for the flag (derived from thumbnailUrl) */
+  flagSvgUrl: string | null;
   /** Full Wikipedia article URL in Portuguese */
   wikipediaUrl: string;
   /** Population (latest Wikidata figure) */

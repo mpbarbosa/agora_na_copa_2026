@@ -330,11 +330,11 @@ function CountryInfoCard({
             {info.description}
           </p>
         </div>
-        {info.thumbnailUrl && (
+        {(info.flagSvgUrl ?? info.thumbnailUrl) && (
           <img
-            src={info.thumbnailUrl}
-            alt={`Imagem de ${info.code}`}
-            className={`h-16 w-16 shrink-0 rounded-2xl border object-cover ${divider}`}
+            src={info.flagSvgUrl ?? info.thumbnailUrl!}
+            alt={`Bandeira de ${info.code}`}
+            className={`h-12 w-20 shrink-0 rounded-xl border object-cover ${divider}`}
             loading="lazy"
           />
         )}
