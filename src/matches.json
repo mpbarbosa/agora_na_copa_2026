@@ -1307,6 +1307,18 @@
           }
         },
         {
+          "id": "b14",
+          "name": "Gabriel Jesus",
+          "number": 23,
+          "position": "FW",
+          "x": 15,
+          "y": 10,
+          "club": "Arsenal",
+          "socials": {
+            "instagram": "https://instagram.com/gabrieljesus9"
+          }
+        },
+        {
           "id": "b13",
           "name": "Vitinho",
           "number": 22,
