@@ -2,6 +2,16 @@ import { expect, test } from "@playwright/test";
 
 test.describe("Leaders view (Líderes)", () => {
   test("opens the player overlay with the player picture", async ({ page }) => {
+    // Serve a 1×1 PNG for any fake test image URL so PlayerPortrait doesn't
+    // fire onError and remove the <img> element before the assertion runs.
+    const onePxPng = Buffer.from(
+      "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==",
+      "base64",
+    );
+    await page.route("https://images.fifa.test/**", async (route) => {
+      await route.fulfill({ contentType: "image/png", body: onePxPng });
+    });
+
     await page.route("**/api/tournament-leaders", async (route) => {
       await route.fulfill({
         contentType: "application/json",
