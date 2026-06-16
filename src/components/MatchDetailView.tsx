@@ -17,6 +17,7 @@ import {
   type Player,
 } from "../types";
 import { APP_MATCHES } from "../appMatches";
+import MATCH_VIDEOS from "../data/matchVideos.json";
 import type { TeamLineupsMap } from "../utils/teamLineup";
 import { enrichPlayerWithMetadata, getPlayerMetadataSupplement } from "../utils/playerMetadata";
 import { FlagIcon } from "./FlagIcon";
@@ -1636,80 +1637,103 @@ export function MatchDetailView({
                 {currentOverlay?.broadcastGuide.note || "Carregando dados oficiais da FIFA..."} •{" "}
                 {formatOverlayUpdatedAt(currentOverlay?.broadcastGuide.updatedAt)}
               </p>
-              <div
-                className="flex items-center gap-4"
-                id="fifa-broadcaster-strip"
-              >
-                <div
-                  className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border ${
-                    theme === "classic-light"
-                      ? "bg-white border-slate-200"
-                      : "bg-[#161919] border-white/10"
-                  }`}
-                  id="broadcast-icon-container"
-                >
-                  <svg
-                    width="20"
-                    height="20"
-                    viewBox="0 0 20 20"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-5 w-5"
-                    aria-hidden="true"
-                  >
-                    <path
-                      d="M8.91634 8.03187V11.2807C8.91634 11.4363 9.08307 11.5313 9.21161 11.4487L11.7423 9.82434C11.8632 9.74672 11.8632 9.56583 11.7423 9.4882L9.21161 7.8638C9.08307 7.78129 8.91634 7.8762 8.91634 8.03187Z"
-                      fill="#505B73"
-                    />
-                    <path
-                      fillRule="evenodd"
-                      clipRule="evenodd"
-                      d="M4.74967 5H15.2497C16.0321 5 16.6663 5.63426 16.6663 6.41667V12.75C16.6663 13.5324 16.0321 14.1667 15.2497 14.1667L13.333 14.1667V15H6.66634V14.1667L4.74967 14.1667C3.96727 14.1667 3.33301 13.5324 3.33301 12.75V6.41667C3.33301 5.63426 3.96727 5 4.74967 5ZM4.74967 6.25C4.65763 6.25 4.58301 6.32462 4.58301 6.41667V12.75C4.58301 12.842 4.65763 12.9167 4.74967 12.9167H15.2497C15.3417 12.9167 15.4163 12.842 15.4163 12.75V6.41667C15.4163 6.32462 15.3417 6.25 15.2497 6.25H4.74967Z"
-                      fill="#505B73"
-                    />
-                  </svg>
-                </div>
-
-                <div
-                  className="flex min-w-0 flex-1 items-center gap-2 md:gap-3 overflow-hidden"
-                  id="fifa-broadcasters-list"
-                >
-                  {visibleBroadcasters.map((cast) => (
-                    <a
-                      key={cast.id}
-                      id={`link-broadcaster-${cast.id}`}
-                      href={cast.link}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      title={`${cast.name} • ${cast.type}`}
-                      className={`flex h-[72px] w-[84px] shrink-0 items-center justify-center rounded-xl border px-2 py-2 transition hover:-translate-y-0.5 ${
-                        theme === "classic-light"
-                          ? "bg-white border-slate-200 hover:border-slate-300"
-                          : "bg-[#161919] border-white/10 hover:border-white/20"
-                      }`}
-                    >
-                      {cast.logoUrl ? (
-                        <img
-                          src={cast.logoUrl}
-                          alt={cast.name}
-                          className="h-full w-full object-contain"
-                          loading="lazy"
+              {currentMatch.status === "FINISHED" &&
+              (MATCH_VIDEOS as Record<string, { embedUrl: string; title: string }[]>)[currentMatch.id]?.length ? (
+                <div className="flex flex-col gap-4" id="match-videos-list">
+                  {(MATCH_VIDEOS as Record<string, { embedUrl: string; title: string }[]>)[currentMatch.id].map(
+                    (video, idx) => (
+                      <div
+                        key={idx}
+                        className="relative w-full overflow-hidden rounded-xl"
+                        style={{ paddingTop: "56.25%" }}
+                      >
+                        <iframe
+                          className="absolute inset-0 h-full w-full"
+                          src={video.embedUrl}
+                          title={video.title}
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                          referrerPolicy="strict-origin-when-cross-origin"
+                          allowFullScreen
                         />
-                      ) : (
-                        <span
-                          className="font-anton text-xs uppercase tracking-wide text-white"
-                          style={{
-                            color: cast.iconColor,
-                          }}
-                        >
-                          {getBroadcasterBadgeLabel(cast.name)}
-                        </span>
-                      )}
-                    </a>
-                  ))}
-
+                      </div>
+                    ),
+                  )}
                 </div>
-              </div>
+              ) : (
+                <div
+                  className="flex items-center gap-4"
+                  id="fifa-broadcaster-strip"
+                >
+                  <div
+                    className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border ${
+                      theme === "classic-light"
+                        ? "bg-white border-slate-200"
+                        : "bg-[#161919] border-white/10"
+                    }`}
+                    id="broadcast-icon-container"
+                  >
+                    <svg
+                      width="20"
+                      height="20"
+                      viewBox="0 0 20 20"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-5 w-5"
+                      aria-hidden="true"
+                    >
+                      <path
+                        d="M8.91634 8.03187V11.2807C8.91634 11.4363 9.08307 11.5313 9.21161 11.4487L11.7423 9.82434C11.8632 9.74672 11.8632 9.56583 11.7423 9.4882L9.21161 7.8638C9.08307 7.78129 8.91634 7.8762 8.91634 8.03187Z"
+                        fill="#505B73"
+                      />
+                      <path
+                        fillRule="evenodd"
+                        clipRule="evenodd"
+                        d="M4.74967 5H15.2497C16.0321 5 16.6663 5.63426 16.6663 6.41667V12.75C16.6663 13.5324 16.0321 14.1667 15.2497 14.1667L13.333 14.1667V15H6.66634V14.1667L4.74967 14.1667C3.96727 14.1667 3.33301 13.5324 3.33301 12.75V6.41667C3.33301 5.63426 3.96727 5 4.74967 5ZM4.74967 6.25C4.65763 6.25 4.58301 6.32462 4.58301 6.41667V12.75C4.58301 12.842 4.65763 12.9167 4.74967 12.9167H15.2497C15.3417 12.9167 15.4163 12.842 15.4163 12.75V6.41667C15.4163 6.32462 15.3417 6.25 15.2497 6.25H4.74967Z"
+                        fill="#505B73"
+                      />
+                    </svg>
+                  </div>
+
+                  <div
+                    className="flex min-w-0 flex-1 items-center gap-2 md:gap-3 overflow-hidden"
+                    id="fifa-broadcasters-list"
+                  >
+                    {visibleBroadcasters.map((cast) => (
+                      <a
+                        key={cast.id}
+                        id={`link-broadcaster-${cast.id}`}
+                        href={cast.link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        title={`${cast.name} • ${cast.type}`}
+                        className={`flex h-[72px] w-[84px] shrink-0 items-center justify-center rounded-xl border px-2 py-2 transition hover:-translate-y-0.5 ${
+                          theme === "classic-light"
+                            ? "bg-white border-slate-200 hover:border-slate-300"
+                            : "bg-[#161919] border-white/10 hover:border-white/20"
+                        }`}
+                      >
+                        {cast.logoUrl ? (
+                          <img
+                            src={cast.logoUrl}
+                            alt={cast.name}
+                            className="h-full w-full object-contain"
+                            loading="lazy"
+                          />
+                        ) : (
+                          <span
+                            className="font-anton text-xs uppercase tracking-wide text-white"
+                            style={{
+                              color: cast.iconColor,
+                            }}
+                          >
+                            {getBroadcasterBadgeLabel(cast.name)}
+                          </span>
+                        )}
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               {(currentMatch.status !== "PRE_GAME" || visibleIncidents.length > 0) && (
                 <div
