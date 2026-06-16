@@ -284,6 +284,26 @@ export interface TeamViewMatchSummary {
   updatedAt: string;
 }
 
+export interface CountryInfoResponse {
+  code: string;
+  /** Short one-line description in pt-BR */
+  description: string;
+  /** Intro paragraph extracted from the Wikipedia article */
+  extract: string;
+  /** Wikipedia thumbnail URL (usually the flag or coat of arms) */
+  thumbnailUrl: string | null;
+  /** Full Wikipedia article URL in Portuguese */
+  wikipediaUrl: string;
+  /** Population (latest Wikidata figure) */
+  population: number | null;
+  /** Area in km² (Wikidata) */
+  areaSqKm: number | null;
+  /** Capital city name in Portuguese */
+  capital: string | null;
+  source: "wikipedia" | "fallback";
+  updatedAt: string;
+}
+
 export interface TeamViewResponse {
   updatedAt: string;
   refreshAfterMs: number;

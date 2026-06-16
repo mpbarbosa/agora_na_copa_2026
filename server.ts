@@ -18,6 +18,7 @@ import type {
 } from "./fifa-sync-core";
 import { APP_MATCHES } from "./src/appMatches";
 import { triviaQuestions } from "./src/data/questions";
+import WIKIPEDIA_COUNTRIES from "./src/data/wikipediaCountries";
 import { computeStandings, groupStandings } from "./src/standings";
 import {
   Position,
@@ -35,6 +36,7 @@ import {
   type TeamViewResponse,
   type TriviaQuestion,
   type StandingsRow,
+  type CountryInfoResponse,
 } from "./src/types";
 
 dotenv.config();
@@ -59,6 +61,10 @@ const BACKGROUND_WARM_FAILURE_RETRY_MS = 30 * 1000;
 const CIRCUIT_BREAKER_FAILURE_THRESHOLD = 3;
 const CIRCUIT_BREAKER_OPEN_MS = 60 * 1000;
 const TOURNAMENT_LEADER_LIMIT = 5;
+const WIKIPEDIA_API_BASE = "https://pt.wikipedia.org/api/rest_v1";
+const WIKIDATA_API_BASE = "https://www.wikidata.org/w/api.php";
+const COUNTRY_INFO_CACHE_TTL_MS = 24 * 60 * 60 * 1000; // Wikipedia data changes rarely
+const WIKIPEDIA_USER_AGENT = "agora-na-copa-2026 (https://github.com/mpbarbosa/agora_na_copa_2026)";
 const APP_MATCHES_BY_ID = new Map(APP_MATCHES.map((match) => [match.id, match]));
 const GOAL_INCIDENT_SUFFIX = " marcou.";
 const YELLOW_CARD_INCIDENT_SUFFIX = " recebeu amarelo.";
@@ -153,6 +159,12 @@ let teamLineupsCache:
       payload: TeamLineupsResponse;
     }
   | null = null;
+
+// Per-country cache — keyed by FIFA team code
+const countryInfoCache = new Map<
+  string,
+  { expiresAt: number; payload: CountryInfoResponse }
+>();
 
 const fifaSyncDiagnostics: {
   broadcastGuide: FifaSyncServiceDiagnostics;
@@ -1483,6 +1495,141 @@ app.get("/api/team-view/:teamCode", async (req, res) => {
     res
       .status(502)
       .json({ error: error?.message || "Erro ao carregar painel completo da seleção" });
+  }
+});
+
+// ---------------------------------------------------------------------------
+// Wikipedia / Wikidata country info
+// ---------------------------------------------------------------------------
+async function fetchCountryInfo(code: string): Promise<CountryInfoResponse | null> {
+  const entry = WIKIPEDIA_COUNTRIES[code.toUpperCase()];
+  if (!entry) return null;
+
+  const cached = countryInfoCache.get(code);
+  if (cached && cached.expiresAt > Date.now()) return cached.payload;
+
+  const { ptArticle, wikidataId } = entry;
+  const now = new Date().toISOString();
+
+  // Wikipedia REST summary
+  const encodedTitle = encodeURIComponent(ptArticle);
+  const summaryUrl = `${WIKIPEDIA_API_BASE}/page/summary/${encodedTitle}`;
+  const summaryRes = await fetch(summaryUrl, {
+    headers: { "User-Agent": WIKIPEDIA_USER_AGENT },
+  });
+  if (!summaryRes.ok) {
+    return {
+      code,
+      description: "",
+      extract: "",
+      thumbnailUrl: null,
+      wikipediaUrl: `https://pt.wikipedia.org/wiki/${encodedTitle}`,
+      population: null,
+      areaSqKm: null,
+      capital: null,
+      source: "fallback",
+      updatedAt: now,
+    };
+  }
+  const summary = (await summaryRes.json()) as {
+    description?: string;
+    extract?: string;
+    thumbnail?: { source?: string };
+    content_urls?: { desktop?: { page?: string } };
+  };
+
+  // Wikidata entity — population (P1082), area (P2046), capital (P36)
+  const wdUrl =
+    `${WIKIDATA_API_BASE}?action=wbgetentities&ids=${wikidataId}` +
+    `&languages=pt&props=claims&format=json`;
+  const wdRes = await fetch(wdUrl, {
+    headers: { "User-Agent": WIKIPEDIA_USER_AGENT },
+  });
+
+  let population: number | null = null;
+  let areaSqKm: number | null = null;
+  let capitalQid: string | null = null;
+
+  if (wdRes.ok) {
+    const wd = (await wdRes.json()) as {
+      entities?: Record<string, { claims?: Record<string, any[]> }>;
+    };
+    const claims = wd.entities?.[wikidataId]?.claims ?? {};
+
+    // Population: preferred rank = most recent census; fall back to last entry
+    const popClaims: any[] = claims["P1082"] ?? [];
+    const popClaim =
+      (popClaims.find((c: any) => c.rank === "preferred") ?? popClaims.at(-1))
+        ?.mainsnak?.datavalue?.value?.amount;
+    if (popClaim) population = Math.abs(parseInt(popClaim, 10));
+
+    const areaClaim = claims["P2046"]?.[0]?.mainsnak?.datavalue?.value?.amount;
+    if (areaClaim) areaSqKm = Math.abs(parseFloat(areaClaim));
+
+    // Pick the current capital: Wikidata marks it with rank "preferred" when
+    // multiple historical entries exist; fall back to the one without P582.
+    const capitalClaims: any[] = claims["P36"] ?? [];
+    const preferred = capitalClaims.find((c: any) => c.rank === "preferred");
+    const currentCapital =
+      preferred ??
+      capitalClaims.find((c: any) => !c.qualifiers?.["P582"]) ??
+      capitalClaims.at(-1);
+    capitalQid = currentCapital?.mainsnak?.datavalue?.value?.id ?? null;
+  }
+
+  // Resolve capital label (another Wikidata call)
+  let capital: string | null = null;
+  if (capitalQid) {
+    const capUrl =
+      `${WIKIDATA_API_BASE}?action=wbgetentities&ids=${capitalQid}` +
+      `&languages=pt&props=labels&format=json`;
+    const capRes = await fetch(capUrl, {
+      headers: { "User-Agent": WIKIPEDIA_USER_AGENT },
+    });
+    if (capRes.ok) {
+      const capData = (await capRes.json()) as {
+        entities?: Record<string, { labels?: Record<string, { value?: string }> }>;
+      };
+      capital =
+        capData.entities?.[capitalQid]?.labels?.["pt"]?.value ?? null;
+    }
+  }
+
+  const payload: CountryInfoResponse = {
+    code,
+    description: summary.description ?? "",
+    extract: summary.extract ?? "",
+    thumbnailUrl: summary.thumbnail?.source ?? null,
+    wikipediaUrl:
+      summary.content_urls?.desktop?.page ??
+      `https://pt.wikipedia.org/wiki/${encodedTitle}`,
+    population,
+    areaSqKm: areaSqKm ? Math.round(areaSqKm) : null,
+    capital,
+    source: "wikipedia",
+    updatedAt: now,
+  };
+
+  countryInfoCache.set(code, {
+    expiresAt: Date.now() + COUNTRY_INFO_CACHE_TTL_MS,
+    payload,
+  });
+  return payload;
+}
+
+app.get("/api/country-info/:code", async (req, res) => {
+  try {
+    const code = req.params.code.toUpperCase();
+    const payload = await fetchCountryInfo(code);
+    if (!payload) {
+      res.status(404).json({ error: "País não encontrado" });
+      return;
+    }
+    res.set("Cache-Control", "public, max-age=3600");
+    res.json(payload);
+  } catch (error: any) {
+    console.error("Wikipedia API Error in /api/country-info:", error);
+    res.status(502).json({ error: error?.message || "Erro ao carregar informações do país" });
   }
 });
 
