@@ -1,13 +1,19 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { APP_MATCHES } from "../appMatches";
-import type { Player } from "../types";
+import type { Player, TeamRef } from "../types";
 import { FlagIcon } from "./FlagIcon";
-import { PlayerPortrait } from "./PlayerOverlayCard";
+import { PlayerPortrait, PlayerOverlayCard } from "./PlayerOverlayCard";
 import { InstagramBrandIcon } from "./InstagramBrandIcon";
 import { getPositionLabel } from "../utils/playerDisplay";
 
 interface JogadoresViewProps {
   theme: "classic-light" | "stadium-dark";
+  onSelectTeamLineup: (team: TeamRef) => void;
+}
+
+interface SelectedContext {
+  player: Player;
+  team: TeamEntry;
 }
 
 interface TeamEntry {
@@ -73,9 +79,10 @@ interface PlayerCardProps {
   player: Player;
   primaryColor: string;
   secondaryColor: string;
+  onClick: () => void;
 }
 
-const PlayerCard: React.FC<PlayerCardProps> = ({ player, primaryColor, secondaryColor }) => {
+const PlayerCard: React.FC<PlayerCardProps> = ({ player, primaryColor, secondaryColor, onClick }) => {
   const posColor = POSITION_COLORS[player.position] ?? "#6b7280";
   const hasPhoto = Boolean(player.pictureUrl);
   const hasInstagram = Boolean(player.socials?.instagram);
@@ -86,8 +93,13 @@ const PlayerCard: React.FC<PlayerCardProps> = ({ player, primaryColor, secondary
     // ── Empty slot: álbum vazio aesthetic ──────────────────────────────────
     return (
       <div
-        className="relative flex flex-col bg-[#f5f4f2] border-2 border-dashed border-slate-300 rounded-sm overflow-hidden"
+        className="relative flex flex-col bg-[#f5f4f2] border-2 border-dashed border-slate-300 rounded-sm overflow-hidden cursor-pointer transition-transform hover:scale-[1.02]"
         id={`jogador-card-${player.id}`}
+        onClick={onClick}
+        role="button"
+        tabIndex={0}
+        onKeyDown={(e) => e.key === "Enter" && onClick()}
+        aria-label={`Ver perfil de ${player.name}`}
       >
         {/* Slot photo area */}
         <div
@@ -140,12 +152,17 @@ const PlayerCard: React.FC<PlayerCardProps> = ({ player, primaryColor, secondary
 
   return (
     <div
-      className="relative flex flex-col bg-white rounded-sm overflow-hidden"
+      className="relative flex flex-col bg-white rounded-sm overflow-hidden cursor-pointer transition-transform hover:scale-[1.03] hover:-translate-y-0.5"
       style={{
         border: `2px solid ${borderColor}`,
         boxShadow: `4px 4px 0 ${shadowColor}`,
       }}
       id={`jogador-card-${player.id}`}
+      onClick={onClick}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => e.key === "Enter" && onClick()}
+      aria-label={`Ver perfil de ${player.name}`}
     >
       {/* Photo area with sticker inner frame */}
       <div
@@ -248,9 +265,11 @@ const PlayerCard: React.FC<PlayerCardProps> = ({ player, primaryColor, secondary
 interface TeamSectionProps {
   team: TeamEntry;
   theme: "classic-light" | "stadium-dark";
+  onPlayerClick: (player: Player) => void;
+  onTeamClick: () => void;
 }
 
-const TeamSection: React.FC<TeamSectionProps> = ({ team, theme }) => {
+const TeamSection: React.FC<TeamSectionProps> = ({ team, theme, onPlayerClick, onTeamClick }) => {
   const players = sortedPlayers(team.players);
   const headingColor = theme === "classic-light" ? "text-slate-900" : "text-white";
   const sectionBg = theme === "classic-light" ? "bg-white border-slate-200" : "bg-[#0f1112] border-white/10";
@@ -272,9 +291,14 @@ const TeamSection: React.FC<TeamSectionProps> = ({ team, theme }) => {
         />
         <FlagIcon flag={team.flagSvg} className="h-7 w-10 shrink-0 object-contain" />
         <div className="flex-1 min-w-0">
-          <h2 className={`font-anton text-base uppercase tracking-wide leading-tight ${headingColor}`}>
+          <button
+            type="button"
+            onClick={onTeamClick}
+            className={`font-anton text-base uppercase tracking-wide leading-tight text-left hover:underline underline-offset-2 ${headingColor}`}
+            aria-label={`Ver escalação de ${team.name}`}
+          >
             {team.name}
-          </h2>
+          </button>
           <p className="font-mono text-[10px] uppercase tracking-wider text-slate-500 leading-tight">
             {team.group} · {players.length} jogadores
           </p>
@@ -291,7 +315,13 @@ const TeamSection: React.FC<TeamSectionProps> = ({ team, theme }) => {
       <div className={`p-3 ${sectionBg}`}>
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
           {players.map((player) => (
-            <PlayerCard key={player.id} player={player} primaryColor={team.primaryColor} secondaryColor={team.secondaryColor} />
+            <PlayerCard
+              key={player.id}
+              player={player}
+              primaryColor={team.primaryColor}
+              secondaryColor={team.secondaryColor}
+              onClick={() => onPlayerClick(player)}
+            />
           ))}
         </div>
       </div>
@@ -299,8 +329,9 @@ const TeamSection: React.FC<TeamSectionProps> = ({ team, theme }) => {
   );
 }
 
-export function JogadoresView({ theme }: JogadoresViewProps) {
+export function JogadoresView({ theme, onSelectTeamLineup }: JogadoresViewProps) {
   const teams = useMemo(() => extractTeams(), []);
+  const [selected, setSelected] = useState<SelectedContext | null>(null);
 
   const groups = useMemo(() => {
     const map = new Map<string, TeamEntry[]>();
@@ -314,6 +345,15 @@ export function JogadoresView({ theme }: JogadoresViewProps) {
   const headingColor = theme === "classic-light" ? "text-slate-900" : "text-white";
   const mutedColor = theme === "classic-light" ? "text-slate-500" : "text-slate-400";
   const groupLabelColor = theme === "classic-light" ? "text-slate-700 border-slate-300" : "text-slate-300 border-white/20";
+
+  const toTeamRef = (team: TeamEntry): TeamRef => ({
+    name: team.name,
+    code: team.code,
+    flagSvg: team.flagSvg,
+    primaryColor: team.primaryColor,
+    secondaryColor: team.secondaryColor,
+    group: team.group,
+  });
 
   return (
     <div className="max-w-7xl mx-auto px-4 mt-8 pb-16" id="jogadores-view">
@@ -332,7 +372,7 @@ export function JogadoresView({ theme }: JogadoresViewProps) {
         {groups.map(([group, groupTeams]) => (
           <div key={group}>
             {/* Group label */}
-            <div className={`flex items-center gap-3 mb-4`}>
+            <div className="flex items-center gap-3 mb-4">
               <span className={`font-anton text-sm uppercase tracking-widest ${groupLabelColor}`}>
                 {group}
               </span>
@@ -342,12 +382,37 @@ export function JogadoresView({ theme }: JogadoresViewProps) {
             {/* Teams in group */}
             <div className="flex flex-col gap-6">
               {groupTeams.map((team) => (
-                <TeamSection key={team.code} team={team} theme={theme} />
+                <TeamSection
+                  key={team.code}
+                  team={team}
+                  theme={theme}
+                  onPlayerClick={(player) => setSelected({ player, team })}
+                  onTeamClick={() => onSelectTeamLineup(toTeamRef(team))}
+                />
               ))}
             </div>
           </div>
         ))}
       </div>
+
+      {/* Player overlay */}
+      {selected && (
+        <PlayerOverlayCard
+          id="jogadores-player-overlay"
+          theme={theme}
+          player={selected.player}
+          teamName={selected.team.name}
+          primaryColor={selected.team.primaryColor}
+          secondaryColor={selected.team.secondaryColor}
+          flagSvg={selected.team.flagSvg}
+          stats={[]}
+          onClose={() => setSelected(null)}
+          onOpenTeamView={() => {
+            onSelectTeamLineup(toTeamRef(selected.team));
+            setSelected(null);
+          }}
+        />
+      )}
     </div>
   );
 }

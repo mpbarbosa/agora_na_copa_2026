@@ -90,7 +90,7 @@ export default function App() {
       case "selecoes":
         return <TeamsView matches={matches} theme={theme} onSelectTeamLineup={setLineupTeam} />;
       case "jogadores":
-        return <JogadoresView theme={theme} />;
+        return <JogadoresView theme={theme} onSelectTeamLineup={setLineupTeam} />;
       case "lideres":
         return <TournamentLeadersView theme={theme} onSelectTeamLineup={setLineupTeam} />;
       case "estadios":
