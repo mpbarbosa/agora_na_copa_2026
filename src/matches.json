@@ -4645,6 +4645,18 @@
           "y": 22,
           "club": "Inter de Milão",
           "pictureUrl": "https://digitalhub.fifa.com/transform/0d942331-39fb-421e-8a8d-d1f875958559/TAREMI-Mehdi_388475"
+        },
+        {
+          "id": "ir12",
+          "name": "Mohammad Mohebbi",
+          "number": 8,
+          "position": "MF",
+          "x": 50,
+          "y": 56,
+          "club": "",
+          "socials": {
+            "instagram": "https://instagram.com/mohammadmohebi_official"
+          }
         }
       ]
     },
