@@ -214,7 +214,12 @@ export interface TournamentPlayerLeader {
   teamCode: string;
   teamName: string;
   teamFlagSvg: string;
+  teamPrimaryColor?: string;
+  teamSecondaryColor?: string;
   shirtNumber?: number;
+  position?: Position;
+  club?: string;
+  socials?: PlayerSocials;
   pictureUrl?: string;
   goals: number;
   yellowCards: number;

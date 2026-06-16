@@ -44,12 +44,7 @@ test.describe("Leaders view (Líderes)", () => {
 
     await expect(page.locator("#leaders-player-overlay")).toBeVisible();
     await expect(page.locator("#leaders-player-overlay-hero-image")).toBeVisible();
-    await expect(page.locator("#leaders-player-overlay-avatar-image")).toBeVisible();
     await expect(page.locator("#leaders-player-overlay-hero-image")).toHaveAttribute(
-      "src",
-      "https://images.fifa.test/messi.png",
-    );
-    await expect(page.locator("#leaders-player-overlay-avatar-image")).toHaveAttribute(
       "src",
       "https://images.fifa.test/messi.png",
     );

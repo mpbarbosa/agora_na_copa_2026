@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import packageInfo from "../package.json";
 import { APP_MATCHES } from "./appMatches";
 import type { Match, TeamRef } from "./types";
@@ -10,19 +10,14 @@ import { VenueMapView } from "./components/VenueMapView";
 import { NewsView } from "./components/NewsView";
 import { BracketView } from "./components/BracketView";
 import { FanZoneView } from "./components/FanZoneView";
+import { JogadoresView } from "./components/JogadoresView";
 import { TeamLineupView } from "./components/TeamLineupView";
 import { PartidasView } from "./components/PartidasView";
-import type { TeamLineupsMap } from "./utils/teamLineup";
+import { useTeamLineups } from "./hooks/useTeamLineups";
 import { NAV_ITEMS } from "./navigation";
 import { Sun, Moon } from "lucide-react";
 
 const APP_VERSION = packageInfo.version;
-const TEAM_LINEUPS_REFRESH_INTERVAL_MS = 5 * 60 * 1000;
-
-interface TeamLineupsApiResponse {
-  refreshAfterMs: number;
-  lineups: TeamLineupsMap;
-}
 
 const getGroupSlug = (group: string) => group.replace(/\s+/g, "-").toLowerCase();
 
@@ -33,9 +28,9 @@ export default function App() {
   const [matches, setMatches] = useState<Match[]>(() => APP_MATCHES);
   const [activeNavId, setActiveNavId] = useState<string>(NAV_ITEMS[0].id);
   const [lineupTeam, setLineupTeam] = useState<TeamRef | null>(null);
-  const [teamLineups, setTeamLineups] = useState<TeamLineupsMap>({});
   const [standingsFocusGroupSlug, setStandingsFocusGroupSlug] = useState<string | null>(null);
   const isAoVivoViewActive = activeNavId === "ao-vivo" && lineupTeam === null;
+  const teamLineups = useTeamLineups(isAoVivoViewActive);
   const hasLiveMatch = matches.some((match) => match.status === "LIVE");
 
   const handleSelectNav = (navId: string) => {
@@ -53,88 +48,6 @@ export default function App() {
     }
     setActiveNavId("grupos");
   };
-
-  useEffect(() => {
-    if (!isAoVivoViewActive) {
-      return;
-    }
-
-    let active = true;
-    let timeoutId: number | undefined;
-    let requestInFlight = false;
-
-    const clearScheduledLoad = () => {
-      if (timeoutId) {
-        window.clearTimeout(timeoutId);
-        timeoutId = undefined;
-      }
-    };
-
-    const isPageVisible = () =>
-      typeof document === "undefined" || document.visibilityState === "visible";
-
-    const scheduleNextLoad = (refreshAfterMs?: number) => {
-      if (!isPageVisible()) {
-        return;
-      }
-
-      const delay =
-        typeof refreshAfterMs === "number" && refreshAfterMs > 0
-          ? refreshAfterMs
-          : TEAM_LINEUPS_REFRESH_INTERVAL_MS;
-
-      clearScheduledLoad();
-      timeoutId = window.setTimeout(() => {
-        void loadTeamLineups();
-      }, delay);
-    };
-
-    const loadTeamLineups = async () => {
-      if (!active || requestInFlight) {
-        return;
-      }
-
-      requestInFlight = true;
-
-      try {
-        const response = await fetch("/api/team-lineups");
-        if (!response.ok) {
-          throw new Error("Falha ao atualizar escalações da FIFA.");
-        }
-
-        const data: TeamLineupsApiResponse = await response.json();
-        if (!active) return;
-
-        setTeamLineups(data.lineups);
-        scheduleNextLoad(data.refreshAfterMs);
-      } catch (error) {
-        console.error(error);
-        scheduleNextLoad();
-      } finally {
-        requestInFlight = false;
-      }
-    };
-
-    const handlePageVisible = () => {
-      if (!active || !isPageVisible()) {
-        return;
-      }
-
-      clearScheduledLoad();
-      void loadTeamLineups();
-    };
-
-    void loadTeamLineups();
-    window.addEventListener("focus", handlePageVisible);
-    document.addEventListener("visibilitychange", handlePageVisible);
-
-    return () => {
-      active = false;
-      clearScheduledLoad();
-      window.removeEventListener("focus", handlePageVisible);
-      document.removeEventListener("visibilitychange", handlePageVisible);
-    };
-  }, [isAoVivoViewActive]);
 
   const activeNavItem =
     NAV_ITEMS.find((item) => item.id === activeNavId) || NAV_ITEMS[0];
@@ -171,6 +84,8 @@ export default function App() {
         );
       case "selecoes":
         return <TeamsView matches={matches} theme={theme} onSelectTeamLineup={setLineupTeam} />;
+      case "jogadores":
+        return <JogadoresView theme={theme} />;
       case "lideres":
         return <TournamentLeadersView theme={theme} onSelectTeamLineup={setLineupTeam} />;
       case "estadios":

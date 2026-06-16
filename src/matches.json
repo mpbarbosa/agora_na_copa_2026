@@ -9,17 +9,111 @@
       "secondaryColor": "#3c3b6e",
       "group": "Grupo D",
       "lineup": [
-        { "id": "us1", "name": "M. Turner", "number": 1, "position": "GK", "x": 50, "y": 88, "club": "Nottingham Forest" },
-        { "id": "us2", "name": "S. Dest", "number": 2, "position": "DF", "x": 15, "y": 70, "club": "PSV" },
-        { "id": "us3", "name": "C. Richards", "number": 3, "position": "DF", "x": 38, "y": 75, "club": "Crystal Palace" },
-        { "id": "us4", "name": "T. Ream", "number": 13, "position": "DF", "x": 62, "y": 75, "club": "Charlotte FC" },
-        { "id": "us5", "name": "A. Robinson", "number": 5, "position": "DF", "x": 85, "y": 70, "club": "Fulham" },
-        { "id": "us6", "name": "T. Adams", "number": 4, "position": "MF", "x": 30, "y": 45, "club": "Bournemouth" },
-        { "id": "us7", "name": "W. McKennie", "number": 8, "position": "MF", "x": 50, "y": 48, "club": "Juventus" },
-        { "id": "us8", "name": "G. Reyna", "number": 7, "position": "MF", "x": 70, "y": 45, "club": "Nottingham Forest" },
-        { "id": "us9", "name": "T. Weah", "number": 21, "position": "FW", "x": 15, "y": 22, "club": "Juventus" },
-        { "id": "us10", "name": "F. Balogun", "number": 20, "position": "FW", "x": 50, "y": 28, "club": "Monaco" },
-        { "id": "us11", "name": "C. Pulisic", "number": 10, "position": "FW", "x": 85, "y": 22, "club": "Milan" }
+        {
+          "id": "us1",
+          "name": "M. Turner",
+          "number": 1,
+          "position": "GK",
+          "x": 50,
+          "y": 88,
+          "club": "Nottingham Forest"
+        },
+        {
+          "id": "us2",
+          "name": "S. Dest",
+          "number": 2,
+          "position": "DF",
+          "x": 15,
+          "y": 70,
+          "club": "PSV",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/5ee00bd8-552e-4e02-b680-b16534e53493/DEST-Sergino_406280"
+        },
+        {
+          "id": "us3",
+          "name": "C. Richards",
+          "number": 3,
+          "position": "DF",
+          "x": 38,
+          "y": 75,
+          "club": "Crystal Palace"
+        },
+        {
+          "id": "us4",
+          "name": "T. Ream",
+          "number": 13,
+          "position": "DF",
+          "x": 62,
+          "y": 75,
+          "club": "Charlotte FC"
+        },
+        {
+          "id": "us5",
+          "name": "A. Robinson",
+          "number": 5,
+          "position": "DF",
+          "x": 85,
+          "y": 70,
+          "club": "Fulham"
+        },
+        {
+          "id": "us6",
+          "name": "T. Adams",
+          "number": 4,
+          "position": "MF",
+          "x": 30,
+          "y": 45,
+          "club": "Bournemouth",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/7fdbded2-aa27-44b1-9bf1-ff1d17c58f86/ADAMS-Tyler_390238"
+        },
+        {
+          "id": "us7",
+          "name": "W. McKennie",
+          "number": 8,
+          "position": "MF",
+          "x": 50,
+          "y": 48,
+          "club": "Juventus"
+        },
+        {
+          "id": "us8",
+          "name": "G. Reyna",
+          "number": 7,
+          "position": "MF",
+          "x": 70,
+          "y": 45,
+          "club": "Nottingham Forest",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/b30d701d-d9eb-4b2d-8db4-6841fc9ed1a9/REYNA-Giovanni_419068"
+        },
+        {
+          "id": "us9",
+          "name": "T. Weah",
+          "number": 21,
+          "position": "FW",
+          "x": 15,
+          "y": 22,
+          "club": "Juventus",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/c0dcfa0a-b862-4cd2-9c33-034bd18dc231/WEAH-Timothy_406304"
+        },
+        {
+          "id": "us10",
+          "name": "F. Balogun",
+          "number": 20,
+          "position": "FW",
+          "x": 50,
+          "y": 28,
+          "club": "Monaco",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/bd47db79-966e-4eba-a8da-f6ba01148f27/BALOGUN-Folarin_466624"
+        },
+        {
+          "id": "us11",
+          "name": "C. Pulisic",
+          "number": 10,
+          "position": "FW",
+          "x": 85,
+          "y": 22,
+          "club": "Milan",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/34d1c247-2a09-4fd6-87bc-71ec687a54aa/PULISIC-Christian_390267"
+        }
       ]
     },
     "teamB": {
@@ -30,17 +124,109 @@
       "secondaryColor": "#0038a8",
       "group": "Grupo D",
       "lineup": [
-        { "id": "py1", "name": "C. Coronel", "number": 1, "position": "GK", "x": 50, "y": 12, "club": "New York Red Bulls" },
-        { "id": "py2", "name": "R. Rojas", "number": 2, "position": "DF", "x": 15, "y": 30, "club": "River Plate" },
-        { "id": "py3", "name": "G. Gomez", "number": 15, "position": "DF", "x": 38, "y": 25, "club": "Palmeiras" },
-        { "id": "py4", "name": "O. Alderete", "number": 3, "position": "DF", "x": 62, "y": 25, "club": "Getafe" },
-        { "id": "py5", "name": "J. Alonso", "number": 6, "position": "DF", "x": 85, "y": 30, "club": "Atlético Mineiro" },
-        { "id": "py6", "name": "A. Cubas", "number": 14, "position": "MF", "x": 30, "y": 50, "club": "Vancouver Whitecaps" },
-        { "id": "py7", "name": "M. Villasanti", "number": 23, "position": "MF", "x": 50, "y": 45, "club": "Grêmio" },
-        { "id": "py8", "name": "M. Almirón", "number": 10, "position": "MF", "x": 70, "y": 50, "club": "Newcastle" },
-        { "id": "py9", "name": "R. Sosa", "number": 19, "position": "FW", "x": 15, "y": 75, "club": "Nottingham Forest" },
-        { "id": "py10", "name": "A. Sanabria", "number": 9, "position": "FW", "x": 50, "y": 85, "club": "Torino" },
-        { "id": "py11", "name": "J. Enciso", "number": 17, "position": "FW", "x": 85, "y": 75, "club": "Brighton" }
+        {
+          "id": "py1",
+          "name": "C. Coronel",
+          "number": 1,
+          "position": "GK",
+          "x": 50,
+          "y": 12,
+          "club": "New York Red Bulls"
+        },
+        {
+          "id": "py2",
+          "name": "R. Rojas",
+          "number": 2,
+          "position": "DF",
+          "x": 15,
+          "y": 30,
+          "club": "River Plate"
+        },
+        {
+          "id": "py3",
+          "name": "G. Gomez",
+          "number": 15,
+          "position": "DF",
+          "x": 38,
+          "y": 25,
+          "club": "Palmeiras"
+        },
+        {
+          "id": "py4",
+          "name": "O. Alderete",
+          "number": 3,
+          "position": "DF",
+          "x": 62,
+          "y": 25,
+          "club": "Getafe"
+        },
+        {
+          "id": "py5",
+          "name": "J. Alonso",
+          "number": 6,
+          "position": "DF",
+          "x": 85,
+          "y": 30,
+          "club": "Atlético Mineiro",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/241fe8c3-a33e-411a-8eca-e81cc3fba926/ALONSO-Junior_369749"
+        },
+        {
+          "id": "py6",
+          "name": "A. Cubas",
+          "number": 14,
+          "position": "MF",
+          "x": 30,
+          "y": 50,
+          "club": "Vancouver Whitecaps"
+        },
+        {
+          "id": "py7",
+          "name": "M. Villasanti",
+          "number": 23,
+          "position": "MF",
+          "x": 50,
+          "y": 45,
+          "club": "Grêmio"
+        },
+        {
+          "id": "py8",
+          "name": "M. Almirón",
+          "number": 10,
+          "position": "MF",
+          "x": 70,
+          "y": 50,
+          "club": "Newcastle",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/62600270-27f4-432a-8f1f-1014124829c1/ALMIRON-Miguel_369761"
+        },
+        {
+          "id": "py9",
+          "name": "R. Sosa",
+          "number": 19,
+          "position": "FW",
+          "x": 15,
+          "y": 75,
+          "club": "Nottingham Forest",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/fb29327f-14b3-4b8f-af4e-3816404afaed/SOSA-Ramon_463125"
+        },
+        {
+          "id": "py10",
+          "name": "A. Sanabria",
+          "number": 9,
+          "position": "FW",
+          "x": 50,
+          "y": 85,
+          "club": "Torino",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/97bc175a-1e5c-417f-ab23-492237ddb3ab/SANABRIA-Antonio_369768"
+        },
+        {
+          "id": "py11",
+          "name": "J. Enciso",
+          "number": 17,
+          "position": "FW",
+          "x": 85,
+          "y": 75,
+          "club": "Brighton"
+        }
       ]
     },
     "stadiumName": "Estádio de Los Angeles",
@@ -57,13 +243,62 @@
     },
     "countdownTargetSeconds": 0,
     "broadcasters": [
-      { "id": "getv9", "type": "STREAM", "name": "GETV", "iconColor": "#00e476", "link": "https://globoplay.globo.com/categorias/ge-tv/", "logoUrl": "https://extranets.fifa.com/TvStationPhotos/914.png" },
-      { "id": "gb9", "type": "STREAM", "name": "Globoplay", "iconColor": "#00e476", "link": "https://globoplay.globo.com/tv-globo/ao-vivo/6120663/", "logoUrl": "https://extranets.fifa.com/TvStationPhotos/30.png" },
-      { "id": "cz9", "type": "YOUTUBE", "name": "CazéTV", "iconColor": "#ed2939", "link": "https://www.youtube.com/@CazeTV", "logoUrl": "https://extranets.fifa.com/TvStationPhotos/451.png" },
-      { "id": "ns9", "type": "STREAM", "name": "NSPORTS", "iconColor": "#00e476", "link": "https://nsports.com.br/n/", "logoUrl": "https://extranets.fifa.com/TvStationPhotos/892.png" },
-      { "id": "sbt9", "type": "TV ABERTA", "name": "SBT", "iconColor": "#05ff85", "link": "https://www.sbt.com.br/", "logoUrl": "https://extranets.fifa.com/TvStationPhotos/901.png" },
-      { "id": "g9", "type": "TV ABERTA", "name": "TV Globo", "iconColor": "#05ff85", "link": "https://redeglobo.globo.com/", "logoUrl": "https://extranets.fifa.com/TvStationPhotos/25.png" },
-      { "id": "s9", "type": "TV PAGA", "name": "sportv", "iconColor": "#ffd700", "link": "https://ge.globo.com/sportv/", "logoUrl": "https://extranets.fifa.com/TvStationPhotos/26.png" }
+      {
+        "id": "getv9",
+        "type": "STREAM",
+        "name": "GETV",
+        "iconColor": "#00e476",
+        "link": "https://globoplay.globo.com/categorias/ge-tv/",
+        "logoUrl": "https://extranets.fifa.com/TvStationPhotos/914.png"
+      },
+      {
+        "id": "gb9",
+        "type": "STREAM",
+        "name": "Globoplay",
+        "iconColor": "#00e476",
+        "link": "https://globoplay.globo.com/tv-globo/ao-vivo/6120663/",
+        "logoUrl": "https://extranets.fifa.com/TvStationPhotos/30.png"
+      },
+      {
+        "id": "cz9",
+        "type": "YOUTUBE",
+        "name": "CazéTV",
+        "iconColor": "#ed2939",
+        "link": "https://www.youtube.com/@CazeTV",
+        "logoUrl": "https://extranets.fifa.com/TvStationPhotos/451.png"
+      },
+      {
+        "id": "ns9",
+        "type": "STREAM",
+        "name": "NSPORTS",
+        "iconColor": "#00e476",
+        "link": "https://nsports.com.br/n/",
+        "logoUrl": "https://extranets.fifa.com/TvStationPhotos/892.png"
+      },
+      {
+        "id": "sbt9",
+        "type": "TV ABERTA",
+        "name": "SBT",
+        "iconColor": "#05ff85",
+        "link": "https://www.sbt.com.br/",
+        "logoUrl": "https://extranets.fifa.com/TvStationPhotos/901.png"
+      },
+      {
+        "id": "g9",
+        "type": "TV ABERTA",
+        "name": "TV Globo",
+        "iconColor": "#05ff85",
+        "link": "https://redeglobo.globo.com/",
+        "logoUrl": "https://extranets.fifa.com/TvStationPhotos/25.png"
+      },
+      {
+        "id": "s9",
+        "type": "TV PAGA",
+        "name": "sportv",
+        "iconColor": "#ffd700",
+        "link": "https://ge.globo.com/sportv/",
+        "logoUrl": "https://extranets.fifa.com/TvStationPhotos/26.png"
+      }
     ]
   },
   {
@@ -76,17 +311,108 @@
       "secondaryColor": "#ce1126",
       "group": "Grupo A",
       "lineup": [
-        { "id": "mx1", "name": "L. Malagón", "number": 1, "position": "GK", "x": 50, "y": 88, "club": "Club América" },
-        { "id": "mx2", "name": "J. Sánchez", "number": 2, "position": "DF", "x": 15, "y": 70, "club": "Cruz Azul" },
-        { "id": "mx3", "name": "C. Montes", "number": 3, "position": "DF", "x": 38, "y": 75, "club": "Lokomotiv Moscou" },
-        { "id": "mx4", "name": "J. Vásquez", "number": 5, "position": "DF", "x": 62, "y": 75, "club": "Genoa" },
-        { "id": "mx5", "name": "J. Gallardo", "number": 23, "position": "DF", "x": 85, "y": 70, "club": "Monterrey" },
-        { "id": "mx6", "name": "E. Álvarez", "number": 4, "position": "MF", "x": 30, "y": 45, "club": "West Ham" },
-        { "id": "mx7", "name": "L. Chávez", "number": 24, "position": "MF", "x": 50, "y": 48, "club": "Dínamo Moscou" },
-        { "id": "mx8", "name": "O. Pineda", "number": 17, "position": "MF", "x": 70, "y": 45, "club": "AEK Atenas" },
-        { "id": "mx9", "name": "U. Antuna", "number": 15, "position": "FW", "x": 15, "y": 22, "club": "Tigres" },
-        { "id": "mx10", "name": "S. Giménez", "number": 11, "position": "FW", "x": 50, "y": 28, "club": "Milan" },
-        { "id": "mx11", "name": "H. Lozano", "number": 22, "position": "FW", "x": 85, "y": 22, "club": "San Diego FC" }
+        {
+          "id": "mx1",
+          "name": "L. Malagón",
+          "number": 1,
+          "position": "GK",
+          "x": 50,
+          "y": 88,
+          "club": "Club América"
+        },
+        {
+          "id": "mx2",
+          "name": "J. Sánchez",
+          "number": 2,
+          "position": "DF",
+          "x": 15,
+          "y": 70,
+          "club": "Cruz Azul"
+        },
+        {
+          "id": "mx3",
+          "name": "C. Montes",
+          "number": 3,
+          "position": "DF",
+          "x": 38,
+          "y": 75,
+          "club": "Lokomotiv Moscou",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/c8c3fa3a-9001-4221-ab3c-754158c0ad8a/MONTES-Cesar_395516"
+        },
+        {
+          "id": "mx4",
+          "name": "J. Vásquez",
+          "number": 5,
+          "position": "DF",
+          "x": 62,
+          "y": 75,
+          "club": "Genoa"
+        },
+        {
+          "id": "mx5",
+          "name": "J. Gallardo",
+          "number": 23,
+          "position": "DF",
+          "x": 85,
+          "y": 70,
+          "club": "Monterrey"
+        },
+        {
+          "id": "mx6",
+          "name": "E. Álvarez",
+          "number": 4,
+          "position": "MF",
+          "x": 30,
+          "y": 45,
+          "club": "West Ham",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/b1581870-6bef-4c29-9a06-f306bbf03ca8/ALVAREZ-Edson_400634"
+        },
+        {
+          "id": "mx7",
+          "name": "L. Chávez",
+          "number": 24,
+          "position": "MF",
+          "x": 50,
+          "y": 48,
+          "club": "Dínamo Moscou",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/a09b97d9-6b02-45d4-aae8-b8ed274e5634/CHAVEZ-Luis_448051"
+        },
+        {
+          "id": "mx8",
+          "name": "O. Pineda",
+          "number": 17,
+          "position": "MF",
+          "x": 70,
+          "y": 45,
+          "club": "AEK Atenas"
+        },
+        {
+          "id": "mx9",
+          "name": "U. Antuna",
+          "number": 15,
+          "position": "FW",
+          "x": 15,
+          "y": 22,
+          "club": "Tigres"
+        },
+        {
+          "id": "mx10",
+          "name": "S. Giménez",
+          "number": 11,
+          "position": "FW",
+          "x": 50,
+          "y": 28,
+          "club": "Milan"
+        },
+        {
+          "id": "mx11",
+          "name": "H. Lozano",
+          "number": 22,
+          "position": "FW",
+          "x": 85,
+          "y": 22,
+          "club": "San Diego FC"
+        }
       ]
     },
     "teamB": {
@@ -97,17 +423,109 @@
       "secondaryColor": "#ffb612",
       "group": "Grupo A",
       "lineup": [
-        { "id": "sa1", "name": "R. Williams", "number": 1, "position": "GK", "x": 50, "y": 12, "club": "Mamelodi Sundowns" },
-        { "id": "sa2", "name": "K. Mudau", "number": 2, "position": "DF", "x": 15, "y": 30, "club": "Mamelodi Sundowns" },
-        { "id": "sa3", "name": "S. Ngezana", "number": 21, "position": "DF", "x": 38, "y": 25, "club": "FCSB" },
-        { "id": "sa4", "name": "M. Mvala", "number": 14, "position": "DF", "x": 62, "y": 25, "club": "Mamelodi Sundowns" },
-        { "id": "sa5", "name": "A. Modiba", "number": 6, "position": "DF", "x": 85, "y": 30, "club": "Mamelodi Sundowns" },
-        { "id": "sa6", "name": "T. Mokoena", "number": 4, "position": "MF", "x": 30, "y": 50, "club": "Mamelodi Sundowns" },
-        { "id": "sa7", "name": "S. Sithole", "number": 13, "position": "MF", "x": 50, "y": 45, "club": "Tondela" },
-        { "id": "sa8", "name": "P. Tau", "number": 10, "position": "MF", "x": 70, "y": 50, "club": "Qatar SC" },
-        { "id": "sa9", "name": "E. Mokwana", "number": 17, "position": "FW", "x": 15, "y": 75, "club": "Espérance" },
-        { "id": "sa10", "name": "L. Foster", "number": 9, "position": "FW", "x": 50, "y": 85, "club": "Burnley" },
-        { "id": "sa11", "name": "T. Zwane", "number": 11, "position": "FW", "x": 85, "y": 75, "club": "Mamelodi Sundowns" }
+        {
+          "id": "sa1",
+          "name": "R. Williams",
+          "number": 1,
+          "position": "GK",
+          "x": 50,
+          "y": 12,
+          "club": "Mamelodi Sundowns"
+        },
+        {
+          "id": "sa2",
+          "name": "K. Mudau",
+          "number": 2,
+          "position": "DF",
+          "x": 15,
+          "y": 30,
+          "club": "Mamelodi Sundowns"
+        },
+        {
+          "id": "sa3",
+          "name": "S. Ngezana",
+          "number": 21,
+          "position": "DF",
+          "x": 38,
+          "y": 25,
+          "club": "FCSB"
+        },
+        {
+          "id": "sa4",
+          "name": "M. Mvala",
+          "number": 14,
+          "position": "DF",
+          "x": 62,
+          "y": 25,
+          "club": "Mamelodi Sundowns"
+        },
+        {
+          "id": "sa5",
+          "name": "A. Modiba",
+          "number": 6,
+          "position": "DF",
+          "x": 85,
+          "y": 30,
+          "club": "Mamelodi Sundowns",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/e5ddfbfb-b601-4ff8-83a5-f55162967798/MODIBA-Aubrey_395050"
+        },
+        {
+          "id": "sa6",
+          "name": "T. Mokoena",
+          "number": 4,
+          "position": "MF",
+          "x": 30,
+          "y": 50,
+          "club": "Mamelodi Sundowns"
+        },
+        {
+          "id": "sa7",
+          "name": "S. Sithole",
+          "number": 13,
+          "position": "MF",
+          "x": 50,
+          "y": 45,
+          "club": "Tondela",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/200f1c50-a60a-4c33-ad94-b4dabd605f35/SITHOLE-Sphephelo_390475"
+        },
+        {
+          "id": "sa8",
+          "name": "P. Tau",
+          "number": 10,
+          "position": "MF",
+          "x": 70,
+          "y": 50,
+          "club": "Qatar SC"
+        },
+        {
+          "id": "sa9",
+          "name": "E. Mokwana",
+          "number": 17,
+          "position": "FW",
+          "x": 15,
+          "y": 75,
+          "club": "Espérance"
+        },
+        {
+          "id": "sa10",
+          "name": "L. Foster",
+          "number": 9,
+          "position": "FW",
+          "x": 50,
+          "y": 85,
+          "club": "Burnley",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/155c969c-63e1-438e-bd3d-ce587ac212c6/FOSTER-Lyle_419211"
+        },
+        {
+          "id": "sa11",
+          "name": "T. Zwane",
+          "number": 11,
+          "position": "FW",
+          "x": 85,
+          "y": 75,
+          "club": "Mamelodi Sundowns",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/8d294899-e656-4484-91b7-99d646bc590c/ZWANE-Themba_395984"
+        }
       ]
     },
     "stadiumName": "Estádio da Cidade do México",
@@ -124,13 +542,62 @@
     },
     "countdownTargetSeconds": 0,
     "broadcasters": [
-      { "id": "getv7", "type": "STREAM", "name": "GETV", "iconColor": "#00e476", "link": "https://globoplay.globo.com/categorias/ge-tv/", "logoUrl": "https://extranets.fifa.com/TvStationPhotos/914.png" },
-      { "id": "gb7", "type": "STREAM", "name": "Globoplay", "iconColor": "#00e476", "link": "https://globoplay.globo.com/tv-globo/ao-vivo/6120663/", "logoUrl": "https://extranets.fifa.com/TvStationPhotos/30.png" },
-      { "id": "cz7", "type": "YOUTUBE", "name": "CazéTV", "iconColor": "#ed2939", "link": "https://www.youtube.com/@CazeTV", "logoUrl": "https://extranets.fifa.com/TvStationPhotos/451.png" },
-      { "id": "ns7", "type": "STREAM", "name": "NSPORTS", "iconColor": "#00e476", "link": "https://nsports.com.br/n/", "logoUrl": "https://extranets.fifa.com/TvStationPhotos/892.png" },
-      { "id": "sbt7", "type": "TV ABERTA", "name": "SBT", "iconColor": "#05ff85", "link": "https://www.sbt.com.br/", "logoUrl": "https://extranets.fifa.com/TvStationPhotos/901.png" },
-      { "id": "g7", "type": "TV ABERTA", "name": "TV Globo", "iconColor": "#05ff85", "link": "https://redeglobo.globo.com/", "logoUrl": "https://extranets.fifa.com/TvStationPhotos/25.png" },
-      { "id": "s7", "type": "TV PAGA", "name": "sportv", "iconColor": "#ffd700", "link": "https://ge.globo.com/sportv/", "logoUrl": "https://extranets.fifa.com/TvStationPhotos/26.png" }
+      {
+        "id": "getv7",
+        "type": "STREAM",
+        "name": "GETV",
+        "iconColor": "#00e476",
+        "link": "https://globoplay.globo.com/categorias/ge-tv/",
+        "logoUrl": "https://extranets.fifa.com/TvStationPhotos/914.png"
+      },
+      {
+        "id": "gb7",
+        "type": "STREAM",
+        "name": "Globoplay",
+        "iconColor": "#00e476",
+        "link": "https://globoplay.globo.com/tv-globo/ao-vivo/6120663/",
+        "logoUrl": "https://extranets.fifa.com/TvStationPhotos/30.png"
+      },
+      {
+        "id": "cz7",
+        "type": "YOUTUBE",
+        "name": "CazéTV",
+        "iconColor": "#ed2939",
+        "link": "https://www.youtube.com/@CazeTV",
+        "logoUrl": "https://extranets.fifa.com/TvStationPhotos/451.png"
+      },
+      {
+        "id": "ns7",
+        "type": "STREAM",
+        "name": "NSPORTS",
+        "iconColor": "#00e476",
+        "link": "https://nsports.com.br/n/",
+        "logoUrl": "https://extranets.fifa.com/TvStationPhotos/892.png"
+      },
+      {
+        "id": "sbt7",
+        "type": "TV ABERTA",
+        "name": "SBT",
+        "iconColor": "#05ff85",
+        "link": "https://www.sbt.com.br/",
+        "logoUrl": "https://extranets.fifa.com/TvStationPhotos/901.png"
+      },
+      {
+        "id": "g7",
+        "type": "TV ABERTA",
+        "name": "TV Globo",
+        "iconColor": "#05ff85",
+        "link": "https://redeglobo.globo.com/",
+        "logoUrl": "https://extranets.fifa.com/TvStationPhotos/25.png"
+      },
+      {
+        "id": "s7",
+        "type": "TV PAGA",
+        "name": "sportv",
+        "iconColor": "#ffd700",
+        "link": "https://ge.globo.com/sportv/",
+        "logoUrl": "https://extranets.fifa.com/TvStationPhotos/26.png"
+      }
     ]
   },
   {
@@ -143,17 +610,105 @@
       "secondaryColor": "#0047a0",
       "group": "Grupo A",
       "lineup": [
-        { "id": "kr1", "name": "Jo Hyeon-woo", "number": 1, "position": "GK", "x": 50, "y": 88, "club": "Ulsan HD" },
-        { "id": "kr2", "name": "Seol Young-woo", "number": 22, "position": "DF", "x": 15, "y": 70, "club": "FK Crvena zvezda" },
-        { "id": "kr3", "name": "Kim Min-jae", "number": 4, "position": "DF", "x": 38, "y": 75, "club": "Bayern Munique" },
-        { "id": "kr4", "name": "Jung Seung-hyun", "number": 15, "position": "DF", "x": 62, "y": 75, "club": "Al-Wasl" },
-        { "id": "kr5", "name": "Lee Myung-jae", "number": 3, "position": "DF", "x": 85, "y": 70, "club": "Ulsan HD" },
-        { "id": "kr6", "name": "Hwang In-beom", "number": 6, "position": "MF", "x": 30, "y": 45, "club": "Feyenoord" },
-        { "id": "kr7", "name": "Park Yong-woo", "number": 5, "position": "MF", "x": 50, "y": 48, "club": "Al-Ain" },
-        { "id": "kr8", "name": "Lee Kang-in", "number": 18, "position": "MF", "x": 70, "y": 45, "club": "PSG" },
-        { "id": "kr9", "name": "Hwang Hee-chan", "number": 11, "position": "FW", "x": 15, "y": 22, "club": "Wolverhampton" },
-        { "id": "kr10", "name": "Cho Gue-sung", "number": 9, "position": "FW", "x": 50, "y": 28, "club": "Midtjylland" },
-        { "id": "kr11", "name": "Son Heung-min", "number": 7, "position": "FW", "x": 85, "y": 22, "club": "Tottenham" }
+        {
+          "id": "kr1",
+          "name": "Jo Hyeon-woo",
+          "number": 1,
+          "position": "GK",
+          "x": 50,
+          "y": 88,
+          "club": "Ulsan HD"
+        },
+        {
+          "id": "kr2",
+          "name": "Seol Young-woo",
+          "number": 22,
+          "position": "DF",
+          "x": 15,
+          "y": 70,
+          "club": "FK Crvena zvezda"
+        },
+        {
+          "id": "kr3",
+          "name": "Kim Min-jae",
+          "number": 4,
+          "position": "DF",
+          "x": 38,
+          "y": 75,
+          "club": "Bayern Munique"
+        },
+        {
+          "id": "kr4",
+          "name": "Jung Seung-hyun",
+          "number": 15,
+          "position": "DF",
+          "x": 62,
+          "y": 75,
+          "club": "Al-Wasl"
+        },
+        {
+          "id": "kr5",
+          "name": "Lee Myung-jae",
+          "number": 3,
+          "position": "DF",
+          "x": 85,
+          "y": 70,
+          "club": "Ulsan HD"
+        },
+        {
+          "id": "kr6",
+          "name": "Hwang In-beom",
+          "number": 6,
+          "position": "MF",
+          "x": 30,
+          "y": 45,
+          "club": "Feyenoord"
+        },
+        {
+          "id": "kr7",
+          "name": "Park Yong-woo",
+          "number": 5,
+          "position": "MF",
+          "x": 50,
+          "y": 48,
+          "club": "Al-Ain"
+        },
+        {
+          "id": "kr8",
+          "name": "Lee Kang-in",
+          "number": 18,
+          "position": "MF",
+          "x": 70,
+          "y": 45,
+          "club": "PSG"
+        },
+        {
+          "id": "kr9",
+          "name": "Hwang Hee-chan",
+          "number": 11,
+          "position": "FW",
+          "x": 15,
+          "y": 22,
+          "club": "Wolverhampton"
+        },
+        {
+          "id": "kr10",
+          "name": "Cho Gue-sung",
+          "number": 9,
+          "position": "FW",
+          "x": 50,
+          "y": 28,
+          "club": "Midtjylland"
+        },
+        {
+          "id": "kr11",
+          "name": "Son Heung-min",
+          "number": 7,
+          "position": "FW",
+          "x": 85,
+          "y": 22,
+          "club": "Tottenham"
+        }
       ]
     },
     "teamB": {
@@ -164,17 +719,109 @@
       "secondaryColor": "#11457e",
       "group": "Grupo A",
       "lineup": [
-        { "id": "cz1", "name": "J. Stanek", "number": 1, "position": "GK", "x": 50, "y": 12, "club": "Slavia Praga" },
-        { "id": "cz2", "name": "V. Coufal", "number": 5, "position": "DF", "x": 15, "y": 30, "club": "West Ham" },
-        { "id": "cz3", "name": "T. Holes", "number": 3, "position": "DF", "x": 38, "y": 25, "club": "Slavia Praga" },
-        { "id": "cz4", "name": "L. Krejci", "number": 7, "position": "DF", "x": 62, "y": 25, "club": "Girona" },
-        { "id": "cz5", "name": "D. Jurásek", "number": 13, "position": "DF", "x": 85, "y": 30, "club": "Hoffenheim" },
-        { "id": "cz6", "name": "T. Soucek", "number": 22, "position": "MF", "x": 30, "y": 50, "club": "West Ham" },
-        { "id": "cz7", "name": "A. Barák", "number": 8, "position": "MF", "x": 50, "y": 45, "club": "Kasimpasa" },
-        { "id": "cz8", "name": "L. Provod", "number": 14, "position": "MF", "x": 70, "y": 50, "club": "Slavia Praga" },
-        { "id": "cz9", "name": "A. Hložek", "number": 9, "position": "FW", "x": 15, "y": 75, "club": "Hoffenheim" },
-        { "id": "cz10", "name": "P. Schick", "number": 10, "position": "FW", "x": 50, "y": 85, "club": "Bayer Leverkusen" },
-        { "id": "cz11", "name": "V. Cerny", "number": 17, "position": "FW", "x": 85, "y": 75, "club": "Rangers" }
+        {
+          "id": "cz1",
+          "name": "J. Stanek",
+          "number": 1,
+          "position": "GK",
+          "x": 50,
+          "y": 12,
+          "club": "Slavia Praga"
+        },
+        {
+          "id": "cz2",
+          "name": "V. Coufal",
+          "number": 5,
+          "position": "DF",
+          "x": 15,
+          "y": 30,
+          "club": "West Ham"
+        },
+        {
+          "id": "cz3",
+          "name": "T. Holes",
+          "number": 3,
+          "position": "DF",
+          "x": 38,
+          "y": 25,
+          "club": "Slavia Praga"
+        },
+        {
+          "id": "cz4",
+          "name": "L. Krejci",
+          "number": 7,
+          "position": "DF",
+          "x": 62,
+          "y": 25,
+          "club": "Girona",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/04ca9e4e-8ab3-458e-a689-2ac49094fb23/KREJCI-Ladislav_441170"
+        },
+        {
+          "id": "cz5",
+          "name": "D. Jurásek",
+          "number": 13,
+          "position": "DF",
+          "x": 85,
+          "y": 30,
+          "club": "Hoffenheim"
+        },
+        {
+          "id": "cz6",
+          "name": "T. Soucek",
+          "number": 22,
+          "position": "MF",
+          "x": 30,
+          "y": 50,
+          "club": "West Ham"
+        },
+        {
+          "id": "cz7",
+          "name": "A. Barák",
+          "number": 8,
+          "position": "MF",
+          "x": 50,
+          "y": 45,
+          "club": "Kasimpasa"
+        },
+        {
+          "id": "cz8",
+          "name": "L. Provod",
+          "number": 14,
+          "position": "MF",
+          "x": 70,
+          "y": 50,
+          "club": "Slavia Praga",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/e5e6a265-9886-4e25-97c0-c4f2f230277d/PROVOD-Lukas_484011"
+        },
+        {
+          "id": "cz9",
+          "name": "A. Hložek",
+          "number": 9,
+          "position": "FW",
+          "x": 15,
+          "y": 75,
+          "club": "Hoffenheim",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/530c1ea8-c013-4858-bb7d-0b71a763a1a1/HLOZEK-Adam_433754"
+        },
+        {
+          "id": "cz10",
+          "name": "P. Schick",
+          "number": 10,
+          "position": "FW",
+          "x": 50,
+          "y": 85,
+          "club": "Bayer Leverkusen",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/725e8c7e-c712-45be-9e0a-ec5b121e84ad/SCHICK-Patrik_401481"
+        },
+        {
+          "id": "cz11",
+          "name": "V. Cerny",
+          "number": 17,
+          "position": "FW",
+          "x": 85,
+          "y": 75,
+          "club": "Rangers"
+        }
       ]
     },
     "stadiumName": "Estádio de Guadalajara",
@@ -191,7 +838,14 @@
     },
     "countdownTargetSeconds": 0,
     "broadcasters": [
-      { "id": "cz8", "type": "YOUTUBE", "name": "CazéTV", "iconColor": "#ed2939", "link": "https://www.youtube.com/@CazeTV", "logoUrl": "https://extranets.fifa.com/TvStationPhotos/451.png" }
+      {
+        "id": "cz8",
+        "type": "YOUTUBE",
+        "name": "CazéTV",
+        "iconColor": "#ed2939",
+        "link": "https://www.youtube.com/@CazeTV",
+        "logoUrl": "https://extranets.fifa.com/TvStationPhotos/451.png"
+      }
     ]
   },
   {
@@ -204,17 +858,111 @@
       "secondaryColor": "#ffffff",
       "group": "Grupo B",
       "lineup": [
-        { "id": "ca1", "name": "M. Crépeau", "number": 1, "position": "GK", "x": 50, "y": 88, "club": "LAFC" },
-        { "id": "ca2", "name": "A. Johnston", "number": 2, "position": "DF", "x": 15, "y": 70, "club": "Celtic" },
-        { "id": "ca3", "name": "D. Cornelius", "number": 5, "position": "DF", "x": 38, "y": 75, "club": "Panathinaikos" },
-        { "id": "ca4", "name": "M. Bombito", "number": 4, "position": "DF", "x": 62, "y": 75, "club": "Nice" },
-        { "id": "ca5", "name": "A. Davies", "number": 19, "position": "DF", "x": 85, "y": 70, "club": "Bayern Munique" },
-        { "id": "ca6", "name": "S. Eustáquio", "number": 7, "position": "MF", "x": 30, "y": 45, "club": "Porto" },
-        { "id": "ca7", "name": "I. Koné", "number": 18, "position": "MF", "x": 50, "y": 48, "club": "Marselha" },
-        { "id": "ca8", "name": "J. Osorio", "number": 21, "position": "MF", "x": 70, "y": 45, "club": "Toronto FC" },
-        { "id": "ca9", "name": "T. Buchanan", "number": 11, "position": "FW", "x": 15, "y": 22, "club": "Villarreal" },
-        { "id": "ca10", "name": "J. David", "number": 20, "position": "FW", "x": 50, "y": 28, "club": "Juventus" },
-        { "id": "ca11", "name": "C. Larin", "number": 17, "position": "FW", "x": 85, "y": 22, "club": "Club América" }
+        {
+          "id": "ca1",
+          "name": "M. Crépeau",
+          "number": 1,
+          "position": "GK",
+          "x": 50,
+          "y": 88,
+          "club": "LAFC"
+        },
+        {
+          "id": "ca2",
+          "name": "A. Johnston",
+          "number": 2,
+          "position": "DF",
+          "x": 15,
+          "y": 70,
+          "club": "Celtic",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/bd760593-4ed3-405e-b497-f508dbc8bbdf/JOHNSTON-Alistair_441252"
+        },
+        {
+          "id": "ca3",
+          "name": "D. Cornelius",
+          "number": 5,
+          "position": "DF",
+          "x": 38,
+          "y": 75,
+          "club": "Panathinaikos"
+        },
+        {
+          "id": "ca4",
+          "name": "M. Bombito",
+          "number": 4,
+          "position": "DF",
+          "x": 62,
+          "y": 75,
+          "club": "Nice"
+        },
+        {
+          "id": "ca5",
+          "name": "A. Davies",
+          "number": 19,
+          "position": "DF",
+          "x": 85,
+          "y": 70,
+          "club": "Bayern Munique"
+        },
+        {
+          "id": "ca6",
+          "name": "S. Eustáquio",
+          "number": 7,
+          "position": "MF",
+          "x": 30,
+          "y": 45,
+          "club": "Porto",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/1c0650a1-bba7-4998-b6b6-ebddeed58058/EUSTAQUIO-Stephen_433635"
+        },
+        {
+          "id": "ca7",
+          "name": "I. Koné",
+          "number": 18,
+          "position": "MF",
+          "x": 50,
+          "y": 48,
+          "club": "Marselha"
+        },
+        {
+          "id": "ca8",
+          "name": "J. Osorio",
+          "number": 21,
+          "position": "MF",
+          "x": 70,
+          "y": 45,
+          "club": "Toronto FC",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/982a5ed2-0878-4733-b071-cd7cc532ee37/OSORIO-Jonathan_370986"
+        },
+        {
+          "id": "ca9",
+          "name": "T. Buchanan",
+          "number": 11,
+          "position": "FW",
+          "x": 15,
+          "y": 22,
+          "club": "Villarreal",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/a607b6f5-fe42-4a89-9e88-cb9690e4bcd1/BUCHANAN-Tajon_430138"
+        },
+        {
+          "id": "ca10",
+          "name": "J. David",
+          "number": 20,
+          "position": "FW",
+          "x": 50,
+          "y": 28,
+          "club": "Juventus",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/97ad628a-b97d-4657-ac41-f2a667c534e6/DAVID-Jonathan_441257"
+        },
+        {
+          "id": "ca11",
+          "name": "C. Larin",
+          "number": 17,
+          "position": "FW",
+          "x": 85,
+          "y": 22,
+          "club": "Club América",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/21086aea-3ec5-47b2-a81f-f7316489183a/LARIN-Cyle_390670"
+        }
       ]
     },
     "teamB": {
@@ -225,17 +973,107 @@
       "secondaryColor": "#fecb00",
       "group": "Grupo B",
       "lineup": [
-        { "id": "bh1", "name": "N. Vasilj", "number": 1, "position": "GK", "x": 50, "y": 12, "club": "Midtjylland" },
-        { "id": "bh2", "name": "A. Dedić", "number": 2, "position": "DF", "x": 85, "y": 30, "club": "Benfica" },
-        { "id": "bh3", "name": "T. Šunjić", "number": 5, "position": "DF", "x": 62, "y": 25, "club": "Cagliari" },
-        { "id": "bh4", "name": "D. Hadžikadunić", "number": 14, "position": "DF", "x": 38, "y": 25, "club": "FC Köln" },
-        { "id": "bh5", "name": "S. Kolašinac", "number": 20, "position": "DF", "x": 15, "y": 30, "club": "Atalanta" },
-        { "id": "bh6", "name": "G. Cimirot", "number": 8, "position": "MF", "x": 35, "y": 50, "club": "Standard de Liège" },
-        { "id": "bh7", "name": "R. Krunić", "number": 16, "position": "MF", "x": 65, "y": 50, "club": "Fenerbahçe" },
-        { "id": "bh8", "name": "N. Bajrami", "number": 10, "position": "MF", "x": 50, "y": 62, "club": "Sassuolo" },
-        { "id": "bh9", "name": "E. Demirović", "number": 9, "position": "FW", "x": 15, "y": 68, "club": "Stuttgart" },
-        { "id": "bh10", "name": "H. Tabaković", "number": 29, "position": "FW", "x": 85, "y": 68, "club": "Hoffenheim" },
-        { "id": "bh11", "name": "E. Džeko", "number": 17, "position": "FW", "x": 50, "y": 80, "club": "Fenerbahçe" }
+        {
+          "id": "bh1",
+          "name": "N. Vasilj",
+          "number": 1,
+          "position": "GK",
+          "x": 50,
+          "y": 12,
+          "club": "Midtjylland"
+        },
+        {
+          "id": "bh2",
+          "name": "A. Dedić",
+          "number": 2,
+          "position": "DF",
+          "x": 85,
+          "y": 30,
+          "club": "Benfica"
+        },
+        {
+          "id": "bh3",
+          "name": "T. Šunjić",
+          "number": 5,
+          "position": "DF",
+          "x": 62,
+          "y": 25,
+          "club": "Cagliari"
+        },
+        {
+          "id": "bh4",
+          "name": "D. Hadžikadunić",
+          "number": 14,
+          "position": "DF",
+          "x": 38,
+          "y": 25,
+          "club": "FC Köln"
+        },
+        {
+          "id": "bh5",
+          "name": "S. Kolašinac",
+          "number": 20,
+          "position": "DF",
+          "x": 15,
+          "y": 30,
+          "club": "Atalanta",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/bed62578-6b40-402e-8c63-94159988fe95/KOLASINAC-Sead_376230"
+        },
+        {
+          "id": "bh6",
+          "name": "G. Cimirot",
+          "number": 8,
+          "position": "MF",
+          "x": 35,
+          "y": 50,
+          "club": "Standard de Liège"
+        },
+        {
+          "id": "bh7",
+          "name": "R. Krunić",
+          "number": 16,
+          "position": "MF",
+          "x": 65,
+          "y": 50,
+          "club": "Fenerbahçe"
+        },
+        {
+          "id": "bh8",
+          "name": "N. Bajrami",
+          "number": 10,
+          "position": "MF",
+          "x": 50,
+          "y": 62,
+          "club": "Sassuolo"
+        },
+        {
+          "id": "bh9",
+          "name": "E. Demirović",
+          "number": 9,
+          "position": "FW",
+          "x": 15,
+          "y": 68,
+          "club": "Stuttgart",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/b9e9f187-0936-4aba-9c70-2a4bcf2281e0/DEMIROVIC-Ermedin_436743"
+        },
+        {
+          "id": "bh10",
+          "name": "H. Tabaković",
+          "number": 29,
+          "position": "FW",
+          "x": 85,
+          "y": 68,
+          "club": "Hoffenheim"
+        },
+        {
+          "id": "bh11",
+          "name": "E. Džeko",
+          "number": 17,
+          "position": "FW",
+          "x": 50,
+          "y": 80,
+          "club": "Fenerbahçe"
+        }
       ]
     },
     "stadiumName": "BMO Field",
@@ -251,9 +1089,27 @@
     },
     "countdownTargetSeconds": 0,
     "broadcasters": [
-      { "id": "g4", "type": "TV ABERTA", "name": "Globo", "iconColor": "#05ff85", "link": "https://globoplay.globo.com" },
-      { "id": "s4", "type": "TV PAGA", "name": "SportTV", "iconColor": "#ffd700", "link": "https://ge.globo.com/sportv/" },
-      { "id": "cz4", "type": "YOUTUBE", "name": "CazéTV", "iconColor": "#ed2939", "link": "https://www.youtube.com/@CazeTV" }
+      {
+        "id": "g4",
+        "type": "TV ABERTA",
+        "name": "Globo",
+        "iconColor": "#05ff85",
+        "link": "https://globoplay.globo.com"
+      },
+      {
+        "id": "s4",
+        "type": "TV PAGA",
+        "name": "SportTV",
+        "iconColor": "#ffd700",
+        "link": "https://ge.globo.com/sportv/"
+      },
+      {
+        "id": "cz4",
+        "type": "YOUTUBE",
+        "name": "CazéTV",
+        "iconColor": "#ed2939",
+        "link": "https://www.youtube.com/@CazeTV"
+      }
     ]
   },
   {
@@ -266,17 +1122,107 @@
       "secondaryColor": "#ffdf00",
       "group": "Grupo C",
       "lineup": [
-        { "id": "b1", "name": "Alisson", "number": 1, "position": "GK", "x": 50, "y": 88, "club": "Liverpool" },
-        { "id": "b2", "name": "Danilo", "number": 2, "position": "DF", "x": 15, "y": 70, "club": "Juventus" },
-        { "id": "b3", "name": "Marquinhos", "number": 4, "position": "DF", "x": 38, "y": 75, "club": "PSG" },
-        { "id": "b4", "name": "G. Magalhães", "number": 3, "position": "DF", "x": 62, "y": 75, "club": "Arsenal" },
-        { "id": "b5", "name": "Abner", "number": 6, "position": "DF", "x": 85, "y": 70, "club": "Lyon" },
-        { "id": "b6", "name": "B. Guimarães", "number": 5, "position": "MF", "x": 30, "y": 45, "club": "Newcastle" },
-        { "id": "b7", "name": "João Gomes", "number": 15, "position": "MF", "x": 70, "y": 45, "club": "Wolverhampton" },
-        { "id": "b8", "name": "Raphinha", "number": 7, "position": "FW", "x": 15, "y": 22, "club": "Barcelona" },
-        { "id": "b9", "name": "Rodrygo", "number": 10, "position": "FW", "x": 50, "y": 28, "club": "Real Madrid" },
-        { "id": "b10", "name": "Vinicius Jr", "number": 11, "position": "FW", "x": 85, "y": 22, "club": "Real Madrid" },
-        { "id": "b11", "name": "Igor Jesus", "number": 9, "position": "FW", "x": 50, "y": 10, "club": "Botafogo" }
+        {
+          "id": "b1",
+          "name": "Alisson",
+          "number": 1,
+          "position": "GK",
+          "x": 50,
+          "y": 88,
+          "club": "Liverpool"
+        },
+        {
+          "id": "b2",
+          "name": "Danilo",
+          "number": 2,
+          "position": "DF",
+          "x": 15,
+          "y": 70,
+          "club": "Juventus",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/364f443f-83df-4e8e-803c-765feae146a3/DANILO_335656"
+        },
+        {
+          "id": "b3",
+          "name": "Marquinhos",
+          "number": 4,
+          "position": "DF",
+          "x": 38,
+          "y": 75,
+          "club": "PSG"
+        },
+        {
+          "id": "b4",
+          "name": "G. Magalhães",
+          "number": 3,
+          "position": "DF",
+          "x": 62,
+          "y": 75,
+          "club": "Arsenal"
+        },
+        {
+          "id": "b5",
+          "name": "Abner",
+          "number": 6,
+          "position": "DF",
+          "x": 85,
+          "y": 70,
+          "club": "Lyon"
+        },
+        {
+          "id": "b6",
+          "name": "B. Guimarães",
+          "number": 5,
+          "position": "MF",
+          "x": 30,
+          "y": 45,
+          "club": "Newcastle",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/0215cb23-c389-4c5a-9bb0-c7044ae7059a/BRUNO-GUIMARAES_430605"
+        },
+        {
+          "id": "b7",
+          "name": "João Gomes",
+          "number": 15,
+          "position": "MF",
+          "x": 70,
+          "y": 45,
+          "club": "Wolverhampton"
+        },
+        {
+          "id": "b8",
+          "name": "Raphinha",
+          "number": 7,
+          "position": "FW",
+          "x": 15,
+          "y": 22,
+          "club": "Barcelona"
+        },
+        {
+          "id": "b9",
+          "name": "Rodrygo",
+          "number": 10,
+          "position": "FW",
+          "x": 50,
+          "y": 28,
+          "club": "Real Madrid"
+        },
+        {
+          "id": "b10",
+          "name": "Vinicius Jr",
+          "number": 11,
+          "position": "FW",
+          "x": 85,
+          "y": 22,
+          "club": "Real Madrid"
+        },
+        {
+          "id": "b11",
+          "name": "Igor Jesus",
+          "number": 9,
+          "position": "FW",
+          "x": 50,
+          "y": 10,
+          "club": "Botafogo"
+        }
       ]
     },
     "teamB": {
@@ -287,17 +1233,109 @@
       "secondaryColor": "#006233",
       "group": "Grupo C",
       "lineup": [
-        { "id": "m1", "name": "Y. Bounou", "number": 1, "position": "GK", "x": 50, "y": 12, "club": "Al-Hilal" },
-        { "id": "m2", "name": "N. Mazraoui", "number": 3, "position": "DF", "x": 15, "y": 30, "club": "Bayern Munique" },
-        { "id": "m3", "name": "A. Dari", "number": 23, "position": "DF", "x": 38, "y": 25, "club": "Brest" },
-        { "id": "m4", "name": "N. Aguerd", "number": 5, "position": "DF", "x": 62, "y": 25, "club": "West Ham" },
-        { "id": "m5", "name": "A. Hakimi", "number": 2, "position": "DF", "x": 85, "y": 30, "club": "PSG" },
-        { "id": "m6", "name": "A. Ounahi", "number": 8, "position": "MF", "x": 30, "y": 50, "club": "Panathinaikos" },
-        { "id": "m7", "name": "S. Amrabat", "number": 4, "position": "MF", "x": 50, "y": 45, "club": "Fenerbahçe" },
-        { "id": "m8", "name": "B. El Khannouss", "number": 17, "position": "MF", "x": 70, "y": 50, "club": "Leicester City" },
-        { "id": "m9", "name": "H. Ziyech", "number": 7, "position": "FW", "x": 15, "y": 75, "club": "Galatasaray" },
-        { "id": "m10", "name": "Y. En-Nesyri", "number": 19, "position": "FW", "x": 50, "y": 85, "club": "Fenerbahçe" },
-        { "id": "m11", "name": "Brahim Díaz", "number": 10, "position": "FW", "x": 85, "y": 75, "club": "Real Madrid" }
+        {
+          "id": "m1",
+          "name": "Y. Bounou",
+          "number": 1,
+          "position": "GK",
+          "x": 50,
+          "y": 12,
+          "club": "Al-Hilal"
+        },
+        {
+          "id": "m2",
+          "name": "N. Mazraoui",
+          "number": 3,
+          "position": "DF",
+          "x": 15,
+          "y": 30,
+          "club": "Bayern Munique",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/000d2b43-36ff-4fe5-90d8-23c96e555c56/MAZRAOUI-Noussair_411680"
+        },
+        {
+          "id": "m3",
+          "name": "A. Dari",
+          "number": 23,
+          "position": "DF",
+          "x": 38,
+          "y": 25,
+          "club": "Brest"
+        },
+        {
+          "id": "m4",
+          "name": "N. Aguerd",
+          "number": 5,
+          "position": "DF",
+          "x": 62,
+          "y": 25,
+          "club": "West Ham"
+        },
+        {
+          "id": "m5",
+          "name": "A. Hakimi",
+          "number": 2,
+          "position": "DF",
+          "x": 85,
+          "y": 30,
+          "club": "PSG"
+        },
+        {
+          "id": "m6",
+          "name": "A. Ounahi",
+          "number": 8,
+          "position": "MF",
+          "x": 30,
+          "y": 50,
+          "club": "Panathinaikos",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/f823c3da-d540-436c-9b56-bfccdc4b51bc/OUNAHI-Azzedine_441307"
+        },
+        {
+          "id": "m7",
+          "name": "S. Amrabat",
+          "number": 4,
+          "position": "MF",
+          "x": 50,
+          "y": 45,
+          "club": "Fenerbahçe"
+        },
+        {
+          "id": "m8",
+          "name": "B. El Khannouss",
+          "number": 17,
+          "position": "MF",
+          "x": 70,
+          "y": 50,
+          "club": "Leicester City",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/8e73a0cb-8200-4870-b0bc-12901de8076f/EL-KHANNOUSS-Bilal_448612"
+        },
+        {
+          "id": "m9",
+          "name": "H. Ziyech",
+          "number": 7,
+          "position": "FW",
+          "x": 15,
+          "y": 75,
+          "club": "Galatasaray"
+        },
+        {
+          "id": "m10",
+          "name": "Y. En-Nesyri",
+          "number": 19,
+          "position": "FW",
+          "x": 50,
+          "y": 85,
+          "club": "Fenerbahçe"
+        },
+        {
+          "id": "m11",
+          "name": "Brahim Díaz",
+          "number": 10,
+          "position": "FW",
+          "x": 85,
+          "y": 75,
+          "club": "Real Madrid",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/b05c2233-cb0a-4abc-9413-e56ad25f0899/DIAZ-Brahim_430740"
+        }
       ]
     },
     "stadiumName": "MetLife Stadium",
@@ -314,10 +1352,34 @@
     },
     "countdownTargetSeconds": 0,
     "broadcasters": [
-      { "id": "g1", "type": "TV ABERTA", "name": "Globo", "iconColor": "#05ff85", "link": "https://globoplay.globo.com" },
-      { "id": "s1", "type": "TV PAGA", "name": "SportTV", "iconColor": "#ffd700", "link": "https://ge.globo.com/sportv/" },
-      { "id": "gb1", "type": "STREAM PAGO", "name": "Globoplay / FIFA+", "iconColor": "#00e476", "link": "https://plus.fifa.com" },
-      { "id": "cz1", "type": "YOUTUBE", "name": "CazéTV", "iconColor": "#ed2939", "link": "https://www.youtube.com/@CazeTV" }
+      {
+        "id": "g1",
+        "type": "TV ABERTA",
+        "name": "Globo",
+        "iconColor": "#05ff85",
+        "link": "https://globoplay.globo.com"
+      },
+      {
+        "id": "s1",
+        "type": "TV PAGA",
+        "name": "SportTV",
+        "iconColor": "#ffd700",
+        "link": "https://ge.globo.com/sportv/"
+      },
+      {
+        "id": "gb1",
+        "type": "STREAM PAGO",
+        "name": "Globoplay / FIFA+",
+        "iconColor": "#00e476",
+        "link": "https://plus.fifa.com"
+      },
+      {
+        "id": "cz1",
+        "type": "YOUTUBE",
+        "name": "CazéTV",
+        "iconColor": "#ed2939",
+        "link": "https://www.youtube.com/@CazeTV"
+      }
     ]
   },
   {
@@ -330,17 +1392,105 @@
       "secondaryColor": "#ed2939",
       "group": "Grupo I",
       "lineup": [
-        { "id": "f1", "name": "Maignan", "number": 1, "position": "GK", "x": 50, "y": 88, "club": "AC Milan" },
-        { "id": "f2", "name": "T. Hernández", "number": 22, "position": "DF", "x": 15, "y": 70, "club": "AC Milan" },
-        { "id": "f3", "name": "Saliba", "number": 17, "position": "DF", "x": 38, "y": 75, "club": "Arsenal" },
-        { "id": "f4", "name": "Upamecano", "number": 4, "position": "DF", "x": 62, "y": 75, "club": "Bayern Munique" },
-        { "id": "f5", "name": "Koundé", "number": 5, "position": "DF", "x": 85, "y": 70, "club": "Barcelona" },
-        { "id": "f6", "name": "Tchouaméni", "number": 8, "position": "MF", "x": 30, "y": 50, "club": "Real Madrid" },
-        { "id": "f7", "name": "Kanté", "number": 13, "position": "MF", "x": 50, "y": 55, "club": "Al-Ittihad" },
-        { "id": "f8", "name": "Griezmann", "number": 7, "position": "MF", "x": 70, "y": 50, "club": "Atlético Madrid" },
-        { "id": "f9", "name": "Dembélé", "number": 11, "position": "FW", "x": 15, "y": 25, "club": "PSG" },
-        { "id": "f10", "name": "K. Mbappé", "number": 10, "position": "FW", "x": 50, "y": 15, "club": "Real Madrid" },
-        { "id": "f11", "name": "Barcola", "number": 20, "position": "FW", "x": 85, "y": 25, "club": "PSG" }
+        {
+          "id": "f1",
+          "name": "Maignan",
+          "number": 1,
+          "position": "GK",
+          "x": 50,
+          "y": 88,
+          "club": "AC Milan"
+        },
+        {
+          "id": "f2",
+          "name": "T. Hernández",
+          "number": 22,
+          "position": "DF",
+          "x": 15,
+          "y": 70,
+          "club": "AC Milan"
+        },
+        {
+          "id": "f3",
+          "name": "Saliba",
+          "number": 17,
+          "position": "DF",
+          "x": 38,
+          "y": 75,
+          "club": "Arsenal"
+        },
+        {
+          "id": "f4",
+          "name": "Upamecano",
+          "number": 4,
+          "position": "DF",
+          "x": 62,
+          "y": 75,
+          "club": "Bayern Munique"
+        },
+        {
+          "id": "f5",
+          "name": "Koundé",
+          "number": 5,
+          "position": "DF",
+          "x": 85,
+          "y": 70,
+          "club": "Barcelona"
+        },
+        {
+          "id": "f6",
+          "name": "Tchouaméni",
+          "number": 8,
+          "position": "MF",
+          "x": 30,
+          "y": 50,
+          "club": "Real Madrid"
+        },
+        {
+          "id": "f7",
+          "name": "Kanté",
+          "number": 13,
+          "position": "MF",
+          "x": 50,
+          "y": 55,
+          "club": "Al-Ittihad"
+        },
+        {
+          "id": "f8",
+          "name": "Griezmann",
+          "number": 7,
+          "position": "MF",
+          "x": 70,
+          "y": 50,
+          "club": "Atlético Madrid"
+        },
+        {
+          "id": "f9",
+          "name": "Dembélé",
+          "number": 11,
+          "position": "FW",
+          "x": 15,
+          "y": 25,
+          "club": "PSG"
+        },
+        {
+          "id": "f10",
+          "name": "K. Mbappé",
+          "number": 10,
+          "position": "FW",
+          "x": 50,
+          "y": 15,
+          "club": "Real Madrid"
+        },
+        {
+          "id": "f11",
+          "name": "Barcola",
+          "number": 20,
+          "position": "FW",
+          "x": 85,
+          "y": 25,
+          "club": "PSG"
+        }
       ]
     },
     "teamB": {
@@ -351,17 +1501,105 @@
       "secondaryColor": "#fdef42",
       "group": "Grupo I",
       "lineup": [
-        { "id": "sn1", "name": "É. Mendy", "number": 16, "position": "GK", "x": 50, "y": 12, "club": "Al-Ahli" },
-        { "id": "sn2", "name": "I. Jakobs", "number": 5, "position": "DF", "x": 15, "y": 30, "club": "Monaco" },
-        { "id": "sn3", "name": "P. A. Cissé", "number": 25, "position": "DF", "x": 38, "y": 25, "club": "Olympiacos" },
-        { "id": "sn4", "name": "K. Koulibaly", "number": 3, "position": "DF", "x": 62, "y": 25, "club": "Al-Hilal" },
-        { "id": "sn5", "name": "A. Diallo", "number": 21, "position": "DF", "x": 85, "y": 30, "club": "Al-Arabi" },
-        { "id": "sn6", "name": "P. M. Sarr", "number": 17, "position": "MF", "x": 30, "y": 50, "club": "Tottenham" },
-        { "id": "sn7", "name": "P. Gueye", "number": 8, "position": "MF", "x": 50, "y": 45, "club": "Marselha" },
-        { "id": "sn8", "name": "I. Gueye", "number": 4, "position": "MF", "x": 70, "y": 50, "club": "Everton" },
-        { "id": "sn9", "name": "I. Sarr", "number": 11, "position": "FW", "x": 15, "y": 75, "club": "Crystal Palace" },
-        { "id": "sn10", "name": "N. Jackson", "number": 19, "position": "FW", "x": 50, "y": 85, "club": "Chelsea" },
-        { "id": "sn11", "name": "H. Diallo", "number": 9, "position": "FW", "x": 85, "y": 75, "club": "Al-Rayyan" }
+        {
+          "id": "sn1",
+          "name": "É. Mendy",
+          "number": 16,
+          "position": "GK",
+          "x": 50,
+          "y": 12,
+          "club": "Al-Ahli"
+        },
+        {
+          "id": "sn2",
+          "name": "I. Jakobs",
+          "number": 5,
+          "position": "DF",
+          "x": 15,
+          "y": 30,
+          "club": "Monaco"
+        },
+        {
+          "id": "sn3",
+          "name": "P. A. Cissé",
+          "number": 25,
+          "position": "DF",
+          "x": 38,
+          "y": 25,
+          "club": "Olympiacos"
+        },
+        {
+          "id": "sn4",
+          "name": "K. Koulibaly",
+          "number": 3,
+          "position": "DF",
+          "x": 62,
+          "y": 25,
+          "club": "Al-Hilal"
+        },
+        {
+          "id": "sn5",
+          "name": "A. Diallo",
+          "number": 21,
+          "position": "DF",
+          "x": 85,
+          "y": 30,
+          "club": "Al-Arabi"
+        },
+        {
+          "id": "sn6",
+          "name": "P. M. Sarr",
+          "number": 17,
+          "position": "MF",
+          "x": 30,
+          "y": 50,
+          "club": "Tottenham"
+        },
+        {
+          "id": "sn7",
+          "name": "P. Gueye",
+          "number": 8,
+          "position": "MF",
+          "x": 50,
+          "y": 45,
+          "club": "Marselha"
+        },
+        {
+          "id": "sn8",
+          "name": "I. Gueye",
+          "number": 4,
+          "position": "MF",
+          "x": 70,
+          "y": 50,
+          "club": "Everton"
+        },
+        {
+          "id": "sn9",
+          "name": "I. Sarr",
+          "number": 11,
+          "position": "FW",
+          "x": 15,
+          "y": 75,
+          "club": "Crystal Palace"
+        },
+        {
+          "id": "sn10",
+          "name": "N. Jackson",
+          "number": 19,
+          "position": "FW",
+          "x": 50,
+          "y": 85,
+          "club": "Chelsea"
+        },
+        {
+          "id": "sn11",
+          "name": "H. Diallo",
+          "number": 9,
+          "position": "FW",
+          "x": 85,
+          "y": 75,
+          "club": "Al-Rayyan"
+        }
       ]
     },
     "stadiumName": "MetLife Stadium",
@@ -373,9 +1611,27 @@
     "status": "PRE_GAME",
     "countdownTargetSeconds": 248400,
     "broadcasters": [
-      { "id": "g2", "type": "TV ABERTA", "name": "Globo", "iconColor": "#05ff85", "link": "https://globoplay.globo.com" },
-      { "id": "s2", "type": "TV PAGA", "name": "SportTV", "iconColor": "#ffd700", "link": "https://ge.globo.com/sportv/" },
-      { "id": "cz2", "type": "YOUTUBE", "name": "CazéTV", "iconColor": "#ed2939", "link": "https://www.youtube.com/@CazeTV" }
+      {
+        "id": "g2",
+        "type": "TV ABERTA",
+        "name": "Globo",
+        "iconColor": "#05ff85",
+        "link": "https://globoplay.globo.com"
+      },
+      {
+        "id": "s2",
+        "type": "TV PAGA",
+        "name": "SportTV",
+        "iconColor": "#ffd700",
+        "link": "https://ge.globo.com/sportv/"
+      },
+      {
+        "id": "cz2",
+        "type": "YOUTUBE",
+        "name": "CazéTV",
+        "iconColor": "#ed2939",
+        "link": "https://www.youtube.com/@CazeTV"
+      }
     ]
   },
   {
@@ -388,17 +1644,106 @@
       "secondaryColor": "#d21034",
       "group": "Grupo C",
       "lineup": [
-        { "id": "h1", "name": "J. Placide", "number": 1, "position": "GK", "x": 50, "y": 88, "club": "Bastia" },
-        { "id": "h2", "name": "C. Arcus", "number": 2, "position": "DF", "x": 15, "y": 70, "club": "Angers" },
-        { "id": "h3", "name": "R. Adé", "number": 4, "position": "DF", "x": 38, "y": 75, "club": "LDU Quito" },
-        { "id": "h4", "name": "A. Christian Jr", "number": 3, "position": "DF", "x": 62, "y": 75, "club": "Figueirense" },
-        { "id": "h5", "name": "M. Sainté", "number": 13, "position": "DF", "x": 85, "y": 70, "club": "Mirebalais" },
-        { "id": "h6", "name": "B. Alceus", "number": 8, "position": "MF", "x": 30, "y": 45, "club": "Apollon Limassol" },
-        { "id": "h7", "name": "D. Jean Jacques", "number": 17, "position": "MF", "x": 50, "y": 48, "club": "Metz" },
-        { "id": "h8", "name": "L. Pierre", "number": 14, "position": "MF", "x": 70, "y": 45, "club": "Dunkerque" },
-        { "id": "h9", "name": "D. Nazon", "number": 9, "position": "FW", "x": 15, "y": 22, "club": "Kayserispor" },
-        { "id": "h10", "name": "F. Pierrot", "number": 20, "position": "FW", "x": 50, "y": 28, "club": "Maccabi Haifa" },
-        { "id": "h11", "name": "L. Don Deedson", "number": 7, "position": "FW", "x": 85, "y": 22, "club": "Odense" }
+        {
+          "id": "h1",
+          "name": "J. Placide",
+          "number": 1,
+          "position": "GK",
+          "x": 50,
+          "y": 88,
+          "club": "Bastia"
+        },
+        {
+          "id": "h2",
+          "name": "C. Arcus",
+          "number": 2,
+          "position": "DF",
+          "x": 15,
+          "y": 70,
+          "club": "Angers"
+        },
+        {
+          "id": "h3",
+          "name": "R. Adé",
+          "number": 4,
+          "position": "DF",
+          "x": 38,
+          "y": 75,
+          "club": "LDU Quito"
+        },
+        {
+          "id": "h4",
+          "name": "A. Christian Jr",
+          "number": 3,
+          "position": "DF",
+          "x": 62,
+          "y": 75,
+          "club": "Figueirense"
+        },
+        {
+          "id": "h5",
+          "name": "M. Sainté",
+          "number": 13,
+          "position": "DF",
+          "x": 85,
+          "y": 70,
+          "club": "Mirebalais"
+        },
+        {
+          "id": "h6",
+          "name": "B. Alceus",
+          "number": 8,
+          "position": "MF",
+          "x": 30,
+          "y": 45,
+          "club": "Apollon Limassol"
+        },
+        {
+          "id": "h7",
+          "name": "D. Jean Jacques",
+          "number": 17,
+          "position": "MF",
+          "x": 50,
+          "y": 48,
+          "club": "Metz"
+        },
+        {
+          "id": "h8",
+          "name": "L. Pierre",
+          "number": 14,
+          "position": "MF",
+          "x": 70,
+          "y": 45,
+          "club": "Dunkerque"
+        },
+        {
+          "id": "h9",
+          "name": "D. Nazon",
+          "number": 9,
+          "position": "FW",
+          "x": 15,
+          "y": 22,
+          "club": "Kayserispor"
+        },
+        {
+          "id": "h10",
+          "name": "F. Pierrot",
+          "number": 20,
+          "position": "FW",
+          "x": 50,
+          "y": 28,
+          "club": "Maccabi Haifa"
+        },
+        {
+          "id": "h11",
+          "name": "L. Don Deedson",
+          "number": 7,
+          "position": "FW",
+          "x": 85,
+          "y": 22,
+          "club": "Odense",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/3838199f-c956-4b7c-a728-eef76a086a78/DEEDSON-Louicius_481027"
+        }
       ]
     },
     "teamB": {
@@ -409,17 +1754,109 @@
       "secondaryColor": "#ffffff",
       "group": "Grupo C",
       "lineup": [
-        { "id": "sc1", "name": "A. Gunn", "number": 1, "position": "GK", "x": 50, "y": 12, "club": "Norwich City" },
-        { "id": "sc2", "name": "A. Ralston", "number": 2, "position": "DF", "x": 15, "y": 30, "club": "Celtic" },
-        { "id": "sc3", "name": "J. Souttar", "number": 5, "position": "DF", "x": 38, "y": 25, "club": "Rangers" },
-        { "id": "sc4", "name": "S. McKenna", "number": 15, "position": "DF", "x": 62, "y": 25, "club": "Las Palmas" },
-        { "id": "sc5", "name": "A. Robertson", "number": 3, "position": "DF", "x": 85, "y": 30, "club": "Liverpool" },
-        { "id": "sc6", "name": "B. Gilmour", "number": 8, "position": "MF", "x": 30, "y": 50, "club": "Napoli" },
-        { "id": "sc7", "name": "S. McTominay", "number": 4, "position": "MF", "x": 50, "y": 45, "club": "Napoli" },
-        { "id": "sc8", "name": "J. McGinn", "number": 7, "position": "MF", "x": 70, "y": 50, "club": "Aston Villa" },
-        { "id": "sc9", "name": "B. Doak", "number": 11, "position": "FW", "x": 15, "y": 75, "club": "Liverpool" },
-        { "id": "sc10", "name": "C. Adams", "number": 10, "position": "FW", "x": 50, "y": 85, "club": "Torino" },
-        { "id": "sc11", "name": "R. Christie", "number": 21, "position": "FW", "x": 85, "y": 75, "club": "Bournemouth" }
+        {
+          "id": "sc1",
+          "name": "A. Gunn",
+          "number": 1,
+          "position": "GK",
+          "x": 50,
+          "y": 12,
+          "club": "Norwich City"
+        },
+        {
+          "id": "sc2",
+          "name": "A. Ralston",
+          "number": 2,
+          "position": "DF",
+          "x": 15,
+          "y": 30,
+          "club": "Celtic"
+        },
+        {
+          "id": "sc3",
+          "name": "J. Souttar",
+          "number": 5,
+          "position": "DF",
+          "x": 38,
+          "y": 25,
+          "club": "Rangers"
+        },
+        {
+          "id": "sc4",
+          "name": "S. McKenna",
+          "number": 15,
+          "position": "DF",
+          "x": 62,
+          "y": 25,
+          "club": "Las Palmas"
+        },
+        {
+          "id": "sc5",
+          "name": "A. Robertson",
+          "number": 3,
+          "position": "DF",
+          "x": 85,
+          "y": 30,
+          "club": "Liverpool"
+        },
+        {
+          "id": "sc6",
+          "name": "B. Gilmour",
+          "number": 8,
+          "position": "MF",
+          "x": 30,
+          "y": 50,
+          "club": "Napoli"
+        },
+        {
+          "id": "sc7",
+          "name": "S. McTominay",
+          "number": 4,
+          "position": "MF",
+          "x": 50,
+          "y": 45,
+          "club": "Napoli"
+        },
+        {
+          "id": "sc8",
+          "name": "J. McGinn",
+          "number": 7,
+          "position": "MF",
+          "x": 70,
+          "y": 50,
+          "club": "Aston Villa",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/af6ceadd-a14f-47c0-9f30-fd85d71a94cd/McGINN-John_401334"
+        },
+        {
+          "id": "sc9",
+          "name": "B. Doak",
+          "number": 11,
+          "position": "FW",
+          "x": 15,
+          "y": 75,
+          "club": "Liverpool",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/7cf469cc-72f7-4c4b-9312-817920757af3/GANNON-DOAK-Ben_485131"
+        },
+        {
+          "id": "sc10",
+          "name": "C. Adams",
+          "number": 10,
+          "position": "FW",
+          "x": 50,
+          "y": 85,
+          "club": "Torino",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/1a70c52f-9a4b-4dc1-813b-991877aa4758/ADAMS-Che_433191"
+        },
+        {
+          "id": "sc11",
+          "name": "R. Christie",
+          "number": 21,
+          "position": "FW",
+          "x": 85,
+          "y": 75,
+          "club": "Bournemouth",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/fce70106-25b4-4b34-b12b-10e4c6e90c18/CHRISTIE-Ryan_430097"
+        }
       ]
     },
     "stadiumName": "Estádio de Boston",
@@ -436,7 +1873,14 @@
     },
     "countdownTargetSeconds": 0,
     "broadcasters": [
-      { "id": "cz5", "type": "YOUTUBE", "name": "CazéTV", "iconColor": "#ed2939", "link": "https://www.youtube.com/@CazeTV", "logoUrl": "https://extranets.fifa.com/TvStationPhotos/451.png" }
+      {
+        "id": "cz5",
+        "type": "YOUTUBE",
+        "name": "CazéTV",
+        "iconColor": "#ed2939",
+        "link": "https://www.youtube.com/@CazeTV",
+        "logoUrl": "https://extranets.fifa.com/TvStationPhotos/451.png"
+      }
     ]
   },
   {
@@ -449,17 +1893,107 @@
       "secondaryColor": "#ffffff",
       "group": "Grupo D",
       "lineup": [
-        { "id": "au1", "name": "M. Ryan", "number": 1, "position": "GK", "x": 50, "y": 88, "club": "AZ Alkmaar" },
-        { "id": "au2", "name": "N. Atkinson", "number": 3, "position": "DF", "x": 15, "y": 70, "club": "Hearts" },
-        { "id": "au3", "name": "H. Souttar", "number": 19, "position": "DF", "x": 38, "y": 75, "club": "Leicester City" },
-        { "id": "au4", "name": "K. Rowles", "number": 4, "position": "DF", "x": 62, "y": 75, "club": "Heart of Midlothian" },
-        { "id": "au5", "name": "J. Bos", "number": 8, "position": "DF", "x": 85, "y": 70, "club": "Westerlo" },
-        { "id": "au6", "name": "J. Irvine", "number": 22, "position": "MF", "x": 30, "y": 45, "club": "St. Pauli" },
-        { "id": "au7", "name": "K. Baccus", "number": 17, "position": "MF", "x": 50, "y": 48, "club": "St. Mirren" },
-        { "id": "au8", "name": "A. Hrustic", "number": 10, "position": "MF", "x": 70, "y": 45, "club": "Salernitana" },
-        { "id": "au9", "name": "M. Boyle", "number": 6, "position": "FW", "x": 15, "y": 22, "club": "Hibernian" },
-        { "id": "au10", "name": "M. Duke", "number": 15, "position": "FW", "x": 50, "y": 28, "club": "Machida Zelvia" },
-        { "id": "au11", "name": "C. Goodwin", "number": 23, "position": "FW", "x": 85, "y": 22, "club": "Al-Wehda" }
+        {
+          "id": "au1",
+          "name": "M. Ryan",
+          "number": 1,
+          "position": "GK",
+          "x": 50,
+          "y": 88,
+          "club": "AZ Alkmaar"
+        },
+        {
+          "id": "au2",
+          "name": "N. Atkinson",
+          "number": 3,
+          "position": "DF",
+          "x": 15,
+          "y": 70,
+          "club": "Hearts"
+        },
+        {
+          "id": "au3",
+          "name": "H. Souttar",
+          "number": 19,
+          "position": "DF",
+          "x": 38,
+          "y": 75,
+          "club": "Leicester City"
+        },
+        {
+          "id": "au4",
+          "name": "K. Rowles",
+          "number": 4,
+          "position": "DF",
+          "x": 62,
+          "y": 75,
+          "club": "Heart of Midlothian"
+        },
+        {
+          "id": "au5",
+          "name": "J. Bos",
+          "number": 8,
+          "position": "DF",
+          "x": 85,
+          "y": 70,
+          "club": "Westerlo",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/4b537554-d211-4b77-aa31-0935973fdd50/BOS-Jordan_423522"
+        },
+        {
+          "id": "au6",
+          "name": "J. Irvine",
+          "number": 22,
+          "position": "MF",
+          "x": 30,
+          "y": 45,
+          "club": "St. Pauli",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/7726492b-0996-47a2-aafd-bd362844d9df/IRVINE-Jackson_355775"
+        },
+        {
+          "id": "au7",
+          "name": "K. Baccus",
+          "number": 17,
+          "position": "MF",
+          "x": 50,
+          "y": 48,
+          "club": "St. Mirren"
+        },
+        {
+          "id": "au8",
+          "name": "A. Hrustic",
+          "number": 10,
+          "position": "MF",
+          "x": 70,
+          "y": 45,
+          "club": "Salernitana"
+        },
+        {
+          "id": "au9",
+          "name": "M. Boyle",
+          "number": 6,
+          "position": "FW",
+          "x": 15,
+          "y": 22,
+          "club": "Hibernian"
+        },
+        {
+          "id": "au10",
+          "name": "M. Duke",
+          "number": 15,
+          "position": "FW",
+          "x": 50,
+          "y": 28,
+          "club": "Machida Zelvia"
+        },
+        {
+          "id": "au11",
+          "name": "C. Goodwin",
+          "number": 23,
+          "position": "FW",
+          "x": 85,
+          "y": 22,
+          "club": "Al-Wehda"
+        }
       ]
     },
     "teamB": {
@@ -470,17 +2004,108 @@
       "secondaryColor": "#ffffff",
       "group": "Grupo D",
       "lineup": [
-        { "id": "tr1", "name": "M. Günok", "number": 1, "position": "GK", "x": 50, "y": 12, "club": "Beşiktaş" },
-        { "id": "tr2", "name": "Z. Çelik", "number": 2, "position": "DF", "x": 15, "y": 30, "club": "Roma" },
-        { "id": "tr3", "name": "M. Demiral", "number": 3, "position": "DF", "x": 38, "y": 25, "club": "Al-Ahli" },
-        { "id": "tr4", "name": "A. Bardakcı", "number": 14, "position": "DF", "x": 62, "y": 25, "club": "Galatasaray" },
-        { "id": "tr5", "name": "F. Kadioglu", "number": 20, "position": "DF", "x": 85, "y": 30, "club": "Brighton" },
-        { "id": "tr6", "name": "H. Çalhanoğlu", "number": 10, "position": "MF", "x": 30, "y": 50, "club": "Inter de Milão" },
-        { "id": "tr7", "name": "İ. Yüksek", "number": 16, "position": "MF", "x": 50, "y": 45, "club": "Fenerbahçe" },
-        { "id": "tr8", "name": "A. Güler", "number": 8, "position": "MF", "x": 70, "y": 50, "club": "Real Madrid" },
-        { "id": "tr9", "name": "K. Aktürkoğlu", "number": 7, "position": "FW", "x": 15, "y": 75, "club": "Benfica" },
-        { "id": "tr10", "name": "K. Yıldız", "number": 11, "position": "FW", "x": 50, "y": 85, "club": "Juventus" },
-        { "id": "tr11", "name": "B. Yılmaz", "number": 21, "position": "FW", "x": 85, "y": 75, "club": "Galatasaray" }
+        {
+          "id": "tr1",
+          "name": "M. Günok",
+          "number": 1,
+          "position": "GK",
+          "x": 50,
+          "y": 12,
+          "club": "Beşiktaş"
+        },
+        {
+          "id": "tr2",
+          "name": "Z. Çelik",
+          "number": 2,
+          "position": "DF",
+          "x": 15,
+          "y": 30,
+          "club": "Roma",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/903b63c2-ab06-47b8-911c-bf4f026601fd/CELIK-Zeki_433072"
+        },
+        {
+          "id": "tr3",
+          "name": "M. Demiral",
+          "number": 3,
+          "position": "DF",
+          "x": 38,
+          "y": 25,
+          "club": "Al-Ahli"
+        },
+        {
+          "id": "tr4",
+          "name": "A. Bardakcı",
+          "number": 14,
+          "position": "DF",
+          "x": 62,
+          "y": 25,
+          "club": "Galatasaray"
+        },
+        {
+          "id": "tr5",
+          "name": "F. Kadioglu",
+          "number": 20,
+          "position": "DF",
+          "x": 85,
+          "y": 30,
+          "club": "Brighton"
+        },
+        {
+          "id": "tr6",
+          "name": "H. Çalhanoğlu",
+          "number": 10,
+          "position": "MF",
+          "x": 30,
+          "y": 50,
+          "club": "Inter de Milão"
+        },
+        {
+          "id": "tr7",
+          "name": "İ. Yüksek",
+          "number": 16,
+          "position": "MF",
+          "x": 50,
+          "y": 45,
+          "club": "Fenerbahçe",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/1f8b0453-0b84-4eea-9c24-9cd992611aed/YUKSEK-Ismail_484092"
+        },
+        {
+          "id": "tr8",
+          "name": "A. Güler",
+          "number": 8,
+          "position": "MF",
+          "x": 70,
+          "y": 50,
+          "club": "Real Madrid"
+        },
+        {
+          "id": "tr9",
+          "name": "K. Aktürkoğlu",
+          "number": 7,
+          "position": "FW",
+          "x": 15,
+          "y": 75,
+          "club": "Benfica",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/9cccf7c0-ebfc-4b65-8587-74742f5a9992/AKTURKOGLU-Kerem_441188"
+        },
+        {
+          "id": "tr10",
+          "name": "K. Yıldız",
+          "number": 11,
+          "position": "FW",
+          "x": 50,
+          "y": 85,
+          "club": "Juventus"
+        },
+        {
+          "id": "tr11",
+          "name": "B. Yılmaz",
+          "number": 21,
+          "position": "FW",
+          "x": 85,
+          "y": 75,
+          "club": "Galatasaray"
+        }
       ]
     },
     "stadiumName": "BC Place de Vancouver",
@@ -497,11 +2122,46 @@
     },
     "countdownTargetSeconds": 0,
     "broadcasters": [
-      { "id": "getv6", "type": "STREAM", "name": "GETV", "iconColor": "#00e476", "link": "https://globoplay.globo.com/categorias/ge-tv/", "logoUrl": "https://extranets.fifa.com/TvStationPhotos/914.png" },
-      { "id": "gb6", "type": "STREAM", "name": "Globoplay", "iconColor": "#00e476", "link": "https://globoplay.globo.com/tv-globo/ao-vivo/6120663/", "logoUrl": "https://extranets.fifa.com/TvStationPhotos/30.png" },
-      { "id": "cz6", "type": "YOUTUBE", "name": "CazéTV", "iconColor": "#ed2939", "link": "https://www.youtube.com/@CazeTV", "logoUrl": "https://extranets.fifa.com/TvStationPhotos/451.png" },
-      { "id": "g6", "type": "TV ABERTA", "name": "TV Globo", "iconColor": "#05ff85", "link": "https://redeglobo.globo.com/", "logoUrl": "https://extranets.fifa.com/TvStationPhotos/25.png" },
-      { "id": "s6", "type": "TV PAGA", "name": "sportv", "iconColor": "#ffd700", "link": "https://ge.globo.com/sportv/", "logoUrl": "https://extranets.fifa.com/TvStationPhotos/26.png" }
+      {
+        "id": "getv6",
+        "type": "STREAM",
+        "name": "GETV",
+        "iconColor": "#00e476",
+        "link": "https://globoplay.globo.com/categorias/ge-tv/",
+        "logoUrl": "https://extranets.fifa.com/TvStationPhotos/914.png"
+      },
+      {
+        "id": "gb6",
+        "type": "STREAM",
+        "name": "Globoplay",
+        "iconColor": "#00e476",
+        "link": "https://globoplay.globo.com/tv-globo/ao-vivo/6120663/",
+        "logoUrl": "https://extranets.fifa.com/TvStationPhotos/30.png"
+      },
+      {
+        "id": "cz6",
+        "type": "YOUTUBE",
+        "name": "CazéTV",
+        "iconColor": "#ed2939",
+        "link": "https://www.youtube.com/@CazeTV",
+        "logoUrl": "https://extranets.fifa.com/TvStationPhotos/451.png"
+      },
+      {
+        "id": "g6",
+        "type": "TV ABERTA",
+        "name": "TV Globo",
+        "iconColor": "#05ff85",
+        "link": "https://redeglobo.globo.com/",
+        "logoUrl": "https://extranets.fifa.com/TvStationPhotos/25.png"
+      },
+      {
+        "id": "s6",
+        "type": "TV PAGA",
+        "name": "sportv",
+        "iconColor": "#ffd700",
+        "link": "https://ge.globo.com/sportv/",
+        "logoUrl": "https://extranets.fifa.com/TvStationPhotos/26.png"
+      }
     ]
   },
   {
@@ -514,17 +2174,109 @@
       "secondaryColor": "#ffce00",
       "group": "Grupo E",
       "lineup": [
-        { "id": "de1", "name": "M. ter Stegen", "number": 1, "position": "GK", "x": 50, "y": 88, "club": "Barcelona" },
-        { "id": "de2", "name": "J. Kimmich", "number": 6, "position": "DF", "x": 15, "y": 70, "club": "Bayern Munique" },
-        { "id": "de3", "name": "A. Rudiger", "number": 2, "position": "DF", "x": 38, "y": 75, "club": "Real Madrid" },
-        { "id": "de4", "name": "J. Tah", "number": 4, "position": "DF", "x": 62, "y": 75, "club": "Bayer Leverkusen" },
-        { "id": "de5", "name": "D. Raum", "number": 3, "position": "DF", "x": 85, "y": 70, "club": "RB Leipzig" },
-        { "id": "de6", "name": "R. Andrich", "number": 8, "position": "MF", "x": 30, "y": 45, "club": "Bayer Leverkusen" },
-        { "id": "de7", "name": "I. Gundogan", "number": 21, "position": "MF", "x": 50, "y": 48, "club": "Barcelona" },
-        { "id": "de8", "name": "J. Musiala", "number": 10, "position": "MF", "x": 70, "y": 45, "club": "Bayern Munique" },
-        { "id": "de9", "name": "L. Sane", "number": 19, "position": "FW", "x": 15, "y": 22, "club": "Bayern Munique" },
-        { "id": "de10", "name": "K. Havertz", "number": 7, "position": "FW", "x": 50, "y": 28, "club": "Arsenal" },
-        { "id": "de11", "name": "F. Wirtz", "number": 17, "position": "FW", "x": 85, "y": 22, "club": "Bayer Leverkusen" }
+        {
+          "id": "de1",
+          "name": "M. ter Stegen",
+          "number": 1,
+          "position": "GK",
+          "x": 50,
+          "y": 88,
+          "club": "Barcelona"
+        },
+        {
+          "id": "de2",
+          "name": "J. Kimmich",
+          "number": 6,
+          "position": "DF",
+          "x": 15,
+          "y": 70,
+          "club": "Bayern Munique",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/ada33dfd-5b01-4792-88f4-14c06641509e/KIMMICH-Joshua_386413"
+        },
+        {
+          "id": "de3",
+          "name": "A. Rudiger",
+          "number": 2,
+          "position": "DF",
+          "x": 38,
+          "y": 75,
+          "club": "Real Madrid"
+        },
+        {
+          "id": "de4",
+          "name": "J. Tah",
+          "number": 4,
+          "position": "DF",
+          "x": 62,
+          "y": 75,
+          "club": "Bayer Leverkusen",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/34f74ca0-1102-446c-b098-02decdf58b8d/TAH-Jonathan_401378"
+        },
+        {
+          "id": "de5",
+          "name": "D. Raum",
+          "number": 3,
+          "position": "DF",
+          "x": 85,
+          "y": 70,
+          "club": "RB Leipzig",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/ce3509c6-13ad-441a-8d05-9d42f8a4578c/RAUM-David_430657"
+        },
+        {
+          "id": "de6",
+          "name": "R. Andrich",
+          "number": 8,
+          "position": "MF",
+          "x": 30,
+          "y": 45,
+          "club": "Bayer Leverkusen"
+        },
+        {
+          "id": "de7",
+          "name": "I. Gundogan",
+          "number": 21,
+          "position": "MF",
+          "x": 50,
+          "y": 48,
+          "club": "Barcelona"
+        },
+        {
+          "id": "de8",
+          "name": "J. Musiala",
+          "number": 10,
+          "position": "MF",
+          "x": 70,
+          "y": 45,
+          "club": "Bayern Munique",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/05f50027-268f-43ff-ba75-1b477b37ca60/MUSIALA-Jamal_429642"
+        },
+        {
+          "id": "de9",
+          "name": "L. Sane",
+          "number": 19,
+          "position": "FW",
+          "x": 15,
+          "y": 22,
+          "club": "Bayern Munique"
+        },
+        {
+          "id": "de10",
+          "name": "K. Havertz",
+          "number": 7,
+          "position": "FW",
+          "x": 50,
+          "y": 28,
+          "club": "Arsenal"
+        },
+        {
+          "id": "de11",
+          "name": "F. Wirtz",
+          "number": 17,
+          "position": "FW",
+          "x": 85,
+          "y": 22,
+          "club": "Bayer Leverkusen"
+        }
       ]
     },
     "teamB": {
@@ -535,17 +2287,106 @@
       "secondaryColor": "#f9e814",
       "group": "Grupo E",
       "lineup": [
-        { "id": "cw1", "name": "E. Room", "number": 1, "position": "GK", "x": 50, "y": 12, "club": "Columbus Crew" },
-        { "id": "cw2", "name": "J. Gaari", "number": 2, "position": "DF", "x": 15, "y": 30, "club": "Al Hazem" },
-        { "id": "cw3", "name": "C. Martina", "number": 4, "position": "DF", "x": 38, "y": 25, "club": "NAC Breda" },
-        { "id": "cw4", "name": "C. Martina", "number": 3, "position": "DF", "x": 62, "y": 25, "club": "Go Ahead Eagles" },
-        { "id": "cw5", "name": "J. Brenet", "number": 5, "position": "DF", "x": 85, "y": 30, "club": "Al Rayyan" },
-        { "id": "cw6", "name": "L. Bacuna", "number": 10, "position": "MF", "x": 30, "y": 50, "club": "Groningen" },
-        { "id": "cw7", "name": "J. Bacuna", "number": 8, "position": "MF", "x": 50, "y": 45, "club": "Al Wehda" },
-        { "id": "cw8", "name": "K. Leerdam", "number": 14, "position": "MF", "x": 70, "y": 50, "club": "Los Angeles Galaxy" },
-        { "id": "cw9", "name": "R. Janga", "number": 9, "position": "FW", "x": 15, "y": 75, "club": "FCSB" },
-        { "id": "cw10", "name": "G. Nepomuceno", "number": 11, "position": "FW", "x": 50, "y": 85, "club": "Melbourne Knights" },
-        { "id": "cw11", "name": "J. Antonisse", "number": 7, "position": "FW", "x": 85, "y": 75, "club": "Moreirense" }
+        {
+          "id": "cw1",
+          "name": "E. Room",
+          "number": 1,
+          "position": "GK",
+          "x": 50,
+          "y": 12,
+          "club": "Columbus Crew"
+        },
+        {
+          "id": "cw2",
+          "name": "J. Gaari",
+          "number": 2,
+          "position": "DF",
+          "x": 15,
+          "y": 30,
+          "club": "Al Hazem"
+        },
+        {
+          "id": "cw3",
+          "name": "C. Martina",
+          "number": 4,
+          "position": "DF",
+          "x": 38,
+          "y": 25,
+          "club": "NAC Breda"
+        },
+        {
+          "id": "cw4",
+          "name": "C. Martina",
+          "number": 3,
+          "position": "DF",
+          "x": 62,
+          "y": 25,
+          "club": "Go Ahead Eagles"
+        },
+        {
+          "id": "cw5",
+          "name": "J. Brenet",
+          "number": 5,
+          "position": "DF",
+          "x": 85,
+          "y": 30,
+          "club": "Al Rayyan"
+        },
+        {
+          "id": "cw6",
+          "name": "L. Bacuna",
+          "number": 10,
+          "position": "MF",
+          "x": 30,
+          "y": 50,
+          "club": "Groningen"
+        },
+        {
+          "id": "cw7",
+          "name": "J. Bacuna",
+          "number": 8,
+          "position": "MF",
+          "x": 50,
+          "y": 45,
+          "club": "Al Wehda"
+        },
+        {
+          "id": "cw8",
+          "name": "K. Leerdam",
+          "number": 14,
+          "position": "MF",
+          "x": 70,
+          "y": 50,
+          "club": "Los Angeles Galaxy"
+        },
+        {
+          "id": "cw9",
+          "name": "R. Janga",
+          "number": 9,
+          "position": "FW",
+          "x": 15,
+          "y": 75,
+          "club": "FCSB"
+        },
+        {
+          "id": "cw10",
+          "name": "G. Nepomuceno",
+          "number": 11,
+          "position": "FW",
+          "x": 50,
+          "y": 85,
+          "club": "Melbourne Knights"
+        },
+        {
+          "id": "cw11",
+          "name": "J. Antonisse",
+          "number": 7,
+          "position": "FW",
+          "x": 85,
+          "y": 75,
+          "club": "Moreirense",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/cd0b7ee9-50b8-4043-a957-44df5860e935/ANTONISSE-Jeremy_424047"
+        }
       ]
     },
     "stadiumName": "Estádio de Houston",
@@ -562,7 +2403,14 @@
     },
     "countdownTargetSeconds": 0,
     "broadcasters": [
-      { "id": "cz10", "type": "YOUTUBE", "name": "CazéTV", "iconColor": "#ed2939", "link": "https://www.youtube.com/@CazeTV", "logoUrl": "https://extranets.fifa.com/TvStationPhotos/451.png" }
+      {
+        "id": "cz10",
+        "type": "YOUTUBE",
+        "name": "CazéTV",
+        "iconColor": "#ed2939",
+        "link": "https://www.youtube.com/@CazeTV",
+        "logoUrl": "https://extranets.fifa.com/TvStationPhotos/451.png"
+      }
     ]
   },
   {
@@ -575,17 +2423,105 @@
       "secondaryColor": "#ffffff",
       "group": "Grupo J",
       "lineup": [
-        { "id": "a1", "name": "E. Martínez", "number": 23, "position": "GK", "x": 50, "y": 88, "club": "Aston Villa" },
-        { "id": "a2", "name": "Molina", "number": 26, "position": "DF", "x": 15, "y": 70, "club": "Atlético Madrid" },
-        { "id": "a3", "name": "Romero", "number": 13, "position": "DF", "x": 38, "y": 75, "club": "Tottenham" },
-        { "id": "a4", "name": "Otamendi", "number": 19, "position": "DF", "x": 62, "y": 75, "club": "Benfica" },
-        { "id": "a5", "name": "Tagliafico", "number": 3, "position": "DF", "x": 85, "y": 70, "club": "Lyon" },
-        { "id": "a6", "name": "De Paul", "number": 7, "position": "MF", "x": 30, "y": 45, "club": "Atlético Madrid" },
-        { "id": "a7", "name": "Mac Allister", "number": 20, "position": "MF", "x": 50, "y": 48, "club": "Liverpool" },
-        { "id": "a8", "name": "Enzo F.", "number": 24, "position": "MF", "x": 70, "y": 45, "club": "Chelsea" },
-        { "id": "a9", "name": "Leo Messi", "number": 10, "position": "FW", "x": 50, "y": 25, "club": "Inter Miami" },
-        { "id": "a10", "name": "Álvarez", "number": 9, "position": "FW", "x": 30, "y": 15, "club": "Atlético Madrid" },
-        { "id": "a11", "name": "Lautaro M.", "number": 22, "position": "FW", "x": 70, "y": 15, "club": "Inter de Milão" }
+        {
+          "id": "a1",
+          "name": "E. Martínez",
+          "number": 23,
+          "position": "GK",
+          "x": 50,
+          "y": 88,
+          "club": "Aston Villa"
+        },
+        {
+          "id": "a2",
+          "name": "Molina",
+          "number": 26,
+          "position": "DF",
+          "x": 15,
+          "y": 70,
+          "club": "Atlético Madrid"
+        },
+        {
+          "id": "a3",
+          "name": "Romero",
+          "number": 13,
+          "position": "DF",
+          "x": 38,
+          "y": 75,
+          "club": "Tottenham"
+        },
+        {
+          "id": "a4",
+          "name": "Otamendi",
+          "number": 19,
+          "position": "DF",
+          "x": 62,
+          "y": 75,
+          "club": "Benfica"
+        },
+        {
+          "id": "a5",
+          "name": "Tagliafico",
+          "number": 3,
+          "position": "DF",
+          "x": 85,
+          "y": 70,
+          "club": "Lyon"
+        },
+        {
+          "id": "a6",
+          "name": "De Paul",
+          "number": 7,
+          "position": "MF",
+          "x": 30,
+          "y": 45,
+          "club": "Atlético Madrid"
+        },
+        {
+          "id": "a7",
+          "name": "Mac Allister",
+          "number": 20,
+          "position": "MF",
+          "x": 50,
+          "y": 48,
+          "club": "Liverpool"
+        },
+        {
+          "id": "a8",
+          "name": "Enzo F.",
+          "number": 24,
+          "position": "MF",
+          "x": 70,
+          "y": 45,
+          "club": "Chelsea"
+        },
+        {
+          "id": "a9",
+          "name": "Leo Messi",
+          "number": 10,
+          "position": "FW",
+          "x": 50,
+          "y": 25,
+          "club": "Inter Miami"
+        },
+        {
+          "id": "a10",
+          "name": "Álvarez",
+          "number": 9,
+          "position": "FW",
+          "x": 30,
+          "y": 15,
+          "club": "Atlético Madrid"
+        },
+        {
+          "id": "a11",
+          "name": "Lautaro M.",
+          "number": 22,
+          "position": "FW",
+          "x": 70,
+          "y": 15,
+          "club": "Inter de Milão"
+        }
       ]
     },
     "teamB": {
@@ -596,17 +2532,105 @@
       "secondaryColor": "#d21034",
       "group": "Grupo J",
       "lineup": [
-        { "id": "dz1", "name": "A. Mandrea", "number": 16, "position": "GK", "x": 50, "y": 12, "club": "Lens" },
-        { "id": "dz2", "name": "J. Hadjam", "number": 19, "position": "DF", "x": 15, "y": 30, "club": "Eintracht Frankfurt" },
-        { "id": "dz3", "name": "R. Bensebaini", "number": 3, "position": "DF", "x": 38, "y": 25, "club": "Borussia Dortmund" },
-        { "id": "dz4", "name": "A. Mandi", "number": 5, "position": "DF", "x": 62, "y": 25, "club": "Beşiktaş" },
-        { "id": "dz5", "name": "Y. Atal", "number": 2, "position": "DF", "x": 85, "y": 30, "club": "Al-Arabi" },
-        { "id": "dz6", "name": "I. Bennacer", "number": 8, "position": "MF", "x": 30, "y": 50, "club": "AC Milan" },
-        { "id": "dz7", "name": "H. Aouar", "number": 28, "position": "MF", "x": 50, "y": 45, "club": "Al-Ittihad" },
-        { "id": "dz8", "name": "H. Belkebla", "number": 14, "position": "MF", "x": 70, "y": 50, "club": "Brest" },
-        { "id": "dz9", "name": "R. Mahrez", "number": 7, "position": "FW", "x": 15, "y": 75, "club": "Al-Ahli" },
-        { "id": "dz10", "name": "A. Gouiri", "number": 9, "position": "FW", "x": 50, "y": 85, "club": "Marselha" },
-        { "id": "dz11", "name": "S. Benrahma", "number": 20, "position": "FW", "x": 85, "y": 75, "club": "Lyon" }
+        {
+          "id": "dz1",
+          "name": "A. Mandrea",
+          "number": 16,
+          "position": "GK",
+          "x": 50,
+          "y": 12,
+          "club": "Lens"
+        },
+        {
+          "id": "dz2",
+          "name": "J. Hadjam",
+          "number": 19,
+          "position": "DF",
+          "x": 15,
+          "y": 30,
+          "club": "Eintracht Frankfurt"
+        },
+        {
+          "id": "dz3",
+          "name": "R. Bensebaini",
+          "number": 3,
+          "position": "DF",
+          "x": 38,
+          "y": 25,
+          "club": "Borussia Dortmund"
+        },
+        {
+          "id": "dz4",
+          "name": "A. Mandi",
+          "number": 5,
+          "position": "DF",
+          "x": 62,
+          "y": 25,
+          "club": "Beşiktaş"
+        },
+        {
+          "id": "dz5",
+          "name": "Y. Atal",
+          "number": 2,
+          "position": "DF",
+          "x": 85,
+          "y": 30,
+          "club": "Al-Arabi"
+        },
+        {
+          "id": "dz6",
+          "name": "I. Bennacer",
+          "number": 8,
+          "position": "MF",
+          "x": 30,
+          "y": 50,
+          "club": "AC Milan"
+        },
+        {
+          "id": "dz7",
+          "name": "H. Aouar",
+          "number": 28,
+          "position": "MF",
+          "x": 50,
+          "y": 45,
+          "club": "Al-Ittihad"
+        },
+        {
+          "id": "dz8",
+          "name": "H. Belkebla",
+          "number": 14,
+          "position": "MF",
+          "x": 70,
+          "y": 50,
+          "club": "Brest"
+        },
+        {
+          "id": "dz9",
+          "name": "R. Mahrez",
+          "number": 7,
+          "position": "FW",
+          "x": 15,
+          "y": 75,
+          "club": "Al-Ahli"
+        },
+        {
+          "id": "dz10",
+          "name": "A. Gouiri",
+          "number": 9,
+          "position": "FW",
+          "x": 50,
+          "y": 85,
+          "club": "Marselha"
+        },
+        {
+          "id": "dz11",
+          "name": "S. Benrahma",
+          "number": 20,
+          "position": "FW",
+          "x": 85,
+          "y": 75,
+          "club": "Lyon"
+        }
       ]
     },
     "stadiumName": "Arrowhead Stadium",
@@ -618,9 +2642,27 @@
     "status": "PRE_GAME",
     "countdownTargetSeconds": 270000,
     "broadcasters": [
-      { "id": "g3", "type": "TV ABERTA", "name": "Globo", "iconColor": "#05ff85", "link": "https://globoplay.globo.com" },
-      { "id": "s3", "type": "TV PAGA", "name": "SportTV", "iconColor": "#ffd700", "link": "https://ge.globo.com/sportv/" },
-      { "id": "gb3", "type": "STREAM PAGO", "name": "Globoplay / FIFA+", "iconColor": "#00e476", "link": "https://plus.fifa.com" }
+      {
+        "id": "g3",
+        "type": "TV ABERTA",
+        "name": "Globo",
+        "iconColor": "#05ff85",
+        "link": "https://globoplay.globo.com"
+      },
+      {
+        "id": "s3",
+        "type": "TV PAGA",
+        "name": "SportTV",
+        "iconColor": "#ffd700",
+        "link": "https://ge.globo.com/sportv/"
+      },
+      {
+        "id": "gb3",
+        "type": "STREAM PAGO",
+        "name": "Globoplay / FIFA+",
+        "iconColor": "#00e476",
+        "link": "https://plus.fifa.com"
+      }
     ]
   },
   {
@@ -633,17 +2675,110 @@
       "secondaryColor": "#ffffff",
       "group": "Grupo F",
       "lineup": [
-        { "id": "nl1", "name": "B. Verbruggen", "number": 1, "position": "GK", "x": 50, "y": 88, "club": "Brighton" },
-        { "id": "nl2", "name": "D. Dumfries", "number": 22, "position": "DF", "x": 15, "y": 70, "club": "Inter de Milão" },
-        { "id": "nl3", "name": "V. van Dijk", "number": 4, "position": "DF", "x": 38, "y": 75, "club": "Liverpool" },
-        { "id": "nl4", "name": "M. de Ligt", "number": 3, "position": "DF", "x": 62, "y": 75, "club": "Manchester United" },
-        { "id": "nl5", "name": "N. Aké", "number": 5, "position": "DF", "x": 85, "y": 70, "club": "Manchester City" },
-        { "id": "nl6", "name": "F. de Jong", "number": 21, "position": "MF", "x": 30, "y": 45, "club": "Barcelona" },
-        { "id": "nl7", "name": "T. Reijnders", "number": 14, "position": "MF", "x": 50, "y": 48, "club": "Milan" },
-        { "id": "nl8", "name": "X. Simons", "number": 7, "position": "MF", "x": 70, "y": 45, "club": "RB Leipzig" },
-        { "id": "nl9", "name": "J. Frimpong", "number": 12, "position": "FW", "x": 15, "y": 22, "club": "Bayer Leverkusen" },
-        { "id": "nl10", "name": "M. Depay", "number": 10, "position": "FW", "x": 50, "y": 28, "club": "Corinthians" },
-        { "id": "nl11", "name": "C. Gakpo", "number": 11, "position": "FW", "x": 85, "y": 22, "club": "Liverpool" }
+        {
+          "id": "nl1",
+          "name": "B. Verbruggen",
+          "number": 1,
+          "position": "GK",
+          "x": 50,
+          "y": 88,
+          "club": "Brighton"
+        },
+        {
+          "id": "nl2",
+          "name": "D. Dumfries",
+          "number": 22,
+          "position": "DF",
+          "x": 15,
+          "y": 70,
+          "club": "Inter de Milão"
+        },
+        {
+          "id": "nl3",
+          "name": "V. van Dijk",
+          "number": 4,
+          "position": "DF",
+          "x": 38,
+          "y": 75,
+          "club": "Liverpool",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/df0e21eb-c210-4ea6-ab2c-0ac13635a9f8/VAN-DIJK-Virgil_397786"
+        },
+        {
+          "id": "nl4",
+          "name": "M. de Ligt",
+          "number": 3,
+          "position": "DF",
+          "x": 62,
+          "y": 75,
+          "club": "Manchester United"
+        },
+        {
+          "id": "nl5",
+          "name": "N. Aké",
+          "number": 5,
+          "position": "DF",
+          "x": 85,
+          "y": 70,
+          "club": "Manchester City",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/e44b0c79-cb0b-4ce8-bace-7530a516371f/AKE-Nathan_336088"
+        },
+        {
+          "id": "nl6",
+          "name": "F. de Jong",
+          "number": 21,
+          "position": "MF",
+          "x": 30,
+          "y": 45,
+          "club": "Barcelona"
+        },
+        {
+          "id": "nl7",
+          "name": "T. Reijnders",
+          "number": 14,
+          "position": "MF",
+          "x": 50,
+          "y": 48,
+          "club": "Milan",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/3f7090ee-2e95-4b6c-a098-729b07484fb2/REIJNDERS-Tijjani_483526"
+        },
+        {
+          "id": "nl8",
+          "name": "X. Simons",
+          "number": 7,
+          "position": "MF",
+          "x": 70,
+          "y": 45,
+          "club": "RB Leipzig"
+        },
+        {
+          "id": "nl9",
+          "name": "J. Frimpong",
+          "number": 12,
+          "position": "FW",
+          "x": 15,
+          "y": 22,
+          "club": "Bayer Leverkusen"
+        },
+        {
+          "id": "nl10",
+          "name": "M. Depay",
+          "number": 10,
+          "position": "FW",
+          "x": 50,
+          "y": 28,
+          "club": "Corinthians",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/6fe9f49e-5f45-4a44-9807-579be23fc0db/DEPAY-Memphis_336098"
+        },
+        {
+          "id": "nl11",
+          "name": "C. Gakpo",
+          "number": 11,
+          "position": "FW",
+          "x": 85,
+          "y": 22,
+          "club": "Liverpool",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/bbb5637f-0587-4ddd-8a82-604c0d921bb3/GAKPO-Cody_448152"
+        }
       ]
     },
     "teamB": {
@@ -654,17 +2789,110 @@
       "secondaryColor": "#ffffff",
       "group": "Grupo F",
       "lineup": [
-        { "id": "jp1", "name": "Z. Suzuki", "number": 1, "position": "GK", "x": 50, "y": 12, "club": "Parma" },
-        { "id": "jp2", "name": "Y. Sugawara", "number": 2, "position": "DF", "x": 15, "y": 30, "club": "Southampton" },
-        { "id": "jp3", "name": "K. Itakura", "number": 4, "position": "DF", "x": 38, "y": 25, "club": "Borussia Monchengladbach" },
-        { "id": "jp4", "name": "T. Tomiyasu", "number": 22, "position": "DF", "x": 62, "y": 25, "club": "Arsenal" },
-        { "id": "jp5", "name": "H. Ito", "number": 21, "position": "DF", "x": 85, "y": 30, "club": "Bayern Munique" },
-        { "id": "jp6", "name": "W. Endo", "number": 6, "position": "MF", "x": 30, "y": 50, "club": "Liverpool" },
-        { "id": "jp7", "name": "H. Morita", "number": 5, "position": "MF", "x": 50, "y": 45, "club": "Sporting" },
-        { "id": "jp8", "name": "T. Kubo", "number": 20, "position": "MF", "x": 70, "y": 50, "club": "Real Sociedad" },
-        { "id": "jp9", "name": "J. Ito", "number": 14, "position": "FW", "x": 15, "y": 75, "club": "Reims" },
-        { "id": "jp10", "name": "A. Ueda", "number": 9, "position": "FW", "x": 50, "y": 85, "club": "Feyenoord" },
-        { "id": "jp11", "name": "K. Mitoma", "number": 7, "position": "FW", "x": 85, "y": 75, "club": "Brighton" }
+        {
+          "id": "jp1",
+          "name": "Z. Suzuki",
+          "number": 1,
+          "position": "GK",
+          "x": 50,
+          "y": 12,
+          "club": "Parma"
+        },
+        {
+          "id": "jp2",
+          "name": "Y. Sugawara",
+          "number": 2,
+          "position": "DF",
+          "x": 15,
+          "y": 30,
+          "club": "Southampton",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/09574b48-f59b-436b-b0db-ab4816a96ede/SUGAWARA-Yukinari_405528"
+        },
+        {
+          "id": "jp3",
+          "name": "K. Itakura",
+          "number": 4,
+          "position": "DF",
+          "x": 38,
+          "y": 25,
+          "club": "Borussia Monchengladbach"
+        },
+        {
+          "id": "jp4",
+          "name": "T. Tomiyasu",
+          "number": 22,
+          "position": "DF",
+          "x": 62,
+          "y": 25,
+          "club": "Arsenal",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/959b632f-531d-420a-85af-5d0fc3c83d5f/TOMIYASU-Takehiro_403289"
+        },
+        {
+          "id": "jp5",
+          "name": "H. Ito",
+          "number": 21,
+          "position": "DF",
+          "x": 85,
+          "y": 30,
+          "club": "Bayern Munique"
+        },
+        {
+          "id": "jp6",
+          "name": "W. Endo",
+          "number": 6,
+          "position": "MF",
+          "x": 30,
+          "y": 50,
+          "club": "Liverpool"
+        },
+        {
+          "id": "jp7",
+          "name": "H. Morita",
+          "number": 5,
+          "position": "MF",
+          "x": 50,
+          "y": 45,
+          "club": "Sporting"
+        },
+        {
+          "id": "jp8",
+          "name": "T. Kubo",
+          "number": 20,
+          "position": "MF",
+          "x": 70,
+          "y": 50,
+          "club": "Real Sociedad",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/7391febf-1e97-4ce1-89c8-0e3ae529ae81/KUBO-Takefusa_403304"
+        },
+        {
+          "id": "jp9",
+          "name": "J. Ito",
+          "number": 14,
+          "position": "FW",
+          "x": 15,
+          "y": 75,
+          "club": "Reims",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/87ce677a-e78d-474c-bfd7-b7dc77e89e62/ITO-Junya_395321"
+        },
+        {
+          "id": "jp10",
+          "name": "A. Ueda",
+          "number": 9,
+          "position": "FW",
+          "x": 50,
+          "y": 85,
+          "club": "Feyenoord",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/1b05e82f-94e8-470d-9c12-f9bdf1a0e080/UEDA-Ayase_430413"
+        },
+        {
+          "id": "jp11",
+          "name": "K. Mitoma",
+          "number": 7,
+          "position": "FW",
+          "x": 85,
+          "y": 75,
+          "club": "Brighton"
+        }
       ]
     },
     "stadiumName": "Estádio de Dallas",
@@ -681,13 +2909,62 @@
     },
     "countdownTargetSeconds": 0,
     "broadcasters": [
-      { "id": "getv11", "type": "STREAM", "name": "GETV", "iconColor": "#00e476", "link": "https://globoplay.globo.com/categorias/ge-tv/", "logoUrl": "https://extranets.fifa.com/TvStationPhotos/914.png" },
-      { "id": "gb11", "type": "STREAM", "name": "Globoplay", "iconColor": "#00e476", "link": "https://globoplay.globo.com/tv-globo/ao-vivo/6120663/", "logoUrl": "https://extranets.fifa.com/TvStationPhotos/30.png" },
-      { "id": "cz11", "type": "YOUTUBE", "name": "CazéTV", "iconColor": "#ed2939", "link": "https://www.youtube.com/@CazeTV", "logoUrl": "https://extranets.fifa.com/TvStationPhotos/451.png" },
-      { "id": "ns11", "type": "STREAM", "name": "NSPORTS", "iconColor": "#00e476", "link": "https://nsports.com.br/n/", "logoUrl": "https://extranets.fifa.com/TvStationPhotos/892.png" },
-      { "id": "sbt11", "type": "TV ABERTA", "name": "SBT", "iconColor": "#05ff85", "link": "https://www.sbt.com.br/", "logoUrl": "https://extranets.fifa.com/TvStationPhotos/901.png" },
-      { "id": "g11", "type": "TV ABERTA", "name": "TV Globo", "iconColor": "#05ff85", "link": "https://redeglobo.globo.com/", "logoUrl": "https://extranets.fifa.com/TvStationPhotos/25.png" },
-      { "id": "s11", "type": "TV PAGA", "name": "sportv", "iconColor": "#ffd700", "link": "https://ge.globo.com/sportv/", "logoUrl": "https://extranets.fifa.com/TvStationPhotos/26.png" }
+      {
+        "id": "getv11",
+        "type": "STREAM",
+        "name": "GETV",
+        "iconColor": "#00e476",
+        "link": "https://globoplay.globo.com/categorias/ge-tv/",
+        "logoUrl": "https://extranets.fifa.com/TvStationPhotos/914.png"
+      },
+      {
+        "id": "gb11",
+        "type": "STREAM",
+        "name": "Globoplay",
+        "iconColor": "#00e476",
+        "link": "https://globoplay.globo.com/tv-globo/ao-vivo/6120663/",
+        "logoUrl": "https://extranets.fifa.com/TvStationPhotos/30.png"
+      },
+      {
+        "id": "cz11",
+        "type": "YOUTUBE",
+        "name": "CazéTV",
+        "iconColor": "#ed2939",
+        "link": "https://www.youtube.com/@CazeTV",
+        "logoUrl": "https://extranets.fifa.com/TvStationPhotos/451.png"
+      },
+      {
+        "id": "ns11",
+        "type": "STREAM",
+        "name": "NSPORTS",
+        "iconColor": "#00e476",
+        "link": "https://nsports.com.br/n/",
+        "logoUrl": "https://extranets.fifa.com/TvStationPhotos/892.png"
+      },
+      {
+        "id": "sbt11",
+        "type": "TV ABERTA",
+        "name": "SBT",
+        "iconColor": "#05ff85",
+        "link": "https://www.sbt.com.br/",
+        "logoUrl": "https://extranets.fifa.com/TvStationPhotos/901.png"
+      },
+      {
+        "id": "g11",
+        "type": "TV ABERTA",
+        "name": "TV Globo",
+        "iconColor": "#05ff85",
+        "link": "https://redeglobo.globo.com/",
+        "logoUrl": "https://extranets.fifa.com/TvStationPhotos/25.png"
+      },
+      {
+        "id": "s11",
+        "type": "TV PAGA",
+        "name": "sportv",
+        "iconColor": "#ffd700",
+        "link": "https://ge.globo.com/sportv/",
+        "logoUrl": "https://extranets.fifa.com/TvStationPhotos/26.png"
+      }
     ]
   },
   {
@@ -700,17 +2977,108 @@
       "secondaryColor": "#009e60",
       "group": "Grupo E",
       "lineup": [
-        { "id": "ci1", "name": "Y. Fofana", "number": 1, "position": "GK", "x": 50, "y": 88, "club": "Angers" },
-        { "id": "ci2", "name": "S. Aurier", "number": 17, "position": "DF", "x": 15, "y": 70, "club": "Galatasaray" },
-        { "id": "ci3", "name": "O. Kossounou", "number": 7, "position": "DF", "x": 38, "y": 75, "club": "Atalanta" },
-        { "id": "ci4", "name": "E. Ndicka", "number": 21, "position": "DF", "x": 62, "y": 75, "club": "Roma" },
-        { "id": "ci5", "name": "G. Konan", "number": 3, "position": "DF", "x": 85, "y": 70, "club": "Al Fayha" },
-        { "id": "ci6", "name": "F. Kessie", "number": 8, "position": "MF", "x": 30, "y": 45, "club": "Al Ahli" },
-        { "id": "ci7", "name": "S. Fofana", "number": 6, "position": "MF", "x": 50, "y": 48, "club": "Al Nassr" },
-        { "id": "ci8", "name": "O. Diomande", "number": 4, "position": "MF", "x": 70, "y": 45, "club": "Sporting" },
-        { "id": "ci9", "name": "N. Pepe", "number": 19, "position": "FW", "x": 15, "y": 22, "club": "Villarreal" },
-        { "id": "ci10", "name": "S. Haller", "number": 22, "position": "FW", "x": 50, "y": 28, "club": "Utrecht" },
-        { "id": "ci11", "name": "J. Boga", "number": 13, "position": "FW", "x": 85, "y": 22, "club": "Nice" }
+        {
+          "id": "ci1",
+          "name": "Y. Fofana",
+          "number": 1,
+          "position": "GK",
+          "x": 50,
+          "y": 88,
+          "club": "Angers"
+        },
+        {
+          "id": "ci2",
+          "name": "S. Aurier",
+          "number": 17,
+          "position": "DF",
+          "x": 15,
+          "y": 70,
+          "club": "Galatasaray"
+        },
+        {
+          "id": "ci3",
+          "name": "O. Kossounou",
+          "number": 7,
+          "position": "DF",
+          "x": 38,
+          "y": 75,
+          "club": "Atalanta",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/c3d01f63-7112-4a0d-a50b-0d85927676e9/KOSSOUNOU-Odilon_477825"
+        },
+        {
+          "id": "ci4",
+          "name": "E. Ndicka",
+          "number": 21,
+          "position": "DF",
+          "x": 62,
+          "y": 75,
+          "club": "Roma"
+        },
+        {
+          "id": "ci5",
+          "name": "G. Konan",
+          "number": 3,
+          "position": "DF",
+          "x": 85,
+          "y": 70,
+          "club": "Al Fayha"
+        },
+        {
+          "id": "ci6",
+          "name": "F. Kessie",
+          "number": 8,
+          "position": "MF",
+          "x": 30,
+          "y": 45,
+          "club": "Al Ahli"
+        },
+        {
+          "id": "ci7",
+          "name": "S. Fofana",
+          "number": 6,
+          "position": "MF",
+          "x": 50,
+          "y": 48,
+          "club": "Al Nassr",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/08197d78-88b8-458f-9ad9-de192f25313c/FOFANA-Seko_405175"
+        },
+        {
+          "id": "ci8",
+          "name": "O. Diomande",
+          "number": 4,
+          "position": "MF",
+          "x": 70,
+          "y": 45,
+          "club": "Sporting"
+        },
+        {
+          "id": "ci9",
+          "name": "N. Pepe",
+          "number": 19,
+          "position": "FW",
+          "x": 15,
+          "y": 22,
+          "club": "Villarreal",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/1c7519d2-960c-4d19-83e7-40a155f1a8eb/PEPE-Nicolas_402261"
+        },
+        {
+          "id": "ci10",
+          "name": "S. Haller",
+          "number": 22,
+          "position": "FW",
+          "x": 50,
+          "y": 28,
+          "club": "Utrecht"
+        },
+        {
+          "id": "ci11",
+          "name": "J. Boga",
+          "number": 13,
+          "position": "FW",
+          "x": 85,
+          "y": 22,
+          "club": "Nice"
+        }
       ]
     },
     "teamB": {
@@ -721,17 +3089,109 @@
       "secondaryColor": "#003893",
       "group": "Grupo E",
       "lineup": [
-        { "id": "ec1", "name": "H. Galindez", "number": 1, "position": "GK", "x": 50, "y": 12, "club": "Huracan" },
-        { "id": "ec2", "name": "A. Preciado", "number": 17, "position": "DF", "x": 15, "y": 30, "club": "Sparta Praga" },
-        { "id": "ec3", "name": "P. Hincapie", "number": 3, "position": "DF", "x": 38, "y": 25, "club": "Bayer Leverkusen" },
-        { "id": "ec4", "name": "F. Torres", "number": 2, "position": "DF", "x": 62, "y": 25, "club": "Santos" },
-        { "id": "ec5", "name": "P. Estupinan", "number": 7, "position": "DF", "x": 85, "y": 30, "club": "Brighton" },
-        { "id": "ec6", "name": "M. Caicedo", "number": 23, "position": "MF", "x": 30, "y": 50, "club": "Chelsea" },
-        { "id": "ec7", "name": "A. Franco", "number": 21, "position": "MF", "x": 50, "y": 45, "club": "Atletico Mineiro" },
-        { "id": "ec8", "name": "K. Paez", "number": 10, "position": "MF", "x": 70, "y": 50, "club": "Chelsea" },
-        { "id": "ec9", "name": "J. Sarmiento", "number": 16, "position": "FW", "x": 15, "y": 75, "club": "Brighton" },
-        { "id": "ec10", "name": "E. Valencia", "number": 13, "position": "FW", "x": 50, "y": 85, "club": "Internacional" },
-        { "id": "ec11", "name": "J. Yeboah", "number": 9, "position": "FW", "x": 85, "y": 75, "club": "Venezia" }
+        {
+          "id": "ec1",
+          "name": "H. Galindez",
+          "number": 1,
+          "position": "GK",
+          "x": 50,
+          "y": 12,
+          "club": "Huracan"
+        },
+        {
+          "id": "ec2",
+          "name": "A. Preciado",
+          "number": 17,
+          "position": "DF",
+          "x": 15,
+          "y": 30,
+          "club": "Sparta Praga",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/2e9be79f-76b7-4f12-8ba0-c4c21ec8b39d/PRECIADO-Angelo_402974"
+        },
+        {
+          "id": "ec3",
+          "name": "P. Hincapie",
+          "number": 3,
+          "position": "DF",
+          "x": 38,
+          "y": 25,
+          "club": "Bayer Leverkusen"
+        },
+        {
+          "id": "ec4",
+          "name": "F. Torres",
+          "number": 2,
+          "position": "DF",
+          "x": 62,
+          "y": 25,
+          "club": "Santos"
+        },
+        {
+          "id": "ec5",
+          "name": "P. Estupinan",
+          "number": 7,
+          "position": "DF",
+          "x": 85,
+          "y": 30,
+          "club": "Brighton"
+        },
+        {
+          "id": "ec6",
+          "name": "M. Caicedo",
+          "number": 23,
+          "position": "MF",
+          "x": 30,
+          "y": 50,
+          "club": "Chelsea"
+        },
+        {
+          "id": "ec7",
+          "name": "A. Franco",
+          "number": 21,
+          "position": "MF",
+          "x": 50,
+          "y": 45,
+          "club": "Atletico Mineiro",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/59ffe3d1-0963-44f5-861e-9eb6590d8fce/FRANCO-Alan_389784"
+        },
+        {
+          "id": "ec8",
+          "name": "K. Paez",
+          "number": 10,
+          "position": "MF",
+          "x": 70,
+          "y": 50,
+          "club": "Chelsea"
+        },
+        {
+          "id": "ec9",
+          "name": "J. Sarmiento",
+          "number": 16,
+          "position": "FW",
+          "x": 15,
+          "y": 75,
+          "club": "Brighton"
+        },
+        {
+          "id": "ec10",
+          "name": "E. Valencia",
+          "number": 13,
+          "position": "FW",
+          "x": 50,
+          "y": 85,
+          "club": "Internacional",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/4688cb2a-6446-4439-ba5f-e4db7b5a18c5/VALENCIA-Enner_373400"
+        },
+        {
+          "id": "ec11",
+          "name": "J. Yeboah",
+          "number": 9,
+          "position": "FW",
+          "x": 85,
+          "y": 75,
+          "club": "Venezia",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/1fc64d7c-4383-4c61-bd76-f22f22b91a8f/YEBOAH-John_405920"
+        }
       ]
     },
     "stadiumName": "Estádio de Filadélfia",
@@ -748,10 +3208,38 @@
     },
     "countdownTargetSeconds": 0,
     "broadcasters": [
-      { "id": "gb12", "type": "STREAM", "name": "Globoplay", "iconColor": "#00e476", "link": "https://globoplay.globo.com/tv-globo/ao-vivo/6120663/", "logoUrl": "https://extranets.fifa.com/TvStationPhotos/30.png" },
-      { "id": "cz12", "type": "YOUTUBE", "name": "CazéTV", "iconColor": "#ed2939", "link": "https://www.youtube.com/@CazeTV", "logoUrl": "https://extranets.fifa.com/TvStationPhotos/451.png" },
-      { "id": "g12", "type": "TV ABERTA", "name": "TV Globo", "iconColor": "#05ff85", "link": "https://redeglobo.globo.com/", "logoUrl": "https://extranets.fifa.com/TvStationPhotos/25.png" },
-      { "id": "s12", "type": "TV PAGA", "name": "sportv", "iconColor": "#ffd700", "link": "https://ge.globo.com/sportv/", "logoUrl": "https://extranets.fifa.com/TvStationPhotos/26.png" }
+      {
+        "id": "gb12",
+        "type": "STREAM",
+        "name": "Globoplay",
+        "iconColor": "#00e476",
+        "link": "https://globoplay.globo.com/tv-globo/ao-vivo/6120663/",
+        "logoUrl": "https://extranets.fifa.com/TvStationPhotos/30.png"
+      },
+      {
+        "id": "cz12",
+        "type": "YOUTUBE",
+        "name": "CazéTV",
+        "iconColor": "#ed2939",
+        "link": "https://www.youtube.com/@CazeTV",
+        "logoUrl": "https://extranets.fifa.com/TvStationPhotos/451.png"
+      },
+      {
+        "id": "g12",
+        "type": "TV ABERTA",
+        "name": "TV Globo",
+        "iconColor": "#05ff85",
+        "link": "https://redeglobo.globo.com/",
+        "logoUrl": "https://extranets.fifa.com/TvStationPhotos/25.png"
+      },
+      {
+        "id": "s12",
+        "type": "TV PAGA",
+        "name": "sportv",
+        "iconColor": "#ffd700",
+        "link": "https://ge.globo.com/sportv/",
+        "logoUrl": "https://extranets.fifa.com/TvStationPhotos/26.png"
+      }
     ]
   },
   {
@@ -764,17 +3252,108 @@
       "secondaryColor": "#fecc00",
       "group": "Grupo F",
       "lineup": [
-        { "id": "se1", "name": "R. Olsen", "number": 1, "position": "GK", "x": 50, "y": 88, "club": "Aston Villa" },
-        { "id": "se2", "name": "E. Krafth", "number": 2, "position": "DF", "x": 15, "y": 70, "club": "Newcastle" },
-        { "id": "se3", "name": "V. Lindelof", "number": 3, "position": "DF", "x": 38, "y": 75, "club": "Manchester United" },
-        { "id": "se4", "name": "I. Hien", "number": 4, "position": "DF", "x": 62, "y": 75, "club": "Atalanta" },
-        { "id": "se5", "name": "L. Augustinsson", "number": 6, "position": "DF", "x": 85, "y": 70, "club": "Anderlecht" },
-        { "id": "se6", "name": "D. Kulusevski", "number": 21, "position": "MF", "x": 30, "y": 45, "club": "Tottenham" },
-        { "id": "se7", "name": "J. Cajuste", "number": 20, "position": "MF", "x": 50, "y": 48, "club": "Ipswich Town" },
-        { "id": "se8", "name": "E. Forsberg", "number": 10, "position": "MF", "x": 70, "y": 45, "club": "New York Red Bulls" },
-        { "id": "se9", "name": "V. Gyokeres", "number": 17, "position": "FW", "x": 15, "y": 22, "club": "Sporting" },
-        { "id": "se10", "name": "A. Isak", "number": 9, "position": "FW", "x": 50, "y": 28, "club": "Newcastle" },
-        { "id": "se11", "name": "A. Elanga", "number": 11, "position": "FW", "x": 85, "y": 22, "club": "Nottingham Forest" }
+        {
+          "id": "se1",
+          "name": "R. Olsen",
+          "number": 1,
+          "position": "GK",
+          "x": 50,
+          "y": 88,
+          "club": "Aston Villa"
+        },
+        {
+          "id": "se2",
+          "name": "E. Krafth",
+          "number": 2,
+          "position": "DF",
+          "x": 15,
+          "y": 70,
+          "club": "Newcastle"
+        },
+        {
+          "id": "se3",
+          "name": "V. Lindelof",
+          "number": 3,
+          "position": "DF",
+          "x": 38,
+          "y": 75,
+          "club": "Manchester United"
+        },
+        {
+          "id": "se4",
+          "name": "I. Hien",
+          "number": 4,
+          "position": "DF",
+          "x": 62,
+          "y": 75,
+          "club": "Atalanta"
+        },
+        {
+          "id": "se5",
+          "name": "L. Augustinsson",
+          "number": 6,
+          "position": "DF",
+          "x": 85,
+          "y": 70,
+          "club": "Anderlecht"
+        },
+        {
+          "id": "se6",
+          "name": "D. Kulusevski",
+          "number": 21,
+          "position": "MF",
+          "x": 30,
+          "y": 45,
+          "club": "Tottenham"
+        },
+        {
+          "id": "se7",
+          "name": "J. Cajuste",
+          "number": 20,
+          "position": "MF",
+          "x": 50,
+          "y": 48,
+          "club": "Ipswich Town"
+        },
+        {
+          "id": "se8",
+          "name": "E. Forsberg",
+          "number": 10,
+          "position": "MF",
+          "x": 70,
+          "y": 45,
+          "club": "New York Red Bulls"
+        },
+        {
+          "id": "se9",
+          "name": "V. Gyokeres",
+          "number": 17,
+          "position": "FW",
+          "x": 15,
+          "y": 22,
+          "club": "Sporting",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/ca3d75bf-7e31-4269-9933-b296eb3f5bff/GYOKERES-Viktor_483327"
+        },
+        {
+          "id": "se10",
+          "name": "A. Isak",
+          "number": 9,
+          "position": "FW",
+          "x": 50,
+          "y": 28,
+          "club": "Newcastle",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/c6ffe63b-aefd-43b8-bd9d-3c6e31a8f418/ISAK-Alexander_430150"
+        },
+        {
+          "id": "se11",
+          "name": "A. Elanga",
+          "number": 11,
+          "position": "FW",
+          "x": 85,
+          "y": 22,
+          "club": "Nottingham Forest",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/38e8d10e-aa56-4837-a589-35bc4dcc23a3/ELANGA-Anthony_441137"
+        }
       ]
     },
     "teamB": {
@@ -785,17 +3364,106 @@
       "secondaryColor": "#ffffff",
       "group": "Grupo F",
       "lineup": [
-        { "id": "tn1", "name": "A. Dahmen", "number": 16, "position": "GK", "x": 50, "y": 12, "club": "Augsburg" },
-        { "id": "tn2", "name": "M. Drager", "number": 20, "position": "DF", "x": 15, "y": 30, "club": "Basel" },
-        { "id": "tn3", "name": "D. Bronn", "number": 6, "position": "DF", "x": 38, "y": 25, "club": "Servette" },
-        { "id": "tn4", "name": "M. Talbi", "number": 3, "position": "DF", "x": 62, "y": 25, "club": "Lorient" },
-        { "id": "tn5", "name": "A. Abdi", "number": 2, "position": "DF", "x": 85, "y": 30, "club": "Nice" },
-        { "id": "tn6", "name": "E. Skhiri", "number": 17, "position": "MF", "x": 30, "y": 50, "club": "Eintracht Frankfurt" },
-        { "id": "tn7", "name": "A. Laidouni", "number": 14, "position": "MF", "x": 50, "y": 45, "club": "Al Wakrah" },
-        { "id": "tn8", "name": "H. Mejbri", "number": 10, "position": "MF", "x": 70, "y": 50, "club": "Burnley" },
-        { "id": "tn9", "name": "Y. Msakni", "number": 7, "position": "FW", "x": 15, "y": 75, "club": "Al Arabi" },
-        { "id": "tn10", "name": "S. Jaziri", "number": 9, "position": "FW", "x": 50, "y": 85, "club": "Zamalek" },
-        { "id": "tn11", "name": "A. Achouri", "number": 11, "position": "FW", "x": 85, "y": 75, "club": "Copenhagen" }
+        {
+          "id": "tn1",
+          "name": "A. Dahmen",
+          "number": 16,
+          "position": "GK",
+          "x": 50,
+          "y": 12,
+          "club": "Augsburg"
+        },
+        {
+          "id": "tn2",
+          "name": "M. Drager",
+          "number": 20,
+          "position": "DF",
+          "x": 15,
+          "y": 30,
+          "club": "Basel"
+        },
+        {
+          "id": "tn3",
+          "name": "D. Bronn",
+          "number": 6,
+          "position": "DF",
+          "x": 38,
+          "y": 25,
+          "club": "Servette"
+        },
+        {
+          "id": "tn4",
+          "name": "M. Talbi",
+          "number": 3,
+          "position": "DF",
+          "x": 62,
+          "y": 25,
+          "club": "Lorient"
+        },
+        {
+          "id": "tn5",
+          "name": "A. Abdi",
+          "number": 2,
+          "position": "DF",
+          "x": 85,
+          "y": 30,
+          "club": "Nice"
+        },
+        {
+          "id": "tn6",
+          "name": "E. Skhiri",
+          "number": 17,
+          "position": "MF",
+          "x": 30,
+          "y": 50,
+          "club": "Eintracht Frankfurt",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/e2ba8e19-b4ab-435f-b12c-e56d655c31e6/SKHIRI-Ellyes_411658"
+        },
+        {
+          "id": "tn7",
+          "name": "A. Laidouni",
+          "number": 14,
+          "position": "MF",
+          "x": 50,
+          "y": 45,
+          "club": "Al Wakrah"
+        },
+        {
+          "id": "tn8",
+          "name": "H. Mejbri",
+          "number": 10,
+          "position": "MF",
+          "x": 70,
+          "y": 50,
+          "club": "Burnley"
+        },
+        {
+          "id": "tn9",
+          "name": "Y. Msakni",
+          "number": 7,
+          "position": "FW",
+          "x": 15,
+          "y": 75,
+          "club": "Al Arabi"
+        },
+        {
+          "id": "tn10",
+          "name": "S. Jaziri",
+          "number": 9,
+          "position": "FW",
+          "x": 50,
+          "y": 85,
+          "club": "Zamalek"
+        },
+        {
+          "id": "tn11",
+          "name": "A. Achouri",
+          "number": 11,
+          "position": "FW",
+          "x": 85,
+          "y": 75,
+          "club": "Copenhagen"
+        }
       ]
     },
     "stadiumName": "Estádio de Monterrey",
@@ -812,10 +3480,38 @@
     },
     "countdownTargetSeconds": 0,
     "broadcasters": [
-      { "id": "gb13", "type": "STREAM", "name": "Globoplay", "iconColor": "#00e476", "link": "https://globoplay.globo.com/tv-globo/ao-vivo/6120663/", "logoUrl": "https://extranets.fifa.com/TvStationPhotos/30.png" },
-      { "id": "cz13", "type": "YOUTUBE", "name": "CazéTV", "iconColor": "#ed2939", "link": "https://www.youtube.com/@CazeTV", "logoUrl": "https://extranets.fifa.com/TvStationPhotos/451.png" },
-      { "id": "g13", "type": "TV ABERTA", "name": "TV Globo", "iconColor": "#05ff85", "link": "https://redeglobo.globo.com/", "logoUrl": "https://extranets.fifa.com/TvStationPhotos/25.png" },
-      { "id": "s13", "type": "TV PAGA", "name": "sportv", "iconColor": "#ffd700", "link": "https://ge.globo.com/sportv/", "logoUrl": "https://extranets.fifa.com/TvStationPhotos/26.png" }
+      {
+        "id": "gb13",
+        "type": "STREAM",
+        "name": "Globoplay",
+        "iconColor": "#00e476",
+        "link": "https://globoplay.globo.com/tv-globo/ao-vivo/6120663/",
+        "logoUrl": "https://extranets.fifa.com/TvStationPhotos/30.png"
+      },
+      {
+        "id": "cz13",
+        "type": "YOUTUBE",
+        "name": "CazéTV",
+        "iconColor": "#ed2939",
+        "link": "https://www.youtube.com/@CazeTV",
+        "logoUrl": "https://extranets.fifa.com/TvStationPhotos/451.png"
+      },
+      {
+        "id": "g13",
+        "type": "TV ABERTA",
+        "name": "TV Globo",
+        "iconColor": "#05ff85",
+        "link": "https://redeglobo.globo.com/",
+        "logoUrl": "https://extranets.fifa.com/TvStationPhotos/25.png"
+      },
+      {
+        "id": "s13",
+        "type": "TV PAGA",
+        "name": "sportv",
+        "iconColor": "#ffd700",
+        "link": "https://ge.globo.com/sportv/",
+        "logoUrl": "https://extranets.fifa.com/TvStationPhotos/26.png"
+      }
     ]
   },
   {
@@ -828,17 +3524,110 @@
       "secondaryColor": "#ffc400",
       "group": "Grupo H",
       "lineup": [
-        { "id": "es1", "name": "Unai Simón", "number": 23, "position": "GK", "x": 50, "y": 88, "club": "Athletic Club" },
-        { "id": "es2", "name": "Dani Carvajal", "number": 2, "position": "DF", "x": 15, "y": 70, "club": "Real Madrid" },
-        { "id": "es3", "name": "Robin Le Normand", "number": 3, "position": "DF", "x": 38, "y": 75, "club": "Atlético de Madrid" },
-        { "id": "es4", "name": "Aymeric Laporte", "number": 14, "position": "DF", "x": 62, "y": 75, "club": "Al-Nassr" },
-        { "id": "es5", "name": "Marc Cucurella", "number": 24, "position": "DF", "x": 85, "y": 70, "club": "Chelsea" },
-        { "id": "es6", "name": "Rodri", "number": 16, "position": "MF", "x": 30, "y": 48, "club": "Manchester City" },
-        { "id": "es7", "name": "Pedri", "number": 20, "position": "MF", "x": 50, "y": 44, "club": "Barcelona" },
-        { "id": "es8", "name": "Fabián Ruiz", "number": 8, "position": "MF", "x": 70, "y": 48, "club": "PSG" },
-        { "id": "es9", "name": "Lamine Yamal", "number": 19, "position": "FW", "x": 15, "y": 22, "club": "Barcelona" },
-        { "id": "es10", "name": "Álvaro Morata", "number": 7, "position": "FW", "x": 50, "y": 28, "club": "Galatasaray" },
-        { "id": "es11", "name": "Nico Williams", "number": 11, "position": "FW", "x": 85, "y": 22, "club": "Athletic Club" }
+        {
+          "id": "es1",
+          "name": "Unai Simón",
+          "number": 23,
+          "position": "GK",
+          "x": 50,
+          "y": 88,
+          "club": "Athletic Club"
+        },
+        {
+          "id": "es2",
+          "name": "Dani Carvajal",
+          "number": 2,
+          "position": "DF",
+          "x": 15,
+          "y": 70,
+          "club": "Real Madrid"
+        },
+        {
+          "id": "es3",
+          "name": "Robin Le Normand",
+          "number": 3,
+          "position": "DF",
+          "x": 38,
+          "y": 75,
+          "club": "Atlético de Madrid"
+        },
+        {
+          "id": "es4",
+          "name": "Aymeric Laporte",
+          "number": 14,
+          "position": "DF",
+          "x": 62,
+          "y": 75,
+          "club": "Al-Nassr"
+        },
+        {
+          "id": "es5",
+          "name": "Marc Cucurella",
+          "number": 24,
+          "position": "DF",
+          "x": 85,
+          "y": 70,
+          "club": "Chelsea"
+        },
+        {
+          "id": "es6",
+          "name": "Rodri",
+          "number": 16,
+          "position": "MF",
+          "x": 30,
+          "y": 48,
+          "club": "Manchester City",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/295ab5b2-4dbf-42b9-918b-04fb4ae0ec0a/RODRI_411375"
+        },
+        {
+          "id": "es7",
+          "name": "Pedri",
+          "number": 20,
+          "position": "MF",
+          "x": 50,
+          "y": 44,
+          "club": "Barcelona",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/75a5861e-008f-460c-81e4-8085fa2cc961/PEDRI_423646"
+        },
+        {
+          "id": "es8",
+          "name": "Fabián Ruiz",
+          "number": 8,
+          "position": "MF",
+          "x": 70,
+          "y": 48,
+          "club": "PSG",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/c40ded96-190d-41c8-90f2-6a253a63b33d/RUIZ-Fabian_430718"
+        },
+        {
+          "id": "es9",
+          "name": "Lamine Yamal",
+          "number": 19,
+          "position": "FW",
+          "x": 15,
+          "y": 22,
+          "club": "Barcelona",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/37b631d3-c340-4590-91a8-bb00bd5f1e89/YAMAL-Lamine_484320"
+        },
+        {
+          "id": "es10",
+          "name": "Álvaro Morata",
+          "number": 7,
+          "position": "FW",
+          "x": 50,
+          "y": 28,
+          "club": "Galatasaray"
+        },
+        {
+          "id": "es11",
+          "name": "Nico Williams",
+          "number": 11,
+          "position": "FW",
+          "x": 85,
+          "y": 22,
+          "club": "Athletic Club",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/1792665e-37cb-421d-969b-e6a3edbd8d76/WILLIAMS-Nico_447855"
+        }
       ]
     },
     "teamB": {
@@ -849,17 +3638,112 @@
       "secondaryColor": "#cf2027",
       "group": "Grupo H",
       "lineup": [
-        { "id": "cv1", "name": "Vozinha", "number": 1, "position": "GK", "x": 50, "y": 12, "club": "Gil Vicente", "socials": { "instagram": "https://instagram.com/vozinha1" } },
-        { "id": "cv2", "name": "Steven Moreira", "number": 22, "position": "DF", "x": 15, "y": 30, "club": "Columbus Crew" },
-        { "id": "cv3", "name": "Logan Costa", "number": 4, "position": "DF", "x": 38, "y": 25, "club": "Toulouse" },
-        { "id": "cv4", "name": "Roberto Lopes", "number": 3, "position": "DF", "x": 62, "y": 25, "club": "Shamrock Rovers" },
-        { "id": "cv5", "name": "João Paulo", "number": 5, "position": "DF", "x": 85, "y": 30, "club": "Omonia" },
-        { "id": "cv6", "name": "Kevin Pina", "number": 8, "position": "MF", "x": 30, "y": 50, "club": "CSKA Sofia" },
-        { "id": "cv7", "name": "Deroy Duarte", "number": 14, "position": "MF", "x": 50, "y": 45, "club": "Fortuna Sittard" },
-        { "id": "cv8", "name": "Jovane Cabral", "number": 7, "position": "MF", "x": 70, "y": 50, "club": "Olympiacos" },
-        { "id": "cv9", "name": "Garry Rodrigues", "number": 11, "position": "FW", "x": 15, "y": 75, "club": "Sivasspor" },
-        { "id": "cv10", "name": "Bebé", "number": 21, "position": "FW", "x": 50, "y": 85, "club": "Racing Ferrol" },
-        { "id": "cv11", "name": "Willy Semedo", "number": 17, "position": "FW", "x": 85, "y": 75, "club": "Al-Faisaly" }
+        {
+          "id": "cv1",
+          "name": "Vozinha",
+          "number": 1,
+          "position": "GK",
+          "x": 50,
+          "y": 12,
+          "club": "Gil Vicente",
+          "socials": {
+            "instagram": "https://instagram.com/vozinha1"
+          }
+        },
+        {
+          "id": "cv2",
+          "name": "Steven Moreira",
+          "number": 22,
+          "position": "DF",
+          "x": 15,
+          "y": 30,
+          "club": "Columbus Crew"
+        },
+        {
+          "id": "cv3",
+          "name": "Logan Costa",
+          "number": 4,
+          "position": "DF",
+          "x": 38,
+          "y": 25,
+          "club": "Toulouse"
+        },
+        {
+          "id": "cv4",
+          "name": "Roberto Lopes",
+          "number": 3,
+          "position": "DF",
+          "x": 62,
+          "y": 25,
+          "club": "Shamrock Rovers"
+        },
+        {
+          "id": "cv5",
+          "name": "João Paulo",
+          "number": 5,
+          "position": "DF",
+          "x": 85,
+          "y": 30,
+          "club": "Omonia",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/18ee15aa-604d-4dea-964e-7b0a73f3f710/JOAO-PAULO_477855"
+        },
+        {
+          "id": "cv6",
+          "name": "Kevin Pina",
+          "number": 8,
+          "position": "MF",
+          "x": 30,
+          "y": 50,
+          "club": "CSKA Sofia"
+        },
+        {
+          "id": "cv7",
+          "name": "Deroy Duarte",
+          "number": 14,
+          "position": "MF",
+          "x": 50,
+          "y": 45,
+          "club": "Fortuna Sittard",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/c2a1dda5-24bd-4ef1-8ef4-cde9f3f3b644/DEROY-DUARTE_477827"
+        },
+        {
+          "id": "cv8",
+          "name": "Jovane Cabral",
+          "number": 7,
+          "position": "MF",
+          "x": 70,
+          "y": 50,
+          "club": "Olympiacos",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/4bc8360c-8ddd-4449-9e5f-a100502763b7/JOVANE-CABRAL_477856"
+        },
+        {
+          "id": "cv9",
+          "name": "Garry Rodrigues",
+          "number": 11,
+          "position": "FW",
+          "x": 15,
+          "y": 75,
+          "club": "Sivasspor"
+        },
+        {
+          "id": "cv10",
+          "name": "Bebé",
+          "number": 21,
+          "position": "FW",
+          "x": 50,
+          "y": 85,
+          "club": "Racing Ferrol"
+        },
+        {
+          "id": "cv11",
+          "name": "Willy Semedo",
+          "number": 17,
+          "position": "FW",
+          "x": 85,
+          "y": 75,
+          "club": "Al-Faisaly",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/37b3a4c5-6899-487c-892a-1d9791945ba3/WILLY-SEMEDO_433724"
+        }
       ]
     },
     "stadiumName": "Estádio de Atlanta",
@@ -875,9 +3759,27 @@
     },
     "countdownTargetSeconds": 0,
     "broadcasters": [
-      { "id": "g14", "type": "TV ABERTA", "name": "TV Globo", "iconColor": "#05ff85", "link": "https://redeglobo.globo.com/" },
-      { "id": "s14", "type": "TV PAGA", "name": "sportv", "iconColor": "#ffd700", "link": "https://ge.globo.com/sportv/" },
-      { "id": "cz14", "type": "YOUTUBE", "name": "CazéTV", "iconColor": "#ed2939", "link": "https://www.youtube.com/@CazeTV" }
+      {
+        "id": "g14",
+        "type": "TV ABERTA",
+        "name": "TV Globo",
+        "iconColor": "#05ff85",
+        "link": "https://redeglobo.globo.com/"
+      },
+      {
+        "id": "s14",
+        "type": "TV PAGA",
+        "name": "sportv",
+        "iconColor": "#ffd700",
+        "link": "https://ge.globo.com/sportv/"
+      },
+      {
+        "id": "cz14",
+        "type": "YOUTUBE",
+        "name": "CazéTV",
+        "iconColor": "#ed2939",
+        "link": "https://www.youtube.com/@CazeTV"
+      }
     ]
   },
   {
@@ -890,17 +3792,110 @@
       "secondaryColor": "#fae042",
       "group": "Grupo G",
       "lineup": [
-        { "id": "be1", "name": "Koen Casteels", "number": 1, "position": "GK", "x": 50, "y": 88, "club": "Al-Qadsiah" },
-        { "id": "be2", "name": "Timothy Castagne", "number": 21, "position": "DF", "x": 15, "y": 70, "club": "Fulham" },
-        { "id": "be3", "name": "Wout Faes", "number": 4, "position": "DF", "x": 38, "y": 75, "club": "Leicester City" },
-        { "id": "be4", "name": "Zeno Debast", "number": 2, "position": "DF", "x": 62, "y": 75, "club": "Sporting" },
-        { "id": "be5", "name": "Arthur Theate", "number": 3, "position": "DF", "x": 85, "y": 70, "club": "Eintracht Frankfurt" },
-        { "id": "be6", "name": "Amadou Onana", "number": 24, "position": "MF", "x": 30, "y": 48, "club": "Aston Villa" },
-        { "id": "be7", "name": "Youri Tielemans", "number": 8, "position": "MF", "x": 50, "y": 44, "club": "Aston Villa" },
-        { "id": "be8", "name": "Kevin De Bruyne", "number": 7, "position": "MF", "x": 70, "y": 48, "club": "Manchester City" },
-        { "id": "be9", "name": "Jérémy Doku", "number": 22, "position": "FW", "x": 15, "y": 22, "club": "Manchester City" },
-        { "id": "be10", "name": "Romelu Lukaku", "number": 10, "position": "FW", "x": 50, "y": 28, "club": "Roma" },
-        { "id": "be11", "name": "Leandro Trossard", "number": 11, "position": "FW", "x": 85, "y": 22, "club": "Arsenal" }
+        {
+          "id": "be1",
+          "name": "Koen Casteels",
+          "number": 1,
+          "position": "GK",
+          "x": 50,
+          "y": 88,
+          "club": "Al-Qadsiah"
+        },
+        {
+          "id": "be2",
+          "name": "Timothy Castagne",
+          "number": 21,
+          "position": "DF",
+          "x": 15,
+          "y": 70,
+          "club": "Fulham",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/58f1cc7c-04f4-43ba-bc82-85c1226fb7a2/CASTAGNE-Timothy_411443"
+        },
+        {
+          "id": "be3",
+          "name": "Wout Faes",
+          "number": 4,
+          "position": "DF",
+          "x": 38,
+          "y": 75,
+          "club": "Leicester City"
+        },
+        {
+          "id": "be4",
+          "name": "Zeno Debast",
+          "number": 2,
+          "position": "DF",
+          "x": 62,
+          "y": 75,
+          "club": "Sporting"
+        },
+        {
+          "id": "be5",
+          "name": "Arthur Theate",
+          "number": 3,
+          "position": "DF",
+          "x": 85,
+          "y": 70,
+          "club": "Eintracht Frankfurt"
+        },
+        {
+          "id": "be6",
+          "name": "Amadou Onana",
+          "number": 24,
+          "position": "MF",
+          "x": 30,
+          "y": 48,
+          "club": "Aston Villa",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/697ee4f8-3df1-4ce5-a8b9-c9dae1ed6aba/ONANA-Amadou_448364"
+        },
+        {
+          "id": "be7",
+          "name": "Youri Tielemans",
+          "number": 8,
+          "position": "MF",
+          "x": 50,
+          "y": 44,
+          "club": "Aston Villa"
+        },
+        {
+          "id": "be8",
+          "name": "Kevin De Bruyne",
+          "number": 7,
+          "position": "MF",
+          "x": 70,
+          "y": 48,
+          "club": "Manchester City",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/41fb7de3-9f9e-44f1-b63f-0551f5d33b2b/DE-BRUYNE-Kevin_358120"
+        },
+        {
+          "id": "be9",
+          "name": "Jérémy Doku",
+          "number": 22,
+          "position": "FW",
+          "x": 15,
+          "y": 22,
+          "club": "Manchester City",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/df41be47-900d-41fe-90eb-b493f7609869/DOKU-Jeremy_448341"
+        },
+        {
+          "id": "be10",
+          "name": "Romelu Lukaku",
+          "number": 10,
+          "position": "FW",
+          "x": 50,
+          "y": 28,
+          "club": "Roma",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/302b7fb7-6964-4a52-8db4-9c12778b80fa/LUKAKU-Romelu_358112"
+        },
+        {
+          "id": "be11",
+          "name": "Leandro Trossard",
+          "number": 11,
+          "position": "FW",
+          "x": 85,
+          "y": 22,
+          "club": "Arsenal"
+        }
       ]
     },
     "teamB": {
@@ -911,17 +3906,109 @@
       "secondaryColor": "#000000",
       "group": "Grupo G",
       "lineup": [
-        { "id": "eg1", "name": "Mohamed El Shenawy", "number": 1, "position": "GK", "x": 50, "y": 12, "club": "Al Ahly" },
-        { "id": "eg2", "name": "Mohamed Hany", "number": 3, "position": "DF", "x": 15, "y": 30, "club": "Al Ahly" },
-        { "id": "eg3", "name": "Ramy Rabia", "number": 5, "position": "DF", "x": 38, "y": 25, "club": "Al Ahly" },
-        { "id": "eg4", "name": "Mohamed Abdelmonem", "number": 6, "position": "DF", "x": 62, "y": 25, "club": "Nice" },
-        { "id": "eg5", "name": "Ahmed Fattouh", "number": 13, "position": "DF", "x": 85, "y": 30, "club": "Zamalek" },
-        { "id": "eg6", "name": "Hamdi Fathi", "number": 8, "position": "MF", "x": 30, "y": 50, "club": "Al Wakrah" },
-        { "id": "eg7", "name": "Marwan Attia", "number": 19, "position": "MF", "x": 50, "y": 45, "club": "Al Ahly" },
-        { "id": "eg8", "name": "Emam Ashour", "number": 22, "position": "MF", "x": 70, "y": 50, "club": "Al Ahly" },
-        { "id": "eg9", "name": "Mahmoud Trézéguet", "number": 7, "position": "FW", "x": 15, "y": 75, "club": "Trabzonspor" },
-        { "id": "eg10", "name": "Mostafa Mohamed", "number": 11, "position": "FW", "x": 50, "y": 85, "club": "Nantes" },
-        { "id": "eg11", "name": "Mohamed Salah", "number": 10, "position": "FW", "x": 85, "y": 75, "club": "Liverpool" }
+        {
+          "id": "eg1",
+          "name": "Mohamed El Shenawy",
+          "number": 1,
+          "position": "GK",
+          "x": 50,
+          "y": 12,
+          "club": "Al Ahly"
+        },
+        {
+          "id": "eg2",
+          "name": "Mohamed Hany",
+          "number": 3,
+          "position": "DF",
+          "x": 15,
+          "y": 30,
+          "club": "Al Ahly"
+        },
+        {
+          "id": "eg3",
+          "name": "Ramy Rabia",
+          "number": 5,
+          "position": "DF",
+          "x": 38,
+          "y": 25,
+          "club": "Al Ahly",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/403c9e6d-efe6-4917-86ea-c7eddc442208/RABIA-Ramy_344661"
+        },
+        {
+          "id": "eg4",
+          "name": "Mohamed Abdelmonem",
+          "number": 6,
+          "position": "DF",
+          "x": 62,
+          "y": 25,
+          "club": "Nice"
+        },
+        {
+          "id": "eg5",
+          "name": "Ahmed Fattouh",
+          "number": 13,
+          "position": "DF",
+          "x": 85,
+          "y": 30,
+          "club": "Zamalek"
+        },
+        {
+          "id": "eg6",
+          "name": "Hamdi Fathi",
+          "number": 8,
+          "position": "MF",
+          "x": 30,
+          "y": 50,
+          "club": "Al Wakrah"
+        },
+        {
+          "id": "eg7",
+          "name": "Marwan Attia",
+          "number": 19,
+          "position": "MF",
+          "x": 50,
+          "y": 45,
+          "club": "Al Ahly",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/cf051f82-c8a8-4328-9439-2ab64f616b83/MARAWAN-ATTIA_461788"
+        },
+        {
+          "id": "eg8",
+          "name": "Emam Ashour",
+          "number": 22,
+          "position": "MF",
+          "x": 70,
+          "y": 50,
+          "club": "Al Ahly",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/6d203b10-285b-4800-b448-e34d2b3a3e09/EMAM-ASHOUR_430482"
+        },
+        {
+          "id": "eg9",
+          "name": "Mahmoud Trézéguet",
+          "number": 7,
+          "position": "FW",
+          "x": 15,
+          "y": 75,
+          "club": "Trabzonspor"
+        },
+        {
+          "id": "eg10",
+          "name": "Mostafa Mohamed",
+          "number": 11,
+          "position": "FW",
+          "x": 50,
+          "y": 85,
+          "club": "Nantes"
+        },
+        {
+          "id": "eg11",
+          "name": "Mohamed Salah",
+          "number": 10,
+          "position": "FW",
+          "x": 85,
+          "y": 75,
+          "club": "Liverpool",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/8d5236b8-acac-4946-af8e-5b007bcfa284/MOHAMED-SALAH_344654"
+        }
       ]
     },
     "stadiumName": "Estádio de Seattle",
@@ -937,9 +4024,27 @@
     },
     "countdownTargetSeconds": 0,
     "broadcasters": [
-      { "id": "g15", "type": "TV ABERTA", "name": "TV Globo", "iconColor": "#05ff85", "link": "https://redeglobo.globo.com/" },
-      { "id": "s15", "type": "TV PAGA", "name": "sportv", "iconColor": "#ffd700", "link": "https://ge.globo.com/sportv/" },
-      { "id": "cz15", "type": "YOUTUBE", "name": "CazéTV", "iconColor": "#ed2939", "link": "https://www.youtube.com/@CazeTV" }
+      {
+        "id": "g15",
+        "type": "TV ABERTA",
+        "name": "TV Globo",
+        "iconColor": "#05ff85",
+        "link": "https://redeglobo.globo.com/"
+      },
+      {
+        "id": "s15",
+        "type": "TV PAGA",
+        "name": "sportv",
+        "iconColor": "#ffd700",
+        "link": "https://ge.globo.com/sportv/"
+      },
+      {
+        "id": "cz15",
+        "type": "YOUTUBE",
+        "name": "CazéTV",
+        "iconColor": "#ed2939",
+        "link": "https://www.youtube.com/@CazeTV"
+      }
     ]
   },
   {
@@ -952,17 +4057,109 @@
       "secondaryColor": "#ffffff",
       "group": "Grupo H",
       "lineup": [
-        { "id": "sau1", "name": "Mohammed Al-Owais", "number": 21, "position": "GK", "x": 50, "y": 88, "club": "Al-Hilal", "socials": { "instagram": "https://instagram.com/alowais_33" } },
-        { "id": "sau2", "name": "Saud Abdulhamid", "number": 12, "position": "DF", "x": 15, "y": 70, "club": "Roma" },
-        { "id": "sau3", "name": "Hassan Kadesh", "number": 14, "position": "DF", "x": 38, "y": 75, "club": "Al-Ittihad" },
-        { "id": "sau4", "name": "Ali Al-Bulaihi", "number": 5, "position": "DF", "x": 62, "y": 75, "club": "Al-Hilal" },
-        { "id": "sau5", "name": "Yasser Al-Shahrani", "number": 13, "position": "DF", "x": 85, "y": 70, "club": "Al-Hilal" },
-        { "id": "sau6", "name": "Mohamed Kanno", "number": 23, "position": "MF", "x": 30, "y": 48, "club": "Al-Hilal" },
-        { "id": "sau7", "name": "Nasser Al-Dawsari", "number": 8, "position": "MF", "x": 50, "y": 44, "club": "Al-Hilal" },
-        { "id": "sau8", "name": "Salem Al-Dawsari", "number": 10, "position": "MF", "x": 70, "y": 48, "club": "Al-Hilal" },
-        { "id": "sau9", "name": "Firas Al-Buraikan", "number": 9, "position": "FW", "x": 15, "y": 22, "club": "Al-Ahli" },
-        { "id": "sau10", "name": "Saleh Al-Shehri", "number": 11, "position": "FW", "x": 50, "y": 28, "club": "Al-Ittihad" },
-        { "id": "sau11", "name": "Abdulrahman Ghareeb", "number": 7, "position": "FW", "x": 85, "y": 22, "club": "Al-Nassr" }
+        {
+          "id": "sau1",
+          "name": "Mohammed Al-Owais",
+          "number": 21,
+          "position": "GK",
+          "x": 50,
+          "y": 88,
+          "club": "Al-Hilal",
+          "socials": {
+            "instagram": "https://instagram.com/alowais_33"
+          }
+        },
+        {
+          "id": "sau2",
+          "name": "Saud Abdulhamid",
+          "number": 12,
+          "position": "DF",
+          "x": 15,
+          "y": 70,
+          "club": "Roma",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/66d9e01f-7f5e-4bef-b5bd-68d1ce4d9849/SAUD-ABDULHAMID_419281"
+        },
+        {
+          "id": "sau3",
+          "name": "Hassan Kadesh",
+          "number": 14,
+          "position": "DF",
+          "x": 38,
+          "y": 75,
+          "club": "Al-Ittihad"
+        },
+        {
+          "id": "sau4",
+          "name": "Ali Al-Bulaihi",
+          "number": 5,
+          "position": "DF",
+          "x": 62,
+          "y": 75,
+          "club": "Al-Hilal"
+        },
+        {
+          "id": "sau5",
+          "name": "Yasser Al-Shahrani",
+          "number": 13,
+          "position": "DF",
+          "x": 85,
+          "y": 70,
+          "club": "Al-Hilal"
+        },
+        {
+          "id": "sau6",
+          "name": "Mohamed Kanno",
+          "number": 23,
+          "position": "MF",
+          "x": 30,
+          "y": 48,
+          "club": "Al-Hilal"
+        },
+        {
+          "id": "sau7",
+          "name": "Nasser Al-Dawsari",
+          "number": 8,
+          "position": "MF",
+          "x": 50,
+          "y": 44,
+          "club": "Al-Hilal"
+        },
+        {
+          "id": "sau8",
+          "name": "Salem Al-Dawsari",
+          "number": 10,
+          "position": "MF",
+          "x": 70,
+          "y": 48,
+          "club": "Al-Hilal"
+        },
+        {
+          "id": "sau9",
+          "name": "Firas Al-Buraikan",
+          "number": 9,
+          "position": "FW",
+          "x": 15,
+          "y": 22,
+          "club": "Al-Ahli"
+        },
+        {
+          "id": "sau10",
+          "name": "Saleh Al-Shehri",
+          "number": 11,
+          "position": "FW",
+          "x": 50,
+          "y": 28,
+          "club": "Al-Ittihad"
+        },
+        {
+          "id": "sau11",
+          "name": "Abdulrahman Ghareeb",
+          "number": 7,
+          "position": "FW",
+          "x": 85,
+          "y": 22,
+          "club": "Al-Nassr"
+        }
       ]
     },
     "teamB": {
@@ -973,17 +4170,112 @@
       "secondaryColor": "#fcd116",
       "group": "Grupo H",
       "lineup": [
-        { "id": "uy1", "name": "Sergio Rochet", "number": 1, "position": "GK", "x": 50, "y": 12, "club": "Internacional" },
-        { "id": "uy2", "name": "Nahitan Nández", "number": 8, "position": "DF", "x": 15, "y": 30, "club": "Al-Qadsiah" },
-        { "id": "uy3", "name": "Ronald Araújo", "number": 4, "position": "DF", "x": 38, "y": 25, "club": "Barcelona" },
-        { "id": "uy4", "name": "José María Giménez", "number": 2, "position": "DF", "x": 62, "y": 25, "club": "Atlético de Madrid" },
-        { "id": "uy5", "name": "Mathías Olivera", "number": 16, "position": "DF", "x": 85, "y": 30, "club": "Napoli" },
-        { "id": "uy6", "name": "Manuel Ugarte", "number": 5, "position": "MF", "x": 30, "y": 50, "club": "Manchester United" },
-        { "id": "uy7", "name": "Federico Valverde", "number": 15, "position": "MF", "x": 50, "y": 45, "club": "Real Madrid" },
-        { "id": "uy8", "name": "Nicolás de la Cruz", "number": 7, "position": "MF", "x": 70, "y": 50, "club": "Flamengo" },
-        { "id": "uy9", "name": "Facundo Pellistri", "number": 11, "position": "FW", "x": 15, "y": 75, "club": "Panathinaikos" },
-        { "id": "uy10", "name": "Darwin Núñez", "number": 9, "position": "FW", "x": 50, "y": 85, "club": "Liverpool" },
-        { "id": "uy11", "name": "Maximiliano Araújo", "number": 20, "position": "FW", "x": 85, "y": 75, "club": "Sporting", "socials": { "instagram": "https://instagram.com/maximilianoaraujo6" } }
+        {
+          "id": "uy1",
+          "name": "Sergio Rochet",
+          "number": 1,
+          "position": "GK",
+          "x": 50,
+          "y": 12,
+          "club": "Internacional"
+        },
+        {
+          "id": "uy2",
+          "name": "Nahitan Nández",
+          "number": 8,
+          "position": "DF",
+          "x": 15,
+          "y": 30,
+          "club": "Al-Qadsiah"
+        },
+        {
+          "id": "uy3",
+          "name": "Ronald Araújo",
+          "number": 4,
+          "position": "DF",
+          "x": 38,
+          "y": 25,
+          "club": "Barcelona"
+        },
+        {
+          "id": "uy4",
+          "name": "José María Giménez",
+          "number": 2,
+          "position": "DF",
+          "x": 62,
+          "y": 25,
+          "club": "Atlético de Madrid"
+        },
+        {
+          "id": "uy5",
+          "name": "Mathías Olivera",
+          "number": 16,
+          "position": "DF",
+          "x": 85,
+          "y": 30,
+          "club": "Napoli"
+        },
+        {
+          "id": "uy6",
+          "name": "Manuel Ugarte",
+          "number": 5,
+          "position": "MF",
+          "x": 30,
+          "y": 50,
+          "club": "Manchester United",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/4ff94bd7-9c21-4338-be92-bad080e8d541/UGARTE-Manuel_441623"
+        },
+        {
+          "id": "uy7",
+          "name": "Federico Valverde",
+          "number": 15,
+          "position": "MF",
+          "x": 50,
+          "y": 45,
+          "club": "Real Madrid"
+        },
+        {
+          "id": "uy8",
+          "name": "Nicolás de la Cruz",
+          "number": 7,
+          "position": "MF",
+          "x": 70,
+          "y": 50,
+          "club": "Flamengo",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/7694c9e6-d4f9-4f60-8173-5a3a79bcaaa2/DE-LA-CRUZ-Nicolas_402898"
+        },
+        {
+          "id": "uy9",
+          "name": "Facundo Pellistri",
+          "number": 11,
+          "position": "FW",
+          "x": 15,
+          "y": 75,
+          "club": "Panathinaikos"
+        },
+        {
+          "id": "uy10",
+          "name": "Darwin Núñez",
+          "number": 9,
+          "position": "FW",
+          "x": 50,
+          "y": 85,
+          "club": "Liverpool",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/078805a6-5fbe-44f3-a58c-ed3837ca5665/NUNEZ-Darwin_419126"
+        },
+        {
+          "id": "uy11",
+          "name": "Maximiliano Araújo",
+          "number": 20,
+          "position": "FW",
+          "x": 85,
+          "y": 75,
+          "club": "Sporting",
+          "socials": {
+            "instagram": "https://instagram.com/maximilianoaraujo6"
+          },
+          "pictureUrl": "https://digitalhub.fifa.com/transform/f1a7af03-ada1-4642-927c-5fe06844c89c/ARAUJO-Maxi_419100"
+        }
       ]
     },
     "stadiumName": "Estádio de Miami",
@@ -999,9 +4291,27 @@
     },
     "countdownTargetSeconds": 0,
     "broadcasters": [
-      { "id": "g16", "type": "TV ABERTA", "name": "TV Globo", "iconColor": "#05ff85", "link": "https://redeglobo.globo.com/" },
-      { "id": "s16", "type": "TV PAGA", "name": "sportv", "iconColor": "#ffd700", "link": "https://ge.globo.com/sportv/" },
-      { "id": "cz16", "type": "YOUTUBE", "name": "CazéTV", "iconColor": "#ed2939", "link": "https://www.youtube.com/@CazeTV" }
+      {
+        "id": "g16",
+        "type": "TV ABERTA",
+        "name": "TV Globo",
+        "iconColor": "#05ff85",
+        "link": "https://redeglobo.globo.com/"
+      },
+      {
+        "id": "s16",
+        "type": "TV PAGA",
+        "name": "sportv",
+        "iconColor": "#ffd700",
+        "link": "https://ge.globo.com/sportv/"
+      },
+      {
+        "id": "cz16",
+        "type": "YOUTUBE",
+        "name": "CazéTV",
+        "iconColor": "#ed2939",
+        "link": "https://www.youtube.com/@CazeTV"
+      }
     ]
   },
   {
@@ -1014,17 +4324,108 @@
       "secondaryColor": "#da0000",
       "group": "Grupo G",
       "lineup": [
-        { "id": "ir1", "name": "Alireza Beiranvand", "number": 1, "position": "GK", "x": 50, "y": 88, "club": "Persepolis" },
-        { "id": "ir2", "name": "Sadegh Moharrami", "number": 2, "position": "DF", "x": 15, "y": 70, "club": "Dinamo Zagreb" },
-        { "id": "ir3", "name": "Shoja Khalilzadeh", "number": 5, "position": "DF", "x": 38, "y": 75, "club": "Tractor" },
-        { "id": "ir4", "name": "Hossein Kanaani", "number": 13, "position": "DF", "x": 62, "y": 75, "club": "Persepolis" },
-        { "id": "ir5", "name": "Milad Mohammadi", "number": 3, "position": "DF", "x": 85, "y": 70, "club": "Persepolis" },
-        { "id": "ir6", "name": "Saeid Ezatolahi", "number": 6, "position": "MF", "x": 30, "y": 48, "club": "Shabab Al Ahli" },
-        { "id": "ir7", "name": "Rouzbeh Cheshmi", "number": 15, "position": "MF", "x": 50, "y": 44, "club": "Esteghlal" },
-        { "id": "ir8", "name": "Saman Ghoddos", "number": 14, "position": "MF", "x": 70, "y": 48, "club": "Kalba" },
-        { "id": "ir9", "name": "Mehdi Ghayedi", "number": 10, "position": "FW", "x": 15, "y": 22, "club": "Kalba" },
-        { "id": "ir10", "name": "Sardar Azmoun", "number": 20, "position": "FW", "x": 50, "y": 28, "club": "Shabab Al Ahli" },
-        { "id": "ir11", "name": "Mehdi Taremi", "number": 9, "position": "FW", "x": 85, "y": 22, "club": "Inter de Milão" }
+        {
+          "id": "ir1",
+          "name": "Alireza Beiranvand",
+          "number": 1,
+          "position": "GK",
+          "x": 50,
+          "y": 88,
+          "club": "Persepolis"
+        },
+        {
+          "id": "ir2",
+          "name": "Sadegh Moharrami",
+          "number": 2,
+          "position": "DF",
+          "x": 15,
+          "y": 70,
+          "club": "Dinamo Zagreb"
+        },
+        {
+          "id": "ir3",
+          "name": "Shoja Khalilzadeh",
+          "number": 5,
+          "position": "DF",
+          "x": 38,
+          "y": 75,
+          "club": "Tractor"
+        },
+        {
+          "id": "ir4",
+          "name": "Hossein Kanaani",
+          "number": 13,
+          "position": "DF",
+          "x": 62,
+          "y": 75,
+          "club": "Persepolis"
+        },
+        {
+          "id": "ir5",
+          "name": "Milad Mohammadi",
+          "number": 3,
+          "position": "DF",
+          "x": 85,
+          "y": 70,
+          "club": "Persepolis"
+        },
+        {
+          "id": "ir6",
+          "name": "Saeid Ezatolahi",
+          "number": 6,
+          "position": "MF",
+          "x": 30,
+          "y": 48,
+          "club": "Shabab Al Ahli"
+        },
+        {
+          "id": "ir7",
+          "name": "Rouzbeh Cheshmi",
+          "number": 15,
+          "position": "MF",
+          "x": 50,
+          "y": 44,
+          "club": "Esteghlal"
+        },
+        {
+          "id": "ir8",
+          "name": "Saman Ghoddos",
+          "number": 14,
+          "position": "MF",
+          "x": 70,
+          "y": 48,
+          "club": "Kalba",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/96d480ac-42c5-4dd6-a2f0-6220ea1a0f4b/GHODDOS-Saman_411644"
+        },
+        {
+          "id": "ir9",
+          "name": "Mehdi Ghayedi",
+          "number": 10,
+          "position": "FW",
+          "x": 15,
+          "y": 22,
+          "club": "Kalba",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/df931c9f-862e-411a-bc23-35af4d0d1bd1/GHAYEDI-Mehdi_403236"
+        },
+        {
+          "id": "ir10",
+          "name": "Sardar Azmoun",
+          "number": 20,
+          "position": "FW",
+          "x": 50,
+          "y": 28,
+          "club": "Shabab Al Ahli"
+        },
+        {
+          "id": "ir11",
+          "name": "Mehdi Taremi",
+          "number": 9,
+          "position": "FW",
+          "x": 85,
+          "y": 22,
+          "club": "Inter de Milão",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/0d942331-39fb-421e-8a8d-d1f875958559/TAREMI-Mehdi_388475"
+        }
       ]
     },
     "teamB": {
@@ -1035,17 +4436,114 @@
       "secondaryColor": "#c8102e",
       "group": "Grupo G",
       "lineup": [
-        { "id": "nz1", "name": "Max Crocombe", "number": 1, "position": "GK", "x": 50, "y": 12, "club": "Burton Albion" },
-        { "id": "nz2", "name": "Tim Payne", "number": 2, "position": "DF", "x": 15, "y": 30, "club": "Wellington Phoenix" },
-        { "id": "nz3", "name": "Michael Boxall", "number": 5, "position": "DF", "x": 38, "y": 25, "club": "Minnesota United" },
-        { "id": "nz4", "name": "Tyler Bindon", "number": 4, "position": "DF", "x": 62, "y": 25, "club": "Reading" },
-        { "id": "nz5", "name": "Liberato Cacace", "number": 13, "position": "DF", "x": 85, "y": 30, "club": "Empoli" },
-        { "id": "nz6", "name": "Joe Bell", "number": 6, "position": "MF", "x": 30, "y": 50, "club": "Viking FK" },
-        { "id": "nz7", "name": "Marko Stamenic", "number": 8, "position": "MF", "x": 50, "y": 45, "club": "Olympiacos" },
-        { "id": "nz8", "name": "Sarpreet Singh", "number": 10, "position": "MF", "x": 70, "y": 50, "club": "Leiria" },
-        { "id": "nz9", "name": "Elijah Just", "number": 11, "position": "FW", "x": 15, "y": 75, "club": "SKN St. Polten", "socials": { "instagram": "https://instagram.com/elijah_just" } },
-        { "id": "nz10", "name": "Chris Wood", "number": 9, "position": "FW", "x": 50, "y": 85, "club": "Nottingham Forest" },
-        { "id": "nz11", "name": "Ben Waine", "number": 17, "position": "FW", "x": 85, "y": 75, "club": "Plymouth Argyle" }
+        {
+          "id": "nz1",
+          "name": "Max Crocombe",
+          "number": 1,
+          "position": "GK",
+          "x": 50,
+          "y": 12,
+          "club": "Burton Albion"
+        },
+        {
+          "id": "nz2",
+          "name": "Tim Payne",
+          "number": 2,
+          "position": "DF",
+          "x": 15,
+          "y": 30,
+          "club": "Wellington Phoenix",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/2fd43bf7-76f0-4733-88d4-5d5ca820e91c/PAYNE-Tim_331463"
+        },
+        {
+          "id": "nz3",
+          "name": "Michael Boxall",
+          "number": 5,
+          "position": "DF",
+          "x": 38,
+          "y": 25,
+          "club": "Minnesota United"
+        },
+        {
+          "id": "nz4",
+          "name": "Tyler Bindon",
+          "number": 4,
+          "position": "DF",
+          "x": 62,
+          "y": 25,
+          "club": "Reading",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/14976514-36f8-43b9-80c8-67fb73d13d6b/BINDON-Tyler_482775"
+        },
+        {
+          "id": "nz5",
+          "name": "Liberato Cacace",
+          "number": 13,
+          "position": "DF",
+          "x": 85,
+          "y": 30,
+          "club": "Empoli",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/0954fe05-e301-4ec1-a8ad-2aaccc60d8a7/CACACE-Liberato_405469"
+        },
+        {
+          "id": "nz6",
+          "name": "Joe Bell",
+          "number": 6,
+          "position": "MF",
+          "x": 30,
+          "y": 50,
+          "club": "Viking FK"
+        },
+        {
+          "id": "nz7",
+          "name": "Marko Stamenic",
+          "number": 8,
+          "position": "MF",
+          "x": 50,
+          "y": 45,
+          "club": "Olympiacos",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/b0e38724-034f-4d1e-a08a-def455a86569/STAMENIC-Marko_423595"
+        },
+        {
+          "id": "nz8",
+          "name": "Sarpreet Singh",
+          "number": 10,
+          "position": "MF",
+          "x": 70,
+          "y": 50,
+          "club": "Leiria",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/3c43e6c2-50b4-4cb3-ba2e-e94f9a928edd/SINGH-Sarpreet_390209"
+        },
+        {
+          "id": "nz9",
+          "name": "Elijah Just",
+          "number": 11,
+          "position": "FW",
+          "x": 15,
+          "y": 75,
+          "club": "SKN St. Polten",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/fe32736f-5d5f-4870-8db3-5b4560835f53/JUST-Elijah_405454",
+          "socials": {
+            "instagram": "https://instagram.com/elijah_just"
+          }
+        },
+        {
+          "id": "nz10",
+          "name": "Chris Wood",
+          "number": 9,
+          "position": "FW",
+          "x": 50,
+          "y": 85,
+          "club": "Nottingham Forest"
+        },
+        {
+          "id": "nz11",
+          "name": "Ben Waine",
+          "number": 17,
+          "position": "FW",
+          "x": 85,
+          "y": 75,
+          "club": "Plymouth Argyle"
+        }
       ]
     },
     "stadiumName": "Estádio de Los Angeles",
@@ -1057,9 +4555,27 @@
     "status": "PRE_GAME",
     "countdownTargetSeconds": 0,
     "broadcasters": [
-      { "id": "g17", "type": "TV ABERTA", "name": "TV Globo", "iconColor": "#05ff85", "link": "https://redeglobo.globo.com/" },
-      { "id": "s17", "type": "TV PAGA", "name": "sportv", "iconColor": "#ffd700", "link": "https://ge.globo.com/sportv/" },
-      { "id": "cz17", "type": "YOUTUBE", "name": "CazéTV", "iconColor": "#ed2939", "link": "https://www.youtube.com/@CazeTV" }
+      {
+        "id": "g17",
+        "type": "TV ABERTA",
+        "name": "TV Globo",
+        "iconColor": "#05ff85",
+        "link": "https://redeglobo.globo.com/"
+      },
+      {
+        "id": "s17",
+        "type": "TV PAGA",
+        "name": "sportv",
+        "iconColor": "#ffd700",
+        "link": "https://ge.globo.com/sportv/"
+      },
+      {
+        "id": "cz17",
+        "type": "YOUTUBE",
+        "name": "CazéTV",
+        "iconColor": "#ed2939",
+        "link": "https://www.youtube.com/@CazeTV"
+      }
     ]
   }
 ]

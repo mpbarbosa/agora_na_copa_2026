@@ -92,29 +92,21 @@ function deriveBracket(selections: SelectionMap) {
   return nodes;
 }
 
-export function BracketView({ theme }: BracketViewProps) {
-  const [selections, setSelections] = useState<SelectionMap>({});
+// --- Sub-components ---
 
-  const nodes = useMemo(() => deriveBracket(selections), [selections]);
-  const finalNode = nodes.find((node) => node.id === "F-1");
-  const championSlot = selections["F-1"];
-  const championLabel = finalNode && championSlot ? getSlotLabel(finalNode, championSlot) : null;
+interface BracketMatchCardProps {
+  node: BracketNode;
+  theme: "classic-light" | "stadium-dark";
+  onAdvance: (matchId: string, slot: BracketSlot) => void;
+}
 
-  const shellClasses =
-    theme === "classic-light"
-      ? "bg-white border-slate-200 shadow-sm"
-      : "bg-[#121414] border-white/10";
-  const stageClasses =
-    theme === "classic-light"
-      ? "bg-slate-50 border-slate-200"
-      : "bg-white/5 border-white/10";
+function BracketMatchCard({ node, theme, onAdvance }: BracketMatchCardProps) {
   const matchClasses =
     theme === "classic-light"
       ? "bg-white border-slate-200"
       : "bg-[#161919] border-white/10";
-  const headingClasses = theme === "classic-light" ? "text-slate-900" : "text-white";
-  const mutedClasses = theme === "classic-light" ? "text-slate-600" : "text-slate-300";
   const subtleClasses = theme === "classic-light" ? "text-slate-500" : "text-slate-400";
+  const mutedClasses = theme === "classic-light" ? "text-slate-600" : "text-slate-300";
   const activePickClasses =
     theme === "classic-light"
       ? "border-[#009c3b] bg-[#009c3b]/10 text-[#065f2c]"
@@ -127,6 +119,122 @@ export function BracketView({ theme }: BracketViewProps) {
     theme === "classic-light"
       ? "border-slate-100 bg-slate-50 text-slate-300"
       : "border-white/5 bg-white/5 text-slate-500";
+
+  return (
+    <article
+      id={`bracket-match-${node.id}`}
+      className={`rounded-2xl border p-3 ${matchClasses}`}
+    >
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <p className={`font-mono text-[10px] uppercase tracking-wider ${subtleClasses}`}>
+            {node.id}
+          </p>
+          <p className={`mt-1 font-archivo text-sm ${mutedClasses}`}>
+            Clique no classificado para avançar
+          </p>
+        </div>
+        {node.stage === "F" ? (
+          <span
+            className={`inline-flex rounded-full border px-2 py-1 font-mono text-[10px] uppercase tracking-wider ${
+              theme === "classic-light"
+                ? "border-[#009c3b]/20 bg-[#009c3b]/10 text-[#065f2c]"
+                : "border-[#00e476]/20 bg-[#00e476]/10 text-[#a7e6bf]"
+            }`}
+          >
+            MetLife
+          </span>
+        ) : null}
+      </div>
+
+      <div className="mt-3 flex flex-col gap-2">
+        {(["A", "B"] as const).map((slot) => {
+          const label = getSlotLabel(node, slot);
+          const isActive = node.winner === slot;
+
+          return (
+            <button
+              key={slot}
+              id={`bracket-pick-${node.id}-${slot.toLowerCase()}`}
+              type="button"
+              disabled={!label}
+              onClick={() => onAdvance(node.id, slot)}
+              className={`min-h-11 rounded-2xl border px-3 py-3 text-left font-archivo text-sm leading-5 break-words transition ${
+                !label
+                  ? disabledPickClasses
+                  : isActive
+                    ? activePickClasses
+                    : idlePickClasses
+              }`}
+            >
+              {label ?? "Aguardando classificado"}
+            </button>
+          );
+        })}
+      </div>
+    </article>
+  );
+}
+
+interface BracketStageSectionProps {
+  stage: BracketNode["stage"];
+  nodes: BracketNode[];
+  theme: "classic-light" | "stadium-dark";
+  onAdvance: (matchId: string, slot: BracketSlot) => void;
+}
+
+function BracketStageSection({ stage, nodes, theme, onAdvance }: BracketStageSectionProps) {
+  const stageClasses =
+    theme === "classic-light"
+      ? "bg-slate-50 border-slate-200"
+      : "bg-white/5 border-white/10";
+  const headingClasses = theme === "classic-light" ? "text-slate-900" : "text-white";
+  const subtleClasses = theme === "classic-light" ? "text-slate-500" : "text-slate-400";
+
+  return (
+    <section
+      id={`bracket-stage-${stage.toLowerCase()}`}
+      className={`h-full rounded-3xl border p-4 ${stageClasses}`}
+    >
+      <div className="mb-4">
+        <h3 className={`font-anton text-lg uppercase tracking-wide ${headingClasses}`}>
+          {STAGE_LABELS[stage]}
+        </h3>
+        <p className={`mt-1 font-mono text-[10px] uppercase tracking-wider ${subtleClasses}`}>
+          {stage === "F"
+            ? "Grande final em East Rutherford"
+            : `${nodes.length} confrontos`}
+        </p>
+      </div>
+
+      <div className="flex flex-col gap-3">
+        {nodes.map((node) => (
+          // key on the native div — custom components don't support key in this project's TS setup
+          <div key={node.id}>
+            <BracketMatchCard node={node} theme={theme} onAdvance={onAdvance} />
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+// --- Main component ---
+
+export function BracketView({ theme }: BracketViewProps) {
+  const [selections, setSelections] = useState<SelectionMap>({});
+
+  const nodes = useMemo(() => deriveBracket(selections), [selections]);
+  const finalNode = nodes.find((node) => node.id === "F-1");
+  const championSlot = selections["F-1"];
+  const championLabel = finalNode && championSlot ? getSlotLabel(finalNode, championSlot) : null;
+
+  const shellClasses =
+    theme === "classic-light"
+      ? "bg-white border-slate-200 shadow-sm"
+      : "bg-[#121414] border-white/10";
+  const headingClasses = theme === "classic-light" ? "text-slate-900" : "text-white";
+  const mutedClasses = theme === "classic-light" ? "text-slate-600" : "text-slate-300";
 
   const handleAdvance = (matchId: string, slot: BracketSlot) => {
     setSelections((prev) => {
@@ -201,86 +309,17 @@ export function BracketView({ theme }: BracketViewProps) {
         </div>
 
         <div className="mt-6 grid grid-cols-1 gap-4 xl:grid-cols-5 2xl:gap-5" id="bracket-stage-grid">
-          {STAGES.map((stage) => {
-            const stageNodes = getStageNodes(nodes, stage);
-
-            return (
-              <section
-                key={stage}
-                id={`bracket-stage-${stage.toLowerCase()}`}
-                className={`h-full rounded-3xl border p-4 ${stageClasses}`}
-              >
-                <div className="mb-4">
-                  <h3 className={`font-anton text-lg uppercase tracking-wide ${headingClasses}`}>
-                    {STAGE_LABELS[stage]}
-                  </h3>
-                  <p className={`mt-1 font-mono text-[10px] uppercase tracking-wider ${subtleClasses}`}>
-                    {stage === "F"
-                      ? "Grande final em East Rutherford"
-                      : `${stageNodes.length} confrontos`}
-                  </p>
-                </div>
-
-                <div className="flex flex-col gap-3">
-                  {stageNodes.map((node) => (
-                    <article
-                      key={node.id}
-                      id={`bracket-match-${node.id}`}
-                      className={`rounded-2xl border p-3 ${matchClasses}`}
-                    >
-                      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                        <div>
-                          <p className={`font-mono text-[10px] uppercase tracking-wider ${subtleClasses}`}>
-                            {node.id}
-                          </p>
-                          <p className={`mt-1 font-archivo text-sm ${mutedClasses}`}>
-                            Clique no classificado para avançar
-                          </p>
-                        </div>
-                        {stage === "F" ? (
-                          <span
-                            className={`inline-flex rounded-full border px-2 py-1 font-mono text-[10px] uppercase tracking-wider ${
-                              theme === "classic-light"
-                                ? "border-[#009c3b]/20 bg-[#009c3b]/10 text-[#065f2c]"
-                                : "border-[#00e476]/20 bg-[#00e476]/10 text-[#a7e6bf]"
-                            }`}
-                          >
-                            MetLife
-                          </span>
-                        ) : null}
-                      </div>
-
-                      <div className="mt-3 flex flex-col gap-2">
-                        {(["A", "B"] as const).map((slot) => {
-                          const label = getSlotLabel(node, slot);
-                          const isActive = node.winner === slot;
-
-                          return (
-                            <button
-                              key={slot}
-                              id={`bracket-pick-${node.id}-${slot.toLowerCase()}`}
-                              type="button"
-                              disabled={!label}
-                              onClick={() => handleAdvance(node.id, slot)}
-                              className={`min-h-11 rounded-2xl border px-3 py-3 text-left font-archivo text-sm leading-5 break-words transition ${
-                                !label
-                                  ? disabledPickClasses
-                                  : isActive
-                                    ? activePickClasses
-                                    : idlePickClasses
-                              }`}
-                            >
-                              {label ?? "Aguardando classificado"}
-                            </button>
-                          );
-                        })}
-                      </div>
-                    </article>
-                  ))}
-                </div>
-              </section>
-            );
-          })}
+          {STAGES.map((stage) => (
+            // key on the native div — custom components don't support key in this project's TS setup
+            <div key={stage}>
+              <BracketStageSection
+                stage={stage}
+                nodes={getStageNodes(nodes, stage)}
+                theme={theme}
+                onAdvance={handleAdvance}
+              />
+            </div>
+          ))}
         </div>
 
         <AnimatePresence>

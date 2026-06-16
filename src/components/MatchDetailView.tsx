@@ -2,8 +2,7 @@ import {
   useState,
   useEffect,
   useRef,
-  Fragment,
-  type ReactNode,
+  useMemo,
   type Dispatch,
   type SetStateAction,
 } from "react";
@@ -16,14 +15,15 @@ import {
   type LineupEntry,
   Position,
   type Player,
-  type PlayerSocials,
 } from "../types";
 import { APP_MATCHES } from "../appMatches";
 import type { TeamLineupsMap } from "../utils/teamLineup";
 import { enrichPlayerWithMetadata, getPlayerMetadataSupplement } from "../utils/playerMetadata";
-import { InstagramBrandIcon } from "./InstagramBrandIcon";
 import { FlagIcon } from "./FlagIcon";
+import { PlayerOverlayCard, PlayerPictureOverlay } from "./PlayerOverlayCard";
+import { getPositionLabel } from "../utils/playerDisplay";
 import { PitchLineup } from "./PitchLineup";
+import { useClockTick } from "../hooks/useClockTick";
 import {
   MapPin,
   Settings,
@@ -52,27 +52,6 @@ const INITIAL_MATCHES_BY_ID = new Map(
   APP_MATCHES.map((match) => [match.id, match]),
 );
 
-const SOCIAL_PLATFORM_LABELS: Record<keyof PlayerSocials, string> = {
-  instagram: "Instagram",
-  x: "X",
-  tiktok: "TikTok",
-  youtube: "YouTube",
-  facebook: "Facebook",
-  site: "Site oficial",
-};
-
-const renderSocialPlatformLabel = (platform: keyof PlayerSocials) => {
-  if (platform === "instagram") {
-    return (
-      <>
-        <InstagramBrandIcon size={16} />
-        <span className="sr-only">{SOCIAL_PLATFORM_LABELS[platform]}</span>
-      </>
-    );
-  }
-
-  return SOCIAL_PLATFORM_LABELS[platform];
-};
 
 interface IncidentPlayerSelection {
   player: Player;
@@ -178,11 +157,34 @@ function getIncidentAccentClass(
     : "border-white/10 bg-white/10 text-slate-200";
 }
 
-function getPositionLabel(position: Position) {
-  if (position === Position.GK) return "Goleiro";
-  if (position === Position.DF) return "Defensor";
-  if (position === Position.MF) return "Meio-Campista";
-  return "Atacante";
+function getIncidentCardClass(
+  type: CommentaryEvent["type"],
+  theme: "classic-light" | "stadium-dark",
+) {
+  if (type === "GOAL") {
+    return theme === "classic-light"
+      ? "border-[#009c3b]/30 bg-[linear-gradient(135deg,rgba(0,156,59,0.12),rgba(255,216,77,0.18))] shadow-[0_14px_34px_rgba(0,156,59,0.12)]"
+      : "border-[#ffd84d]/25 bg-[linear-gradient(135deg,rgba(255,216,77,0.12),rgba(0,228,118,0.14))] shadow-[0_16px_36px_rgba(255,216,77,0.08)]";
+  }
+
+  return theme === "classic-light"
+    ? "bg-white border-slate-200"
+    : "bg-[#161919] border-white/10";
+}
+
+function getIncidentTextClass(
+  type: CommentaryEvent["type"],
+  theme: "classic-light" | "stadium-dark",
+) {
+  if (type === "GOAL") {
+    return theme === "classic-light"
+      ? "text-slate-900 text-base font-semibold"
+      : "text-white text-base font-semibold";
+  }
+
+  return theme === "classic-light"
+    ? "text-slate-700 text-sm"
+    : "text-slate-100 text-sm";
 }
 
 function normalizePlayerLookupText(value: string) {
@@ -232,12 +234,6 @@ function isIncidentPlayerNameMatch(playerName: string, incidentName: string) {
   }
 
   return false;
-}
-
-function getPlayerSocialEntries(player: Player) {
-  return (
-    Object.entries(player.socials ?? {}) as Array<[keyof PlayerSocials, string | undefined]>
-  ).filter((entry): entry is [keyof PlayerSocials, string] => Boolean(entry[1]));
 }
 
 function getIncidentPlayerTokens(incident: CommentaryEvent) {
@@ -313,7 +309,7 @@ function buildIncidentPlayerSelections(
                 player.socials ??
                 fallbackPlayer?.socials ??
                 metadataSupplement?.socials,
-              pictureUrl: player.pictureUrl ?? fallbackPlayer?.pictureUrl,
+              pictureUrl: mention.pictureUrl ?? player.pictureUrl ?? fallbackPlayer?.pictureUrl,
             }),
           },
           team,
@@ -399,6 +395,130 @@ function getMatchGroupLabel(match: Match) {
   return match.teamA.group === match.teamB.group ? match.teamA.group : match.teamA.group || null;
 }
 
+function formatBrasiliaTime(date: Date) {
+  return date.toLocaleTimeString("pt-BR", {
+    timeZone: "America/Sao_Paulo",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  });
+}
+
+function formatOverlayUpdatedAt(value: string | undefined) {
+  if (!value) {
+    return "Atualização pendente";
+  }
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return "Atualização indisponível";
+  }
+
+  return `Atualizado ${date.toLocaleTimeString("pt-BR", {
+    timeZone: "America/Sao_Paulo",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  })}`;
+}
+
+function formatCountdown(totalSecs: number) {
+  const h = Math.floor(totalSecs / 3600);
+  const m = Math.floor((totalSecs % 3600) / 60);
+  const s = totalSecs % 60;
+  return `${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
+}
+
+interface StoredIncidentPlayerKey {
+  id?: string;
+  name: string;
+  pictureUrl?: string;
+}
+
+interface StoredIncidentPlayer {
+  playerKey: StoredIncidentPlayerKey;
+  team: Match["teamA"];
+  opponentName: string;
+}
+
+interface IncidentTextProps {
+  incident: CommentaryEvent;
+  match: Match;
+  lineupEntry: { teamA: LineupEntry; teamB: LineupEntry } | undefined;
+  theme: "classic-light" | "stadium-dark";
+  onSelectPlayer: (selection: IncidentPlayerSelection) => void;
+}
+
+function IncidentText({ incident, match, lineupEntry, theme, onSelectPlayer }: IncidentTextProps) {
+  const renderablePlayers = buildIncidentPlayerSelections(incident, match, lineupEntry);
+
+  if (renderablePlayers.length === 0) {
+    return <>{incident.text}</>;
+  }
+
+  const incidentPlayerButtonClasses =
+    theme === "classic-light"
+      ? "inline-flex items-center rounded-md border border-[#065f2c]/15 bg-[#065f2c]/8 px-1.5 py-0.5 font-semibold text-[#065f2c] underline decoration-[#065f2c]/35 underline-offset-4 transition hover:border-[#065f2c]/30 hover:bg-[#065f2c]/12 hover:text-[#0a7f3f]"
+      : "inline-flex items-center rounded-md border border-[#ffd84d]/15 bg-[#ffd84d]/10 px-1.5 py-0.5 font-semibold text-[#ffd84d] underline decoration-[#ffd84d]/35 underline-offset-4 transition hover:border-[#ffd84d]/35 hover:bg-[#ffd84d]/15 hover:text-[#ffe58b]";
+
+  if (
+    (incident.type === "GOAL" ||
+      incident.type === "YELLOW_CARD" ||
+      incident.type === "RED_CARD") &&
+    renderablePlayers[0]
+  ) {
+    const [entry] = renderablePlayers;
+    const suffix =
+      incident.type === "GOAL"
+        ? " marcou."
+        : incident.type === "YELLOW_CARD"
+          ? " recebeu amarelo."
+          : " foi expulso.";
+
+    return (
+      <>
+        <button
+          type="button"
+          id={`btn-incident-player-${incident.id}-0`}
+          onClick={() => onSelectPlayer(entry.selection)}
+          className={`transition ${incidentPlayerButtonClasses}`}
+        >
+          {entry.token}
+        </button>
+        {suffix}
+      </>
+    );
+  }
+
+  if (incident.type === "SUBSTITUTION" && renderablePlayers.length >= 2) {
+    return (
+      <>
+        Sai{" "}
+        <button
+          type="button"
+          id={`btn-incident-player-${incident.id}-0`}
+          onClick={() => onSelectPlayer(renderablePlayers[0].selection)}
+          className={`transition ${incidentPlayerButtonClasses}`}
+        >
+          {renderablePlayers[0].token}
+        </button>
+        {", entra "}
+        <button
+          type="button"
+          id={`btn-incident-player-${incident.id}-1`}
+          onClick={() => onSelectPlayer(renderablePlayers[1].selection)}
+          className={`transition ${incidentPlayerButtonClasses}`}
+        >
+          {renderablePlayers[1].token}
+        </button>
+        .
+      </>
+    );
+  }
+
+  return <>{incident.text}</>;
+}
+
 interface MatchOverlaysApiResponse {
   refreshAfterMs?: number;
   overlays: Record<string, MatchOverlayEntry>;
@@ -442,9 +562,13 @@ export function MatchDetailView({
   const [customCountdownSeconds, setCustomCountdownSeconds] = useState(
     15 * 3600 + 2 * 60 + 3,
   ); // 15:02:03 default
-  const [selectedIncidentPlayer, setSelectedIncidentPlayer] =
-    useState<IncidentPlayerSelection | null>(null);
-  const [expandedIncidentPlayer, setExpandedIncidentPlayer] = useState<Player | null>(null);
+  const [storedIncidentPlayer, setStoredIncidentPlayer] = useState<StoredIncidentPlayer | null>(null);
+  const [expandedIncidentPlayerKey, setExpandedIncidentPlayerKey] = useState<StoredIncidentPlayerKey | null>(null);
+  const [incidentPlayerStats, setIncidentPlayerStats] = useState<{
+    goals: number;
+    yellowCards: number;
+    redCards: number;
+  } | null>(null);
   const simulatedMatchStatesRef = useRef(simulatedMatchStates);
   const matchSelectorRailRefs = useRef<Record<string, HTMLDivElement | null>>({});
   useEffect(() => {
@@ -496,27 +620,42 @@ export function MatchDetailView({
   })).filter(({ matches: statusMatches }) => statusMatches.length > 0);
   const hasLiveHeaderGroup = headerMatchGroups.some(({ status }) => status === "LIVE");
   const hasUpcomingHeaderGroup = headerMatchGroups.some(({ status }) => status === "PRE_GAME");
-  const selectedIncidentPlayerSocials = selectedIncidentPlayer
-    ? getPlayerSocialEntries(selectedIncidentPlayer.player)
-    : [];
-  const incidentPlayerButtonClasses =
-    theme === "classic-light"
-      ? "inline-flex items-center rounded-md border border-[#065f2c]/15 bg-[#065f2c]/8 px-1.5 py-0.5 font-semibold text-[#065f2c] underline decoration-[#065f2c]/35 underline-offset-4 transition hover:border-[#065f2c]/30 hover:bg-[#065f2c]/12 hover:text-[#0a7f3f]"
-      : "inline-flex items-center rounded-md border border-[#ffd84d]/15 bg-[#ffd84d]/10 px-1.5 py-0.5 font-semibold text-[#ffd84d] underline decoration-[#ffd84d]/35 underline-offset-4 transition hover:border-[#ffd84d]/35 hover:bg-[#ffd84d]/15 hover:text-[#ffe58b]";
-  const incidentOverlayCardClasses =
-    theme === "classic-light"
-      ? "border-slate-200 bg-white text-slate-900"
-      : "border-white/10 bg-[#121414] text-white";
-  const incidentOverlayMutedClasses =
-    theme === "classic-light" ? "text-slate-600" : "text-slate-300";
-  const incidentOverlayButtonClasses =
-    theme === "classic-light"
-      ? "border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100"
-      : "border-white/10 bg-white/5 text-slate-100 hover:bg-white/10";
-  const incidentOverlayDetailClasses =
-    theme === "classic-light"
-      ? "border-slate-200 bg-slate-50"
-      : "border-white/10 bg-white/5";
+  const currentLineupPlayers = useMemo(
+    () =>
+      currentLineupEntry
+        ? [...currentLineupEntry.teamA.players, ...currentLineupEntry.teamB.players]
+        : [...currentMatch.teamA.lineup, ...currentMatch.teamB.lineup],
+    [currentLineupEntry, currentMatch],
+  );
+
+  const resolvePlayerFromKey = (key: StoredIncidentPlayerKey): Player => {
+    const found = currentLineupPlayers.find(
+      (p) =>
+        (key.id !== undefined && p.id === key.id) ||
+        isIncidentPlayerNameMatch(p.name, key.name),
+    );
+    return found ?? {
+      id: key.id ?? `ref-${normalizePlayerLookupText(key.name).replace(/\s+/g, "-")}`,
+      name: key.name,
+      number: 0,
+      position: Position.MF,
+      x: 50,
+      y: 50,
+      pictureUrl: key.pictureUrl,
+    };
+  };
+
+  const selectedIncidentPlayer: IncidentPlayerSelection | null = storedIncidentPlayer
+    ? {
+        player: resolvePlayerFromKey(storedIncidentPlayer.playerKey),
+        team: storedIncidentPlayer.team,
+        opponentName: storedIncidentPlayer.opponentName,
+      }
+    : null;
+
+  const expandedIncidentPlayer: Player | null = expandedIncidentPlayerKey
+    ? resolvePlayerFromKey(expandedIncidentPlayerKey)
+    : null;
 
   const setMatchSelectorRailRef = (railKey: string, node: HTMLDivElement | null) => {
     if (node) {
@@ -560,85 +699,12 @@ export function MatchDetailView({
     }
   }, [selectedMatchId]);
 
-  const renderIncidentText = (incident: CommentaryEvent): ReactNode => {
-    const renderablePlayers = buildIncidentPlayerSelections(
-      incident,
-      currentMatch,
-      currentLineupEntry,
-    );
-
-    if (renderablePlayers.length === 0) {
-      return incident.text;
-    }
-
-    const openSelection = (selection: IncidentPlayerSelection) => {
-      setSelectedIncidentPlayer(selection);
-    };
-
-    if (
-      (incident.type === "GOAL" ||
-        incident.type === "YELLOW_CARD" ||
-        incident.type === "RED_CARD") &&
-      renderablePlayers[0]
-    ) {
-      const [entry] = renderablePlayers;
-      const suffix =
-        incident.type === "GOAL"
-          ? " marcou."
-          : incident.type === "YELLOW_CARD"
-            ? " recebeu amarelo."
-            : " foi expulso.";
-
-      return (
-        <>
-          <button
-            type="button"
-            id={`btn-incident-player-${incident.id}-0`}
-            onClick={() => openSelection(entry.selection)}
-            className={`transition ${incidentPlayerButtonClasses}`}
-          >
-            {entry.token}
-          </button>
-          {suffix}
-        </>
-      );
-    }
-
-    if (incident.type === "SUBSTITUTION" && renderablePlayers.length >= 2) {
-      return (
-        <>
-          Sai{" "}
-          <button
-            type="button"
-            id={`btn-incident-player-${incident.id}-0`}
-            onClick={() => openSelection(renderablePlayers[0].selection)}
-            className={`transition ${incidentPlayerButtonClasses}`}
-          >
-            {renderablePlayers[0].token}
-          </button>
-          {", entra "}
-          <button
-            type="button"
-            id={`btn-incident-player-${incident.id}-1`}
-            onClick={() => openSelection(renderablePlayers[1].selection)}
-            className={`transition ${incidentPlayerButtonClasses}`}
-          >
-            {renderablePlayers[1].token}
-          </button>
-          .
-        </>
-      );
-    }
-
-    return incident.text;
-  };
   const hasClickableIncidentPlayers = visibleIncidents.some(
     (incident) =>
       buildIncidentPlayerSelections(incident, currentMatch, currentLineupEntry).length > 0,
   );
 
-  // Live clock showing the current Horário de Brasília (BRT, UTC-3)
-  const [currentTime, setCurrentTime] = useState<Date>(new Date());
+  const currentTime = useClockTick();
   const secondsRemaining = getMatchCountdownSeconds(
     currentMatch,
     currentTime,
@@ -646,84 +712,19 @@ export function MatchDetailView({
   );
 
   useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentTime(new Date());
-    }, 1000);
-    return () => clearInterval(timer);
-  }, []);
-
-  useEffect(() => {
-    setSelectedIncidentPlayer((current) => {
-      if (!current) {
-        return null;
-      }
-
-      const nextSelections = currentLineupEntry
-        ? [
-            ...currentLineupEntry.teamA.players.map((player) => ({
-              player,
-              team: currentMatch.teamA,
-              opponentName: currentMatch.teamB.name,
-            })),
-            ...currentLineupEntry.teamB.players.map((player) => ({
-              player,
-              team: currentMatch.teamB,
-              opponentName: currentMatch.teamA.name,
-            })),
-          ]
-        : [
-            ...currentMatch.teamA.lineup.map((player) => ({
-              player,
-              team: currentMatch.teamA,
-              opponentName: currentMatch.teamB.name,
-            })),
-            ...currentMatch.teamB.lineup.map((player) => ({
-              player,
-              team: currentMatch.teamB,
-              opponentName: currentMatch.teamA.name,
-            })),
-          ];
-
-      return (
-        nextSelections.find(
-          (entry) =>
-            entry.player.id === current.player.id ||
-            isIncidentPlayerNameMatch(entry.player.name, current.player.name),
-        ) ?? null
-      );
-    });
-    setExpandedIncidentPlayer((current) => {
-      if (!current) {
-        return null;
-      }
-
-      const nextPlayers = currentLineupEntry
-        ? [...currentLineupEntry.teamA.players, ...currentLineupEntry.teamB.players]
-        : [...currentMatch.teamA.lineup, ...currentMatch.teamB.lineup];
-      return (
-        nextPlayers.find(
-          (player) =>
-            player.id === current.id || isIncidentPlayerNameMatch(player.name, current.name),
-        ) ?? null
-      );
-    });
-  }, [currentLineupEntry, currentMatch]);
-
-  useEffect(() => {
-    if (!selectedIncidentPlayer && !expandedIncidentPlayer) {
+    if (!storedIncidentPlayer) {
+      setIncidentPlayerStats(null);
       return;
     }
-
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        setSelectedIncidentPlayer(null);
-        setExpandedIncidentPlayer(null);
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [selectedIncidentPlayer, expandedIncidentPlayer]);
+    let active = true;
+    fetch(
+      `/api/player-stats/${encodeURIComponent(storedIncidentPlayer.team.code)}/${encodeURIComponent(storedIncidentPlayer.playerKey.name)}`,
+    )
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => { if (active) setIncidentPlayerStats(data); })
+      .catch(() => { if (active) setIncidentPlayerStats(null); });
+    return () => { active = false; };
+  }, [storedIncidentPlayer]);
 
   useEffect(() => {
     if (matchSelectionMode !== "auto") {
@@ -733,12 +734,16 @@ export function MatchDetailView({
     const preferredMatchId = getInitialMatchId(matches);
     if (preferredMatchId !== selectedMatchId) {
       setSelectedMatchId(preferredMatchId);
+      setStoredIncidentPlayer(null);
+      setExpandedIncidentPlayerKey(null);
     }
   }, [matches, matchSelectionMode, selectedMatchId]);
 
   const handleSelectMatch = (matchId: string) => {
     setMatchSelectionMode("manual");
     setSelectedMatchId(matchId);
+    setStoredIncidentPlayer(null);
+    setExpandedIncidentPlayerKey(null);
   };
 
   useEffect(() => {
@@ -834,41 +839,6 @@ export function MatchDetailView({
       document.removeEventListener("visibilitychange", handlePageVisible);
     };
   }, []);
-
-  // Format a Date as HH:MM:SS in Horário de Brasília (BRT, UTC-3, no DST)
-  const formatBrasiliaTime = (date: Date) =>
-    date.toLocaleTimeString("pt-BR", {
-      timeZone: "America/Sao_Paulo",
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit",
-    });
-
-  const formatOverlayUpdatedAt = (value: string | undefined) => {
-    if (!value) {
-      return "Atualização pendente";
-    }
-
-    const date = new Date(value);
-    if (Number.isNaN(date.getTime())) {
-      return "Atualização indisponível";
-    }
-
-    return `Atualizado ${date.toLocaleTimeString("pt-BR", {
-      timeZone: "America/Sao_Paulo",
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit",
-    })}`;
-  };
-
-  // Format seconds to hh:mm:ss
-  const formatCountdown = (totalSecs: number) => {
-    const h = Math.floor(totalSecs / 3600);
-    const m = Math.floor((totalSecs % 3600) / 60);
-    const s = totalSecs % 60;
-    return `${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
-  };
 
   // Custom edit mode to test different lineups
   const handleUpdateKickoff = () => {
@@ -1801,18 +1771,20 @@ export function MatchDetailView({
                       {visibleIncidents.map((incident) => (
                         <div
                           key={incident.id}
-                          className={`rounded-xl border px-3 py-3 ${
-                            theme === "classic-light"
-                              ? "bg-white border-slate-200"
-                              : "bg-[#161919] border-white/10"
+                          className={`rounded-xl border px-3 py-3 transition ${
+                            getIncidentCardClass(incident.type, theme)
                           }`}
                         >
                           <div className="flex flex-wrap items-center gap-2">
                             <span
-                              className={`font-mono text-xs font-black uppercase tracking-wider ${
-                                theme === "classic-light"
-                                  ? "text-slate-700"
-                                  : "text-slate-100"
+                              className={`font-mono font-black uppercase tracking-wider ${
+                                incident.type === "GOAL"
+                                  ? theme === "classic-light"
+                                    ? "text-[#007a2f] text-sm"
+                                    : "text-[#ffe58b] text-sm"
+                                  : theme === "classic-light"
+                                    ? "text-slate-700 text-xs"
+                                    : "text-slate-100 text-xs"
                               }`}
                             >
                               {incident.time}
@@ -1840,13 +1812,28 @@ export function MatchDetailView({
                             )}
                           </div>
                           <p
-                            className={`mt-2 font-archivo text-sm leading-6 ${
-                              theme === "classic-light"
-                                ? "text-slate-700"
-                                : "text-slate-100"
-                            }`}
+                            className={`mt-2 font-archivo leading-6 ${getIncidentTextClass(
+                              incident.type,
+                              theme,
+                            )}`}
                           >
-                            {renderIncidentText(incident)}
+                            <IncidentText
+                              incident={incident}
+                              match={currentMatch}
+                              lineupEntry={currentLineupEntry}
+                              theme={theme}
+                              onSelectPlayer={(selection) =>
+                                setStoredIncidentPlayer({
+                                  playerKey: {
+                                    id: selection.player.id,
+                                    name: selection.player.name,
+                                    pictureUrl: selection.player.pictureUrl,
+                                  },
+                                  team: selection.team,
+                                  opponentName: selection.opponentName,
+                                })
+                              }
+                            />
                           </p>
                         </div>
                       ))}
@@ -2015,190 +2002,76 @@ export function MatchDetailView({
       </div>
 
       {selectedIncidentPlayer && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 p-4 backdrop-blur-md"
+        <PlayerOverlayCard
           id="match-incident-player-overlay"
-          onClick={() => setSelectedIncidentPlayer(null)}
-        >
-          <div
-            className={`relative w-full max-w-2xl overflow-hidden rounded-3xl border shadow-2xl ${incidentOverlayCardClasses}`}
-            onClick={(event) => event.stopPropagation()}
-          >
-            <div
-              className="border-b px-5 py-4"
-              style={{
-                background: `linear-gradient(135deg, ${selectedIncidentPlayer.team.primaryColor}22, ${selectedIncidentPlayer.team.secondaryColor}22)`,
-                borderColor:
-                  theme === "classic-light" ? "rgb(226 232 240)" : "rgb(255 255 255 / 0.08)",
-              }}
-            >
-              <button
-                type="button"
-                id="btn-close-match-incident-player-overlay"
-                onClick={() => setSelectedIncidentPlayer(null)}
-                className={`absolute right-4 top-4 rounded-full border px-3 py-1 font-mono text-[10px] font-bold uppercase tracking-wider transition ${incidentOverlayButtonClasses}`}
-              >
-                Fechar
-              </button>
-              <p className={`font-mono text-[10px] uppercase tracking-[0.25em] ${incidentOverlayMutedClasses}`}>
-                Card completo do jogador
-              </p>
-              <h4 className="mt-2 pr-20 font-anton text-3xl uppercase tracking-wide">
-                {selectedIncidentPlayer.player.name}
-              </h4>
-              <p className={`mt-1 font-archivo text-sm ${incidentOverlayMutedClasses}`}>
-                {selectedIncidentPlayer.team.name}
-                {selectedIncidentPlayer.player.club
-                  ? ` • ${selectedIncidentPlayer.player.club}`
-                  : ""}
-              </p>
-            </div>
-
-            <div className="grid gap-0 lg:grid-cols-[1.1fr_0.9fr]">
-              <div
-                className="border-b p-4 lg:border-b-0 lg:border-r"
-                style={{
-                  borderColor:
-                    theme === "classic-light" ? "rgb(226 232 240)" : "rgb(255 255 255 / 0.08)",
-                }}
-              >
-                <div
-                  className={`flex min-h-[320px] items-center justify-center overflow-hidden rounded-3xl border ${
-                    theme === "classic-light"
-                      ? "border-slate-200 bg-slate-50"
-                      : "border-white/10 bg-[#161919]"
-                  }`}
-                >
-                  {selectedIncidentPlayer.player.pictureUrl ? (
-                    <img
-                      src={selectedIncidentPlayer.player.pictureUrl}
-                      alt={`Foto de ${selectedIncidentPlayer.player.name}`}
-                      className="h-full max-h-[420px] w-full object-contain p-4"
-                    />
-                  ) : (
-                    <div
-                      className="flex h-full w-full items-center justify-center font-mono text-6xl font-black text-white"
-                      style={{
-                        background: `linear-gradient(135deg, ${selectedIncidentPlayer.team.primaryColor}, ${selectedIncidentPlayer.team.secondaryColor})`,
-                      }}
-                    >
-                      {selectedIncidentPlayer.player.number}
-                    </div>
-                  )}
-                </div>
-                {selectedIncidentPlayer.player.pictureUrl && (
-                  <button
-                    type="button"
-                    id="btn-open-match-incident-player-picture"
-                    onClick={() => setExpandedIncidentPlayer(selectedIncidentPlayer.player)}
-                    className={`mt-3 inline-flex rounded-full border px-3 py-1.5 font-mono text-[10px] font-bold uppercase tracking-wider transition ${incidentOverlayButtonClasses}`}
-                  >
-                    Abrir foto em tamanho real
-                  </button>
-                )}
-              </div>
-
-              <div className="p-5">
-                <div className="grid grid-cols-1 gap-3 sm:grid-cols-3" id="match-incident-player-overlay-stats">
-                  {[
-                    { label: "Camisa", value: selectedIncidentPlayer.player.number },
-                    {
-                      label: "Posição",
-                      value: getPositionLabel(selectedIncidentPlayer.player.position),
-                    },
-                    { label: "Seleção", value: selectedIncidentPlayer.team.code },
-                  ].map((stat) => (
-                    <div
-                      key={stat.label}
-                      className={`rounded-2xl border px-3 py-3 ${incidentOverlayDetailClasses}`}
-                    >
-                      <p className="font-anton text-lg uppercase text-[#00e476]">{stat.value}</p>
-                      <p className={`mt-1 font-mono text-[10px] uppercase tracking-wider ${incidentOverlayMutedClasses}`}>
-                        {stat.label}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="mt-4 space-y-2 text-sm font-archivo" id="match-incident-player-overlay-details">
-                  <div className={`flex items-center justify-between rounded-2xl border px-3 py-3 ${incidentOverlayDetailClasses}`}>
-                    <span className={incidentOverlayMutedClasses}>Clube atual</span>
-                    <span className="font-semibold">
-                      {selectedIncidentPlayer.player.club || "Seleção Nacional"}
-                    </span>
-                  </div>
-                  <div className={`flex items-center justify-between rounded-2xl border px-3 py-3 ${incidentOverlayDetailClasses}`}>
-                    <span className={incidentOverlayMutedClasses}>Leitura tática</span>
-                    <span className="font-semibold text-right">
-                      Titular confirmado • Papel crucial
-                    </span>
-                  </div>
-                  <div className={`rounded-2xl border px-3 py-3 ${incidentOverlayDetailClasses}`}>
-                    <p className={incidentOverlayMutedClasses}>Contexto da partida</p>
-                    <p className="mt-1 leading-6">
-                      Contra {selectedIncidentPlayer.opponentName},{" "}
-                      {selectedIncidentPlayer.player.name} aparece no radar dos lances da
-                      partida.
-                    </p>
-                  </div>
-                </div>
-
-                {selectedIncidentPlayerSocials.length > 0 && (
-                  <div className="mt-5" id="match-incident-player-overlay-social-links">
-                    <p className={`font-mono text-[10px] uppercase tracking-wider ${incidentOverlayMutedClasses}`}>
-                      Redes oficiais
-                    </p>
-                    <div className="mt-2 flex flex-wrap gap-2">
-                      {selectedIncidentPlayerSocials.map(([platform, url]) => (
-                        <a
-                          key={platform}
-                          id={`match-incident-player-overlay-social-link-${platform}`}
-                          href={url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className={`inline-flex items-center justify-center rounded-full border px-3 py-1.5 font-mono text-[10px] font-bold uppercase tracking-wider transition ${
-                            theme === "classic-light"
-                              ? "border-slate-200 bg-slate-50 text-slate-700 hover:border-[#065f2c]/30 hover:text-[#065f2c]"
-                              : "border-white/10 bg-white/5 text-white hover:border-[#ffd700]/40 hover:text-[#ffd700]"
-                          }`}
-                        >
-                          {renderSocialPlatformLabel(platform)}
-                        </a>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
+          theme={theme}
+          player={selectedIncidentPlayer.player}
+          teamName={selectedIncidentPlayer.team.name}
+          primaryColor={selectedIncidentPlayer.team.primaryColor}
+          secondaryColor={selectedIncidentPlayer.team.secondaryColor}
+          stats={[
+            { label: "Camisa", value: selectedIncidentPlayer.player.number },
+            {
+              label: "Posição",
+              value: getPositionLabel(selectedIncidentPlayer.player.position),
+            },
+            { label: "Seleção", value: selectedIncidentPlayer.team.code },
+            ...(incidentPlayerStats &&
+            (incidentPlayerStats.goals > 0 ||
+              incidentPlayerStats.yellowCards > 0 ||
+              incidentPlayerStats.redCards > 0)
+              ? [
+                  {
+                    label: "Gols",
+                    value: incidentPlayerStats.goals,
+                    accent:
+                      theme === "classic-light" ? "text-[#065f2c]" : "text-[#00e476]",
+                  },
+                  {
+                    label: "Amarelos",
+                    value: incidentPlayerStats.yellowCards,
+                    accent:
+                      theme === "classic-light" ? "text-[#9a6700]" : "text-[#ffd84d]",
+                  },
+                  {
+                    label: "Vermelhos",
+                    value: incidentPlayerStats.redCards,
+                    accent:
+                      theme === "classic-light" ? "text-[#9f1239]" : "text-[#ff879d]",
+                  },
+                ]
+              : []),
+          ]}
+          details={[
+            {
+              label: "Clube atual",
+              value: selectedIncidentPlayer.player.club || "Seleção Nacional",
+            },
+            { label: "Leitura tática", value: "Titular confirmado • Papel crucial" },
+            {
+              label: "Contexto da partida",
+              value: `Contra ${selectedIncidentPlayer.opponentName}, ${selectedIncidentPlayer.player.name} aparece no radar dos lances da partida.`,
+              fullWidth: true,
+            },
+          ]}
+          onClose={() => setStoredIncidentPlayer(null)}
+          onOpenPicture={() =>
+            setExpandedIncidentPlayerKey({
+              id: selectedIncidentPlayer.player.id,
+              name: selectedIncidentPlayer.player.name,
+              pictureUrl: selectedIncidentPlayer.player.pictureUrl,
+            })
+          }
+          openPictureButtonId="btn-open-match-incident-player-picture"
+        />
       )}
 
-      {expandedIncidentPlayer?.pictureUrl && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 p-4 backdrop-blur-md"
+      {expandedIncidentPlayer && (
+        <PlayerPictureOverlay
           id="match-incident-player-picture-overlay"
-          onClick={() => setExpandedIncidentPlayer(null)}
-        >
-          <div
-            className="relative max-h-[92vh] max-w-[92vw] rounded-2xl border border-white/10 bg-[#050505]/95 p-3 shadow-2xl"
-            onClick={(event) => event.stopPropagation()}
-          >
-            <button
-              type="button"
-              id="btn-close-match-incident-player-picture-overlay"
-              onClick={() => setExpandedIncidentPlayer(null)}
-              className="absolute right-3 top-3 rounded-full border border-white/10 bg-black/70 px-3 py-1 font-mono text-[10px] font-bold uppercase tracking-wider text-white transition hover:bg-black/90"
-            >
-              Fechar
-            </button>
-            <img
-              src={expandedIncidentPlayer.pictureUrl}
-              alt={`Foto ampliada de ${expandedIncidentPlayer.name}`}
-              className="block h-auto max-h-[calc(92vh-1.5rem)] w-auto max-w-[calc(92vw-1.5rem)] rounded-xl object-contain"
-            />
-          </div>
-        </div>
+          player={expandedIncidentPlayer}
+          onClose={() => setExpandedIncidentPlayerKey(null)}
+        />
       )}
     </div>
   );

@@ -5,31 +5,36 @@ import path from "path";
 import { createServer as createViteServer } from "vite";
 import dotenv from "dotenv";
 import {
-  buildMatchStateEntry as buildMatchStateEntryCore,
-  buildTeamLineupEntry as buildTeamLineupEntryCore,
-  findCalendarMatch as findCalendarMatchCore,
-  normalizeBroadcasters as normalizeBroadcastersCore,
+  buildMatchStateEntry,
+  buildTeamLineupEntry,
+  findCalendarMatch,
+  normalizeBroadcasters,
+  normalizeText,
 } from "./fifa-sync-core";
-import type { FifaLiveMatch as FifaLiveMatchCore } from "./fifa-sync-core";
+import type {
+  FifaCalendarMatch,
+  FifaLiveMatch,
+  FifaWatchSource,
+} from "./fifa-sync-core";
 import { APP_MATCHES } from "./src/appMatches";
 import { triviaQuestions } from "./src/data/questions";
 import { computeStandings, groupStandings } from "./src/standings";
-import type {
-  Broadcaster,
-  BroadcastGuideEntry,
-  LineupEntry,
-  Match,
-  MatchOverlayEntry,
-  MatchStateEntry,
-  MatchStatus,
-  TournamentLeadersResponse,
-  TournamentPlayerLeader,
-  TournamentTeamLeader,
-  TeamRef,
-  TeamViewMatchSummary,
-  TeamViewResponse,
-  TriviaQuestion,
-  StandingsRow,
+import {
+  Position,
+  type BroadcastGuideEntry,
+  type LineupEntry,
+  type Match,
+  type MatchOverlayEntry,
+  type MatchStateEntry,
+  type PlayerSocials,
+  type TournamentLeadersResponse,
+  type TournamentPlayerLeader,
+  type TournamentTeamLeader,
+  type TeamRef,
+  type TeamViewMatchSummary,
+  type TeamViewResponse,
+  type TriviaQuestion,
+  type StandingsRow,
 } from "./src/types";
 
 dotenv.config();
@@ -61,39 +66,8 @@ const RED_CARD_INCIDENT_SUFFIX = " foi expulso.";
 
 app.use(express.json());
 
-interface FifaLocalizedText {
-  Locale?: string;
-  Description?: string;
-}
-
-interface FifaCalendarTeam {
-  TeamName?: FifaLocalizedText[];
-  Abbreviation?: string;
-}
-
-interface FifaCalendarMatch {
-  IdMatch: string;
-  Date: string;
-  MatchStatus?: number | null;
-  HomeTeamScore?: number | null;
-  AwayTeamScore?: number | null;
-  Home?: FifaCalendarTeam;
-  Away?: FifaCalendarTeam;
-}
-
 interface FifaCalendarResponse {
   Results?: FifaCalendarMatch[];
-}
-
-interface FifaWatchSource {
-  IdChannel: string;
-  Name: string;
-  Logo?: string;
-  TvChannelUrl?: string;
-  IOsUrl?: string;
-  AndroidUrl?: string;
-  Url?: string;
-  Language?: string;
 }
 
 interface FifaWatchMatch {
@@ -104,22 +78,6 @@ interface FifaWatchMatch {
 
 interface FifaWatchSeasonResponse {
   Matches?: FifaWatchMatch[];
-}
-
-interface FifaLiveTeam {
-  Score?: number | null;
-}
-
-interface FifaLiveMatch {
-  IdMatch: string;
-  Date?: string;
-  MatchStatus?: number | null;
-  MatchTime?: string | null;
-  Period?: number | null;
-  HomeTeam?: FifaLiveTeam;
-  AwayTeam?: FifaLiveTeam;
-  HomeTeamScore?: number | null;
-  AwayTeamScore?: number | null;
 }
 
 interface BroadcastGuideResponse {
@@ -247,27 +205,12 @@ const fifaSyncDiagnostics: {
 
 let backgroundWarmTimeout: NodeJS.Timeout | null = null;
 
-const normalizeText = (value: string) =>
-  value
-    .normalize("NFD")
-    .replace(/\p{Diacritic}/gu, "")
-    .replace(/[^A-Za-z0-9]/g, "")
-    .toUpperCase();
-
-const getLocalizedDescription = (entries: FifaLocalizedText[] | undefined, language: string) => {
-  if (!entries || entries.length === 0) return "";
-
-  const normalizedLanguage = language.toLowerCase();
-  return (
-    entries.find((entry) => entry.Locale?.toLowerCase().startsWith(normalizedLanguage))?.Description ||
-    entries[0]?.Description ||
-    ""
-  );
-};
-
 interface PlayerLeaderMetadata {
   name: string;
   shirtNumber?: number;
+  position?: Position;
+  club?: string;
+  socials?: PlayerSocials;
   pictureUrl?: string;
 }
 
@@ -296,6 +239,9 @@ const upsertPlayerLeaderMetadata = (
   player: {
     name: string;
     number?: number;
+    position?: Position;
+    club?: string;
+    socials?: PlayerSocials;
     pictureUrl?: string;
   },
 ) => {
@@ -306,6 +252,9 @@ const upsertPlayerLeaderMetadata = (
     metadataByPlayerKey.set(playerKey, {
       name: player.name,
       shirtNumber: player.number,
+      position: player.position,
+      club: player.club,
+      socials: player.socials,
       pictureUrl: player.pictureUrl,
     });
     return;
@@ -314,6 +263,9 @@ const upsertPlayerLeaderMetadata = (
   metadataByPlayerKey.set(playerKey, {
     name: current.name || player.name,
     shirtNumber: current.shirtNumber ?? player.number,
+    position: current.position ?? player.position,
+    club: current.club ?? player.club,
+    socials: current.socials ?? player.socials,
     pictureUrl: current.pictureUrl ?? player.pictureUrl,
   });
 };
@@ -469,7 +421,12 @@ const aggregateTournamentLeaders = async (
         teamCode: team.code,
         teamName: team.name,
         teamFlagSvg: team.flagSvg,
+        teamPrimaryColor: team.primaryColor,
+        teamSecondaryColor: team.secondaryColor,
         shirtNumber: metadata?.shirtNumber,
+        position: metadata?.position,
+        club: metadata?.club,
+        socials: metadata?.socials,
         pictureUrl: metadata?.pictureUrl,
         goals: 0,
         yellowCards: 0,
@@ -574,231 +531,6 @@ const getTournamentLeadersPayload = async (
   };
 };
 
-const SPORTV_URL = "https://ge.globo.com/sportv/";
-
-const getWatchSourceUrl = (source: FifaWatchSource) =>
-  source.Url || source.TvChannelUrl || source.IOsUrl || source.AndroidUrl || "";
-
-const getNormalizedWatchSourceUrl = (source: FifaWatchSource) => {
-  const link = getWatchSourceUrl(source);
-  const haystack = `${source.Name} ${link}`.toLowerCase();
-
-  if (haystack.includes("sportv")) {
-    return SPORTV_URL;
-  }
-
-  return link;
-};
-
-const classifyBroadcasterType = (source: FifaWatchSource): Broadcaster["type"] => {
-  const haystack = `${source.Name} ${getWatchSourceUrl(source)}`.toLowerCase();
-
-  if (haystack.includes("youtube") || haystack.includes("caze")) {
-    return "YOUTUBE";
-  }
-
-  if (
-    haystack.includes("globoplay") ||
-    haystack.includes("getv") ||
-    haystack.includes("ge-tv") ||
-    haystack.includes("nsports") ||
-    haystack.includes("fifa+")
-  ) {
-    return "STREAM";
-  }
-
-  if (haystack.includes("sportv")) {
-    return "TV PAGA";
-  }
-
-  if (haystack.includes("globo") || haystack.includes("sbt")) {
-    return "TV ABERTA";
-  }
-
-  return "STREAM";
-};
-
-const getBroadcasterColor = (type: Broadcaster["type"]) => {
-  switch (type) {
-    case "TV ABERTA":
-      return "#00e476";
-    case "TV PAGA":
-      return "#ffd700";
-    case "YOUTUBE":
-      return "#ed2939";
-    case "STREAM":
-    case "STREAM PAGO":
-      return "#38bdf8";
-    default:
-      return "#94a3b8";
-  }
-};
-
-const normalizeBroadcasters = (sources: FifaWatchSource[] | undefined): Broadcaster[] => {
-  if (!sources || sources.length === 0) return [];
-
-  const seen = new Set<string>();
-  const broadcasters: Broadcaster[] = [];
-
-  for (const source of sources) {
-    const link = getNormalizedWatchSourceUrl(source);
-    if (!source.Name || !link) continue;
-
-    const dedupeKey = `${normalizeText(source.Name)}::${link}`;
-    if (seen.has(dedupeKey)) continue;
-    seen.add(dedupeKey);
-
-    const type = classifyBroadcasterType(source);
-    broadcasters.push({
-      id: source.IdChannel,
-      name: source.Name,
-      type,
-      logoUrl: source.Logo || undefined,
-      iconColor: getBroadcasterColor(type),
-      link,
-    });
-  }
-
-  return broadcasters;
-};
-
-const findCalendarMatch = (localMatch: Match, calendarMatches: FifaCalendarMatch[], language: string) => {
-  const localKickoff = new Date(localMatch.kickoffTimestamp).getTime();
-  const localHomeCode = normalizeText(localMatch.teamA.code);
-  const localAwayCode = normalizeText(localMatch.teamB.code);
-  const localHomeName = normalizeText(localMatch.teamA.name);
-  const localAwayName = normalizeText(localMatch.teamB.name);
-
-  const exactMatch = calendarMatches.find((calendarMatch) => {
-    const fifaKickoff = new Date(calendarMatch.Date).getTime();
-    const homeCode = normalizeText(calendarMatch.Home?.Abbreviation || "");
-    const awayCode = normalizeText(calendarMatch.Away?.Abbreviation || "");
-
-    return fifaKickoff === localKickoff && homeCode === localHomeCode && awayCode === localAwayCode;
-  });
-
-  if (exactMatch) return exactMatch;
-
-  const nameAndDateMatch = calendarMatches.find((calendarMatch) => {
-    const fifaKickoff = new Date(calendarMatch.Date).getTime();
-    const homeName = normalizeText(getLocalizedDescription(calendarMatch.Home?.TeamName, language));
-    const awayName = normalizeText(getLocalizedDescription(calendarMatch.Away?.TeamName, language));
-
-    return fifaKickoff === localKickoff && homeName === localHomeName && awayName === localAwayName;
-  });
-
-  if (nameAndDateMatch) return nameAndDateMatch;
-
-  return calendarMatches.find((calendarMatch) => {
-    const homeCode = normalizeText(calendarMatch.Home?.Abbreviation || "");
-    const awayCode = normalizeText(calendarMatch.Away?.Abbreviation || "");
-    return homeCode === localHomeCode && awayCode === localAwayCode;
-  });
-};
-
-const getMatchStatusFromFifa = (localMatch: Match, fifaMatch: FifaCalendarMatch): MatchStatus => {
-  if (fifaMatch.MatchStatus === 0) {
-    return "FINISHED";
-  }
-
-  if (fifaMatch.MatchStatus === 1) {
-    return "PRE_GAME";
-  }
-
-  if (typeof fifaMatch.MatchStatus === "number") {
-    return "LIVE";
-  }
-
-  const kickoffTime = new Date(fifaMatch.Date).getTime();
-  if (!Number.isNaN(kickoffTime) && kickoffTime > Date.now()) {
-    return "PRE_GAME";
-  }
-
-  if (
-    typeof fifaMatch.HomeTeamScore === "number" ||
-    typeof fifaMatch.AwayTeamScore === "number"
-  ) {
-    return "LIVE";
-  }
-
-  return localMatch.status;
-};
-
-const getScoreFromFifa = (fifaMatch: FifaCalendarMatch) => {
-  if (
-    typeof fifaMatch.HomeTeamScore === "number" &&
-    typeof fifaMatch.AwayTeamScore === "number"
-  ) {
-    return {
-      teamA: fifaMatch.HomeTeamScore,
-      teamB: fifaMatch.AwayTeamScore,
-    };
-  }
-
-  return undefined;
-};
-
-const getScoreFromLiveFifa = (fifaMatch: FifaLiveMatch) => {
-  const homeScore =
-    typeof fifaMatch.HomeTeam?.Score === "number"
-      ? fifaMatch.HomeTeam.Score
-      : fifaMatch.HomeTeamScore;
-  const awayScore =
-    typeof fifaMatch.AwayTeam?.Score === "number"
-      ? fifaMatch.AwayTeam.Score
-      : fifaMatch.AwayTeamScore;
-
-  if (typeof homeScore === "number" && typeof awayScore === "number") {
-    return {
-      teamA: homeScore,
-      teamB: awayScore,
-    };
-  }
-
-  return undefined;
-};
-
-const buildMatchStateEntry = (
-  localMatch: Match,
-  fifaMatch: FifaCalendarMatch | undefined,
-  fifaLiveMatch?: FifaLiveMatch,
-): MatchStateEntry => {
-  if (!fifaMatch) {
-    return {
-      status: localMatch.status,
-      score: localMatch.score,
-      source: "fallback",
-      note: "Dados oficiais da FIFA indisponíveis para esta partida no momento; exibindo o estado local.",
-      updatedAt: new Date().toISOString(),
-    };
-  }
-
-  const fifaScore = getScoreFromFifa(fifaMatch);
-  const liveScore = fifaLiveMatch ? getScoreFromLiveFifa(fifaLiveMatch) : undefined;
-  const status = fifaLiveMatch
-    ? getMatchStatusFromFifa(localMatch, {
-        ...fifaMatch,
-        Date: fifaLiveMatch.Date || fifaMatch.Date,
-        MatchStatus: fifaLiveMatch.MatchStatus ?? fifaMatch.MatchStatus,
-        HomeTeamScore: liveScore?.teamA ?? fifaMatch.HomeTeamScore,
-        AwayTeamScore: liveScore?.teamB ?? fifaMatch.AwayTeamScore,
-      })
-    : getMatchStatusFromFifa(localMatch, fifaMatch);
-
-  return {
-    status,
-    score: liveScore || fifaScore || (status === "PRE_GAME" ? undefined : localMatch.score),
-    matchTime:
-      status === "LIVE" && fifaLiveMatch?.MatchTime ? fifaLiveMatch.MatchTime : undefined,
-    source: "fifa",
-    note: fifaLiveMatch
-      ? "Placar e status oficiais da FIFA com atualização ao vivo."
-      : "Placar e status oficiais da FIFA.",
-    fifaMatchId: fifaMatch.IdMatch,
-    updatedAt: new Date().toISOString(),
-  };
-};
-
 const getMatchStateCacheTtlMs = (states: Record<string, MatchStateEntry>) => {
   const stateEntries = Object.entries(states);
 
@@ -828,11 +560,11 @@ const getMatchStateCacheTtlMs = (states: Record<string, MatchStateEntry>) => {
 
 const getTeamLineupCacheTtlMs = (
   matchedFifa: Array<{ match: Match; fifaMatch: FifaCalendarMatch | undefined }>,
-  liveByMatchId: Map<string, FifaLiveMatchCore>,
+  liveByMatchId: Map<string, FifaLiveMatch>,
 ) =>
   matchedFifa.some(({ match, fifaMatch }) => {
     const liveMatch = fifaMatch ? liveByMatchId.get(fifaMatch.IdMatch) : undefined;
-    return buildMatchStateEntryCore(match, fifaMatch, liveMatch).status === "LIVE";
+    return buildMatchStateEntry(match, fifaMatch, liveMatch).status === "LIVE";
   })
     ? LIVE_TEAM_LINEUPS_CACHE_TTL_MS
     : TEAM_LINEUPS_CACHE_TTL_MS;
@@ -907,7 +639,7 @@ const fetchCalendarMatches = async (language: string) => {
 };
 
 const fetchLiveMatch = async (matchId: string, language: string) =>
-  fetchJson<FifaLiveMatchCore>(
+  fetchJson<FifaLiveMatch>(
     `${FIFA_API_BASE_URL}/live/football/${encodeURIComponent(matchId)}?language=${encodeURIComponent(language)}`
   );
 
@@ -950,11 +682,11 @@ const getBroadcastGuidePayload = async (
 
     const guides = Object.fromEntries(
       APP_MATCHES.map((match) => {
-        const fifaMatch = findCalendarMatchCore(match, calendarMatches, language);
+        const fifaMatch = findCalendarMatch(match, calendarMatches, language);
         const fifaWatchMatch = fifaMatch
           ? watchByMatchId.get(fifaMatch.IdMatch)
           : undefined;
-        const fifaBroadcasters = normalizeBroadcastersCore(fifaWatchMatch?.Sources);
+        const fifaBroadcasters = normalizeBroadcasters(fifaWatchMatch?.Sources);
         const hasOfficialGuide = fifaBroadcasters.length > 0;
 
         return [
@@ -1031,8 +763,8 @@ const getMatchStatesPayload = async (
   try {
     const calendarMatches = await fetchCalendarMatches(language);
     const matchedStates = APP_MATCHES.map((match) => {
-      const fifaMatch = findCalendarMatchCore(match, calendarMatches, language);
-      const calendarState = buildMatchStateEntryCore(match, fifaMatch);
+      const fifaMatch = findCalendarMatch(match, calendarMatches, language);
+      const calendarState = buildMatchStateEntry(match, fifaMatch);
 
       return {
         match,
@@ -1068,7 +800,7 @@ const getMatchStatesPayload = async (
       matchedStates.map(({ match, fifaMatch }) => {
         return [
           match.id,
-          buildMatchStateEntryCore(
+          buildMatchStateEntry(
             match,
             fifaMatch,
             fifaMatch ? liveMatchesById.get(fifaMatch.IdMatch) : undefined,
@@ -1140,7 +872,7 @@ const getTeamLineupsPayload = async (
     const calendarMatches = await fetchCalendarMatches(language);
     const matchedFifa = APP_MATCHES.map((match) => ({
       match,
-      fifaMatch: findCalendarMatchCore(match, calendarMatches, language),
+      fifaMatch: findCalendarMatch(match, calendarMatches, language),
     }));
 
     const liveResults = await Promise.all(
@@ -1161,7 +893,7 @@ const getTeamLineupsPayload = async (
 
     const liveByMatchId = new Map(
       liveResults
-        .filter((liveMatch): liveMatch is FifaLiveMatchCore => Boolean(liveMatch?.IdMatch))
+        .filter((liveMatch): liveMatch is FifaLiveMatch => Boolean(liveMatch?.IdMatch))
         .map((liveMatch) => [liveMatch.IdMatch, liveMatch]),
     );
 
@@ -1172,13 +904,13 @@ const getTeamLineupsPayload = async (
         return [
           match.id,
           {
-            teamA: buildTeamLineupEntryCore(
+            teamA: buildTeamLineupEntry(
               match.teamA.code,
               match.teamA.lineup,
               fifaMatch,
               liveMatch?.HomeTeam,
             ),
-            teamB: buildTeamLineupEntryCore(
+            teamB: buildTeamLineupEntry(
               match.teamB.code,
               match.teamB.lineup,
               fifaMatch,
@@ -1696,6 +1428,34 @@ app.get("/api/tournament-leaders", async (req, res) => {
     res
       .status(502)
       .json({ error: error?.message || "Erro ao carregar líderes do torneio" });
+  }
+});
+
+app.get("/api/player-stats/:teamCode/:playerName", async (req, res) => {
+  try {
+    const teamCode = req.params.teamCode.toUpperCase();
+    const playerName = req.params.playerName;
+    const language =
+      typeof req.query.language === "string" && req.query.language.trim()
+        ? req.query.language.trim()
+        : DEFAULT_BROADCAST_LANGUAGE;
+
+    const aggregated = await aggregateTournamentLeaders(language);
+    const normalizedPlayerName = normalizeText(playerName);
+    const leader = aggregated.playerLeaders.find(
+      (p) => p.teamCode === teamCode && normalizeText(p.name) === normalizedPlayerName,
+    );
+
+    if (!leader) {
+      res.status(404).json({ error: "Jogador não encontrado nos líderes do torneio" });
+      return;
+    }
+
+    res.set("Cache-Control", "no-store");
+    res.json({ goals: leader.goals, yellowCards: leader.yellowCards, redCards: leader.redCards });
+  } catch (error: any) {
+    console.error("FIFA API Error in /api/player-stats:", error);
+    res.status(502).json({ error: error?.message || "Erro ao carregar estatísticas do jogador" });
   }
 });
 

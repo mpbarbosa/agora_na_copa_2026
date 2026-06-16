@@ -60,3 +60,20 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Deployment
 
 Single production instance running as a `systemd` service (`agora-na-copa-2026`) behind nginx on an AWS host. `npm run deploy` rsyncs `dist/`, `package.json`, `package-lock.json` to the host and restarts the service (no blue/green — brief downtime, in-memory caches reset). The production `.env` is preserved across deploys (not overwritten by rsync).
+
+## Design and quality guides
+
+Reference guides live in `docs/guides/`. Consult the relevant guide before making changes in that area:
+
+| Task | Guide |
+|---|---|
+| Writing or reviewing Playwright tests | `E2E_TEST_GUIDE.md` |
+| Writing or reviewing Node unit tests | `UNIT_TEST_GUIDE.md` |
+| Adding or modifying API endpoints in `server.ts` | `REST_API_GUIDE.md` |
+| Adding or modifying React UI components | `MOBILE_FIRST_GUIDE.md`, `REACT_GUIDE.md` |
+| Extracting pure logic (calculations, transformations) | `REFERENTIAL_TRANSPARENCY.md` |
+| Spotting or removing duplication | `DRY_GUIDE.md` |
+| Splitting or scoping a module's responsibilities | `HIGH_COHESION_GUIDE.md` |
+| Managing imports and inter-module dependencies | `LOW_COUPLING_GUIDE.md` |
+| Naming domain concepts or adapting FIFA API shapes | `LIGHTWEIGHT_DDD_GUIDE.md` |
+| Reviewing implementation quality of adapters and boundaries | `CODE_QUALITY_CONTROL_GUIDE.md` |

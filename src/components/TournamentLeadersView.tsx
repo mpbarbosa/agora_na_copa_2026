@@ -1,5 +1,7 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { FlagIcon } from "./FlagIcon";
+import { PlayerOverlayCard } from "./PlayerOverlayCard";
+import { getPositionLabel } from "../utils/playerDisplay";
 import type {
   TeamRef,
   TournamentLeadersResponse,
@@ -292,7 +294,6 @@ export function TournamentLeadersView({ theme, onSelectTeamLineup }: TournamentL
   const [leaders, setLeaders] = useState<TournamentLeadersResponse | null>(null);
   const [status, setStatus] = useState<LoadStatus>("loading");
   const [selectedPlayer, setSelectedPlayer] = useState<TournamentPlayerLeader | null>(null);
-
   useEffect(() => {
     let active = true;
 
@@ -321,19 +322,6 @@ export function TournamentLeadersView({ theme, onSelectTeamLineup }: TournamentL
       active = false;
     };
   }, []);
-
-  useEffect(() => {
-    if (!selectedPlayer) return;
-
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        setSelectedPlayer(null);
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [selectedPlayer]);
 
   const headingClasses = theme === "classic-light" ? "text-slate-900" : "text-white";
   const mutedClasses = theme === "classic-light" ? "text-slate-600" : "text-slate-300";
@@ -383,6 +371,7 @@ export function TournamentLeadersView({ theme, onSelectTeamLineup }: TournamentL
                 theme={theme}
                 entries={leaders.playerLeaders.topScorers}
                 valueFor={(entry) => `${entry.goals} gol${entry.goals === 1 ? "" : "s"}`}
+
                 onSelectPlayer={setSelectedPlayer}
                 onOpenTeamView={(entry) => onSelectTeamLineup(toLeaderTeamRef(entry))}
               />
@@ -393,6 +382,7 @@ export function TournamentLeadersView({ theme, onSelectTeamLineup }: TournamentL
                 theme={theme}
                 entries={leaders.playerLeaders.yellowCards}
                 valueFor={(entry) => `${entry.yellowCards} amarelo${entry.yellowCards === 1 ? "" : "s"}`}
+
                 onSelectPlayer={setSelectedPlayer}
                 onOpenTeamView={(entry) => onSelectTeamLineup(toLeaderTeamRef(entry))}
               />
@@ -403,6 +393,7 @@ export function TournamentLeadersView({ theme, onSelectTeamLineup }: TournamentL
                 theme={theme}
                 entries={leaders.playerLeaders.redCards}
                 valueFor={(entry) => `${entry.redCards} vermelho${entry.redCards === 1 ? "" : "s"}`}
+
                 onSelectPlayer={setSelectedPlayer}
                 onOpenTeamView={(entry) => onSelectTeamLineup(toLeaderTeamRef(entry))}
               />
@@ -444,163 +435,57 @@ export function TournamentLeadersView({ theme, onSelectTeamLineup }: TournamentL
       )}
 
       {selectedPlayer && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 p-4 backdrop-blur-md"
+        <PlayerOverlayCard
           id="leaders-player-overlay"
-          onClick={() => setSelectedPlayer(null)}
-        >
-          <div
-            className={`relative w-full max-w-md rounded-3xl border p-5 shadow-2xl ${
-              theme === "classic-light"
-                ? "border-slate-200 bg-white text-slate-900"
-                : "border-white/10 bg-[#121414] text-white"
-            }`}
-            onClick={(event) => event.stopPropagation()}
-          >
-            <button
-              type="button"
-              onClick={() => setSelectedPlayer(null)}
-              className={`absolute right-4 top-4 rounded-full border px-3 py-1 font-mono text-[10px] font-bold uppercase tracking-wider ${
-                theme === "classic-light"
-                  ? "border-slate-200 bg-slate-50 text-slate-700"
-                  : "border-white/10 bg-white/5 text-slate-100"
-              }`}
-            >
-              Fechar
-            </button>
-
-            <div
-              className={`mb-4 flex min-h-[240px] items-center justify-center overflow-hidden rounded-3xl border ${
-                theme === "classic-light"
-                  ? "border-slate-200 bg-slate-50"
-                  : "border-white/10 bg-[#161919]"
-              }`}
-            >
-              {selectedPlayer.pictureUrl ? (
-                <img
-                  src={selectedPlayer.pictureUrl}
-                  alt={`Foto de ${selectedPlayer.name}`}
-                  id="leaders-player-overlay-hero-image"
-                  className="h-full max-h-[320px] w-full object-contain p-3"
-                />
-              ) : (
-                <div className="flex h-full min-h-[240px] w-full items-center justify-center font-mono text-5xl font-black text-white">
-                  {getPlayerFallbackLabel(selectedPlayer.name)}
-                </div>
-              )}
-            </div>
-
-            <div className="flex items-start gap-4">
-              {selectedPlayer.pictureUrl ? (
-                <img
-                  src={selectedPlayer.pictureUrl}
-                  alt={`Foto de ${selectedPlayer.name}`}
-                  id="leaders-player-overlay-avatar-image"
-                  className="h-24 w-24 shrink-0 rounded-3xl border border-white/10 bg-black/20 object-contain p-1"
-                />
-              ) : (
-                <div className="flex h-24 w-24 shrink-0 items-center justify-center rounded-3xl border border-white/10 bg-black/20 font-mono text-2xl font-black text-white">
-                  {getPlayerFallbackLabel(selectedPlayer.name)}
-                </div>
-              )}
-
-              <div className="min-w-0 pt-1">
-                <div className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    id="btn-open-player-overlay-team-view-flag"
-                    onClick={() => {
-                      onSelectTeamLineup(toLeaderTeamRef(selectedPlayer));
-                      setSelectedPlayer(null);
-                    }}
-                    className="shrink-0 rounded transition hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-[#ffd84d]/70"
-                    aria-label={`Abrir painel completo de ${selectedPlayer.teamName}`}
-                  >
-                    <FlagIcon flag={selectedPlayer.teamFlagSvg} className="h-5 w-7 shrink-0" />
-                  </button>
-                  <p className="truncate font-anton text-xl uppercase tracking-wide">
-                    {selectedPlayer.name}
-                  </p>
-                </div>
-                <div
-                  className={`mt-2 font-archivo text-sm ${
-                    theme === "classic-light" ? "text-slate-600" : "text-slate-300"
-                  }`}
-                >
-                  <button
-                    type="button"
-                    id="btn-open-player-overlay-team-view-name"
-                    onClick={() => {
-                      onSelectTeamLineup(toLeaderTeamRef(selectedPlayer));
-                      setSelectedPlayer(null);
-                    }}
-                    className={`transition hover:opacity-80 ${
-                      theme === "classic-light"
-                        ? "hover:text-[#065f2c]"
-                        : "hover:text-[#ffd84d]"
-                    }`}
-                  >
-                    {selectedPlayer.teamName}
-                  </button>
-                  {typeof selectedPlayer.shirtNumber === "number"
-                    ? ` • Camisa ${selectedPlayer.shirtNumber}`
-                    : ""}
-                </div>
-              </div>
-            </div>
-
-            <div className="mt-5 grid grid-cols-3 gap-3">
-              {[
-                {
-                  label: "Gols",
-                  value: selectedPlayer.goals,
-                  accent: theme === "classic-light" ? "text-[#065f2c]" : "text-[#00e476]",
-                },
-                {
-                  label: "Amarelos",
-                  value: selectedPlayer.yellowCards,
-                  accent: theme === "classic-light" ? "text-[#9a6700]" : "text-[#ffd84d]",
-                },
-                {
-                  label: "Vermelhos",
-                  value: selectedPlayer.redCards,
-                  accent: theme === "classic-light" ? "text-[#9f1239]" : "text-[#ff879d]",
-                },
-              ].map((stat) => (
-                <div
-                  key={stat.label}
-                  className={`rounded-2xl border px-3 py-3 text-center ${
-                    theme === "classic-light"
-                      ? "border-slate-200 bg-slate-50"
-                      : "border-white/10 bg-white/5"
-                  }`}
-                >
-                  <p className={`font-anton text-2xl uppercase ${stat.accent}`}>{stat.value}</p>
-                  <p
-                    className={`mt-1 font-mono text-[10px] uppercase tracking-wider ${
-                      theme === "classic-light" ? "text-slate-500" : "text-slate-400"
-                    }`}
-                  >
-                    {stat.label}
-                  </p>
-                </div>
-              ))}
-            </div>
-
-            <div
-              className={`mt-4 rounded-2xl border px-4 py-4 font-archivo text-sm leading-6 ${
-                theme === "classic-light"
-                  ? "border-slate-200 bg-slate-50 text-slate-700"
-                  : "border-white/10 bg-[#161919] text-slate-100"
-              }`}
-            >
-              Destaque oficial do torneio para {selectedPlayer.teamName}. Clique fora do card ou
-              pressione <span className="font-mono">Esc</span> para fechar.
-            </div>
-          </div>
-        </div>
+          theme={theme}
+          player={{
+            name: selectedPlayer.name,
+            number: selectedPlayer.shirtNumber,
+            position: selectedPlayer.position,
+            club: selectedPlayer.club,
+            socials: selectedPlayer.socials,
+            pictureUrl: selectedPlayer.pictureUrl,
+          }}
+          teamName={selectedPlayer.teamName}
+          primaryColor={selectedPlayer.teamPrimaryColor}
+          secondaryColor={selectedPlayer.teamSecondaryColor}
+          flagSvg={selectedPlayer.teamFlagSvg}
+          onOpenTeamView={() => {
+            onSelectTeamLineup(toLeaderTeamRef(selectedPlayer));
+            setSelectedPlayer(null);
+          }}
+          stats={[
+            {
+              label: "Gols",
+              value: selectedPlayer.goals,
+              accent: theme === "classic-light" ? "text-[#065f2c]" : "text-[#00e476]",
+            },
+            {
+              label: "Amarelos",
+              value: selectedPlayer.yellowCards,
+              accent: theme === "classic-light" ? "text-[#9a6700]" : "text-[#ffd84d]",
+            },
+            {
+              label: "Vermelhos",
+              value: selectedPlayer.redCards,
+              accent: theme === "classic-light" ? "text-[#9f1239]" : "text-[#ff879d]",
+            },
+          ]}
+          details={[
+            ...(selectedPlayer.club
+              ? [{ label: "Clube atual", value: selectedPlayer.club }]
+              : []),
+            ...(selectedPlayer.position
+              ? [{ label: "Posição", value: getPositionLabel(selectedPlayer.position) }]
+              : []),
+            {
+              value: `Destaque oficial do torneio para ${selectedPlayer.teamName}.`,
+              fullWidth: true,
+            },
+          ]}
+          onClose={() => setSelectedPlayer(null)}
+        />
       )}
-
     </div>
   );
 }
