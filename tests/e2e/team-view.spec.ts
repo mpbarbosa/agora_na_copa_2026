@@ -394,9 +394,7 @@ test.describe("Team view", () => {
 
     await expect(page.locator("#team-lineup-view")).toBeVisible();
     await expect(page.locator("#team-view-matches")).toBeVisible();
-    await expect(page.locator("#team-view-standings-card")).toBeVisible();
-    await expect(page.locator("#team-view-summary-card")).toBeVisible();
-    await expect(page.locator("#team-view-performance-card")).toBeVisible();
+    await expect(page.locator("#team-view-campanha-card")).toBeVisible();
     await expect(page.locator("#team-view-leaders-card")).toBeVisible();
     await expect(page.locator("#team-view-broadcast-card")).toBeVisible();
     await expect(page.locator("#team-lineup-board-card")).toContainText("Escalação da seleção");
@@ -415,9 +413,8 @@ test.describe("Team view", () => {
 
     await expect(page.locator("#team-lineup-view")).toBeVisible();
     await expect(page.locator("#team-lineup-title")).toContainText("SELEÇÃO BRA");
-    await expect(page.locator("#team-view-performance-card")).toBeVisible();
-    await expect(page.locator("#team-performance-media-gols-pro")).toHaveText("1,5");
-    await expect(page.locator("#team-performance-media-gols-contra")).toHaveText("0,5");
+    await expect(page.locator("#team-view-campanha-card")).toBeVisible();
+    await expect(page.locator("#team-performance-aproveitamento")).toHaveText("67%");
   });
 
   test("opens the full team page from the venue hosted matches list", async ({ page }) => {
@@ -439,8 +436,7 @@ test.describe("Team view", () => {
     await page.click("#venue-hosted-match-aus-tur-2026 button[aria-label^='Ver escalação']");
 
     await expect(page.locator("#team-lineup-view")).toBeVisible();
-    await expect(page.locator("#team-view-standings-card")).toBeVisible();
-    await expect(page.locator("#team-view-performance-card")).toBeVisible();
+    await expect(page.locator("#team-view-campanha-card")).toBeVisible();
   });
 
   test("shows player social links in the player card when they are available", async ({

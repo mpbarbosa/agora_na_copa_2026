@@ -179,7 +179,7 @@ test.describe("Leaders view (Líderes)", () => {
 
     await expect(page.locator("#team-lineup-view")).toBeVisible();
     await expect(page.locator("#team-lineup-title")).toContainText("ARGENTINA");
-    await expect(page.locator("#team-view-standings-card")).toBeVisible();
+    await expect(page.locator("#team-view-campanha-card")).toBeVisible();
   });
 
   test("opens the full team page directly from a team leaderboard click", async ({ page }) => {
@@ -300,6 +300,6 @@ test.describe("Leaders view (Líderes)", () => {
 
     await expect(page.locator("#team-lineup-view")).toBeVisible();
     await expect(page.locator("#team-lineup-title")).toContainText("BRASIL");
-    await expect(page.locator("#team-view-standings-card")).toBeVisible();
+    await expect(page.locator("#team-view-campanha-card")).toBeVisible();
   });
 });

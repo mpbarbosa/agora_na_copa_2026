@@ -51,31 +51,12 @@ const getMatchHeadline = (match: TeamViewMatchSummary) => {
   return `${match.team.code} x ${match.opponent.code}`;
 };
 
-const formatDecimalMetric = (value: number) =>
-  value.toLocaleString("pt-BR", {
-    minimumFractionDigits: 1,
-    maximumFractionDigits: 1,
-  });
-
 const getPerformanceRate = (won: number, drawn: number, played: number) => {
   if (played === 0) return "0%";
   const pointsWon = won * 3 + drawn;
   const maxPoints = played * 3;
   return `${Math.round((pointsWon / maxPoints) * 100)}%`;
 };
-
-const getGoalsPerMatch = (goals: number, played: number) => {
-  if (played === 0) return "0,0";
-  return formatDecimalMetric(goals / played);
-};
-
-const metricIdFromLabel = (label: string) =>
-  label
-    .normalize("NFD")
-    .replace(/\p{Diacritic}/gu, "")
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "");
 
 function MatchSummaryCard({
   theme,
@@ -438,23 +419,6 @@ export const TeamLineupView: React.FC<TeamLineupViewProps> = ({ team, theme, onB
       : "bg-white/10 text-white hover:bg-white/15";
 
   const featuredMatch = teamView?.currentMatch ?? teamView?.nextMatch ?? null;
-  const standingsRow = teamView?.standings?.row;
-  const performanceMetrics = standingsRow
-    ? [
-        {
-          label: "Aproveitamento",
-          value: getPerformanceRate(standingsRow.won, standingsRow.drawn, standingsRow.played),
-        },
-        {
-          label: "Média gols pró",
-          value: getGoalsPerMatch(standingsRow.goalsFor, standingsRow.played),
-        },
-        {
-          label: "Média gols contra",
-          value: getGoalsPerMatch(standingsRow.goalsAgainst, standingsRow.played),
-        },
-      ]
-    : [];
 
   return (
     <div className="mx-auto mt-8 max-w-7xl px-4 2xl:max-w-[1600px]" id="team-lineup-view">
@@ -589,30 +553,79 @@ export const TeamLineupView: React.FC<TeamLineupViewProps> = ({ team, theme, onB
           </div>
 
           <div className="space-y-6">
-            <section className={`rounded-3xl border p-5 ${cardClasses}`} id="team-view-standings-card">
+            <section className={`rounded-3xl border p-5 ${cardClasses}`} id="team-view-campanha-card">
               <h3 className={`font-anton text-xl uppercase tracking-wide ${headingClasses}`}>
-                Campanha no grupo
+                Campanha
               </h3>
               {teamView.standings ? (
                 <>
                   <p className={`mt-1 font-mono text-[10px] uppercase tracking-wider ${mutedClasses}`}>
                     {teamView.standings.row.group} • {teamView.standings.rank}º de {teamView.standings.groupSize}
                   </p>
-                  <div className="mt-4 grid grid-cols-2 gap-3">
+
+                  <div className="mt-4 flex gap-3">
+                    <div className={`flex-none rounded-2xl border px-4 py-3 ${theme === "classic-light" ? "border-slate-100 bg-slate-50" : "border-white/5 bg-white/5"}`}>
+                      <p className="font-anton text-3xl text-[#00e476]">{teamView.standings.row.points}</p>
+                      <p className={`mt-1 font-mono text-[10px] uppercase tracking-wider ${mutedClasses}`}>Pontos</p>
+                    </div>
+                    <div className={`flex-1 rounded-2xl border px-4 py-3 ${theme === "classic-light" ? "border-slate-100 bg-slate-50" : "border-white/5 bg-white/5"}`}>
+                      <div className="flex h-full items-center justify-around gap-2">
+                        {[
+                          { label: "J", value: teamView.standings.row.played },
+                          { label: "V", value: teamView.standings.row.won },
+                          { label: "E", value: teamView.standings.row.drawn },
+                          { label: "D", value: teamView.standings.row.lost },
+                        ].map(({ label, value }) => (
+                          <div key={label} className="text-center">
+                            <p className="font-anton text-2xl text-[#00e476]">{value}</p>
+                            <p className={`mt-1 font-mono text-[10px] uppercase tracking-wider ${mutedClasses}`}>{label}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="mt-3 grid grid-cols-5 gap-2">
                     {[
-                      { label: "Pontos", value: teamView.standings.row.points },
-                      { label: "Jogos", value: teamView.standings.row.played },
-                      { label: "Vitórias", value: teamView.standings.row.won },
-                      { label: "Empates", value: teamView.standings.row.drawn },
-                      { label: "Derrotas", value: teamView.standings.row.lost },
-                      { label: "Saldo", value: teamView.standings.row.goalDifference },
+                      {
+                        label: "Gols pró",
+                        value: teamView.leaders.teamSummary?.goalsFor ?? teamView.standings.row.goalsFor,
+                      },
+                      {
+                        label: "Sofridos",
+                        value: teamView.leaders.teamSummary?.goalsAgainst ?? teamView.standings.row.goalsAgainst,
+                      },
+                      {
+                        label: "Saldo",
+                        value: teamView.standings.row.goalDifference > 0
+                          ? `+${teamView.standings.row.goalDifference}`
+                          : teamView.standings.row.goalDifference,
+                      },
+                      {
+                        label: "Aprov.",
+                        value: getPerformanceRate(
+                          teamView.standings.row.won,
+                          teamView.standings.row.drawn,
+                          teamView.standings.row.played,
+                        ),
+                        id: "team-performance-aproveitamento",
+                      },
+                      {
+                        label: "Clean",
+                        value: teamView.leaders.teamSummary?.cleanSheets ?? 0,
+                      },
                     ].map((stat) => (
                       <div
                         key={stat.label}
-                        className={`rounded-2xl border px-3 py-3 ${theme === "classic-light" ? "border-slate-100 bg-slate-50" : "border-white/5 bg-white/5"}`}
+                        className={`rounded-2xl border px-2 py-3 text-center ${theme === "classic-light" ? "border-slate-100 bg-slate-50" : "border-white/5 bg-white/5"}`}
                       >
-                        <p className="font-anton text-2xl text-[#00e476]">{stat.value}</p>
-                        <p className={`mt-1 font-mono text-[10px] uppercase tracking-wider ${mutedClasses}`}>
+                        <p
+                          className="font-anton text-lg text-[#00e476]"
+                          {...(stat.id ? { id: stat.id } : {})}
+                        >
+                          {stat.value}
+                        </p>
+                        <p className={`mt-1 font-mono text-[9px] uppercase tracking-wider ${mutedClasses}`}>
                           {stat.label}
                         </p>
                       </div>
@@ -621,70 +634,7 @@ export const TeamLineupView: React.FC<TeamLineupViewProps> = ({ team, theme, onB
                 </>
               ) : (
                 <p className={`mt-4 font-archivo text-sm ${mutedClasses}`}>
-                  A classificação do grupo ainda não foi montada para esta seleção.
-                </p>
-              )}
-            </section>
-
-            <section className={`rounded-3xl border p-5 ${cardClasses}`} id="team-view-summary-card">
-              <h3 className={`font-anton text-xl uppercase tracking-wide ${headingClasses}`}>
-                Resumo coletivo
-              </h3>
-              {teamView.leaders.teamSummary ? (
-                <div className="mt-4 grid grid-cols-2 gap-3">
-                  {[
-                    { label: "Jogos", value: teamView.leaders.teamSummary.matchesPlayed },
-                    { label: "Vitórias", value: teamView.leaders.teamSummary.wins },
-                    { label: "Gols pró", value: teamView.leaders.teamSummary.goalsFor },
-                    { label: "Gols contra", value: teamView.leaders.teamSummary.goalsAgainst },
-                    { label: "Clean sheets", value: teamView.leaders.teamSummary.cleanSheets },
-                  ].map((stat) => (
-                    <div
-                      key={stat.label}
-                      className={`rounded-2xl border px-3 py-3 ${theme === "classic-light" ? "border-slate-100 bg-slate-50" : "border-white/5 bg-white/5"}`}
-                    >
-                      <p className="font-anton text-2xl text-[#00e476]">{stat.value}</p>
-                      <p className={`mt-1 font-mono text-[10px] uppercase tracking-wider ${mutedClasses}`}>
-                        {stat.label}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <p className={`mt-4 font-archivo text-sm ${mutedClasses}`}>
-                  A campanha coletiva ainda está em formação, sem métricas suficientes para destacar a seleção.
-                </p>
-              )}
-            </section>
-
-            <section className={`rounded-3xl border p-5 ${cardClasses}`} id="team-view-performance-card">
-              <h3 className={`font-anton text-xl uppercase tracking-wide ${headingClasses}`}>
-                Leitura de desempenho
-              </h3>
-              {performanceMetrics.length > 0 ? (
-                <div className="mt-4 grid grid-cols-1 gap-3">
-                  {performanceMetrics.map((stat) => (
-                    <div
-                      key={stat.label}
-                      className={`rounded-2xl border px-4 py-3 ${
-                        theme === "classic-light" ? "border-slate-100 bg-slate-50" : "border-white/5 bg-white/5"
-                      }`}
-                    >
-                      <div className="flex items-center justify-between gap-4">
-                        <p className={`font-mono text-[10px] uppercase tracking-wider ${mutedClasses}`}>
-                          {stat.label}
-                        </p>
-                        <p className="font-anton text-2xl text-[#00e476]" id={`team-performance-${metricIdFromLabel(stat.label)}`}>
-                          {stat.value}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <p className={`mt-4 font-archivo text-sm leading-6 ${mutedClasses}`}>
-                  A seleção ainda não estreou ou não tem resultados suficientes para calcular o
-                  aproveitamento e as médias do torneio.
+                  Campanha em formação — aguardando os primeiros resultados.
                 </p>
               )}
             </section>
