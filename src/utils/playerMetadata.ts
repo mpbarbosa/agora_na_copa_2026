@@ -28,6 +28,13 @@ const PLAYER_METADATA: PlayerMetadataEntry[] = [
       instagram: "https://instagram.com/raminrezaeian",
     },
   },
+  {
+    teamCode: "NOR",
+    aliases: ["Erling Haaland", "Haaland", "E. Haaland"],
+    socials: {
+      instagram: "https://instagram.com/erling",
+    },
+  },
 ];
 
 export const getPlayerMetadataSupplement = (teamCode: string, playerName: string) => {
