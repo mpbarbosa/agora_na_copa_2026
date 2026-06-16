@@ -178,3 +178,22 @@
 .scrollbar-hidden::-webkit-scrollbar {
   display: none;
 }
+
+@keyframes shimmer-foil {
+  0%   { background-position: 200% center; }
+  100% { background-position: -200% center; }
+}
+
+.sticker-foil-overlay {
+  background: linear-gradient(
+    108deg,
+    transparent 15%,
+    rgba(255, 223, 0, 0.22) 28%,
+    rgba(255, 255, 255, 0.55) 38%,
+    rgba(173, 216, 255, 0.25) 46%,
+    rgba(255, 223, 0, 0.18) 55%,
+    transparent 68%
+  );
+  background-size: 250% 100%;
+  animation: shimmer-foil 2.8s linear infinite;
+}

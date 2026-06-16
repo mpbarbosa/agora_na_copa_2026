@@ -58,6 +58,17 @@ const POSITION_COLORS: Record<string, string> = {
   FW: "#ef4444",
 };
 
+const LEGEND_IDS = new Set([
+  "a9",   // Lionel Messi
+  "b10",  // Vinicius Jr
+  "b12",  // Neymar Jr
+  "eg11", // Mohamed Salah
+  "es9",  // Lamine Yamal
+  "f10",  // Kylian Mbappé
+  "ir11", // Mehdi Taremi
+  "p10",  // Cristiano Ronaldo
+]);
+
 interface PlayerCardProps {
   player: Player;
   primaryColor: string;
@@ -68,6 +79,7 @@ const PlayerCard: React.FC<PlayerCardProps> = ({ player, primaryColor, secondary
   const posColor = POSITION_COLORS[player.position] ?? "#6b7280";
   const hasPhoto = Boolean(player.pictureUrl);
   const hasInstagram = Boolean(player.socials?.instagram);
+  const isLegend = LEGEND_IDS.has(player.id);
   const initials = player.name.split(" ").map((w) => w[0]).join("").slice(0, 2).toUpperCase();
 
   if (!hasPhoto) {
@@ -123,16 +135,25 @@ const PlayerCard: React.FC<PlayerCardProps> = ({ player, primaryColor, secondary
   }
 
   // ── Filled sticker card ──────────────────────────────────────────────────
+  const borderColor = isLegend ? "#b8860b" : "#000";
+  const shadowColor = isLegend ? "#b8860b" : "#000";
+
   return (
     <div
-      className="relative flex flex-col bg-white border-2 border-black rounded-sm overflow-hidden"
-      style={{ boxShadow: "4px 4px 0 #000" }}
+      className="relative flex flex-col bg-white rounded-sm overflow-hidden"
+      style={{
+        border: `2px solid ${borderColor}`,
+        boxShadow: `4px 4px 0 ${shadowColor}`,
+      }}
       id={`jogador-card-${player.id}`}
     >
       {/* Photo area with sticker inner frame */}
       <div
         className="relative w-full aspect-[3/4] overflow-hidden p-[5px]"
-        style={{ background: "#e8e6e3", borderBottom: "2px solid #000" }}
+        style={{
+          background: isLegend ? "linear-gradient(145deg, #fef9e7, #e8e6e3)" : "#e8e6e3",
+          borderBottom: `2px solid ${borderColor}`,
+        }}
       >
         <PlayerPortrait
           player={player}
@@ -143,24 +164,48 @@ const PlayerCard: React.FC<PlayerCardProps> = ({ player, primaryColor, secondary
           fallbackTextClassName="text-4xl"
         />
 
+        {/* Foil shimmer overlay for legends */}
+        {isLegend && (
+          <div
+            className="sticker-foil-overlay absolute inset-0 rounded-[2px] pointer-events-none"
+            aria-hidden="true"
+          />
+        )}
+
         {/* Circular number badge — bottom-left, team color */}
         <div
-          className="absolute bottom-2 left-2 w-7 h-7 rounded-full border-2 border-black flex items-center justify-center font-anton text-[11px] text-white leading-none"
-          style={{ background: primaryColor, boxShadow: "1px 1px 0 #000" }}
+          className="absolute bottom-2 left-2 w-7 h-7 rounded-full flex items-center justify-center font-anton text-[11px] text-white leading-none"
+          style={{
+            background: primaryColor,
+            border: `2px solid ${borderColor}`,
+            boxShadow: `1px 1px 0 ${shadowColor}`,
+          }}
         >
           {player.number}
         </div>
 
         {/* Position badge — top-right */}
         <div
-          className="absolute top-2 right-2 font-mono text-[9px] font-bold leading-none px-1.5 py-0.5 text-white border border-black"
-          style={{ background: posColor, boxShadow: "1px 1px 0 #000" }}
+          className="absolute top-2 right-2 font-mono text-[9px] font-bold leading-none px-1.5 py-0.5 text-white"
+          style={{
+            background: posColor,
+            border: `1px solid ${borderColor}`,
+            boxShadow: `1px 1px 0 ${shadowColor}`,
+          }}
         >
           {player.position}
         </div>
 
-        {/* Instagram indicator — top-left */}
-        {hasInstagram && (
+        {/* Legend crown badge — top-left (replaces IG when legend) */}
+        {isLegend ? (
+          <div
+            className="absolute top-2 left-2 w-5 h-5 flex items-center justify-center rounded-full bg-[#ffd700] text-[10px] leading-none"
+            style={{ border: "1.5px solid #b8860b", boxShadow: "1px 1px 0 #b8860b" }}
+            title="Lenda"
+          >
+            ★
+          </div>
+        ) : hasInstagram ? (
           <div
             className="absolute top-2 left-2 w-5 h-5 flex items-center justify-center border border-black bg-white rounded-full"
             style={{ boxShadow: "1px 1px 0 #000" }}
@@ -168,7 +213,7 @@ const PlayerCard: React.FC<PlayerCardProps> = ({ player, primaryColor, secondary
           >
             <InstagramBrandIcon size={11} />
           </div>
-        )}
+        ) : null}
       </div>
 
       {/* Info area */}
@@ -187,7 +232,15 @@ const PlayerCard: React.FC<PlayerCardProps> = ({ player, primaryColor, secondary
       </div>
 
       {/* Team color accent strip */}
-      <div className="h-1.5 w-full mt-auto border-t border-black" style={{ background: primaryColor }} />
+      <div
+        className="h-1.5 w-full mt-auto"
+        style={{
+          background: isLegend
+            ? "linear-gradient(90deg, #b8860b, #ffd700, #b8860b)"
+            : primaryColor,
+          borderTop: `2px solid ${borderColor}`,
+        }}
+      />
     </div>
   );
 };
