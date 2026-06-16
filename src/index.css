@@ -50,6 +50,15 @@
   background: rgba(255, 255, 255, 0.2);
 }
 
+.scrollbar-hidden {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hidden::-webkit-scrollbar {
+  display: none;
+}
+
 .venue-map-surface .leaflet-container {
   font-family: var(--font-mono);
 }

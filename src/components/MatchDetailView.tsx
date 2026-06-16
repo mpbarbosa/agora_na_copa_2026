@@ -24,7 +24,16 @@ import { getPlayerMetadataSupplement } from "../utils/playerMetadata";
 import { InstagramBrandIcon } from "./InstagramBrandIcon";
 import { FlagIcon } from "./FlagIcon";
 import { PitchLineup } from "./PitchLineup";
-import { MapPin, Settings, Edit3, Goal, ShieldAlert, CircleDot } from "lucide-react";
+import {
+  MapPin,
+  Settings,
+  Edit3,
+  Goal,
+  ShieldAlert,
+  CircleDot,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
 
 // Header match-selector groups, split by match status
 const MATCH_STATUS_GROUPS: { status: MatchStatus; label: string }[] = [
@@ -435,6 +444,7 @@ export function MatchDetailView({
     useState<IncidentPlayerSelection | null>(null);
   const [expandedIncidentPlayer, setExpandedIncidentPlayer] = useState<Player | null>(null);
   const simulatedMatchStatesRef = useRef(simulatedMatchStates);
+  const matchSelectorRailRefs = useRef<Record<string, HTMLDivElement | null>>({});
   useEffect(() => {
     simulatedMatchStatesRef.current = simulatedMatchStates;
   }, [simulatedMatchStates]);
@@ -471,6 +481,19 @@ export function MatchDetailView({
       ? "FIFA oficial"
       : "Fallback local";
   const currentMatchGroupLabel = getMatchGroupLabel(currentMatch);
+  const headerMatchGroups = HEADER_MATCH_STATUS_GROUPS.map(({ status, label }) => ({
+    status,
+    label,
+    matches: matches
+      .filter((match) => match.status === status)
+      .sort(
+        (a, b) =>
+          new Date(a.kickoffTimestamp).getTime() -
+          new Date(b.kickoffTimestamp).getTime(),
+      ),
+  })).filter(({ matches: statusMatches }) => statusMatches.length > 0);
+  const hasLiveHeaderGroup = headerMatchGroups.some(({ status }) => status === "LIVE");
+  const hasUpcomingHeaderGroup = headerMatchGroups.some(({ status }) => status === "PRE_GAME");
   const selectedIncidentPlayerSocials = selectedIncidentPlayer
     ? getPlayerSocialEntries(selectedIncidentPlayer.player)
     : [];
@@ -492,6 +515,48 @@ export function MatchDetailView({
     theme === "classic-light"
       ? "border-slate-200 bg-slate-50"
       : "border-white/10 bg-white/5";
+
+  const setMatchSelectorRailRef = (railKey: string, node: HTMLDivElement | null) => {
+    if (node) {
+      matchSelectorRailRefs.current[railKey] = node;
+      return;
+    }
+
+    delete matchSelectorRailRefs.current[railKey];
+  };
+
+  const scrollMatchSelectorRail = (railKey: string, direction: "prev" | "next") => {
+    const rail = matchSelectorRailRefs.current[railKey];
+    if (!rail) {
+      return;
+    }
+
+    const offset = Math.max(rail.clientWidth * 0.72, 180);
+    rail.scrollBy({
+      left: direction === "next" ? offset : -offset,
+      behavior: "smooth",
+    });
+  };
+
+  useEffect(() => {
+    for (const rail of Object.values(matchSelectorRailRefs.current) as Array<
+      HTMLDivElement | null
+    >) {
+      const selectedButton = rail?.querySelector<HTMLButtonElement>(
+        `#btn-match-${selectedMatchId}`,
+      );
+      if (!selectedButton) {
+        continue;
+      }
+
+      selectedButton.scrollIntoView({
+        behavior: "smooth",
+        block: "nearest",
+        inline: "center",
+      });
+      return;
+    }
+  }, [selectedMatchId]);
 
   const renderIncidentText = (incident: CommentaryEvent): ReactNode => {
     const renderablePlayers = buildIncidentPlayerSelections(
@@ -1002,29 +1067,25 @@ export function MatchDetailView({
         }`}
         id="match-selector-bar"
       >
-        <div className="max-w-7xl mx-auto px-4 py-3.5 flex flex-wrap items-center justify-between gap-4">
+        <div className="max-w-7xl mx-auto px-4 py-3.5 flex flex-wrap items-start justify-between gap-4">
           {/* Match selector groups, split by status: live / upcoming */}
           <div
-            className="flex flex-wrap items-center gap-4"
+            className={`grid min-w-0 flex-1 gap-3 ${
+              hasLiveHeaderGroup && hasUpcomingHeaderGroup
+                ? "xl:grid-cols-[max-content_minmax(0,1fr)] xl:items-start"
+                : ""
+            }`}
             id="match-selector-groups"
           >
-            {HEADER_MATCH_STATUS_GROUPS.map(({ status, label }) => {
-              const group = matches
-                .filter((m) => m.status === status)
-                .sort(
-                  (a, b) =>
-                    new Date(a.kickoffTimestamp).getTime() -
-                    new Date(b.kickoffTimestamp).getTime(),
-                );
-              if (group.length === 0) return null;
+            {headerMatchGroups.map(({ status, label, matches: group }) => {
               return (
                 <div
-                  className="flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-2"
+                  className={`grid min-w-0 gap-1 ${status === "LIVE" ? "xl:w-fit" : ""}`}
                   id={`match-group-${status}`}
                   key={status}
                 >
                   <span
-                    className={`shrink-0 font-mono text-xs font-bold uppercase tracking-wider sm:w-[132px] ${
+                    className={`shrink-0 font-mono text-xs font-bold uppercase tracking-wider ${
                       theme === "classic-light"
                         ? "text-slate-700"
                         : "text-slate-100"
@@ -1032,46 +1093,111 @@ export function MatchDetailView({
                   >
                     {label}
                   </span>
-                  <div
-                    className={`flex items-center rounded-lg border p-1 ${
-                      theme === "classic-light"
-                        ? "bg-slate-100 border-slate-200"
-                        : "bg-white/10 border-white/15"
-                    }`}
-                    id={`match-selector-chips-${status}`}
-                  >
-                    {group.map((m) => (
+                  {status === "LIVE" ? (
+                    <div
+                      className={`flex min-w-0 flex-wrap items-center gap-1 rounded-lg border p-1 xl:w-fit ${
+                        theme === "classic-light"
+                          ? "bg-slate-100 border-slate-200"
+                          : "bg-white/10 border-white/15"
+                      }`}
+                      id={`match-selector-chips-${status}`}
+                    >
+                      {group.map((m) => (
+                        <button
+                          key={m.id}
+                          id={`btn-match-${m.id}`}
+                          onClick={() => handleSelectMatch(m.id)}
+                          title={`${formatCountryNameForTooltip(m.teamA.name)} x ${formatCountryNameForTooltip(m.teamB.name)}`}
+                          aria-label={`${formatCountryNameForTooltip(m.teamA.name)} x ${formatCountryNameForTooltip(m.teamB.name)}`}
+                          className={`shrink-0 px-3.5 py-2 rounded-md text-[13px] md:text-sm leading-none font-anton transition-all uppercase tracking-wide ${
+                            selectedMatchId === m.id
+                              ? theme === "classic-light"
+                                ? "bg-white text-slate-950 shadow-sm font-semibold"
+                                : "bg-[#171a1c] text-[#ffd84d] shadow-sm font-semibold"
+                              : theme === "classic-light"
+                                ? "text-slate-700 hover:bg-white hover:text-slate-950"
+                                : "text-slate-100 hover:bg-white/10 hover:text-white"
+                          }`}
+                        >
+                          <span className="inline-flex items-center gap-1.5">
+                            <span>{m.teamA.code}</span>
+                            <span>x</span>
+                            <span>{m.teamB.code}</span>
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="flex min-w-0 items-center gap-2">
                       <button
-                        key={m.id}
-                        id={`btn-match-${m.id}`}
-                        onClick={() => handleSelectMatch(m.id)}
-                        title={`${formatCountryNameForTooltip(m.teamA.name)} x ${formatCountryNameForTooltip(m.teamB.name)}`}
-                        aria-label={`${formatCountryNameForTooltip(m.teamA.name)} x ${formatCountryNameForTooltip(m.teamB.name)}`}
-                        className={`px-3.5 py-2 rounded-md text-[13px] md:text-sm leading-none font-anton transition-all uppercase tracking-wide ${
-                          selectedMatchId === m.id
-                            ? theme === "classic-light"
-                              ? "bg-white text-slate-950 shadow-sm font-semibold"
-                              : "bg-[#171a1c] text-[#ffd84d] shadow-sm font-semibold"
-                            : theme === "classic-light"
-                              ? "text-slate-700 hover:bg-white hover:text-slate-950"
-                              : "text-slate-100 hover:bg-white/10 hover:text-white"
+                        type="button"
+                        onClick={() => scrollMatchSelectorRail(status, "prev")}
+                        className={`hidden h-9 w-9 shrink-0 items-center justify-center rounded-full border md:inline-flex ${
+                          theme === "classic-light"
+                            ? "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
+                            : "border-white/10 bg-[#171a1c] text-slate-100 hover:bg-white/10"
                         }`}
+                        aria-label={`Ver jogos anteriores em ${label.toLowerCase()}`}
                       >
-                        <span className="inline-flex items-center gap-1.5">
-                          <span>{m.teamA.code}</span>
-                          <span>x</span>
-                          <span>{m.teamB.code}</span>
-                        </span>
+                        <ChevronLeft size={16} />
                       </button>
-                    ))}
-                  </div>
+                      <div className="relative min-w-0 flex-1">
+                        <div
+                          ref={(node) => setMatchSelectorRailRef(status, node)}
+                          className={`match-selector-rail scrollbar-hidden flex min-w-0 max-w-full snap-x snap-mandatory flex-nowrap items-center gap-1 overflow-x-auto rounded-lg border p-1 scroll-smooth ${
+                            theme === "classic-light"
+                              ? "bg-slate-100 border-slate-200"
+                              : "bg-white/10 border-white/15"
+                          }`}
+                          id={`match-selector-chips-${status}`}
+                        >
+                          {group.map((m) => (
+                            <button
+                              key={m.id}
+                              id={`btn-match-${m.id}`}
+                              onClick={() => handleSelectMatch(m.id)}
+                              title={`${formatCountryNameForTooltip(m.teamA.name)} x ${formatCountryNameForTooltip(m.teamB.name)}`}
+                              aria-label={`${formatCountryNameForTooltip(m.teamA.name)} x ${formatCountryNameForTooltip(m.teamB.name)}`}
+                              className={`shrink-0 snap-center px-3.5 py-2 rounded-md text-[13px] md:text-sm leading-none font-anton transition-all uppercase tracking-wide ${
+                                selectedMatchId === m.id
+                                  ? theme === "classic-light"
+                                    ? "bg-white text-slate-950 shadow-sm font-semibold"
+                                    : "bg-[#171a1c] text-[#ffd84d] shadow-sm font-semibold"
+                                  : theme === "classic-light"
+                                    ? "text-slate-700 hover:bg-white hover:text-slate-950"
+                                    : "text-slate-100 hover:bg-white/10 hover:text-white"
+                              }`}
+                            >
+                              <span className="inline-flex items-center gap-1.5">
+                                <span>{m.teamA.code}</span>
+                                <span>x</span>
+                                <span>{m.teamB.code}</span>
+                              </span>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => scrollMatchSelectorRail(status, "next")}
+                        className={`hidden h-9 w-9 shrink-0 items-center justify-center rounded-full border md:inline-flex ${
+                          theme === "classic-light"
+                            ? "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
+                            : "border-white/10 bg-[#171a1c] text-slate-100 hover:bg-white/10"
+                        }`}
+                        aria-label={`Ver próximos jogos em ${label.toLowerCase()}`}
+                      >
+                        <ChevronRight size={16} />
+                      </button>
+                    </div>
+                  )}
                 </div>
               );
             })}
           </div>
 
           {/* Match Detail Controls */}
-          <div className="flex items-center space-x-2" id="match-detail-actions">
+          <div className="flex shrink-0 items-center space-x-2" id="match-detail-actions">
             {/* Config Mode Toggle */}
             <button
               id="btn-edit-match"
@@ -1750,7 +1876,7 @@ export function MatchDetailView({
 
                 return (
                   <div
-                    className={`mt-4 flex flex-col gap-1 rounded-2xl border px-4 py-3 sm:flex-row sm:items-center sm:gap-2 ${
+                    className={`mt-4 flex flex-col gap-1 rounded-2xl border px-4 py-3 xl:flex-row xl:items-center xl:gap-2 ${
                       theme === "classic-light"
                         ? "bg-slate-50 border-slate-200"
                         : "bg-[#121414]/70 border-white/10"
@@ -1758,7 +1884,7 @@ export function MatchDetailView({
                     id="finished-match-bar"
                   >
                     <span
-                      className={`shrink-0 font-mono text-xs font-bold uppercase tracking-wider sm:w-[132px] ${
+                      className={`shrink-0 font-mono text-xs font-bold uppercase tracking-wider ${
                         theme === "classic-light"
                           ? "text-slate-700"
                           : "text-slate-100"
@@ -1766,38 +1892,81 @@ export function MatchDetailView({
                     >
                       Jogos concluídos:
                     </span>
-                    <div
-                      className={`flex flex-wrap items-center rounded-lg border p-1 ${
-                        theme === "classic-light"
-                          ? "bg-white border-slate-200"
-                          : "bg-white/10 border-white/15"
-                      }`}
-                      id="match-selector-chips-finished"
-                    >
-                      {finishedMatches.map((m) => (
-                        <button
-                          key={m.id}
-                          id={`btn-match-${m.id}`}
-                          onClick={() => handleSelectMatch(m.id)}
-                          title={`${formatCountryNameForTooltip(m.teamA.name)} x ${formatCountryNameForTooltip(m.teamB.name)}`}
-                          aria-label={`${formatCountryNameForTooltip(m.teamA.name)} x ${formatCountryNameForTooltip(m.teamB.name)}`}
-                          className={`px-3.5 py-2 rounded-md text-[13px] md:text-sm leading-none font-anton transition-all uppercase tracking-wide ${
-                            selectedMatchId === m.id
-                              ? theme === "classic-light"
-                                ? "bg-white text-slate-950 shadow-sm font-semibold"
-                                : "bg-[#171a1c] text-[#ffd84d] shadow-sm font-semibold"
-                              : theme === "classic-light"
-                                ? "text-slate-700 hover:bg-slate-50 hover:text-slate-950"
-                                : "text-slate-100 hover:bg-white/10 hover:text-white"
+                    <div className="flex min-w-0 items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => scrollMatchSelectorRail("finished", "prev")}
+                        className={`hidden h-9 w-9 shrink-0 items-center justify-center rounded-full border md:inline-flex ${
+                          theme === "classic-light"
+                            ? "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
+                            : "border-white/10 bg-[#171a1c] text-slate-100 hover:bg-white/10"
+                        }`}
+                        aria-label="Ver jogos concluídos anteriores"
+                      >
+                        <ChevronLeft size={16} />
+                      </button>
+                      <div className="relative min-w-0 flex-1">
+                        <div
+                          className={`pointer-events-none absolute inset-y-1 left-0 z-10 hidden w-6 rounded-l-lg md:block ${
+                            theme === "classic-light"
+                              ? "bg-gradient-to-r from-slate-50 via-slate-50/90 to-transparent"
+                              : "bg-gradient-to-r from-[#121414] via-[#121414]/90 to-transparent"
                           }`}
+                        />
+                        <div
+                          className={`pointer-events-none absolute inset-y-1 right-0 z-10 hidden w-6 rounded-r-lg md:block ${
+                            theme === "classic-light"
+                              ? "bg-gradient-to-l from-slate-50 via-slate-50/90 to-transparent"
+                              : "bg-gradient-to-l from-[#121414] via-[#121414]/90 to-transparent"
+                          }`}
+                        />
+                        <div
+                          ref={(node) => setMatchSelectorRailRef("finished", node)}
+                          className={`flex min-w-0 max-w-full snap-x snap-mandatory flex-nowrap items-center gap-1 overflow-x-auto rounded-lg border p-1 scroll-smooth ${
+                            theme === "classic-light"
+                              ? "bg-white border-slate-200"
+                              : "bg-white/10 border-white/15"
+                          }`}
+                          id="match-selector-chips-finished"
                         >
-                          <span className="inline-flex items-center gap-1.5">
-                            <span>{m.teamA.code}</span>
-                            <span>x</span>
-                            <span>{m.teamB.code}</span>
-                          </span>
-                        </button>
-                      ))}
+                          {finishedMatches.map((m) => (
+                            <button
+                              key={m.id}
+                              id={`btn-match-${m.id}`}
+                              onClick={() => handleSelectMatch(m.id)}
+                              title={`${formatCountryNameForTooltip(m.teamA.name)} x ${formatCountryNameForTooltip(m.teamB.name)}`}
+                              aria-label={`${formatCountryNameForTooltip(m.teamA.name)} x ${formatCountryNameForTooltip(m.teamB.name)}`}
+                              className={`shrink-0 snap-center px-3.5 py-2 rounded-md text-[13px] md:text-sm leading-none font-anton transition-all uppercase tracking-wide ${
+                                selectedMatchId === m.id
+                                  ? theme === "classic-light"
+                                    ? "bg-white text-slate-950 shadow-sm font-semibold"
+                                    : "bg-[#171a1c] text-[#ffd84d] shadow-sm font-semibold"
+                                  : theme === "classic-light"
+                                    ? "text-slate-700 hover:bg-slate-50 hover:text-slate-950"
+                                    : "text-slate-100 hover:bg-white/10 hover:text-white"
+                              }`}
+                            >
+                              <span className="inline-flex items-center gap-1.5">
+                                <span>{m.teamA.code}</span>
+                                <span>x</span>
+                                <span>{m.teamB.code}</span>
+                              </span>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => scrollMatchSelectorRail("finished", "next")}
+                        className={`hidden h-9 w-9 shrink-0 items-center justify-center rounded-full border md:inline-flex ${
+                          theme === "classic-light"
+                            ? "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
+                            : "border-white/10 bg-[#171a1c] text-slate-100 hover:bg-white/10"
+                        }`}
+                        aria-label="Ver próximos jogos concluídos"
+                      >
+                        <ChevronRight size={16} />
+                      </button>
                     </div>
                   </div>
                 );
