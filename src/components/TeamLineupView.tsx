@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import type {
   Broadcaster,
+  CountryInfoResponse,
   TeamRef,
   TeamViewMatchSummary,
   TeamViewResponse,
@@ -278,9 +279,101 @@ function BroadcasterList({
   );
 }
 
+const formatPopulation = (n: number) => {
+  if (n >= 1_000_000) {
+    return `${(n / 1_000_000).toLocaleString("pt-BR", { maximumFractionDigits: 1 })} mi`;
+  }
+  return n.toLocaleString("pt-BR");
+};
+
+const formatArea = (n: number) =>
+  `${Math.round(n).toLocaleString("pt-BR")} km²`;
+
+function CountryInfoCard({
+  theme,
+  info,
+}: {
+  theme: TeamLineupViewProps["theme"];
+  info: CountryInfoResponse;
+}) {
+  const mutedClasses = theme === "classic-light" ? "text-slate-600" : "text-slate-300";
+  const headingClasses = theme === "classic-light" ? "text-slate-900" : "text-white";
+  const pillClasses =
+    theme === "classic-light"
+      ? "border-slate-100 bg-slate-50"
+      : "border-white/5 bg-white/5";
+  const divider = theme === "classic-light" ? "border-slate-100" : "border-white/10";
+
+  const truncatedExtract =
+    info.extract.length > 420 ? `${info.extract.slice(0, 420).trimEnd()}…` : info.extract;
+
+  const facts = [
+    info.capital ? { label: "Capital", value: info.capital } : null,
+    info.population ? { label: "População", value: formatPopulation(info.population) } : null,
+    info.areaSqKm ? { label: "Área", value: formatArea(info.areaSqKm) } : null,
+  ].filter(Boolean) as { label: string; value: string }[];
+
+  return (
+    <section
+      className={`rounded-3xl border p-5 ${theme === "classic-light" ? "bg-white border-slate-200 shadow-sm" : "bg-[#121414] border-white/10"}`}
+      id="team-view-country-card"
+    >
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <h3 className={`font-anton text-xl uppercase tracking-wide ${headingClasses}`}>
+            Sobre o País
+          </h3>
+          <p className={`mt-1 font-mono text-[10px] uppercase tracking-wider ${mutedClasses}`}>
+            {info.description}
+          </p>
+        </div>
+        {info.thumbnailUrl && (
+          <img
+            src={info.thumbnailUrl}
+            alt={`Imagem de ${info.code}`}
+            className={`h-16 w-16 shrink-0 rounded-2xl border object-cover ${divider}`}
+            loading="lazy"
+          />
+        )}
+      </div>
+
+      {facts.length > 0 && (
+        <div className="mt-4 grid grid-cols-3 gap-2">
+          {facts.map((f) => (
+            <div key={f.label} className={`rounded-2xl border px-3 py-3 ${pillClasses}`}>
+              <p className="font-anton text-base text-[#00e476]">{f.value}</p>
+              <p className={`mt-1 font-mono text-[10px] uppercase tracking-wider ${mutedClasses}`}>
+                {f.label}
+              </p>
+            </div>
+          ))}
+        </div>
+      )}
+
+      <p className={`mt-4 font-archivo text-sm leading-6 ${mutedClasses}`}>
+        {truncatedExtract}
+      </p>
+
+      <a
+        href={info.wikipediaUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        className={`mt-4 inline-flex rounded-full border px-4 py-2 font-mono text-[10px] font-bold uppercase tracking-wider transition ${
+          theme === "classic-light"
+            ? "border-slate-200 bg-slate-100 text-slate-700 hover:bg-slate-200"
+            : "border-white/10 bg-white/10 text-white hover:bg-white/15"
+        }`}
+      >
+        Ler mais na Wikipédia
+      </a>
+    </section>
+  );
+}
+
 export const TeamLineupView: React.FC<TeamLineupViewProps> = ({ team, theme, onBack }) => {
   const [teamView, setTeamView] = useState<TeamViewResponse | null>(null);
   const [status, setStatus] = useState<LoadStatus>("loading");
+  const [countryInfo, setCountryInfo] = useState<CountryInfoResponse | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -316,6 +409,18 @@ export const TeamLineupView: React.FC<TeamLineupViewProps> = ({ team, theme, onB
     return () => {
       active = false;
     };
+  }, [team.code]);
+
+  useEffect(() => {
+    let active = true;
+    setCountryInfo(null);
+
+    fetch(`/api/country-info/${encodeURIComponent(team.code)}`)
+      .then((r) => (r.ok ? r.json() : Promise.reject(r.status)))
+      .then((data: CountryInfoResponse) => { if (active) setCountryInfo(data); })
+      .catch(() => {/* silently skip — country card is decorative */});
+
+    return () => { active = false; };
   }, [team.code]);
 
   const cardClasses =
@@ -637,6 +742,10 @@ export const TeamLineupView: React.FC<TeamLineupViewProps> = ({ team, theme, onB
                 </a>
               )}
             </section>
+
+            {countryInfo && (
+              <CountryInfoCard theme={theme} info={countryInfo} />
+            )}
           </div>
         </div>
       ) : null}
