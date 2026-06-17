@@ -2361,10 +2361,146 @@
     "fifaId": "448252",
     "teamCode": "ARG",
     "name": "Enzo F.",
+    "fullName": "Enzo Fernández",
     "number": 24,
     "position": "MF",
     "club": "Chelsea",
     "pictureUrl": "https://digitalhub.fifa.com/transform/b88c6da2-28db-4d61-a668-ac8e84114063/FERNANDEZ-Enzo_448252"
+  },
+  "ARG-1": {
+    "fifaId": "ARG-1",
+    "teamCode": "ARG",
+    "name": "W. Benítez",
+    "fullName": "Walter Benítez",
+    "number": 1,
+    "position": "GK",
+    "club": "PSG"
+  },
+  "ARG-2": {
+    "fifaId": "ARG-2",
+    "teamCode": "ARG",
+    "name": "Montiel",
+    "fullName": "Gonzalo Montiel",
+    "number": 2,
+    "position": "DF",
+    "club": "Nottingham Forest"
+  },
+  "ARG-4": {
+    "fifaId": "ARG-4",
+    "teamCode": "ARG",
+    "name": "N. Pérez",
+    "fullName": "Nehuén Pérez",
+    "number": 4,
+    "position": "DF",
+    "club": "Atlético Madrid"
+  },
+  "ARG-5": {
+    "fifaId": "ARG-5",
+    "teamCode": "ARG",
+    "name": "Paredes",
+    "fullName": "Leandro Paredes",
+    "number": 5,
+    "position": "MF",
+    "club": "Roma"
+  },
+  "ARG-6": {
+    "fifaId": "ARG-6",
+    "teamCode": "ARG",
+    "name": "L. Martínez",
+    "fullName": "Lisandro Martínez",
+    "number": 6,
+    "position": "DF",
+    "club": "Manchester United"
+  },
+  "ARG-8": {
+    "fifaId": "ARG-8",
+    "teamCode": "ARG",
+    "name": "G. Rodríguez",
+    "fullName": "Guido Rodríguez",
+    "number": 8,
+    "position": "MF",
+    "club": "Real Betis"
+  },
+  "ARG-11": {
+    "fifaId": "ARG-11",
+    "teamCode": "ARG",
+    "name": "Garnacho",
+    "fullName": "Alejandro Garnacho",
+    "number": 11,
+    "position": "FW",
+    "club": "Manchester United"
+  },
+  "ARG-12": {
+    "fifaId": "ARG-12",
+    "teamCode": "ARG",
+    "name": "Rulli",
+    "fullName": "Gerónimo Rulli",
+    "number": 12,
+    "position": "GK",
+    "club": "Atlético Madrid"
+  },
+  "ARG-14": {
+    "fifaId": "ARG-14",
+    "teamCode": "ARG",
+    "name": "Palacios",
+    "fullName": "Exequiel Palacios",
+    "number": 14,
+    "position": "MF",
+    "club": "Bayer Leverkusen"
+  },
+  "ARG-15": {
+    "fifaId": "ARG-15",
+    "teamCode": "ARG",
+    "name": "N. González",
+    "fullName": "Nicolás González",
+    "number": 15,
+    "position": "FW",
+    "club": "Juventus"
+  },
+  "ARG-16": {
+    "fifaId": "ARG-16",
+    "teamCode": "ARG",
+    "name": "Acuña",
+    "fullName": "Marcos Acuña",
+    "number": 16,
+    "position": "DF",
+    "club": "Sevilla"
+  },
+  "ARG-17": {
+    "fifaId": "ARG-17",
+    "teamCode": "ARG",
+    "name": "Lo Celso",
+    "fullName": "Giovani Lo Celso",
+    "number": 17,
+    "position": "MF",
+    "club": "Villarreal"
+  },
+  "ARG-18": {
+    "fifaId": "ARG-18",
+    "teamCode": "ARG",
+    "name": "Almada",
+    "fullName": "Thiago Almada",
+    "number": 18,
+    "position": "MF",
+    "club": "Lyon"
+  },
+  "ARG-21": {
+    "fifaId": "ARG-21",
+    "teamCode": "ARG",
+    "name": "F. Medina",
+    "fullName": "Facundo Medina",
+    "number": 21,
+    "position": "DF",
+    "club": "RC Lens"
+  },
+  "ARG-25": {
+    "fifaId": "ARG-25",
+    "teamCode": "ARG",
+    "name": "Carboni",
+    "fullName": "Valentín Carboni",
+    "number": 25,
+    "position": "FW",
+    "club": "Inter Milan"
   },
   "448332": {
     "fifaId": "448332",
