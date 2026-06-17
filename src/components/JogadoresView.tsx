@@ -2,7 +2,7 @@ import React, { useMemo, useState } from "react";
 import { APP_MATCHES } from "../appMatches";
 import type { Player, TeamRef } from "../types";
 import { FlagIcon } from "./FlagIcon";
-import { PlayerPortrait, PlayerOverlayCard, getPlayerAge } from "./PlayerOverlayCard";
+import { PlayerPortrait, PlayerOverlayCard, PlayerPictureOverlay, getPlayerAge } from "./PlayerOverlayCard";
 import { InstagramBrandIcon } from "./InstagramBrandIcon";
 import { getPositionLabel } from "../utils/playerDisplay";
 
@@ -332,6 +332,7 @@ const TeamSection: React.FC<TeamSectionProps> = ({ team, theme, onPlayerClick, o
 export function JogadoresView({ theme, onSelectTeamLineup }: JogadoresViewProps) {
   const teams = useMemo(() => extractTeams(), []);
   const [selected, setSelected] = useState<SelectedContext | null>(null);
+  const [expandedPlayer, setExpandedPlayer] = useState<Player | null>(null);
 
   const groups = useMemo(() => {
     const map = new Map<string, TeamEntry[]>();
@@ -416,10 +417,18 @@ export function JogadoresView({ theme, onSelectTeamLineup }: JogadoresViewProps)
               : []),
           ]}
           onClose={() => setSelected(null)}
+          onOpenPicture={() => setExpandedPlayer(selected.player)}
           onOpenTeamView={() => {
             onSelectTeamLineup(toTeamRef(selected.team));
             setSelected(null);
           }}
+        />
+      )}
+
+      {expandedPlayer && (
+        <PlayerPictureOverlay
+          player={expandedPlayer}
+          onClose={() => setExpandedPlayer(null)}
         />
       )}
     </div>
