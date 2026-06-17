@@ -4108,6 +4108,127 @@
     "club": "Galatasaray",
     "pictureUrl": "https://digitalhub.fifa.com/transform/a6d1d8b4-a559-4c7f-aed3-095126b60e1c/1442552095"
   },
+  "ESP-1": {
+    "fifaId": "ESP-1",
+    "teamCode": "ESP",
+    "name": "David Raya",
+    "number": 1,
+    "position": "GK",
+    "club": "Arsenal"
+  },
+  "ESP-4": {
+    "fifaId": "ESP-4",
+    "teamCode": "ESP",
+    "name": "Nacho",
+    "fullName": "Nacho Fernández",
+    "number": 4,
+    "position": "DF",
+    "club": "Fenerbahçe"
+  },
+  "ESP-5": {
+    "fifaId": "ESP-5",
+    "teamCode": "ESP",
+    "name": "Alejandro Balde",
+    "number": 5,
+    "position": "DF",
+    "club": "Barcelona"
+  },
+  "ESP-6": {
+    "fifaId": "ESP-6",
+    "teamCode": "ESP",
+    "name": "Pau Cubarsí",
+    "number": 6,
+    "position": "DF",
+    "club": "Barcelona"
+  },
+  "ESP-9": {
+    "fifaId": "ESP-9",
+    "teamCode": "ESP",
+    "name": "Ayoze Pérez",
+    "number": 9,
+    "position": "FW",
+    "club": "Betis"
+  },
+  "ESP-10": {
+    "fifaId": "ESP-10",
+    "teamCode": "ESP",
+    "name": "Dani Olmo",
+    "number": 10,
+    "position": "MF",
+    "club": "Barcelona"
+  },
+  "ESP-12": {
+    "fifaId": "ESP-12",
+    "teamCode": "ESP",
+    "name": "Álex Remiro",
+    "number": 12,
+    "position": "GK",
+    "club": "Real Sociedad"
+  },
+  "ESP-13": {
+    "fifaId": "ESP-13",
+    "teamCode": "ESP",
+    "name": "Ferran Torres",
+    "number": 13,
+    "position": "FW",
+    "club": "Barcelona"
+  },
+  "ESP-15": {
+    "fifaId": "ESP-15",
+    "teamCode": "ESP",
+    "name": "Martín Zubimendi",
+    "number": 15,
+    "position": "MF",
+    "club": "Arsenal"
+  },
+  "ESP-17": {
+    "fifaId": "ESP-17",
+    "teamCode": "ESP",
+    "name": "Mikel Oyarzabal",
+    "number": 17,
+    "position": "FW",
+    "club": "Real Sociedad"
+  },
+  "ESP-18": {
+    "fifaId": "ESP-18",
+    "teamCode": "ESP",
+    "name": "Mikel Merino",
+    "number": 18,
+    "position": "MF",
+    "club": "Arsenal"
+  },
+  "ESP-21": {
+    "fifaId": "ESP-21",
+    "teamCode": "ESP",
+    "name": "Alex Baena",
+    "number": 21,
+    "position": "MF",
+    "club": "Villarreal"
+  },
+  "ESP-22": {
+    "fifaId": "ESP-22",
+    "teamCode": "ESP",
+    "name": "Pedro Porro",
+    "number": 22,
+    "position": "DF",
+    "club": "Tottenham"
+  },
+  "ESP-25": {
+    "fifaId": "ESP-25",
+    "teamCode": "ESP",
+    "name": "Alex Grimaldo",
+    "number": 25,
+    "position": "DF",
+    "club": "Bayer Leverkusen"
+  },
+  "ESP-26": {
+    "fifaId": "ESP-26",
+    "teamCode": "ESP",
+    "name": "Yeremy Pino",
+    "number": 26,
+    "position": "FW",
+    "club": "Villarreal"
+  },
   "CPV-21": {
     "fifaId": "CPV-21",
     "teamCode": "CPV",
