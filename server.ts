@@ -433,9 +433,30 @@ const aggregateTournamentLeaders = async (
 
       const team = incident.team === "A" ? match.teamA : match.teamB;
       const playerKey = buildPlayerLeaderKey(team.code, playerName);
-      const metadata = metadataByPlayerKey.get(playerKey);
-      const current = playerLeaders.get(playerKey) ?? {
-        id: `${team.code.toLowerCase()}-${normalizeText(playerName).toLowerCase()}`,
+      let metadata = metadataByPlayerKey.get(playerKey);
+
+      // FIFA incident text may use a different name form than the registry
+      // (e.g. "VINICIUS JUNIOR" vs "Vinicius Jr"). When the name-based lookup
+      // misses, retry by shirt number from playerMentions against the lineup.
+      if (!metadata) {
+        const shirtNumber = incident.playerMentions?.[0]?.number;
+        if (shirtNumber !== undefined) {
+          const lineupPlayer = team.lineup.find((p) => p.number === shirtNumber);
+          if (lineupPlayer) {
+            metadata = metadataByPlayerKey.get(
+              buildPlayerLeaderKey(team.code, lineupPlayer.name),
+            );
+          }
+        }
+      }
+
+      // Key by canonical registry name so /api/player-stats can find the entry.
+      const canonicalKey = metadata
+        ? buildPlayerLeaderKey(team.code, metadata.name)
+        : playerKey;
+
+      const current = playerLeaders.get(canonicalKey) ?? {
+        id: `${team.code.toLowerCase()}-${normalizeText(metadata?.name ?? playerName).toLowerCase()}`,
         name: metadata?.name ?? playerName,
         teamCode: team.code,
         teamName: team.name,
@@ -456,7 +477,7 @@ const aggregateTournamentLeaders = async (
       if (incident.type === "YELLOW_CARD") current.yellowCards += 1;
       if (incident.type === "RED_CARD") current.redCards += 1;
 
-      playerLeaders.set(playerKey, current);
+      playerLeaders.set(canonicalKey, current);
     });
   });
 
