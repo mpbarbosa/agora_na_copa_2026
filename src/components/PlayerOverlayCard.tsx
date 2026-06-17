@@ -8,6 +8,40 @@ import { getPlayerSocialEntries } from "../utils/playerDisplay";
 export const getPlayerAge = (dateOfBirth: string): number =>
   Math.floor((Date.now() - new Date(dateOfBirth).getTime()) / (365.25 * 24 * 3600 * 1000));
 
+interface TournamentStats {
+  goals: number;
+  yellowCards: number;
+  redCards: number;
+}
+
+// Returns stat cells for goals/yellows/reds, only including rows with value > 0.
+export function buildTournamentStatCells(
+  stats: TournamentStats | null | undefined,
+  theme: "classic-light" | "stadium-dark",
+) {
+  if (!stats) return [];
+  const cells = [];
+  if (stats.goals > 0)
+    cells.push({
+      label: "Gols",
+      value: stats.goals,
+      accent: theme === "classic-light" ? "text-[#065f2c]" : "text-[#00e476]",
+    });
+  if (stats.yellowCards > 0)
+    cells.push({
+      label: "Amarelos",
+      value: stats.yellowCards,
+      accent: theme === "classic-light" ? "text-[#9a6700]" : "text-[#ffd84d]",
+    });
+  if (stats.redCards > 0)
+    cells.push({
+      label: "Vermelhos",
+      value: stats.redCards,
+      accent: theme === "classic-light" ? "text-[#9f1239]" : "text-[#ff879d]",
+    });
+  return cells;
+}
+
 const SOCIAL_PLATFORM_LABELS: Record<keyof PlayerSocials, string> = {
   instagram: "Instagram",
   x: "X",

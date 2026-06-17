@@ -4,10 +4,12 @@ import {
   PlayerOverlayCard,
   PlayerPictureOverlay,
   PlayerPortrait,
+  buildTournamentStatCells,
   getPlayerAge,
   renderSocialPlatformLabel,
 } from "./PlayerOverlayCard";
 import { getPlayerSocialEntries, getPositionLabel } from "../utils/playerDisplay";
+import { usePlayerStats } from "../hooks/usePlayerStats";
 
 interface TeamPitchBoardProps {
   team: {
@@ -46,11 +48,7 @@ export const TeamPitchBoard: FC<TeamPitchBoardProps> = ({
   const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
   const [expandedPlayer, setExpandedPlayer] = useState<Player | null>(null);
   const [featuredPlayer, setFeaturedPlayer] = useState<Player | null>(null);
-  const [featuredPlayerStats, setFeaturedPlayerStats] = useState<{
-    goals: number;
-    yellowCards: number;
-    redCards: number;
-  } | null>(null);
+  const featuredPlayerStats = usePlayerStats(team.code, featuredPlayer?.name);
   const selectedPlayerSocials = selectedPlayer ? getPlayerSocialEntries(selectedPlayer.socials) : [];
 
   useEffect(() => {
@@ -68,21 +66,6 @@ export const TeamPitchBoard: FC<TeamPitchBoardProps> = ({
       return enrichedLineup.find((player) => isSamePlayer(player, current)) ?? null;
     });
   }, [enrichedLineup]);
-
-  useEffect(() => {
-    if (!featuredPlayer) {
-      setFeaturedPlayerStats(null);
-      return;
-    }
-    let active = true;
-    fetch(
-      `/api/player-stats/${encodeURIComponent(team.code)}/${encodeURIComponent(featuredPlayer.name)}`,
-    )
-      .then((res) => (res.ok ? res.json() : null))
-      .then((data) => { if (active) setFeaturedPlayerStats(data); })
-      .catch(() => { if (active) setFeaturedPlayerStats(null); });
-    return () => { active = false; };
-  }, [featuredPlayer, team.code]);
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6" id="pitch-main-content">
@@ -371,31 +354,7 @@ export const TeamPitchBoard: FC<TeamPitchBoardProps> = ({
             ...(featuredPlayer.height
               ? [{ label: "Altura", value: `${featuredPlayer.height} cm` }]
               : []),
-            ...(featuredPlayerStats &&
-            (featuredPlayerStats.goals > 0 ||
-              featuredPlayerStats.yellowCards > 0 ||
-              featuredPlayerStats.redCards > 0)
-              ? [
-                  {
-                    label: "Gols",
-                    value: featuredPlayerStats.goals,
-                    accent:
-                      theme === "classic-light" ? "text-[#065f2c]" : "text-[#00e476]",
-                  },
-                  {
-                    label: "Amarelos",
-                    value: featuredPlayerStats.yellowCards,
-                    accent:
-                      theme === "classic-light" ? "text-[#9a6700]" : "text-[#ffd84d]",
-                  },
-                  {
-                    label: "Vermelhos",
-                    value: featuredPlayerStats.redCards,
-                    accent:
-                      theme === "classic-light" ? "text-[#9f1239]" : "text-[#ff879d]",
-                  },
-                ]
-              : []),
+            ...buildTournamentStatCells(featuredPlayerStats, theme as "classic-light" | "stadium-dark"),
           ]}
           details={[
             { label: "Clube atual", value: featuredPlayer.club || "Seleção Nacional" },

@@ -20,7 +20,8 @@ import { APP_MATCHES } from "../appMatches";
 import MATCH_VIDEOS from "../data/matchVideos.json";
 import type { TeamLineupsMap } from "../utils/teamLineup";
 import { FlagIcon } from "./FlagIcon";
-import { PlayerOverlayCard, PlayerPictureOverlay, getPlayerAge } from "./PlayerOverlayCard";
+import { PlayerOverlayCard, PlayerPictureOverlay, buildTournamentStatCells, getPlayerAge } from "./PlayerOverlayCard";
+import { usePlayerStats } from "../hooks/usePlayerStats";
 import { getPositionLabel } from "../utils/playerDisplay";
 import { PitchLineup } from "./PitchLineup";
 import { useClockTick } from "../hooks/useClockTick";
@@ -557,11 +558,10 @@ export function MatchDetailView({
   ); // 15:02:03 default
   const [storedIncidentPlayer, setStoredIncidentPlayer] = useState<StoredIncidentPlayer | null>(null);
   const [expandedIncidentPlayerKey, setExpandedIncidentPlayerKey] = useState<StoredIncidentPlayerKey | null>(null);
-  const [incidentPlayerStats, setIncidentPlayerStats] = useState<{
-    goals: number;
-    yellowCards: number;
-    redCards: number;
-  } | null>(null);
+  const incidentPlayerStats = usePlayerStats(
+    storedIncidentPlayer?.team.code,
+    storedIncidentPlayer?.playerKey.name,
+  );
   const simulatedMatchStatesRef = useRef(simulatedMatchStates);
   const matchSelectorRailRefs = useRef<Record<string, HTMLDivElement | null>>({});
   useEffect(() => {
@@ -703,21 +703,6 @@ export function MatchDetailView({
     currentTime,
     customCountdownSeconds,
   );
-
-  useEffect(() => {
-    if (!storedIncidentPlayer) {
-      setIncidentPlayerStats(null);
-      return;
-    }
-    let active = true;
-    fetch(
-      `/api/player-stats/${encodeURIComponent(storedIncidentPlayer.team.code)}/${encodeURIComponent(storedIncidentPlayer.playerKey.name)}`,
-    )
-      .then((res) => (res.ok ? res.json() : null))
-      .then((data) => { if (active) setIncidentPlayerStats(data); })
-      .catch(() => { if (active) setIncidentPlayerStats(null); });
-    return () => { active = false; };
-  }, [storedIncidentPlayer]);
 
   useEffect(() => {
     if (matchSelectionMode !== "auto") {
@@ -2069,31 +2054,7 @@ export function MatchDetailView({
             ...(selectedIncidentPlayer.player.height
               ? [{ label: "Altura", value: `${selectedIncidentPlayer.player.height} cm` }]
               : []),
-            ...(incidentPlayerStats &&
-            (incidentPlayerStats.goals > 0 ||
-              incidentPlayerStats.yellowCards > 0 ||
-              incidentPlayerStats.redCards > 0)
-              ? [
-                  {
-                    label: "Gols",
-                    value: incidentPlayerStats.goals,
-                    accent:
-                      theme === "classic-light" ? "text-[#065f2c]" : "text-[#00e476]",
-                  },
-                  {
-                    label: "Amarelos",
-                    value: incidentPlayerStats.yellowCards,
-                    accent:
-                      theme === "classic-light" ? "text-[#9a6700]" : "text-[#ffd84d]",
-                  },
-                  {
-                    label: "Vermelhos",
-                    value: incidentPlayerStats.redCards,
-                    accent:
-                      theme === "classic-light" ? "text-[#9f1239]" : "text-[#ff879d]",
-                  },
-                ]
-              : []),
+            ...buildTournamentStatCells(incidentPlayerStats, theme),
           ]}
           details={[
             {
