@@ -24,10 +24,13 @@ import { computeStandings, groupStandings } from "./src/standings";
 import {
   Position,
   type BroadcastGuideEntry,
+  type CommentaryEvent,
   type LineupEntry,
   type Match,
   type MatchOverlayEntry,
   type MatchStateEntry,
+  type PlayerIncidentEntry,
+  type PlayerIncidentsPayload,
   type PlayerSocials,
   type TournamentLeadersResponse,
   type TournamentPlayerLeader,
@@ -581,6 +584,142 @@ const getTournamentLeadersPayload = async (
       bestDefense: sortBestDefenseLeaders(aggregated.teamLeaders),
       cleanSheets: sortCleanSheetLeaders(aggregated.teamLeaders),
     },
+  };
+};
+
+const resolveMentionToCanonicalKey = (
+  mention: NonNullable<CommentaryEvent["playerMentions"]>[number],
+  teamCode: string,
+  teamLineup: Match["teamA"]["lineup"],
+  metadataByPlayerKey: Map<string, PlayerLeaderMetadata>,
+  playerKeyByFifaId: Map<string, string>,
+): string => {
+  if (isNumericFifaId(mention.id)) {
+    const key = playerKeyByFifaId.get(`${teamCode}:${mention.id}`);
+    if (key) return key;
+  }
+
+  if (mention.name) {
+    const key = buildPlayerLeaderKey(teamCode, mention.name);
+    if (metadataByPlayerKey.has(key)) return key;
+  }
+
+  if (mention.number !== undefined) {
+    const lineupPlayer = teamLineup.find((p) => p.number === mention.number);
+    if (lineupPlayer) {
+      const key = buildPlayerLeaderKey(teamCode, lineupPlayer.name);
+      if (metadataByPlayerKey.has(key)) return key;
+    }
+  }
+
+  return mention.name ? buildPlayerLeaderKey(teamCode, mention.name) : "";
+};
+
+const aggregatePlayerIncidents = async (
+  teamCode: string,
+  rawPlayerName: string,
+  language: string,
+): Promise<PlayerIncidentsPayload | null> => {
+  const [matchStatesPayload, lineupsPayload] = await Promise.all([
+    getMatchStatesPayload(language),
+    getTeamLineupsPayload(language),
+  ]);
+
+  const { metadataByPlayerKey, playerKeyByFifaId } = buildPlayerLeaderMetadataMap(lineupsPayload);
+
+  const targetKey = buildPlayerLeaderKey(teamCode, rawPlayerName);
+  const metadata = metadataByPlayerKey.get(targetKey);
+  if (!metadata) return null;
+
+  const teamMatch = APP_MATCHES.find(
+    (m) => m.teamA.code === teamCode || m.teamB.code === teamCode,
+  );
+  const teamName = teamMatch
+    ? teamMatch.teamA.code === teamCode
+      ? teamMatch.teamA.name
+      : teamMatch.teamB.name
+    : teamCode;
+  const teamFlagSvg = teamMatch
+    ? teamMatch.teamA.code === teamCode
+      ? teamMatch.teamA.flagSvg
+      : teamMatch.teamB.flagSvg
+    : "";
+
+  const incidents: PlayerIncidentEntry[] = [];
+  let latestUpdatedAt = "";
+
+  APP_MATCHES.forEach((match) => {
+    const state = matchStatesPayload.states[match.id];
+    if (!state?.incidents?.length) return;
+
+    const isTeamA = match.teamA.code === teamCode;
+    const isTeamB = match.teamB.code === teamCode;
+    if (!isTeamA && !isTeamB) return;
+
+    const teamSide = isTeamA ? "A" : "B";
+    const teamInMatch = isTeamA ? match.teamA : match.teamB;
+
+    state.incidents.forEach((incident) => {
+      if (incident.team !== teamSide) return;
+
+      (incident.playerMentions ?? []).forEach((mention, mentionIndex) => {
+        const resolvedKey = resolveMentionToCanonicalKey(
+          mention,
+          teamCode,
+          teamInMatch.lineup,
+          metadataByPlayerKey,
+          playerKeyByFifaId,
+        );
+        if (resolvedKey !== targetKey) return;
+
+        incidents.push({
+          matchId: match.id,
+          matchLabel: `${match.teamA.name} vs ${match.teamB.name}`,
+          kickoffTimestamp: match.kickoffTimestamp,
+          minute: incident.time,
+          type: incident.type,
+          ...(incident.type === "SUBSTITUTION" && {
+            role: mentionIndex === 0 ? ("off" as const) : ("on" as const),
+          }),
+        });
+      });
+
+      if (state.updatedAt > latestUpdatedAt) latestUpdatedAt = state.updatedAt;
+    });
+  });
+
+  const resolvedSource = resolveTournamentLeadersSource(matchStatesPayload.states);
+
+  incidents.sort((a, b) => {
+    const tsDiff = a.kickoffTimestamp.localeCompare(b.kickoffTimestamp);
+    if (tsDiff !== 0) return tsDiff;
+    return (parseInt(a.minute) || 0) - (parseInt(b.minute) || 0);
+  });
+
+  return {
+    player: {
+      name: metadata.name,
+      teamCode,
+      teamName,
+      teamFlagSvg,
+      shirtNumber: metadata.shirtNumber,
+      position: metadata.position,
+      pictureUrl: metadata.pictureUrl,
+    },
+    incidents,
+    summary: {
+      goals: incidents.filter((i) => i.type === "GOAL").length,
+      yellowCards: incidents.filter((i) => i.type === "YELLOW_CARD").length,
+      redCards: incidents.filter((i) => i.type === "RED_CARD").length,
+      substitutionsOff: incidents.filter((i) => i.type === "SUBSTITUTION" && i.role === "off").length,
+      substitutionsOn: incidents.filter((i) => i.type === "SUBSTITUTION" && i.role === "on").length,
+    },
+    source: resolvedSource,
+    note:
+      resolvedSource === "fallback"
+        ? "Incidentes a partir de dados locais (FIFA indisponível)."
+        : "Incidentes sincronizados com a FIFA.",
+    updatedAt: latestUpdatedAt || new Date().toISOString(),
   };
 };
 
@@ -1509,6 +1648,29 @@ app.get("/api/player-stats/:teamCode/:playerName", async (req, res) => {
   } catch (error: any) {
     console.error("FIFA API Error in /api/player-stats:", error);
     res.status(502).json({ error: error?.message || "Erro ao carregar estatísticas do jogador" });
+  }
+});
+
+app.get("/api/player-incidents/:teamCode/:playerName", async (req, res) => {
+  try {
+    const teamCode = req.params.teamCode.toUpperCase();
+    const playerName = req.params.playerName;
+    const language =
+      typeof req.query.language === "string" && req.query.language.trim()
+        ? req.query.language.trim()
+        : DEFAULT_BROADCAST_LANGUAGE;
+
+    const payload = await aggregatePlayerIncidents(teamCode, playerName, language);
+    if (!payload) {
+      res.status(404).json({ error: "Jogador não encontrado" });
+      return;
+    }
+
+    res.set("Cache-Control", "no-store");
+    res.json(payload);
+  } catch (error: any) {
+    console.error("FIFA API Error in /api/player-incidents:", error);
+    res.status(502).json({ error: error?.message || "Erro ao carregar incidentes do jogador" });
   }
 });
 

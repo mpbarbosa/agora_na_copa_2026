@@ -154,6 +154,38 @@ export interface CommentaryEvent {
   }>;
 }
 
+export interface PlayerIncidentEntry {
+  matchId: string;
+  matchLabel: string;
+  kickoffTimestamp: string;
+  minute: string;
+  type: CommentaryEvent["type"];
+  role?: "off" | "on"; // only for SUBSTITUTION: player going off vs. coming on
+}
+
+export interface PlayerIncidentsPayload {
+  player: {
+    name: string;
+    teamCode: string;
+    teamName: string;
+    teamFlagSvg: string;
+    shirtNumber?: number;
+    position?: Position;
+    pictureUrl?: string;
+  };
+  incidents: PlayerIncidentEntry[];
+  summary: {
+    goals: number;
+    yellowCards: number;
+    redCards: number;
+    substitutionsOff: number;
+    substitutionsOn: number;
+  };
+  source: "fifa" | "fallback" | "mixed";
+  note: string;
+  updatedAt: string;
+}
+
 // --- Tournament-wide data (groups, stadiums, bracket, news) ---
 // Added in Phase 0b. These types are additive and not yet wired into
 // App.tsx; see src/data/tournament.ts for the seed dataset.

@@ -20,6 +20,7 @@ Express API defined in `server.ts`. Current endpoints:
 | `/api/match-lineup/:matchId` | GET | Player lineup for a given match |
 | `/api/team-view/:teamCode` | GET | Team detail view data |
 | `/api/tournament-leaders` | GET | Top scorers and assist leaders |
+| `/api/player-incidents/:teamCode/:playerName` | GET | All match incidents for a player, summarized by type |
 | `/api/standings` | GET | Group standings |
 | `/api/questions` | GET | Fan prediction questions |
 | `/api/predict` | POST | Submit a fan prediction |
