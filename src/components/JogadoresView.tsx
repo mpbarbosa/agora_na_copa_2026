@@ -333,6 +333,23 @@ export function JogadoresView({ theme, onSelectTeamLineup }: JogadoresViewProps)
   const teams = useMemo(() => extractTeams(), []);
   const [selected, setSelected] = useState<SelectedContext | null>(null);
   const [expandedPlayer, setExpandedPlayer] = useState<Player | null>(null);
+  const [selectedStats, setSelectedStats] = useState<{
+    goals: number;
+    yellowCards: number;
+    redCards: number;
+  } | null>(null);
+
+  React.useEffect(() => {
+    if (!selected) { setSelectedStats(null); return; }
+    let active = true;
+    fetch(
+      `/api/player-stats/${encodeURIComponent(selected.team.code)}/${encodeURIComponent(selected.player.name)}`,
+    )
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => { if (active) setSelectedStats(data); })
+      .catch(() => { if (active) setSelectedStats(null); });
+    return () => { active = false; };
+  }, [selected]);
 
   const groups = useMemo(() => {
     const map = new Map<string, TeamEntry[]>();
@@ -414,6 +431,15 @@ export function JogadoresView({ theme, onSelectTeamLineup }: JogadoresViewProps)
               : []),
             ...(selected.player.height
               ? [{ label: "Altura", value: `${selected.player.height} cm` }]
+              : []),
+            ...(selectedStats && selectedStats.goals > 0
+              ? [{ label: "Gols", value: selectedStats.goals, accent: theme === "classic-light" ? "text-[#065f2c]" : "text-[#00e476]" }]
+              : []),
+            ...(selectedStats && selectedStats.yellowCards > 0
+              ? [{ label: "Amarelos", value: selectedStats.yellowCards, accent: theme === "classic-light" ? "text-[#9a6700]" : "text-[#ffd84d]" }]
+              : []),
+            ...(selectedStats && selectedStats.redCards > 0
+              ? [{ label: "Vermelhos", value: selectedStats.redCards, accent: theme === "classic-light" ? "text-[#9f1239]" : "text-[#ff879d]" }]
               : []),
           ]}
           onClose={() => setSelected(null)}
