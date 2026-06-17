@@ -3130,6 +3130,114 @@
       "instagram": "https://instagram.com/gabrieljesus9"
     }
   },
+  "BRA-2": {
+    "fifaId": "BRA-2",
+    "teamCode": "BRA",
+    "name": "Militão",
+    "fullName": "Éder Gabriel Militão",
+    "number": 2,
+    "position": "DF",
+    "club": "Real Madrid"
+  },
+  "BRA-5": {
+    "fifaId": "BRA-5",
+    "teamCode": "BRA",
+    "name": "Casemiro",
+    "fullName": "Carlos Henrique Casimiro",
+    "number": 5,
+    "position": "MF",
+    "club": "Manchester United"
+  },
+  "BRA-12": {
+    "fifaId": "BRA-12",
+    "teamCode": "BRA",
+    "name": "Ederson",
+    "fullName": "Ederson Santana de Moraes",
+    "number": 12,
+    "position": "GK",
+    "club": "Manchester City"
+  },
+  "BRA-14": {
+    "fifaId": "BRA-14",
+    "teamCode": "BRA",
+    "name": "G. Arana",
+    "fullName": "Guilherme Arana",
+    "number": 14,
+    "position": "DF",
+    "club": "Atlético Mineiro"
+  },
+  "BRA-16": {
+    "fifaId": "BRA-16",
+    "teamCode": "BRA",
+    "name": "Wendell",
+    "fullName": "Wendell Nascimento Borges",
+    "number": 16,
+    "position": "DF",
+    "club": "Porto"
+  },
+  "BRA-17": {
+    "fifaId": "BRA-17",
+    "teamCode": "BRA",
+    "name": "Bremer",
+    "fullName": "Gleison Bremer",
+    "number": 17,
+    "position": "DF",
+    "club": "Juventus"
+  },
+  "BRA-18": {
+    "fifaId": "BRA-18",
+    "teamCode": "BRA",
+    "name": "Paquetá",
+    "fullName": "Lucas Paquetá",
+    "number": 18,
+    "position": "MF",
+    "club": "West Ham"
+  },
+  "BRA-19": {
+    "fifaId": "BRA-19",
+    "teamCode": "BRA",
+    "name": "Endrick",
+    "fullName": "Endrick Felipe Moreira de Sousa",
+    "number": 19,
+    "position": "FW",
+    "club": "Real Madrid"
+  },
+  "BRA-20": {
+    "fifaId": "BRA-20",
+    "teamCode": "BRA",
+    "name": "Martinelli",
+    "fullName": "Gabriel Martinelli",
+    "number": 20,
+    "position": "FW",
+    "club": "Arsenal"
+  },
+  "BRA-24": {
+    "fifaId": "BRA-24",
+    "teamCode": "BRA",
+    "name": "Weverton",
+    "fullName": "Weverton Pereira da Silva",
+    "number": 24,
+    "position": "GK",
+    "club": "Palmeiras"
+  },
+  "BRA-25": {
+    "fifaId": "BRA-25",
+    "teamCode": "BRA",
+    "name": "Savinho",
+    "fullName": "Samuel Ilário Rodrigues Justino",
+    "number": 25,
+    "position": "FW",
+    "club": "Manchester City"
+  },
+  "BRA-26": {
+    "fifaId": "BRA-26",
+    "teamCode": "BRA",
+    "name": "A. Pereira",
+    "fullName": "Andreas Pereira",
+    "number": 26,
+    "position": "MF",
+    "club": "Fulham"
+  },
   "BRA-22": {
     "fifaId": "BRA-22",
     "teamCode": "BRA",
