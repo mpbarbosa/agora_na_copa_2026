@@ -234,6 +234,7 @@ test.describe("Navigation shell", () => {
                     y: 75,
                     club: "Al-Nassr",
                     pictureUrl: "https://images.fifa.test/alamri.png",
+                    socials: { instagram: "https://instagram.com/aalamri32" },
                   },
                   {
                     id: "ksa-kanno",

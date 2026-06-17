@@ -7,7 +7,33 @@ test.describe("Incident player metadata", () => {
         contentType: "application/json",
         body: JSON.stringify({
           refreshAfterMs: 60000,
-          lineups: {},
+          lineups: {
+            "irn-nzl-2026": {
+              teamA: {
+                players: [
+                  {
+                    id: "irn-ramin",
+                    name: "Ramin Rezaeian",
+                    number: 23,
+                    position: "DF",
+                    x: 85,
+                    y: 70,
+                    club: "Esteghlal",
+                    socials: { instagram: "https://instagram.com/raminrezaeian" },
+                  },
+                ],
+                source: "fallback",
+                note: "Test lineup.",
+                updatedAt: "2026-06-15T23:00:00.000Z",
+              },
+              teamB: {
+                players: [],
+                source: "fallback",
+                note: "Test lineup.",
+                updatedAt: "2026-06-15T23:00:00.000Z",
+              },
+            },
+          },
         }),
       });
     });

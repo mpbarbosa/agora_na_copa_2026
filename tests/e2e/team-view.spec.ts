@@ -367,6 +367,7 @@ async function mockIranTeamView(page: Page) {
               x: 85,
               y: 70,
               club: "Esteghlal",
+              socials: { instagram: "https://instagram.com/raminrezaeian" },
             },
           ],
           source: "fifa",
