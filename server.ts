@@ -230,6 +230,9 @@ interface PlayerLeaderMetadata {
 const buildPlayerLeaderKey = (teamCode: string, playerName: string) =>
   `${teamCode}:${normalizeText(playerName)}`;
 
+const isNumericFifaId = (id: string | undefined): id is string =>
+  id !== undefined && /^\d+$/.test(id);
+
 const parseIncidentPlayerName = (state: MatchStateEntry["incidents"][number]) => {
   if (state.type === "GOAL" && state.text.endsWith(GOAL_INCIDENT_SUFFIX)) {
     return state.text.slice(0, -GOAL_INCIDENT_SUFFIX.length).trim();
@@ -285,6 +288,7 @@ const upsertPlayerLeaderMetadata = (
 
 const buildPlayerLeaderMetadataMap = (lineupsPayload: TeamLineupsResponse) => {
   const metadataByPlayerKey = new Map<string, PlayerLeaderMetadata>();
+  const playerKeyByFifaId = new Map<string, string>(); // `${teamCode}:${fifaId}` → playerKey
 
   APP_MATCHES.forEach((match) => {
     const lineupEntry = lineupsPayload.lineups[match.id];
@@ -299,13 +303,17 @@ const buildPlayerLeaderMetadataMap = (lineupsPayload: TeamLineupsResponse) => {
         socials: player.socials ?? entry?.socials,
         pictureUrl: player.pictureUrl ?? entry?.pictureUrl,
       });
+      const fifaId = player.fifaId ?? (isNumericFifaId(player.id) ? player.id : undefined);
+      if (fifaId) {
+        playerKeyByFifaId.set(`${teamCode}:${fifaId}`, buildPlayerLeaderKey(teamCode, player.name));
+      }
     };
 
     teamALineup.forEach((player) => enrich(match.teamA.code, player));
     teamBLineup.forEach((player) => enrich(match.teamB.code, player));
   });
 
-  return metadataByPlayerKey;
+  return { metadataByPlayerKey, playerKeyByFifaId };
 };
 
 const resolveTournamentLeadersSource = (
@@ -381,7 +389,7 @@ const aggregateTournamentLeaders = async (
     getTeamLineupsPayload(language),
   ]);
 
-  const metadataByPlayerKey = buildPlayerLeaderMetadataMap(lineupsPayload);
+  const { metadataByPlayerKey, playerKeyByFifaId } = buildPlayerLeaderMetadataMap(lineupsPayload);
   const playerLeaders = new Map<string, TournamentPlayerLeader>();
   const teamLeaders = new Map<string, TournamentTeamLeader>();
 
@@ -432,20 +440,25 @@ const aggregateTournamentLeaders = async (
       if (!playerName) return;
 
       const team = incident.team === "A" ? match.teamA : match.teamB;
-      const playerKey = buildPlayerLeaderKey(team.code, playerName);
-      let metadata = metadataByPlayerKey.get(playerKey);
 
-      // FIFA incident text may use a different name form than the registry
-      // (e.g. "VINICIUS JUNIOR" vs "Vinicius Jr"). When the name-based lookup
-      // misses, retry by shirt number from playerMentions against the lineup.
+      // Primary: FIFA player ID from the incident — exact, immune to name drift.
+      const incidentFifaId = incident.playerMentions?.[0]?.id;
+      let metadata = incidentFifaId
+        ? metadataByPlayerKey.get(playerKeyByFifaId.get(`${team.code}:${incidentFifaId}`) ?? "")
+        : undefined;
+
+      // Fallback 1: normalized name match.
+      if (!metadata) {
+        metadata = metadataByPlayerKey.get(buildPlayerLeaderKey(team.code, playerName));
+      }
+
+      // Fallback 2: shirt number — handles FIFA name forms that differ from registry.
       if (!metadata) {
         const shirtNumber = incident.playerMentions?.[0]?.number;
         if (shirtNumber !== undefined) {
           const lineupPlayer = team.lineup.find((p) => p.number === shirtNumber);
           if (lineupPlayer) {
-            metadata = metadataByPlayerKey.get(
-              buildPlayerLeaderKey(team.code, lineupPlayer.name),
-            );
+            metadata = metadataByPlayerKey.get(buildPlayerLeaderKey(team.code, lineupPlayer.name));
           }
         }
       }
@@ -453,7 +466,7 @@ const aggregateTournamentLeaders = async (
       // Key by canonical registry name so /api/player-stats can find the entry.
       const canonicalKey = metadata
         ? buildPlayerLeaderKey(team.code, metadata.name)
-        : playerKey;
+        : buildPlayerLeaderKey(team.code, playerName);
 
       const current = playerLeaders.get(canonicalKey) ?? {
         id: `${team.code.toLowerCase()}-${normalizeText(metadata?.name ?? playerName).toLowerCase()}`,
