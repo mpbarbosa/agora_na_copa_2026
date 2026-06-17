@@ -99,18 +99,18 @@ test.describe("Navigation shell", () => {
     await expect(page.locator("#btn-partidas-filter-pre_game")).toContainText("Agendadas");
     await expect(page.locator("#btn-partidas-filter-live")).toContainText("Ao vivo");
     await expect(page.locator("#btn-partidas-filter-finished")).toContainText("Encerradas");
-    // The default PRE_GAME filter must show at least one upcoming match card.
-    // (Avoid hardcoding a specific match ID here — live matches migrate to the LIVE bucket.)
-    await expect(page.locator('[id^="partidas-card-"]').first()).toBeVisible();
 
     await page.click("#btn-partidas-filter-finished");
+    await expect(page.locator('[id^="partidas-card-"]').first()).toBeVisible();
     await expect(page.locator("#partidas-card-ksa-uru-2026")).toBeVisible();
   });
 
   test("match selector switches the active match", async ({ page }) => {
     await page.goto("/");
 
-    const chips = page.locator('#match-selector-groups [id^="btn-match-"]');
+    // Use the finished chips rail — always has multiple chips regardless of live/upcoming state
+    const chips = page.locator('#match-selector-chips-finished [id^="btn-match-"]');
+    await expect(chips.first()).toBeVisible();
     const chipCount = await chips.count();
     expect(chipCount).toBeGreaterThan(1);
 
@@ -128,7 +128,7 @@ test.describe("Navigation shell", () => {
     const targetId = await target!.getAttribute("id");
     await target!.click();
 
-    await expect(page.locator(`#match-selector-groups #${targetId}`)).toHaveClass(/font-semibold/);
+    await expect(page.locator(`#match-selector-chips-finished #${targetId}`)).toHaveClass(/font-semibold/);
     await expect(page.locator("#scoreboard-clock")).toBeVisible();
   });
 

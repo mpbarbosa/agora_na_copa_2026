@@ -5144,7 +5144,11 @@
     "kickoffTime": "14:00",
     "kickoffDate": "17 Junho, 2026",
     "kickoffTimestamp": "2026-06-17T14:00:00-03:00",
-    "status": "PRE_GAME",
+    "status": "FINISHED",
+    "score": {
+      "teamA": 1,
+      "teamB": 1
+    },
     "countdownTargetSeconds": 0,
     "broadcasters": [
       {
@@ -5698,8 +5702,8 @@
     "kickoffTimestamp": "2026-06-17T17:00:00-03:00",
     "status": "LIVE",
     "score": {
-      "teamA": 1,
-      "teamB": 0
+      "teamA": 2,
+      "teamB": 2
     },
     "countdownTargetSeconds": 0,
     "broadcasters": []
