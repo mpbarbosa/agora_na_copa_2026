@@ -99,7 +99,9 @@ test.describe("Navigation shell", () => {
     await expect(page.locator("#btn-partidas-filter-pre_game")).toContainText("Agendadas");
     await expect(page.locator("#btn-partidas-filter-live")).toContainText("Ao vivo");
     await expect(page.locator("#btn-partidas-filter-finished")).toContainText("Encerradas");
-    await expect(page.locator("#partidas-card-por-cod-2026")).toBeVisible();
+    // The default PRE_GAME filter must show at least one upcoming match card.
+    // (Avoid hardcoding a specific match ID here — live matches migrate to the LIVE bucket.)
+    await expect(page.locator('[id^="partidas-card-"]').first()).toBeVisible();
 
     await page.click("#btn-partidas-filter-finished");
     await expect(page.locator("#partidas-card-ksa-uru-2026")).toBeVisible();
