@@ -59,6 +59,31 @@ test.describe("Jogadores view — player overlay stats", () => {
     await expect(stats).not.toContainText("Vermelhos");
   });
 
+  test("Vinicius Jr (Brazil) with 1 goal shows Gols cell in overlay", async ({ page }) => {
+    await page.route("**/api/player-stats/BRA/**", async (route) => {
+      await route.fulfill({
+        contentType: "application/json",
+        body: JSON.stringify({ goals: 1, yellowCards: 0, redCards: 0 }),
+      });
+    });
+
+    await page.goto("/");
+    await page.click("#btn-nav-jogadores");
+    await expect(page.locator("#jogadores-view")).toBeVisible();
+
+    await page.click("#jogador-card-405742");
+
+    const overlay = page.locator("#jogadores-player-overlay");
+    await expect(overlay).toBeVisible();
+    await expect(overlay).toContainText("Vinicius Jr");
+
+    const stats = overlay.locator("#jogadores-player-overlay-stats");
+    await expect(stats).toContainText("Gols");
+    await expect(stats).toContainText("1");
+    await expect(stats).not.toContainText("Amarelos");
+    await expect(stats).not.toContainText("Vermelhos");
+  });
+
   test("fetches stats for the correct team and player", async ({ page }) => {
     const capturedUrls: string[] = [];
 
