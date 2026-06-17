@@ -41,16 +41,27 @@ const FIFA_SUPPLEMENTAL_MATCHES: SupplementalMatchSeed[] = [
     status: "FINISHED",
     stadiumName: "Estádio da Baía de São Francisco",
     city: "ÁREA DA BAÍA DE SÃO FRANCISCO",
-    score: {
-      teamA: 1,
-      teamB: 1,
-    },
+    score: { teamA: 1, teamB: 1 },
+  },
+  {
+    teamA: "AUT",
+    teamB: "JOR",
+    kickoffTimestamp: "2026-06-17T01:00:00-03:00",
+    status: "FINISHED",
+    stadiumName: "Estádio da Baía de São Francisco",
+    city: "ÁREA DA BAÍA DE SÃO FRANCISCO",
+    score: { teamA: 3, teamB: 1 },
   },
 ];
 
 const BASE_MATCHES = baseMatchesData as Match[];
 
-const existingIds = new Set(BASE_MATCHES.map((match) => match.id));
+const existingIds = new Set([
+  ...BASE_MATCHES.map((match) => match.id),
+  ...FIFA_SUPPLEMENTAL_MATCHES.map(
+    ({ teamA, teamB }) => `${teamA.toLowerCase()}-${teamB.toLowerCase()}-2026`,
+  ),
+]);
 
 const lineupByTeamCode = new Map<string, Match["teamA"]["lineup"]>();
 for (const match of BASE_MATCHES) {
