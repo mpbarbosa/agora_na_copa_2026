@@ -2143,6 +2143,141 @@
     "club": "Bayern München",
     "pictureUrl": "https://digitalhub.fifa.com/transform/0a8c4e68-c22f-4b62-a02c-b29e5f2ddf26/PALHINHA-Joao_432858"
   },
+  "POR-2": {
+    "fifaId": "POR-2",
+    "teamCode": "POR",
+    "name": "Diogo Dalot",
+    "fullName": "Diogo Dalot",
+    "number": 2,
+    "position": "DF",
+    "club": "Manchester United"
+  },
+  "POR-4": {
+    "fifaId": "POR-4",
+    "teamCode": "POR",
+    "name": "G. Inácio",
+    "fullName": "Gonçalo Inácio",
+    "number": 4,
+    "position": "DF",
+    "club": "Sporting CP"
+  },
+  "POR-6": {
+    "fifaId": "POR-6",
+    "teamCode": "POR",
+    "name": "T. Djaló",
+    "fullName": "Tiago Djaló",
+    "number": 6,
+    "position": "DF",
+    "club": "Juventus"
+  },
+  "POR-9": {
+    "fifaId": "POR-9",
+    "teamCode": "POR",
+    "name": "G. Ramos",
+    "fullName": "Gonçalo Ramos",
+    "number": 9,
+    "position": "FW",
+    "club": "PSG"
+  },
+  "POR-12": {
+    "fifaId": "POR-12",
+    "teamCode": "POR",
+    "name": "José Sá",
+    "fullName": "José Sá",
+    "number": 12,
+    "position": "GK",
+    "club": "Wolverhampton"
+  },
+  "POR-13": {
+    "fifaId": "POR-13",
+    "teamCode": "POR",
+    "name": "R. Veiga",
+    "fullName": "Renato Veiga",
+    "number": 13,
+    "position": "DF",
+    "club": "Chelsea"
+  },
+  "POR-14": {
+    "fifaId": "POR-14",
+    "teamCode": "POR",
+    "name": "R. Sanches",
+    "fullName": "Renato Sanches",
+    "number": 14,
+    "position": "MF",
+    "club": "PSG"
+  },
+  "POR-15": {
+    "fifaId": "POR-15",
+    "teamCode": "POR",
+    "name": "M. Nunes",
+    "fullName": "Matheus Nunes",
+    "number": 15,
+    "position": "MF",
+    "club": "Manchester City"
+  },
+  "POR-17": {
+    "fifaId": "POR-17",
+    "teamCode": "POR",
+    "name": "Pedro Neto",
+    "fullName": "Pedro Neto",
+    "number": 17,
+    "position": "FW",
+    "club": "Chelsea"
+  },
+  "POR-18": {
+    "fifaId": "POR-18",
+    "teamCode": "POR",
+    "name": "R. Neves",
+    "fullName": "Rúben Neves",
+    "number": 18,
+    "position": "MF",
+    "club": "Al-Hilal"
+  },
+  "POR-21": {
+    "fifaId": "POR-21",
+    "teamCode": "POR",
+    "name": "F. Conceição",
+    "fullName": "Francisco Conceição",
+    "number": 21,
+    "position": "FW",
+    "club": "Juventus"
+  },
+  "POR-22": {
+    "fifaId": "POR-22",
+    "teamCode": "POR",
+    "name": "Rui Silva",
+    "fullName": "Rui Silva",
+    "number": 22,
+    "position": "GK",
+    "club": "Real Betis"
+  },
+  "POR-23": {
+    "fifaId": "POR-23",
+    "teamCode": "POR",
+    "name": "Diogo Jota",
+    "fullName": "Diogo Jota",
+    "number": 23,
+    "position": "FW",
+    "club": "Liverpool"
+  },
+  "POR-24": {
+    "fifaId": "POR-24",
+    "teamCode": "POR",
+    "name": "João Félix",
+    "fullName": "João Félix",
+    "number": 24,
+    "position": "FW",
+    "club": "Barcelona"
+  },
+  "POR-25": {
+    "fifaId": "POR-25",
+    "teamCode": "POR",
+    "name": "Otávio",
+    "fullName": "Otávio",
+    "number": 25,
+    "position": "MF",
+    "club": "Al-Nassr"
+  },
   "433072": {
     "fifaId": "433072",
     "teamCode": "TUR",
