@@ -110,8 +110,8 @@ ENVIRONMENT:
 
 PROCESS:
     1. Verify this repo worktree is clean
-    2. Verify mpbarbosa.com worktree is clean
-    3. git pull --ff-only  — fast-forward mpbarbosa.com from remote
+    2. Sync match results from FIFA calendar API (auto-commits if changed)
+    3. Verify mpbarbosa.com worktree is clean + git pull --ff-only
     4. deploy-preflight.sh — build + validate dist/
     5. stage payload       — dist/ + package manifests + env example
     6. rsync payload       — sync to $MPBARBOSA_COM_ROOT/agora_na_copa_2026/
@@ -183,7 +183,7 @@ payload_is_ready() {
 }
 
 validate_clean_worktrees() {
-    echo "==> [1/7] Verifying clean worktrees..."
+    echo "==> [1/8] Verifying clean worktrees..."
 
     if [ -n "$(git -C "$PROJECT_ROOT" status --porcelain)" ]; then
         die "agora_na_copa_2026 worktree is not clean. Commit or stash changes before deploying."
@@ -205,10 +205,34 @@ prepare_deploy_metadata() {
     COMMIT_MESSAGE="chore(deploy): publish agora_na_copa_2026 ${version} (${sha})"
 }
 
+sync_match_results() {
+    echo "==> [2/8] Syncing match results from FIFA calendar..."
+
+    if ! command -v python3 >/dev/null 2>&1; then
+        echo "==> python3 not found — skipping match sync."
+        return 0
+    fi
+
+    local sync_out
+    if sync_out="$(cd "$PROJECT_ROOT" && python3 scripts/sync-match-results.py 2>&1)"; then
+        if git -C "$PROJECT_ROOT" diff --quiet src/matches.json; then
+            echo "==> Match results already in sync."
+        else
+            echo "$sync_out"
+            git -C "$PROJECT_ROOT" add src/matches.json
+            git -C "$PROJECT_ROOT" commit -m "chore: sync match results from FIFA calendar [auto]"
+            echo "==> Match results updated and committed."
+        fi
+    else
+        # FIFA API unreachable or returned an error — not fatal, deploy continues
+        echo "==> Match sync skipped (FIFA API unreachable): proceeding with existing data."
+    fi
+}
+
 sync_target_repo() {
     local branch
 
-    echo "==> [2/7] Fast-forwarding $MPBARBOSA_COM_ROOT..."
+    echo "==> [3/8] Fast-forwarding $MPBARBOSA_COM_ROOT..."
     branch="$(git -C "$MPBARBOSA_COM_ROOT" rev-parse --abbrev-ref HEAD)"
     if [ "$branch" = "HEAD" ]; then
         die "mpbarbosa.com is in detached HEAD state. Check out a branch before deploying."
@@ -223,14 +247,14 @@ sync_target_repo() {
 }
 
 run_preflight() {
-    echo "==> [3/7] Running production preflight..."
+    echo "==> [4/8] Running production preflight..."
     cd "$PROJECT_ROOT"
     "$SCRIPT_DIR/deploy-preflight.sh"
     echo "==> Preflight complete."
 }
 
 stage_payload() {
-    echo "==> [4/7] Staging deployment payload..."
+    echo "==> [5/8] Staging deployment payload..."
 
     PAYLOAD_STAGE_DIR="$(stage_deploy_payload "$PROJECT_ROOT")"
 
@@ -238,7 +262,7 @@ stage_payload() {
 }
 
 sync_to_target() {
-    echo "==> [5/7] Syncing payload to $DEPLOY_TARGET..."
+    echo "==> [6/8] Syncing payload to $DEPLOY_TARGET..."
     mkdir -p "$DEPLOY_TARGET"
     rsync -av --delete "$PAYLOAD_STAGE_DIR/" "$DEPLOY_TARGET/"
 
@@ -250,7 +274,7 @@ sync_to_target() {
 }
 
 git_commit_and_push() {
-    echo "==> [6/7] Checking for changes in $MPBARBOSA_COM_ROOT/$DEPLOY_SUBTREE..."
+    echo "==> [7/8] Checking for changes in $MPBARBOSA_COM_ROOT/$DEPLOY_SUBTREE..."
     cd "$MPBARBOSA_COM_ROOT"
 
     echo "==> Staging deployment subtree..."
@@ -305,7 +329,7 @@ maybe_redeploy_live_app() {
         return 0
     fi
 
-    echo "==> [7/7] Syncing live app at $LIVE_DEPLOY_DIR..."
+    echo "==> [8/8] Syncing live app at $LIVE_DEPLOY_DIR..."
     "$LIVE_REDEPLOY_SCRIPT"
 }
 
@@ -313,6 +337,7 @@ main() {
     resolve_paths
     validate_prerequisites
     validate_clean_worktrees
+    sync_match_results
     prepare_deploy_metadata
     sync_target_repo
     run_preflight

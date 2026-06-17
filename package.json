@@ -1,7 +1,7 @@
 {
   "name": "agora-na-copa-2026",
   "private": true,
-  "version": "0.0.127",
+  "version": "0.0.128",
   "type": "module",
   "scripts": {
     "dev": "tsx server.ts",
@@ -12,6 +12,7 @@
     "test:unit": "node --import tsx --test tests/fifa-sync-core.test.ts",
     "test:e2e": "playwright test",
     "test:e2e:prod": "playwright test --config=playwright.prod.config.ts",
+    "sync-matches": "python3 scripts/sync-match-results.py --verbose",
     "deploy": "./scripts/deploy.sh",
     "deploy:preflight": "./scripts/deploy-preflight.sh"
   },
