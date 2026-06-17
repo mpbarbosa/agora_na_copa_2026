@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from "react";
 import { APP_MATCHES } from "../appMatches";
+import { getTeamSquad } from "../data/playerRegistry";
 import type { Player, TeamRef } from "../types";
 import { FlagIcon } from "./FlagIcon";
 import { PlayerPortrait, PlayerOverlayCard, PlayerPictureOverlay, buildTournamentStatCells, getPlayerAge } from "./PlayerOverlayCard";
@@ -32,6 +33,25 @@ function extractTeams(): TeamEntry[] {
   for (const match of APP_MATCHES) {
     for (const side of [match.teamA, match.teamB]) {
       if (!seen.has(side.code)) {
+        const squadEntries = getTeamSquad(side.code);
+        const players: Player[] =
+          squadEntries.length > 0
+            ? squadEntries.map((sp) => ({
+                id: sp.fifaId,
+                name: sp.name,
+                number: sp.number,
+                position: sp.position,
+                x: 0,
+                y: 0,
+                club: sp.club,
+                pictureUrl: sp.pictureUrl,
+                socials: sp.socials,
+                fullName: sp.fullName,
+                dateOfBirth: sp.dateOfBirth,
+                height: sp.height,
+                fifaId: sp.fifaId,
+              }))
+            : side.lineup;
         seen.set(side.code, {
           name: side.name,
           code: side.code,
@@ -39,7 +59,7 @@ function extractTeams(): TeamEntry[] {
           primaryColor: side.primaryColor,
           secondaryColor: side.secondaryColor,
           group: side.group,
-          players: side.lineup,
+          players,
         });
       }
     }
@@ -66,14 +86,14 @@ const POSITION_COLORS: Record<string, string> = {
 };
 
 const LEGEND_IDS = new Set([
-  "a9",   // Lionel Messi
-  "b10",  // Vinicius Jr
-  "b12",  // Neymar Jr
-  "eg11", // Mohamed Salah
-  "es9",  // Lamine Yamal
-  "f10",  // Kylian Mbappé
-  "ir11", // Mehdi Taremi
-  "p10",  // Cristiano Ronaldo
+  "229397", // Lionel Messi (ARG)
+  "405742", // Vinicius Jr (BRA)
+  "190460", // Neymar Jr (BRA)
+  "344654", // Mohamed Salah (EGY)
+  "484320", // Lamine Yamal (ESP)
+  "389867", // K. Mbappé (FRA)
+  "388475", // Mehdi Taremi (IRN)
+  "384462", // Cristiano Ronaldo (POR)
 ]);
 
 interface PlayerCardProps {
