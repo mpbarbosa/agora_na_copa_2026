@@ -895,10 +895,146 @@
     "fifaId": "398681",
     "teamCode": "FRA",
     "name": "Kanté",
+    "fullName": "N'Golo Kanté",
     "number": 13,
     "position": "MF",
     "club": "Al-Ittihad",
     "pictureUrl": "https://digitalhub.fifa.com/transform/355040a8-6b40-452b-92af-7c22f91cb87c/KANTE-Ngolo_398681"
+  },
+  "FRA-2": {
+    "fifaId": "FRA-2",
+    "teamCode": "FRA",
+    "name": "Pavard",
+    "fullName": "Benjamin Pavard",
+    "number": 2,
+    "position": "DF",
+    "club": "Inter Milan"
+  },
+  "FRA-3": {
+    "fifaId": "FRA-3",
+    "teamCode": "FRA",
+    "name": "L. Hernández",
+    "fullName": "Lucas Hernández",
+    "number": 3,
+    "position": "DF",
+    "club": "PSG"
+  },
+  "FRA-6": {
+    "fifaId": "FRA-6",
+    "teamCode": "FRA",
+    "name": "Konaté",
+    "fullName": "Ibrahima Konaté",
+    "number": 6,
+    "position": "DF",
+    "club": "Liverpool"
+  },
+  "FRA-9": {
+    "fifaId": "FRA-9",
+    "teamCode": "FRA",
+    "name": "Kolo Muani",
+    "fullName": "Randal Kolo Muani",
+    "number": 9,
+    "position": "FW",
+    "club": "PSG"
+  },
+  "FRA-12": {
+    "fifaId": "FRA-12",
+    "teamCode": "FRA",
+    "name": "Fofana",
+    "fullName": "Youssouf Fofana",
+    "number": 12,
+    "position": "MF",
+    "club": "AC Milan"
+  },
+  "FRA-14": {
+    "fifaId": "FRA-14",
+    "teamCode": "FRA",
+    "name": "Rabiot",
+    "fullName": "Adrien Rabiot",
+    "number": 14,
+    "position": "MF",
+    "club": "Manchester United"
+  },
+  "FRA-15": {
+    "fifaId": "FRA-15",
+    "teamCode": "FRA",
+    "name": "M. Thuram",
+    "fullName": "Marcus Thuram",
+    "number": 15,
+    "position": "FW",
+    "club": "Inter Milan"
+  },
+  "FRA-16": {
+    "fifaId": "FRA-16",
+    "teamCode": "FRA",
+    "name": "Areola",
+    "fullName": "Alphonse Areola",
+    "number": 16,
+    "position": "GK",
+    "club": "West Ham"
+  },
+  "FRA-18": {
+    "fifaId": "FRA-18",
+    "teamCode": "FRA",
+    "name": "Camavinga",
+    "fullName": "Eduardo Camavinga",
+    "number": 18,
+    "position": "MF",
+    "club": "Real Madrid"
+  },
+  "FRA-19": {
+    "fifaId": "FRA-19",
+    "teamCode": "FRA",
+    "name": "Coman",
+    "fullName": "Kingsley Coman",
+    "number": 19,
+    "position": "FW",
+    "club": "Bayern Munich"
+  },
+  "FRA-21": {
+    "fifaId": "FRA-21",
+    "teamCode": "FRA",
+    "name": "F. Mendy",
+    "fullName": "Ferland Mendy",
+    "number": 21,
+    "position": "DF",
+    "club": "Real Madrid"
+  },
+  "FRA-23": {
+    "fifaId": "FRA-23",
+    "teamCode": "FRA",
+    "name": "Lafont",
+    "fullName": "Alban Lafont",
+    "number": 23,
+    "position": "GK",
+    "club": "Nantes"
+  },
+  "FRA-24": {
+    "fifaId": "FRA-24",
+    "teamCode": "FRA",
+    "name": "Disasi",
+    "fullName": "Axel Disasi",
+    "number": 24,
+    "position": "DF",
+    "club": "Chelsea"
+  },
+  "FRA-25": {
+    "fifaId": "FRA-25",
+    "teamCode": "FRA",
+    "name": "Zaïre-Emery",
+    "fullName": "Warren Zaïre-Emery",
+    "number": 25,
+    "position": "MF",
+    "club": "PSG"
+  },
+  "FRA-26": {
+    "fifaId": "FRA-26",
+    "teamCode": "FRA",
+    "name": "M. Tel",
+    "fullName": "Mathys Tel",
+    "number": 26,
+    "position": "FW",
+    "club": "Bayern Munich"
   },
   "400511": {
     "fifaId": "400511",
