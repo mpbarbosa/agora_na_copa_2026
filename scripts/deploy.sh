@@ -214,7 +214,7 @@ sync_match_results() {
     fi
 
     local sync_out
-    if sync_out="$(cd "$PROJECT_ROOT" && python3 scripts/sync-match-results.py 2>&1)"; then
+    if sync_out="$(cd "$PROJECT_ROOT" && timeout 20 python3 scripts/sync-match-results.py 2>&1)"; then
         if git -C "$PROJECT_ROOT" diff --quiet src/matches.json; then
             echo "==> Match results already in sync."
         else
