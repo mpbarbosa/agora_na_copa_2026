@@ -8,6 +8,16 @@ import { getPlayerSocialEntries } from "../utils/playerDisplay";
 export const getPlayerAge = (dateOfBirth: string): number =>
   Math.floor((Date.now() - new Date(dateOfBirth).getTime()) / (365.25 * 24 * 3600 * 1000));
 
+const PT_MONTHS_SHORT = ["jan.", "fev.", "mar.", "abr.", "mai.", "jun.", "jul.", "ago.", "set.", "out.", "nov.", "dez."];
+
+// Formats "1993-07-28" → "28 jul. 1993" without timezone shift risk
+export function formatBirthDate(isoDate: string): string {
+  const [yearStr, monthStr, dayStr] = isoDate.split("-");
+  const month = parseInt(monthStr, 10);
+  const day = parseInt(dayStr, 10);
+  return `${day} ${PT_MONTHS_SHORT[month - 1]} ${yearStr}`;
+}
+
 interface TournamentStats {
   goals: number;
   yellowCards: number;

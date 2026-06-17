@@ -20,7 +20,7 @@ import { APP_MATCHES } from "../appMatches";
 import MATCH_VIDEOS from "../data/matchVideos.json";
 import type { TeamLineupsMap } from "../utils/teamLineup";
 import { FlagIcon } from "./FlagIcon";
-import { PlayerOverlayCard, PlayerPictureOverlay, buildTournamentStatCells, getPlayerAge } from "./PlayerOverlayCard";
+import { PlayerOverlayCard, PlayerPictureOverlay, buildTournamentStatCells, getPlayerAge, formatBirthDate } from "./PlayerOverlayCard";
 import { usePlayerStats } from "../hooks/usePlayerStats";
 import { getPositionLabel } from "../utils/playerDisplay";
 import { PitchLineup } from "./PitchLineup";
@@ -2057,6 +2057,9 @@ export function MatchDetailView({
             ...buildTournamentStatCells(incidentPlayerStats, theme),
           ]}
           details={[
+            ...(selectedIncidentPlayer.player.dateOfBirth
+              ? [{ label: "Nascimento", value: formatBirthDate(selectedIncidentPlayer.player.dateOfBirth) }]
+              : []),
             {
               label: "Clube atual",
               value: selectedIncidentPlayer.player.club || "Seleção Nacional",

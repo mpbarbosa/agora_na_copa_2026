@@ -3,7 +3,7 @@ import { APP_MATCHES } from "../appMatches";
 import { getTeamSquad } from "../data/playerRegistry";
 import type { Player, TeamRef } from "../types";
 import { FlagIcon } from "./FlagIcon";
-import { PlayerPortrait, PlayerOverlayCard, PlayerPictureOverlay, buildTournamentStatCells, getPlayerAge } from "./PlayerOverlayCard";
+import { PlayerPortrait, PlayerOverlayCard, PlayerPictureOverlay, buildTournamentStatCells, getPlayerAge, formatBirthDate } from "./PlayerOverlayCard";
 import { InstagramBrandIcon } from "./InstagramBrandIcon";
 import { getPositionLabel } from "../utils/playerDisplay";
 import { usePlayerStats } from "../hooks/usePlayerStats";
@@ -491,6 +491,11 @@ export function JogadoresView({ theme, onSelectTeamLineup }: JogadoresViewProps)
               ? [{ label: "Altura", value: `${selected.player.height} cm` }]
               : []),
             ...buildTournamentStatCells(selectedStats, theme),
+          ]}
+          details={[
+            ...(selected.player.dateOfBirth
+              ? [{ label: "Nascimento", value: formatBirthDate(selected.player.dateOfBirth) }]
+              : []),
           ]}
           onClose={() => setSelected(null)}
           onOpenPicture={() => setExpandedPlayer(selected.player)}

@@ -6,6 +6,7 @@ import {
   PlayerPortrait,
   buildTournamentStatCells,
   getPlayerAge,
+  formatBirthDate,
   renderSocialPlatformLabel,
 } from "./PlayerOverlayCard";
 import { getPlayerSocialEntries, getPositionLabel } from "../utils/playerDisplay";
@@ -357,6 +358,9 @@ export const TeamPitchBoard: FC<TeamPitchBoardProps> = ({
             ...buildTournamentStatCells(featuredPlayerStats, theme as "classic-light" | "stadium-dark"),
           ]}
           details={[
+            ...(featuredPlayer.dateOfBirth
+              ? [{ label: "Nascimento", value: formatBirthDate(featuredPlayer.dateOfBirth) }]
+              : []),
             { label: "Clube atual", value: featuredPlayer.club || "Seleção Nacional" },
             ...(opponentName
               ? [
