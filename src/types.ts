@@ -24,6 +24,25 @@ export interface Player {
   club?: string;
   pictureUrl?: string;
   socials?: PlayerSocials;
+  fifaId?: string;
+  fullName?: string;
+  dateOfBirth?: string; // ISO 8601, e.g. "2000-07-21"
+  height?: number; // cm
+  captain?: boolean;
+}
+
+export interface SquadPlayer {
+  fifaId: string;
+  teamCode: string;
+  name: string;
+  fullName?: string;
+  number: number;
+  position: Position;
+  club?: string;
+  pictureUrl?: string;
+  socials?: PlayerSocials;
+  dateOfBirth?: string; // ISO 8601
+  height?: number; // cm
 }
 
 export interface Broadcaster {

@@ -2,7 +2,7 @@ import React, { useMemo, useState } from "react";
 import { APP_MATCHES } from "../appMatches";
 import type { Player, TeamRef } from "../types";
 import { FlagIcon } from "./FlagIcon";
-import { PlayerPortrait, PlayerOverlayCard } from "./PlayerOverlayCard";
+import { PlayerPortrait, PlayerOverlayCard, getPlayerAge } from "./PlayerOverlayCard";
 import { InstagramBrandIcon } from "./InstagramBrandIcon";
 import { getPositionLabel } from "../utils/playerDisplay";
 
@@ -405,7 +405,16 @@ export function JogadoresView({ theme, onSelectTeamLineup }: JogadoresViewProps)
           primaryColor={selected.team.primaryColor}
           secondaryColor={selected.team.secondaryColor}
           flagSvg={selected.team.flagSvg}
-          stats={[]}
+          stats={[
+            { label: "Camisa", value: selected.player.number },
+            { label: "Posição", value: getPositionLabel(selected.player.position) },
+            ...(selected.player.dateOfBirth
+              ? [{ label: "Idade", value: getPlayerAge(selected.player.dateOfBirth) }]
+              : []),
+            ...(selected.player.height
+              ? [{ label: "Altura", value: `${selected.player.height} cm` }]
+              : []),
+          ]}
           onClose={() => setSelected(null)}
           onOpenTeamView={() => {
             onSelectTeamLineup(toTeamRef(selected.team));

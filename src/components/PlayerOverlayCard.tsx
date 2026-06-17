@@ -5,6 +5,9 @@ import { FlagIcon } from "./FlagIcon";
 import { useEscapeKey } from "../hooks/useEscapeKey";
 import { getPlayerSocialEntries } from "../utils/playerDisplay";
 
+export const getPlayerAge = (dateOfBirth: string): number =>
+  Math.floor((Date.now() - new Date(dateOfBirth).getTime()) / (365.25 * 24 * 3600 * 1000));
+
 const SOCIAL_PLATFORM_LABELS: Record<keyof PlayerSocials, string> = {
   instagram: "Instagram",
   x: "X",
@@ -140,11 +143,15 @@ interface PlayerOverlayCardProps {
   theme: "classic-light" | "stadium-dark";
   player: {
     name: string;
+    fullName?: string;
     number?: number;
     position?: Position;
     club?: string;
     pictureUrl?: string;
     socials?: PlayerSocials;
+    captain?: boolean;
+    dateOfBirth?: string;
+    height?: number;
   };
   teamName: string;
   primaryColor?: string;
@@ -236,7 +243,19 @@ export function PlayerOverlayCard({
                 <FlagIcon flag={flagSvg} className="h-6 w-9 shrink-0" />
               </button>
             )}
-            <h4 className="min-w-0 font-anton text-3xl uppercase tracking-wide">{player.name}</h4>
+            <div className="min-w-0">
+              <div className="flex items-center gap-2">
+                <h4 className="font-anton text-3xl uppercase tracking-wide">{player.name}</h4>
+                {player.captain && (
+                  <span className="shrink-0 rounded-full border border-[#ffd700]/60 bg-[#ffd700]/15 px-2 py-0.5 font-mono text-[10px] font-black uppercase tracking-wider text-[#ffd700]">
+                    C
+                  </span>
+                )}
+              </div>
+              {player.fullName && player.fullName !== player.name && (
+                <p className={`font-archivo text-xs ${mutedClasses}`}>{player.fullName}</p>
+              )}
+            </div>
           </div>
           <p className={`mt-1 font-archivo text-sm ${mutedClasses}`}>
             {onOpenTeamView ? (

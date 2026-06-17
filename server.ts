@@ -17,6 +17,7 @@ import type {
   FifaWatchSource,
 } from "./fifa-sync-core";
 import { APP_MATCHES } from "./src/appMatches";
+import { resolvePlayerEntry } from "./src/data/playerRegistry";
 import { triviaQuestions } from "./src/data/questions";
 import WIKIPEDIA_COUNTRIES from "./src/data/wikipediaCountries";
 import { computeStandings, groupStandings } from "./src/standings";
@@ -290,12 +291,18 @@ const buildPlayerLeaderMetadataMap = (lineupsPayload: TeamLineupsResponse) => {
     const teamALineup = lineupEntry?.teamA.players ?? match.teamA.lineup;
     const teamBLineup = lineupEntry?.teamB.players ?? match.teamB.lineup;
 
-    teamALineup.forEach((player) => {
-      upsertPlayerLeaderMetadata(metadataByPlayerKey, match.teamA.code, player);
-    });
-    teamBLineup.forEach((player) => {
-      upsertPlayerLeaderMetadata(metadataByPlayerKey, match.teamB.code, player);
-    });
+    const enrich = (teamCode: string, player: (typeof teamALineup)[number]) => {
+      const entry = resolvePlayerEntry(teamCode, player.name, player.number, player.fifaId);
+      upsertPlayerLeaderMetadata(metadataByPlayerKey, teamCode, {
+        ...player,
+        club: player.club ?? entry?.club,
+        socials: player.socials ?? entry?.socials,
+        pictureUrl: player.pictureUrl ?? entry?.pictureUrl,
+      });
+    };
+
+    teamALineup.forEach((player) => enrich(match.teamA.code, player));
+    teamBLineup.forEach((player) => enrich(match.teamB.code, player));
   });
 
   return metadataByPlayerKey;

@@ -1,10 +1,10 @@
 import { FC, useEffect, useMemo, useState } from "react";
 import { Player, Position, type PlayerSocials } from "../types";
-import { enrichPlayerWithMetadata } from "../utils/playerMetadata";
 import {
   PlayerOverlayCard,
   PlayerPictureOverlay,
   PlayerPortrait,
+  getPlayerAge,
   renderSocialPlatformLabel,
 } from "./PlayerOverlayCard";
 import { getPlayerSocialEntries, getPositionLabel } from "../utils/playerDisplay";
@@ -42,10 +42,7 @@ export const TeamPitchBoard: FC<TeamPitchBoardProps> = ({
   mirror = false,
   theme = "stadium-dark",
 }) => {
-  const enrichedLineup = useMemo(
-    () => team.lineup.map((player) => enrichPlayerWithMetadata(team.code, player)),
-    [team.code, team.lineup],
-  );
+  const enrichedLineup = useMemo(() => team.lineup, [team.lineup]);
   const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
   const [expandedPlayer, setExpandedPlayer] = useState<Player | null>(null);
   const [featuredPlayer, setFeaturedPlayer] = useState<Player | null>(null);
@@ -235,10 +232,17 @@ export const TeamPitchBoard: FC<TeamPitchBoardProps> = ({
                     <span className="font-semibold uppercase">{team.name}</span>
                   </div>
 
-                  <div className="flex justify-between py-1.5 border-b border-white/5">
-                    <span className="text-white/65 font-mono">VALOR TÁTICO</span>
-                    <span className="font-semibold text-white">Crucial • Titular Confirmado</span>
-                  </div>
+                  {selectedPlayer.height ? (
+                    <div className="flex justify-between py-1.5 border-b border-white/5">
+                      <span className="text-white/65 font-mono">ALTURA</span>
+                      <span className="font-semibold text-white">{selectedPlayer.height} cm</span>
+                    </div>
+                  ) : selectedPlayer.captain ? (
+                    <div className="flex justify-between py-1.5 border-b border-white/5">
+                      <span className="text-white/65 font-mono">FUNÇÃO</span>
+                      <span className="font-semibold text-[#ffd700]">Capitão</span>
+                    </div>
+                  ) : null}
                 </div>
 
                 {selectedPlayerSocials.length > 0 && (
@@ -361,6 +365,12 @@ export const TeamPitchBoard: FC<TeamPitchBoardProps> = ({
             { label: "Camisa", value: featuredPlayer.number },
             { label: "Posição", value: getPositionLabel(featuredPlayer.position) },
             { label: "Seleção", value: team.name },
+            ...(featuredPlayer.dateOfBirth
+              ? [{ label: "Idade", value: getPlayerAge(featuredPlayer.dateOfBirth) }]
+              : []),
+            ...(featuredPlayer.height
+              ? [{ label: "Altura", value: `${featuredPlayer.height} cm` }]
+              : []),
             ...(featuredPlayerStats &&
             (featuredPlayerStats.goals > 0 ||
               featuredPlayerStats.yellowCards > 0 ||
@@ -389,7 +399,6 @@ export const TeamPitchBoard: FC<TeamPitchBoardProps> = ({
           ]}
           details={[
             { label: "Clube atual", value: featuredPlayer.club || "Seleção Nacional" },
-            { label: "Leitura tática", value: "Titular confirmado • Papel crucial" },
             ...(opponentName
               ? [
                   {

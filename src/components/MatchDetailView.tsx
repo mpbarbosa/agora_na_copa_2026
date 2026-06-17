@@ -19,9 +19,8 @@ import {
 import { APP_MATCHES } from "../appMatches";
 import MATCH_VIDEOS from "../data/matchVideos.json";
 import type { TeamLineupsMap } from "../utils/teamLineup";
-import { enrichPlayerWithMetadata, getPlayerMetadataSupplement } from "../utils/playerMetadata";
 import { FlagIcon } from "./FlagIcon";
-import { PlayerOverlayCard, PlayerPictureOverlay } from "./PlayerOverlayCard";
+import { PlayerOverlayCard, PlayerPictureOverlay, getPlayerAge } from "./PlayerOverlayCard";
 import { getPositionLabel } from "../utils/playerDisplay";
 import { PitchLineup } from "./PitchLineup";
 import { useClockTick } from "../hooks/useClockTick";
@@ -297,21 +296,14 @@ function buildIncidentPlayerSelections(
           y: 50,
           pictureUrl: mention.pictureUrl,
         } satisfies Player);
-      const metadataSupplement = getPlayerMetadataSupplement(team.code, mention.name);
-
       return {
         token: incidentTokens[index] ?? mention.name,
         selection: {
           player: {
-            ...enrichPlayerWithMetadata(team.code, {
-              ...player,
-              club: player.club ?? fallbackPlayer?.club,
-              socials:
-                player.socials ??
-                fallbackPlayer?.socials ??
-                metadataSupplement?.socials,
-              pictureUrl: mention.pictureUrl ?? player.pictureUrl ?? fallbackPlayer?.pictureUrl,
-            }),
+            ...player,
+            club: player.club ?? fallbackPlayer?.club,
+            socials: player.socials ?? fallbackPlayer?.socials,
+            pictureUrl: mention.pictureUrl ?? player.pictureUrl ?? fallbackPlayer?.pictureUrl,
           },
           team,
           opponentName,
@@ -648,10 +640,7 @@ export function MatchDetailView({
 
   const selectedIncidentPlayer: IncidentPlayerSelection | null = storedIncidentPlayer
     ? {
-        player: enrichPlayerWithMetadata(
-          storedIncidentPlayer.team.code,
-          resolvePlayerFromKey(storedIncidentPlayer.playerKey),
-        ),
+        player: resolvePlayerFromKey(storedIncidentPlayer.playerKey),
         team: storedIncidentPlayer.team,
         opponentName: storedIncidentPlayer.opponentName,
       }
@@ -2074,6 +2063,12 @@ export function MatchDetailView({
               value: getPositionLabel(selectedIncidentPlayer.player.position),
             },
             { label: "Seleção", value: selectedIncidentPlayer.team.code },
+            ...(selectedIncidentPlayer.player.dateOfBirth
+              ? [{ label: "Idade", value: getPlayerAge(selectedIncidentPlayer.player.dateOfBirth) }]
+              : []),
+            ...(selectedIncidentPlayer.player.height
+              ? [{ label: "Altura", value: `${selectedIncidentPlayer.player.height} cm` }]
+              : []),
             ...(incidentPlayerStats &&
             (incidentPlayerStats.goals > 0 ||
               incidentPlayerStats.yellowCards > 0 ||
@@ -2105,7 +2100,6 @@ export function MatchDetailView({
               label: "Clube atual",
               value: selectedIncidentPlayer.player.club || "Seleção Nacional",
             },
-            { label: "Leitura tática", value: "Titular confirmado • Papel crucial" },
             {
               label: "Contexto da partida",
               value: `Contra ${selectedIncidentPlayer.opponentName}, ${selectedIncidentPlayer.player.name} aparece no radar dos lances da partida.`,

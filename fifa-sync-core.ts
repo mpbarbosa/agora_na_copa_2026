@@ -8,7 +8,7 @@ import type {
   MatchStatus,
   Player,
 } from "./src/types";
-import { getPlayerMetadataSupplement } from "./src/utils/playerMetadata";
+import { resolvePlayerEntry } from "./src/data/playerRegistry";
 
 export interface FifaLocalizedText {
   Locale?: string;
@@ -467,22 +467,25 @@ const mergeLineupWithLocalMetadata = (
 ): Player[] =>
   players.map((player) => {
     const fallbackPlayer = findMatchingLineupPlayer(player, fallbackLineup);
-    const metadataSupplement = getPlayerMetadataSupplement(teamCode, player.name);
+    const entry = resolvePlayerEntry(teamCode, player.name, player.number, player.fifaId);
     if (!fallbackPlayer) {
       return {
         ...player,
-        socials: player.socials ?? metadataSupplement?.socials,
+        socials: player.socials ?? entry?.socials,
+        fullName: player.fullName ?? entry?.fullName,
+        dateOfBirth: player.dateOfBirth ?? entry?.dateOfBirth,
+        height: player.height ?? entry?.height,
       };
     }
 
     return {
       ...player,
-      club: player.club ?? fallbackPlayer.club,
+      club: player.club ?? fallbackPlayer.club ?? entry?.club,
       pictureUrl: player.pictureUrl ?? fallbackPlayer.pictureUrl,
-      socials:
-        player.socials ??
-        fallbackPlayer.socials ??
-        metadataSupplement?.socials,
+      socials: player.socials ?? fallbackPlayer.socials ?? entry?.socials,
+      fullName: player.fullName ?? fallbackPlayer.fullName ?? entry?.fullName,
+      dateOfBirth: player.dateOfBirth ?? fallbackPlayer.dateOfBirth ?? entry?.dateOfBirth,
+      height: player.height ?? fallbackPlayer.height ?? entry?.height,
     };
   });
 
@@ -502,13 +505,16 @@ const enrichFallbackLineupWithFifaPictures = (
       return player;
     }
 
+    const entry = resolvePlayerEntry(teamCode, player.name, player.number, fifaPlayer.IdPlayer);
     return {
       ...player,
+      fifaId: fifaPlayer.IdPlayer,
       number: fifaPlayer.ShirtNumber || player.number,
       pictureUrl: pictureUrl ?? player.pictureUrl,
-      socials:
-        player.socials ??
-        getPlayerMetadataSupplement(teamCode, player.name)?.socials,
+      socials: player.socials ?? entry?.socials,
+      fullName: player.fullName ?? entry?.fullName,
+      dateOfBirth: player.dateOfBirth ?? entry?.dateOfBirth,
+      height: player.height ?? entry?.height,
     };
   });
 };
@@ -810,6 +816,8 @@ export const getStartingLineupFromLiveFifa = (
 
   return starters.map((player, index) => ({
     id: player.IdPlayer,
+    fifaId: player.IdPlayer,
+    captain: player.Captain ?? false,
     name: getBestPlayerName(player.ShortName, getBestPlayerName(player.PlayerName, "Jogador")),
     number: player.ShirtNumber || 0,
     position: FIFA_POSITION_TO_LOCAL[player.Position ?? 2] ?? Position.MF,

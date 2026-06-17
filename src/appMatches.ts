@@ -2,6 +2,7 @@ import baseMatchesData from "./matches.json";
 import { BBC_SCHEDULED_MATCHES } from "./data/bbcScheduledMatches";
 import { FIFA_MATCH_VENUES } from "./data/fifaMatchVenues";
 import { standings as seedStandings } from "./data/tournament";
+import { resolvePlayerEntry } from "./data/playerRegistry";
 import type { Match } from "./types";
 
 interface SupplementalMatchSeed {
@@ -58,6 +59,26 @@ for (const match of BASE_MATCHES) {
       lineupByTeamCode.set(team.code, team.lineup);
     }
   }
+}
+
+for (const [teamCode, lineup] of lineupByTeamCode) {
+  lineupByTeamCode.set(
+    teamCode,
+    lineup.map((player) => {
+      const entry = resolvePlayerEntry(teamCode, player.name, player.number, player.fifaId);
+      if (!entry) return player;
+      return {
+        ...player,
+        fifaId: entry.fifaId,
+        fullName: player.fullName ?? entry.fullName,
+        club: player.club ?? entry.club,
+        pictureUrl: player.pictureUrl ?? entry.pictureUrl,
+        socials: player.socials ?? entry.socials,
+        dateOfBirth: player.dateOfBirth ?? entry.dateOfBirth,
+        height: player.height ?? entry.height,
+      };
+    }),
+  );
 }
 
 const teamByCode = new Map(
