@@ -5425,5 +5425,283 @@
     },
     "countdownTargetSeconds": 0,
     "broadcasters": []
+  },
+  {
+    "id": "eng-cro-2026",
+    "teamA": {
+      "name": "INGLATERRA",
+      "code": "ENG",
+      "flagSvg": "england",
+      "primaryColor": "#ce1124",
+      "secondaryColor": "#ffffff",
+      "group": "Grupo L",
+      "lineup": [
+        {
+          "id": "336022",
+          "name": "Pickford",
+          "number": 1,
+          "position": "GK",
+          "x": 50,
+          "y": 88,
+          "club": "Everton",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/5f9b3bbf-edb5-4956-bce7-2d0a8e77f6ab/PICKFORD-Jordan_336022",
+          "fifaId": "336022"
+        },
+        {
+          "id": "403049",
+          "name": "Konsa",
+          "number": 2,
+          "position": "DF",
+          "x": 12,
+          "y": 72,
+          "club": "Aston Villa",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/54b28723-92e1-42e8-97b5-162f5099cf60/KONSA-Ezri_403049",
+          "fifaId": "403049"
+        },
+        {
+          "id": "463780",
+          "name": "O'Reilly",
+          "number": 3,
+          "position": "DF",
+          "x": 37,
+          "y": 72,
+          "club": "Manchester United",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/6a6be1c6-3496-49ba-81ca-354bdb2f404c/OREILLY-Nico_390761",
+          "fifaId": "463780"
+        },
+        {
+          "id": "369434",
+          "name": "Stones",
+          "number": 5,
+          "position": "DF",
+          "x": 63,
+          "y": 72,
+          "club": "Manchester City",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/bb455f6a-d793-44ef-92b8-bd1aff6d14d6/STONES-John_369434",
+          "fifaId": "369434"
+        },
+        {
+          "id": "439641",
+          "name": "James",
+          "number": 24,
+          "position": "DF",
+          "x": 88,
+          "y": 72,
+          "club": "Chelsea",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/1ffcc3c3-fdf3-4b61-9ac5-299213771a62/JAMES-Reece_439641",
+          "fifaId": "439641"
+        },
+        {
+          "id": "433097",
+          "name": "Declan Rice",
+          "number": 4,
+          "position": "MF",
+          "x": 12,
+          "y": 45,
+          "club": "Arsenal",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/acb98657-fa9b-4202-bc38-075a97b5bf78/RICE-Declan_433097",
+          "fifaId": "433097"
+        },
+        {
+          "id": "481610",
+          "name": "Elliot Anderson",
+          "number": 8,
+          "position": "MF",
+          "x": 50,
+          "y": 45,
+          "club": "Newcastle United",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/8da5855f-c957-4151-94a0-731e9714249f/ANDERSON-Elliot_481610",
+          "fifaId": "481610"
+        },
+        {
+          "id": "448202",
+          "name": "Bellingham",
+          "number": 10,
+          "position": "MF",
+          "x": 88,
+          "y": 45,
+          "club": "Real Madrid",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/d711b37f-ec06-4ea7-bb52-50ba0a42ef67/BELLINGHAM-Jude_448202",
+          "fifaId": "448202"
+        },
+        {
+          "id": "369419",
+          "name": "Kane",
+          "number": 9,
+          "position": "FW",
+          "x": 12,
+          "y": 18,
+          "club": "Bayern München",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/5ad83fe6-1139-4f92-a97c-669052eb1755/KANE-Harry_369419",
+          "fifaId": "369419"
+        },
+        {
+          "id": "448189",
+          "name": "Gordon",
+          "number": 18,
+          "position": "FW",
+          "x": 50,
+          "y": 18,
+          "club": "Liverpool",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/bb7bbfe0-791d-408e-a2c2-f33156fce3e8/GORDON-Anthony_448189",
+          "fifaId": "448189"
+        },
+        {
+          "id": "489732",
+          "name": "Madueke",
+          "number": 20,
+          "position": "FW",
+          "x": 88,
+          "y": 18,
+          "club": "Chelsea",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/115733f4-8e52-477a-867f-063f1e2c7752/MADUEKE-Noni_489732",
+          "fifaId": "489732"
+        }
+      ]
+    },
+    "teamB": {
+      "name": "CROÁCIA",
+      "code": "CRO",
+      "flagSvg": "croatia",
+      "primaryColor": "#ff0000",
+      "secondaryColor": "#ffffff",
+      "group": "Grupo L",
+      "lineup": [
+        {
+          "id": "369029",
+          "name": "Livaković",
+          "number": 1,
+          "position": "GK",
+          "x": 50,
+          "y": 88,
+          "club": "Fenerbahçe",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/6f54cf31-4fd8-4dff-aaa7-9db6bf2fa2ec/LIVAKOVIC-Dominik_369029",
+          "fifaId": "369029"
+        },
+        {
+          "id": "433667",
+          "name": "Stanišić",
+          "number": 2,
+          "position": "DF",
+          "x": 12,
+          "y": 72,
+          "club": "Bayer Leverkusen",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/c1f59cf4-db22-4b38-af85-ab5692105f95/STANISIC-Josip_433667",
+          "fifaId": "433667"
+        },
+        {
+          "id": "448180",
+          "name": "Gvardiol",
+          "number": 4,
+          "position": "DF",
+          "x": 37,
+          "y": 72,
+          "club": "Manchester City",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/18cba70e-f4ed-4f57-8e6a-5d4bfd3df8b0/GVARDIOL-Josko_448180",
+          "fifaId": "448180"
+        },
+        {
+          "id": "448171",
+          "name": "Šutalo",
+          "number": 6,
+          "position": "DF",
+          "x": 63,
+          "y": 72,
+          "club": "Ajax",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/5b23d028-3bf8-4355-8364-7838975c264f/SUTALO-Josip_448171",
+          "fifaId": "448171"
+        },
+        {
+          "id": "499290",
+          "name": "Luka Vuskovic",
+          "number": 22,
+          "position": "DF",
+          "x": 88,
+          "y": 72,
+          "club": "Tottenham",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/c905e324-dc60-4e79-a2a1-c06412f27aed/VUSKOVIC-Luka_499290",
+          "fifaId": "499290"
+        },
+        {
+          "id": "241559",
+          "name": "Modrić",
+          "number": 10,
+          "position": "MF",
+          "x": 12,
+          "y": 45,
+          "club": "Real Madrid",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/cbff6a19-cce4-45ee-9869-84cf30ce5676/MODRIC-Luka_241559",
+          "fifaId": "241559"
+        },
+        {
+          "id": "380005",
+          "name": "Mario Pasalic",
+          "number": 15,
+          "position": "MF",
+          "x": 37,
+          "y": 45,
+          "club": "Atalanta",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/f3c0fd5e-6814-4acc-822a-2152e1cf79de/PASALIC-Mario_380005",
+          "fifaId": "380005"
+        },
+        {
+          "id": "482774",
+          "name": "Martin Baturina",
+          "number": 16,
+          "position": "MF",
+          "x": 63,
+          "y": 45,
+          "club": "Dinamo Zagreb",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/b9125a74-a920-4ffc-922b-68d57c524f4e/BATURINA-Martin_482774",
+          "fifaId": "482774"
+        },
+        {
+          "id": "485066",
+          "name": "Petar Sucic",
+          "number": 17,
+          "position": "MF",
+          "x": 88,
+          "y": 45,
+          "club": "RB Leipzig",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/89c383c2-39ba-413d-b945-e42dd2d47c6d/SUCIC-Petar_485066",
+          "fifaId": "485066"
+        },
+        {
+          "id": "359381",
+          "name": "Perišić",
+          "number": 14,
+          "position": "FW",
+          "x": 12,
+          "y": 18,
+          "club": "Hajduk Split",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/ba7ea3ab-0ef6-4cdd-834c-79a94739fe26/PERISIC-Ivan_359381",
+          "fifaId": "359381"
+        },
+        {
+          "id": "389754",
+          "name": "Petar Musa",
+          "number": 26,
+          "position": "FW",
+          "x": 88,
+          "y": 18,
+          "club": "Benfica",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/5c33a6f7-32cc-4821-949d-42fa33de6f74/MUSA-Petar_389754",
+          "fifaId": "389754"
+        }
+      ]
+    },
+    "stadiumName": "Dallas Stadium",
+    "city": "DALLAS",
+    "stageName": "Group Stage",
+    "kickoffTime": "17:00",
+    "kickoffDate": "17 Junho, 2026",
+    "kickoffTimestamp": "2026-06-17T17:00:00-03:00",
+    "status": "LIVE",
+    "score": {
+      "teamA": 1,
+      "teamB": 0
+    },
+    "countdownTargetSeconds": 0,
+    "broadcasters": []
   }
 ]

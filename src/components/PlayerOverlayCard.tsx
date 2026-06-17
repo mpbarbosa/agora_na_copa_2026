@@ -51,6 +51,21 @@ const SOCIAL_PLATFORM_LABELS: Record<keyof PlayerSocials, string> = {
   site: "Site oficial",
 };
 
+const SOCIAL_BASE_URLS: Partial<Record<keyof PlayerSocials, string>> = {
+  instagram: "https://www.instagram.com/",
+  x:         "https://x.com/",
+  tiktok:    "https://www.tiktok.com/@",
+  youtube:   "https://www.youtube.com/@",
+  facebook:  "https://www.facebook.com/",
+};
+
+function getSocialUrl(platform: keyof PlayerSocials, value: string): string {
+  const base = SOCIAL_BASE_URLS[platform];
+  if (!base) return value; // "site" already stores the full URL
+  if (value.startsWith("http")) return value;
+  return `${base}${value}`;
+}
+
 export function renderSocialPlatformLabel(platform: keyof PlayerSocials) {
   if (platform === "instagram") {
     return (
@@ -399,7 +414,7 @@ export function PlayerOverlayCard({
                     <a
                       key={platform}
                       id={id ? `${id}-social-link-${platform}` : undefined}
-                      href={url}
+                      href={getSocialUrl(platform, url)}
                       target="_blank"
                       rel="noopener noreferrer"
                       className={`inline-flex items-center justify-center rounded-full border px-3 py-1.5 font-mono text-[10px] font-bold uppercase tracking-wider transition ${socialButtonClasses}`}

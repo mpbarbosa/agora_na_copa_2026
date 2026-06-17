@@ -1,5 +1,4 @@
 import baseMatchesData from "./matches.json";
-import { BBC_SCHEDULED_MATCHES } from "./data/bbcScheduledMatches";
 import { FIFA_MATCH_VENUES } from "./data/fifaMatchVenues";
 import { standings as seedStandings } from "./data/tournament";
 import { resolvePlayerEntry } from "./data/playerRegistry";
@@ -29,9 +28,6 @@ const PT_MONTHS = [
   "Novembro",
   "Dezembro",
 ];
-
-const DEFAULT_SCHEDULED_STADIUM = "Estádio a confirmar";
-const DEFAULT_SCHEDULED_CITY = "A CONFIRMAR";
 
 const FIFA_SUPPLEMENTAL_MATCHES: SupplementalMatchSeed[] = [
   {
@@ -150,30 +146,12 @@ const buildSupplementalMatch = (
   };
 };
 
-const buildScheduledMatch = (
-  teamACode: string,
-  teamBCode: string,
-  kickoffTimestamp: string,
-) =>
-  buildSupplementalMatch({
-    teamA: teamACode,
-    teamB: teamBCode,
-    kickoffTimestamp,
-    status: "PRE_GAME",
-    stadiumName: DEFAULT_SCHEDULED_STADIUM,
-    city: DEFAULT_SCHEDULED_CITY,
-  });
 
 export const APP_MATCHES: Match[] = [
   ...BASE_MATCHES,
   ...FIFA_SUPPLEMENTAL_MATCHES.filter(
     ({ teamA, teamB }) => !existingIds.has(`${teamA.toLowerCase()}-${teamB.toLowerCase()}-2026`),
   ).map(buildSupplementalMatch),
-  ...BBC_SCHEDULED_MATCHES.filter(
-    ({ teamA, teamB }) => !existingIds.has(`${teamA.toLowerCase()}-${teamB.toLowerCase()}-2026`),
-  ).map(({ teamA, teamB, kickoffTimestamp }) =>
-    buildScheduledMatch(teamA, teamB, kickoffTimestamp),
-  ),
 ].map((match) => {
   const officialVenue = FIFA_MATCH_VENUES[match.id];
   if (!officialVenue) {

@@ -354,9 +354,10 @@ export function JogadoresView({ theme, onSelectTeamLineup }: JogadoresViewProps)
   const teams = useMemo(() => extractTeams(), []);
   const [selected, setSelected] = useState<SelectedContext | null>(null);
   const [expandedPlayer, setExpandedPlayer] = useState<Player | null>(null);
+  const [filterTeamCode, setFilterTeamCode] = useState<string | null>(null);
   const selectedStats = usePlayerStats(selected?.team.code, selected?.player.name);
 
-  const groups = useMemo(() => {
+  const allGroupedTeams = useMemo(() => {
     const map = new Map<string, TeamEntry[]>();
     for (const team of teams) {
       if (!map.has(team.group)) map.set(team.group, []);
@@ -365,9 +366,20 @@ export function JogadoresView({ theme, onSelectTeamLineup }: JogadoresViewProps)
     return Array.from(map.entries());
   }, [teams]);
 
+  const displayedGroups = useMemo(() => {
+    const source = filterTeamCode ? teams.filter((t) => t.code === filterTeamCode) : teams;
+    const map = new Map<string, TeamEntry[]>();
+    for (const team of source) {
+      if (!map.has(team.group)) map.set(team.group, []);
+      map.get(team.group)!.push(team);
+    }
+    return Array.from(map.entries());
+  }, [teams, filterTeamCode]);
+
   const headingColor = theme === "classic-light" ? "text-slate-900" : "text-white";
   const mutedColor = theme === "classic-light" ? "text-slate-500" : "text-slate-400";
   const groupLabelColor = theme === "classic-light" ? "text-slate-700 border-slate-300" : "text-slate-300 border-white/20";
+  const selectBg = theme === "classic-light" ? "bg-white text-slate-900" : "bg-[#0f1112] text-white";
 
   const toTeamRef = (team: TeamEntry): TeamRef => ({
     name: team.name,
@@ -380,19 +392,60 @@ export function JogadoresView({ theme, onSelectTeamLineup }: JogadoresViewProps)
 
   return (
     <div className="max-w-7xl mx-auto px-4 mt-8 pb-16" id="jogadores-view">
-      {/* Page header */}
-      <div className="mb-8">
-        <h1 className={`font-anton text-3xl uppercase tracking-wide ${headingColor}`}>
-          Jogadores
-        </h1>
-        <p className={`mt-1 font-mono text-xs uppercase tracking-wider ${mutedColor}`}>
-          {teams.length} seleções · {teams.reduce((n, t) => n + t.players.length, 0)} atletas
-        </p>
+      {/* Page header + filter */}
+      <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <h1 className={`font-anton text-3xl uppercase tracking-wide ${headingColor}`}>
+            Jogadores
+          </h1>
+          <p className={`mt-1 font-mono text-xs uppercase tracking-wider ${mutedColor}`}>
+            {filterTeamCode
+              ? (() => {
+                  const t = teams.find((t) => t.code === filterTeamCode);
+                  return t ? `${t.name} · ${t.players.length} atletas` : "";
+                })()
+              : `${teams.length} seleções · ${teams.reduce((n, t) => n + t.players.length, 0)} atletas`}
+          </p>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-3">
+          <span className={`font-mono text-xs uppercase tracking-wider shrink-0 ${mutedColor}`}>
+            Seleção
+          </span>
+          <select
+            value={filterTeamCode ?? ""}
+            onChange={(e) => setFilterTeamCode(e.target.value || null)}
+            className={`border-2 border-black font-mono text-xs uppercase px-3 py-1.5 cursor-pointer ${selectBg}`}
+            style={{ boxShadow: "2px 2px 0 #000" }}
+            aria-label="Filtrar por seleção"
+          >
+            <option value="">Todas as seleções</option>
+            {allGroupedTeams.map(([group, groupTeams]) => (
+              <optgroup key={group} label={group}>
+                {groupTeams.map((t) => (
+                  <option key={t.code} value={t.code}>
+                    {t.name} ({t.code})
+                  </option>
+                ))}
+              </optgroup>
+            ))}
+          </select>
+          {filterTeamCode && (
+            <button
+              type="button"
+              onClick={() => setFilterTeamCode(null)}
+              className="font-mono text-xs uppercase px-3 py-1.5 border-2 border-black bg-white text-black hover:bg-slate-100 transition-colors"
+              style={{ boxShadow: "2px 2px 0 #000" }}
+            >
+              Ver todas ×
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Groups */}
       <div className="flex flex-col gap-12">
-        {groups.map(([group, groupTeams]) => (
+        {displayedGroups.map(([group, groupTeams]) => (
           <div key={group}>
             {/* Group label */}
             <div className="flex items-center gap-3 mb-4">

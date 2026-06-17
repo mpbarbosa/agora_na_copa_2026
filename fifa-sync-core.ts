@@ -799,20 +799,25 @@ export const getStartingLineupFromLiveFifa = (
     }
   }
 
-  const expectedForwards = formation[formation.length - 1];
+  if (counts[0] !== 1) return null;
+
   const expectedDefenders = formation[0];
   const expectedMidfielders = formation.slice(1, -1).reduce((sum, count) => sum + count, 0);
+  const expectedForwards = formation[formation.length - 1];
 
-  if (
-    counts[0] !== 1 ||
-    counts[1] !== expectedDefenders ||
-    counts[2] !== expectedMidfielders ||
-    counts[3] !== expectedForwards
-  ) {
-    return null;
-  }
+  // When position counts don't match the declared formation (e.g. wing-backs
+  // classified as DF in a 3-back system), derive coordinates from actual
+  // counts rather than rejecting the lineup entirely.
+  const coordFormation =
+    counts[1] === expectedDefenders &&
+    counts[2] === expectedMidfielders &&
+    counts[3] === expectedForwards
+      ? formation
+      : [counts[1], counts[2], counts[3]];
 
-  const coords = getFormationCoordinates(formation);
+  if (coordFormation.reduce((s, n) => s + n, 0) !== 10) return null;
+
+  const coords = getFormationCoordinates(coordFormation);
 
   return starters.map((player, index) => ({
     id: player.IdPlayer,
