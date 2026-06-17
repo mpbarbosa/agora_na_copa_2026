@@ -3416,6 +3416,141 @@
     "position": "FW",
     "club": "Espérance"
   },
+  "RSA-3": {
+    "fifaId": "RSA-3",
+    "teamCode": "RSA",
+    "name": "R. Frosler",
+    "fullName": "Reeve Frosler",
+    "number": 3,
+    "position": "DF",
+    "club": "Kaizer Chiefs"
+  },
+  "RSA-5": {
+    "fifaId": "RSA-5",
+    "teamCode": "RSA",
+    "name": "B. Mkhwanazi",
+    "fullName": "Buhle Mkhwanazi",
+    "number": 5,
+    "position": "DF",
+    "club": "AmaZulu"
+  },
+  "RSA-7": {
+    "fifaId": "RSA-7",
+    "teamCode": "RSA",
+    "name": "K. Dolly",
+    "fullName": "Keagan Dolly",
+    "number": 7,
+    "position": "FW",
+    "club": "Kaizer Chiefs"
+  },
+  "RSA-8": {
+    "fifaId": "RSA-8",
+    "teamCode": "RSA",
+    "name": "B. Zungu",
+    "fullName": "Bongani Zungu",
+    "number": 8,
+    "position": "MF",
+    "club": "Rangers"
+  },
+  "RSA-12": {
+    "fifaId": "RSA-12",
+    "teamCode": "RSA",
+    "name": "G. Kekana",
+    "fullName": "Grant Kekana",
+    "number": 12,
+    "position": "DF",
+    "club": "Mamelodi Sundowns"
+  },
+  "RSA-15": {
+    "fifaId": "RSA-15",
+    "teamCode": "RSA",
+    "name": "S. Xulu",
+    "fullName": "Siyanda Xulu",
+    "number": 15,
+    "position": "DF",
+    "club": "Mamelodi Sundowns"
+  },
+  "RSA-16": {
+    "fifaId": "RSA-16",
+    "teamCode": "RSA",
+    "name": "B. Bvuma",
+    "fullName": "Bruce Bvuma",
+    "number": 16,
+    "position": "GK",
+    "club": "Kaizer Chiefs"
+  },
+  "RSA-18": {
+    "fifaId": "RSA-18",
+    "teamCode": "RSA",
+    "name": "N. Blom",
+    "fullName": "Njabulo Blom",
+    "number": 18,
+    "position": "MF",
+    "club": "NYCFC"
+  },
+  "RSA-19": {
+    "fifaId": "RSA-19",
+    "teamCode": "RSA",
+    "name": "V. Letsoalo",
+    "fullName": "Victor Letsoalo",
+    "number": 19,
+    "position": "FW",
+    "club": "Mamelodi Sundowns"
+  },
+  "RSA-20": {
+    "fifaId": "RSA-20",
+    "teamCode": "RSA",
+    "name": "B. Aubaas",
+    "fullName": "Bathusi Aubaas",
+    "number": 20,
+    "position": "MF",
+    "club": "Mamelodi Sundowns"
+  },
+  "RSA-22": {
+    "fifaId": "RSA-22",
+    "teamCode": "RSA",
+    "name": "V. Mothwa",
+    "fullName": "Veli Mothwa",
+    "number": 22,
+    "position": "GK",
+    "club": "AmaZulu"
+  },
+  "RSA-23": {
+    "fifaId": "RSA-23",
+    "teamCode": "RSA",
+    "name": "T. Cornell",
+    "fullName": "Thapelo Cornell",
+    "number": 23,
+    "position": "FW",
+    "club": "Mamelodi Sundowns"
+  },
+  "RSA-24": {
+    "fifaId": "RSA-24",
+    "teamCode": "RSA",
+    "name": "K. Dlamini",
+    "fullName": "Kabelo Dlamini",
+    "number": 24,
+    "position": "MF",
+    "club": "Mamelodi Sundowns"
+  },
+  "RSA-25": {
+    "fifaId": "RSA-25",
+    "teamCode": "RSA",
+    "name": "R. Maarman",
+    "fullName": "Ronaldo Maarman",
+    "number": 25,
+    "position": "FW",
+    "club": "Stellenbosch FC"
+  },
+  "RSA-26": {
+    "fifaId": "RSA-26",
+    "teamCode": "RSA",
+    "name": "Y. Maart",
+    "fullName": "Yusuf Maart",
+    "number": 26,
+    "position": "MF",
+    "club": "Mamelodi Sundowns"
+  },
   "KOR-15": {
     "fifaId": "KOR-15",
     "teamCode": "KOR",
