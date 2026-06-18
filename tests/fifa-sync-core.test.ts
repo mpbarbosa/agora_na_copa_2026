@@ -610,7 +610,7 @@ test("buildTeamLineupEntry preserves local socials when FIFA starters replace fa
   assert.equal(vozinha?.pictureUrl, "https://digitalhub.fifa.com/VOZINHA");
 });
 
-test("buildTeamLineupEntry adds supplemental socials for FIFA starters missing from local lineup", () => {
+test("buildTeamLineupEntry adds supplemental metadata for FIFA starters missing from local lineup", () => {
   const fallbackLineup = [
     createPlayer({
       id: "sau1",
@@ -706,7 +706,12 @@ test("buildTeamLineupEntry adds supplemental socials for FIFA starters missing f
 
   assert.equal(entry.source, "fifa");
   const alamri = entry.players.find((player) => player.name === "ALAMRI");
-  assert.deepEqual(alamri?.socials, {
-    instagram: "https://instagram.com/aalamri32",
-  });
+  assert.ok(alamri, "ALAMRI should be present in the merged lineup");
+  // pictureUrl from the FIFA live player object
+  assert.equal(alamri?.pictureUrl, "https://images.fifa.test/alamri.png");
+  // fullName, dateOfBirth, height enriched from squads.json via resolvePlayerEntry
+  // (ALAMRI is absent from the fallback lineup, so enrichment comes from the registry alone)
+  assert.equal(alamri?.fullName, "Abdulelah Alamri");
+  assert.equal(alamri?.dateOfBirth, "1997-01-15");
+  assert.equal(alamri?.height, 185);
 });
