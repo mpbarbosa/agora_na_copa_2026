@@ -206,6 +206,18 @@ test.describe("Navigation shell", () => {
   test("renders the FIFA-style incidents feed and opens player overlays from highlighted names", async ({
     page,
   }) => {
+    // Intercept test image URLs so onError never fires and the <img> stays in the DOM.
+    // The 1×1 transparent PNG is the minimal valid response; real URL resolution would
+    // trigger React's onError handler and unmount the <img> before the assertion runs.
+    const png1x1 = Buffer.from(
+      "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAC0lEQVQI12NgAAIABQ" +
+        "AABjkB6QAAAABJRU5ErkJggg==",
+      "base64",
+    );
+    await page.route("https://images.fifa.test/**", async (route) => {
+      await route.fulfill({ contentType: "image/png", body: png1x1 });
+    });
+
     await page.route("**/api/team-lineups", async (route) => {
       await route.fulfill({
         contentType: "application/json",
