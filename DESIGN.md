@@ -43,7 +43,30 @@ Três fontes foram escolhidas para garantir escaneabilidade instantânea de esta
 
 ---
 
-## 🏟️ 4. Arquitetura de Componentes & Central Tática
+## 🗞️ 4. Athletic Editorial — Player Overlay Card
+
+The player overlay card (`PlayerOverlayCard`) follows an **Athletic Editorial** aesthetic that rejects the soft-card conventions of SaaS dashboards in favour of direct high-impact typography, hard dark-and-light contrast, and accent highlights matched dynamically to each athlete's national team colour.
+
+### Principles
+
+| Principle | Expression in the card |
+|-----------|----------------------|
+| **High-impact typography** | Player name at `text-4xl font-anton uppercase`, jersey number as a full-bleed watermark behind the header at 7% opacity |
+| **Dark-and-light contrast** | Crisp `rounded-xl border` shell with no soft background gradients; `bg-[#0c0d0e]` in dark mode, clean `bg-white` in light |
+| **Dynamic team accent** | Every accent element (top bar, stat left-borders, number badge, watermark) uses the team's `primaryColor` at runtime — a Brazil player is green/yellow, a France player is deep blue |
+| **Editorial stat blocks** | Stats rendered as `border-l-[3px]` left-border tiles with `font-anton text-2xl` values; no rounded pill backgrounds |
+| **Semantic tournament stats** | Goals (green), yellow cards (amber), red cards (rose) keep their semantic text colour; the structural left-border remains in `primaryColor` |
+
+### Implementation contract
+
+- The `accent` variable (`primaryColor ?? "#00e476"`) drives: top accent bar, stat `borderLeftColor`, number badge `background`, captain badge `color`/`borderColor`, photo area `background` tint (`${accent}12`).
+- `stat.accent` (a Tailwind text-color class) overrides only the **value text** for tournament stats; it does not override the left-border colour.
+- `rounded-xl` for the card shell; `rounded-lg` for the photo container; `rounded-sm` for small inline badges — no `rounded-3xl` or `rounded-full` within the card.
+- Detail rows use hairline `border-b` separators (not background tiles) for a editorial table look.
+
+---
+
+## 🏟️ 5. Arquitetura de Componentes & Central Tática
 
 O aplicativo está estruturado com alta modularidade em três camadas funcionais no mesmo contêiner visual responsivo:
 
@@ -58,7 +81,7 @@ O aplicativo está estruturado com alta modularidade em três camadas funcionais
 - Distribuição espacial dinâmica para o time escalado (Brasil ou França no clássico do MetLife Stadium).
 - Gaveta lateral detalhada para exibição dos clubes originais, valor de mercado simulado e notas táticas dos atletas selecionados.
 
-## 📱 5. Design Responsivo & Transições
+## 📱 6. Design Responsivo & Transições
 
 - **Desktop**: Grade de 12 colunas com layout fluido agrupado em bento-boxes dinâmicos.
 - **Mobile**: Compressão ágil para 4 colunas; o campo de futebol converte-se em layout de rolagem suave com botões ajustáveis de toque suave minimizando erros de digitação (Targets de no mínimo 44px).

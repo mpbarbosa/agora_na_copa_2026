@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { Position, type Player, type PlayerSocials } from "../types";
 import { InstagramBrandIcon } from "./InstagramBrandIcon";
 import { FlagIcon } from "./FlagIcon";
@@ -100,6 +100,7 @@ export interface PlayerPortraitProps {
   imgId?: string;
   showNumberBadge?: boolean;
   numberBadgeClassName?: string;
+  numberBadgeStyle?: React.CSSProperties;
 }
 
 export function PlayerPortrait({
@@ -112,6 +113,7 @@ export function PlayerPortrait({
   imgId,
   showNumberBadge = false,
   numberBadgeClassName = "",
+  numberBadgeStyle,
 }: PlayerPortraitProps) {
   const [failedUrl, setFailedUrl] = useState<string | undefined>(undefined);
   const showImage = Boolean(player.pictureUrl) && player.pictureUrl !== failedUrl;
@@ -137,7 +139,7 @@ export function PlayerPortrait({
         </div>
       )}
       {showImage && showNumberBadge && (
-        <span className={numberBadgeClassName}>{player.number}</span>
+        <span className={numberBadgeClassName} style={numberBadgeStyle}>{player.number}</span>
       )}
     </div>
   );
@@ -242,23 +244,16 @@ export function PlayerOverlayCard({
 }: PlayerOverlayCardProps) {
   useEscapeKey(onClose);
 
-  const cardClasses =
-    theme === "classic-light"
-      ? "border-slate-200 bg-white text-slate-900"
-      : "border-white/10 bg-[#121414] text-white";
-  const mutedClasses = theme === "classic-light" ? "text-slate-600" : "text-slate-300";
-  const buttonClasses =
-    theme === "classic-light"
-      ? "border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100"
-      : "border-white/10 bg-white/5 text-slate-100 hover:bg-white/10";
-  const detailBgClasses =
-    theme === "classic-light" ? "border-slate-200 bg-slate-50" : "border-white/10 bg-white/5";
-  const dividerColor =
-    theme === "classic-light" ? "rgb(226 232 240)" : "rgb(255 255 255 / 0.08)";
-  const socialButtonClasses =
-    theme === "classic-light"
-      ? "border-slate-200 bg-slate-50 text-slate-700 hover:border-[#065f2c]/30 hover:text-[#065f2c]"
-      : "border-white/10 bg-white/5 text-white hover:border-[#ffd700]/40 hover:text-[#ffd700]";
+  const accent = primaryColor ?? "#00e476";
+  const isLight = theme === "classic-light";
+
+  const cardBg = isLight ? "bg-white text-slate-900" : "bg-[#0c0d0e] text-white";
+  const borderColor = isLight ? "#e2e8f0" : "rgba(255,255,255,0.08)";
+  const mutedClasses = isLight ? "text-slate-500" : "text-slate-400";
+  const closeClasses = isLight
+    ? "border-slate-300 bg-white text-slate-700 hover:bg-slate-100"
+    : "border-white/15 bg-white/5 text-slate-200 hover:bg-white/10";
+  const photoBg = isLight ? `${accent}12` : "#111314";
 
   const socials = getPlayerSocialEntries(player.socials);
 
@@ -269,34 +264,46 @@ export function PlayerOverlayCard({
       onClick={onClose}
     >
       <div
-        className={`relative w-full max-w-2xl overflow-hidden rounded-3xl border shadow-2xl ${cardClasses}`}
+        className={`relative w-full max-w-2xl overflow-hidden rounded-xl shadow-2xl border ${cardBg}`}
+        style={{ borderColor }}
         onClick={(event) => event.stopPropagation()}
       >
+        {/* Top accent bar — team colour */}
+        <div className="h-1 w-full" style={{ background: accent }} />
+
         {/* Header */}
-        <div
-          className="border-b px-5 py-4"
-          style={{
-            background: `linear-gradient(135deg, ${primaryColor ?? "#000"}22, ${secondaryColor ?? "#333"}22)`,
-            borderColor: dividerColor,
-          }}
-        >
+        <div className="relative overflow-hidden border-b px-5 py-4" style={{ borderColor }}>
+          {/* Jersey number watermark */}
+          {player.number != null && (
+            <span
+              className="pointer-events-none absolute right-2 top-0 select-none font-anton leading-none"
+              style={{ fontSize: "clamp(80px, 14vw, 120px)", color: accent, opacity: 0.07 }}
+              aria-hidden="true"
+            >
+              {player.number}
+            </span>
+          )}
+
+          {/* Close */}
           <button
             type="button"
             id={id ? `btn-close-${id}` : undefined}
             onClick={onClose}
-            className={`absolute right-4 top-4 rounded-full border px-3 py-1 font-mono text-[10px] font-bold uppercase tracking-wider transition ${buttonClasses}`}
+            className={`absolute right-4 top-4 z-10 rounded border px-3 py-1 font-mono text-[10px] font-bold uppercase tracking-wider transition ${closeClasses}`}
           >
             Fechar
           </button>
+
           <p className={`font-mono text-[10px] uppercase tracking-[0.25em] ${mutedClasses}`}>
             Card completo do jogador
           </p>
+
           <div className="mt-2 flex items-center gap-3 pr-20">
             {flagSvg && onOpenTeamView && (
               <button
                 type="button"
                 onClick={onOpenTeamView}
-                className="shrink-0 rounded transition hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-[#ffd84d]/70"
+                className="shrink-0 transition hover:scale-[1.03] focus:outline-none focus:ring-2 focus:ring-white/30"
                 aria-label={`Abrir painel completo de ${teamName}`}
               >
                 <FlagIcon flag={flagSvg} className="h-6 w-9 shrink-0" />
@@ -304,26 +311,30 @@ export function PlayerOverlayCard({
             )}
             <div className="min-w-0">
               <div className="flex items-center gap-2">
-                <h4 className="font-anton text-3xl uppercase tracking-wide">{player.name}</h4>
+                <h4 className="font-anton text-4xl uppercase leading-none tracking-wide">
+                  {player.name}
+                </h4>
                 {player.captain && (
-                  <span className="shrink-0 rounded-full border border-[#ffd700]/60 bg-[#ffd700]/15 px-2 py-0.5 font-mono text-[10px] font-black uppercase tracking-wider text-[#ffd700]">
+                  <span
+                    className="shrink-0 rounded-sm border px-2 py-0.5 font-mono text-[10px] font-black uppercase tracking-wider"
+                    style={{ color: accent, borderColor: `${accent}60`, background: `${accent}15` }}
+                  >
                     C
                   </span>
                 )}
               </div>
               {player.fullName && player.fullName !== player.name && (
-                <p className={`font-archivo text-xs ${mutedClasses}`}>{player.fullName}</p>
+                <p className={`mt-0.5 font-archivo text-xs ${mutedClasses}`}>{player.fullName}</p>
               )}
             </div>
           </div>
-          <p className={`mt-1 font-archivo text-sm ${mutedClasses}`}>
+
+          <p className={`mt-1.5 font-archivo text-sm ${mutedClasses}`}>
             {onOpenTeamView ? (
               <button
                 type="button"
                 onClick={onOpenTeamView}
-                className={`transition hover:opacity-80 ${
-                  theme === "classic-light" ? "hover:text-[#065f2c]" : "hover:text-[#ffd84d]"
-                }`}
+                className="transition hover:opacity-70"
               >
                 {teamName}
               </button>
@@ -336,16 +347,11 @@ export function PlayerOverlayCard({
 
         {/* Body */}
         <div className="grid gap-0 lg:grid-cols-[1.1fr_0.9fr]">
-          <div
-            className="border-b p-4 lg:border-b-0 lg:border-r"
-            style={{ borderColor: dividerColor }}
-          >
+          {/* Portrait column */}
+          <div className="border-b p-4 lg:border-b-0 lg:border-r" style={{ borderColor }}>
             <div
-              className={`flex min-h-[320px] items-center justify-center overflow-hidden rounded-3xl border ${
-                theme === "classic-light"
-                  ? "border-slate-200 bg-slate-50"
-                  : "border-white/10 bg-[#161919]"
-              }`}
+              className="flex min-h-[320px] items-center justify-center overflow-hidden rounded-lg border"
+              style={{ background: photoBg, borderColor }}
             >
               <PlayerPortrait
                 player={player}
@@ -356,7 +362,8 @@ export function PlayerOverlayCard({
                 imageClassName="h-full max-h-[420px] w-full object-contain p-4"
                 imgId={id ? `${id}-hero-image` : undefined}
                 showNumberBadge
-                numberBadgeClassName="absolute bottom-4 right-4 rounded-full border border-white/10 bg-black/80 px-3 py-1 font-mono text-xs font-black text-[#ffd700]"
+                numberBadgeClassName="absolute bottom-3 right-3 rounded-sm px-2.5 py-1 font-mono text-xs font-black text-white"
+                numberBadgeStyle={{ background: accent }}
               />
             </div>
             {player.pictureUrl && onOpenPicture && (
@@ -364,56 +371,77 @@ export function PlayerOverlayCard({
                 type="button"
                 id={openPictureButtonId}
                 onClick={onOpenPicture}
-                className={`mt-3 inline-flex rounded-full border px-3 py-1.5 font-mono text-[10px] font-bold uppercase tracking-wider transition ${buttonClasses}`}
+                className={`mt-3 inline-flex rounded border px-3 py-1.5 font-mono text-[10px] font-bold uppercase tracking-wider transition ${closeClasses}`}
               >
                 Abrir foto em tamanho real
               </button>
             )}
           </div>
 
+          {/* Stats + details column */}
           <div className="p-5">
+            {/* Stat tiles — editorial left-border blocks */}
             <div
-              className="grid grid-cols-1 gap-3 sm:grid-cols-3"
+              className="grid grid-cols-1 gap-2 sm:grid-cols-3"
               id={id ? `${id}-stats` : undefined}
             >
               {stats.map((stat) => (
-                <div key={stat.label} className={`rounded-2xl border px-3 py-3 ${detailBgClasses}`}>
-                  <p className={`font-anton text-lg uppercase ${stat.accent ?? "text-[#00e476]"}`}>
+                <div
+                  key={stat.label}
+                  className="border-l-[3px] pl-3 py-1.5"
+                  style={{ borderLeftColor: accent }}
+                >
+                  <p
+                    className={`font-anton text-2xl uppercase leading-none ${stat.accent ?? ""}`}
+                    style={!stat.accent ? { color: accent } : {}}
+                  >
                     {stat.value}
                   </p>
-                  <p
-                    className={`mt-1 font-mono text-[10px] uppercase tracking-wider ${mutedClasses}`}
-                  >
+                  <p className={`mt-1 font-mono text-[9px] uppercase tracking-wider ${mutedClasses}`}>
                     {stat.label}
                   </p>
                 </div>
               ))}
             </div>
 
+            {/* Detail rows — clean key/value with hairline dividers */}
             {details && details.length > 0 && (
               <div
-                className="mt-4 space-y-2 text-sm font-archivo"
+                className="mt-5 border-t font-archivo text-sm"
+                style={{ borderColor }}
                 id={id ? `${id}-details` : undefined}
               >
                 {details.map((detail, i) =>
                   detail.fullWidth ? (
-                    <div key={i} className={`rounded-2xl border px-3 py-3 ${detailBgClasses}`}>
-                      {detail.label && <p className={mutedClasses}>{detail.label}</p>}
-                      <p className="mt-1 leading-6">{detail.value}</p>
+                    <div
+                      key={i}
+                      className="border-b py-3"
+                      style={{ borderColor }}
+                    >
+                      {detail.label && (
+                        <p className={`mb-1 font-mono text-[9px] uppercase tracking-wider ${mutedClasses}`}>
+                          {detail.label}
+                        </p>
+                      )}
+                      <p className="leading-6">{detail.value}</p>
                     </div>
                   ) : (
                     <div
                       key={i}
-                      className={`flex items-center justify-between rounded-2xl border px-3 py-3 ${detailBgClasses}`}
+                      className="flex items-center justify-between border-b py-2.5"
+                      style={{ borderColor }}
                     >
-                      <span className={mutedClasses}>{detail.label}</span>
-                      <span className="font-semibold text-right">{detail.value}</span>
+                      <span className={`font-mono text-[10px] uppercase tracking-wider ${mutedClasses}`}>
+                        {detail.label}
+                      </span>
+                      <span className="font-semibold tabular-nums">{detail.value}</span>
                     </div>
                   ),
                 )}
               </div>
             )}
 
+            {/* Social links */}
             {socials.length > 0 && (
               <div className="mt-5" id={id ? `${id}-social-links` : undefined}>
                 <p className={`font-mono text-[10px] uppercase tracking-wider ${mutedClasses}`}>
@@ -427,7 +455,8 @@ export function PlayerOverlayCard({
                       href={getSocialUrl(platform, url)}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className={`inline-flex items-center justify-center rounded-full border px-3 py-1.5 font-mono text-[10px] font-bold uppercase tracking-wider transition ${socialButtonClasses}`}
+                      className={`inline-flex items-center justify-center rounded border px-3 py-1.5 font-mono text-[10px] font-bold uppercase tracking-wider transition ${closeClasses}`}
+                      style={{ borderColor: `${accent}40` }}
                     >
                       {renderSocialPlatformLabel(platform)}
                     </a>
