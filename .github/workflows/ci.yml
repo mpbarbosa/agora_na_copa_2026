@@ -93,6 +93,18 @@ jobs:
             /home/runner/.npm/_logs
           if-no-files-found: ignore
 
+  docker-test:
+    name: Docker test suite
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Run all suites inside Docker
+        run: bash scripts/docker-test.sh
+
   e2e:
     name: End-to-end tests
     runs-on: ubuntu-latest
