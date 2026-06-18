@@ -24,7 +24,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ### Data flow
 
 - **`src/matches.json`** is the source of truth for all curated match fixtures and full player lineups (23 players per team, with `x`/`y` pitch coordinates). `src/data.ts` only contains commentary strings now — not match data.
-- **`src/appMatches.ts`** assembles the full `APP_MATCHES` array by merging `matches.json` + supplemental FIFA fixtures + `data/bbcScheduledMatches.ts` schedule entries + `data/fifaMatchVenues.ts` official venue overrides.
+- **`src/appMatches.ts`** assembles the full `APP_MATCHES` array by merging `matches.json` + supplemental FIFA fixtures + `data/fifaScheduledMatches.ts` schedule seeds + `data/fifaMatchVenues.ts` official venue overrides.
 - **`src/data/tournament.ts`** holds the tournament-wide lightweight dataset: 48 `Team` seed standings, 16 `Stadium` records, `BracketNode` skeleton, and `NewsArticle` entries. No lineups, no broadcasters. Used by `StandingsView`, `BracketView`, `VenueMapView`.
 - **`src/standings.ts`** computes `StandingsRow[]` by reconciling `tournament.ts` seed stats with `FINISHED` match results from `APP_MATCHES`.
 
@@ -38,7 +38,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ### Frontend
 
 - **`src/App.tsx`** — shell: global header (theme toggle) + top-level nav + routed view. Theme state (`"classic-light"` | `"stadium-dark"`) and match-selection state live here.
-- **`src/navigation.ts`** — `NAV_ITEMS` array (9 tabs: Ao Vivo, Partidas, Grupos, Seleções, Líderes, Chaveamento, Estádios, Notícias, Fan Zone). Each entry has `id`, `label`, `description`. Tabs without a shipped view render `ComingSoonView`.
+- **`src/navigation.ts`** — `NAV_ITEMS` array (10 tabs: Ao Vivo, Partidas, Grupos, Seleções, Jogadores, Líderes, Chaveamento, Estádios, Notícias, Fan Zone). Each entry has `id`, `label`, `description`. Tabs without a shipped view render `ComingSoonView`.
 - **`src/types.ts`** — single source of truth for all TypeScript shapes (`Match`, `Player`, `Broadcaster`, `BroadcastGuideEntry`, `MatchStateEntry`, `Team`, `StandingsRow`, `Stadium`, `BracketNode`, `NewsArticle`, etc.). Extend here first before touching data or components.
 
 ### Components
