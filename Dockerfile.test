@@ -1,0 +1,13 @@
+FROM node:22-bookworm
+
+WORKDIR /app
+
+# Install npm deps first — cached unless package*.json changes
+COPY package*.json ./
+RUN npm ci
+
+# Install Chromium binary + all OS-level dependencies Playwright needs
+RUN npx playwright install --with-deps chromium
+
+# Copy source last — only this layer re-runs when source changes
+COPY . .
