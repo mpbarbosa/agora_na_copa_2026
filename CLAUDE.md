@@ -32,7 +32,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 - **`server.ts`** — single Express server. Owns the API routes, loads `APP_MATCHES`, proxies Vite in dev, serves `dist/` statically in production.
 - **`fifa-sync-core.ts`** — pure FIFA API integration logic (match-finding, broadcaster normalization, lineup building, match-state building). Extracted from `server.ts` so it can be unit-tested independently. Imported by both `server.ts` and `tests/fifa-sync-core.test.ts`.
-- API endpoints: `/api/broadcast-guide`, `/api/match-states`, `/api/match-overlays`, `/api/team-lineups`, `/api/tournament-leaders`, `/api/player-stats/:teamCode/:playerName`, `/api/player-incidents/:teamCode/:playerName`, `/api/team-view/:teamCode`, `/api/country-info/:code`, `/api/questions`, `/api/fifa-sync-status`.
+- API endpoints: `/api/broadcast-guide`, `/api/match-states`, `/api/match-overlays`, `/api/team-lineups`, `/api/tournament-leaders`, `/api/player-stats/:teamCode/:playerName`, `/api/player-incidents/:teamCode/:playerName`, `/api/team-view/:teamCode`, `/api/country-info/:code`, `/api/questions`, `/api/fifa-sync-status`, `/api/health`.
+- **`/api/health`** returns `{ status, version, uptime, load, memory, system }` — real-time server vitals for external uptime monitors (no cache). Not a FIFA-sourced endpoint; does not carry the resilience shape.
 - Every FIFA-sourced response carries `source: "fifa" | "fallback"`, a human-readable `note`, and `updatedAt`. Any new endpoint must follow this resilience shape and fall back gracefully when the FIFA API is unreachable.
 
 ### Frontend

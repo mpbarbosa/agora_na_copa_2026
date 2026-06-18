@@ -1,4 +1,5 @@
 import express from "express";
+import os from "node:os";
 import { createServer as createHttpServer } from "node:http";
 import { createServer as createNetServer } from "node:net";
 import path from "path";
@@ -75,7 +76,24 @@ const GOAL_INCIDENT_SUFFIX = " marcou.";
 const YELLOW_CARD_INCIDENT_SUFFIX = " recebeu amarelo.";
 const RED_CARD_INCIDENT_SUFFIX = " foi expulso.";
 
+// Trust the nginx reverse proxy so req.ip reflects the real client IP via X-Forwarded-For.
+app.set("trust proxy", 1);
+
 app.use(express.json());
+
+// Per-request access log → journald (journalctl -u agora-na-copa-2026)
+// Skips /assets/ to avoid noise from static file serving in production.
+app.use((req, res, next) => {
+  if (req.path.startsWith("/assets/") || req.path === "/favicon.ico") return next();
+  const start = Date.now();
+  res.on("finish", () => {
+    const ms = Date.now() - start;
+    const ip = req.ip ?? req.socket.remoteAddress ?? "-";
+    const ref = req.get("referer") ?? "-";
+    console.log(`[access] ${req.method} ${req.path} ${res.statusCode} ${ms}ms ip=${ip} ref=${ref}`);
+  });
+  next();
+});
 
 interface FifaCalendarResponse {
   Results?: FifaCalendarMatch[];
@@ -2025,6 +2043,27 @@ app.get("/api/fifa-sync-status", (_req, res) => {
 app.get("/api/questions", (_req, res) => {
   res.set("Cache-Control", "no-store");
   res.json(TRIVIA_QUESTIONS);
+});
+
+app.get("/api/health", (_req, res) => {
+  const mem = process.memoryUsage();
+  res.set("Cache-Control", "no-store");
+  res.json({
+    status: "ok",
+    version: process.env.npm_package_version ?? "unknown",
+    uptime: Math.round(process.uptime()),
+    load: os.loadavg(),
+    memory: {
+      rss: mem.rss,
+      heapUsed: mem.heapUsed,
+      heapTotal: mem.heapTotal,
+      external: mem.external,
+    },
+    system: {
+      freeMem: os.freemem(),
+      totalMem: os.totalmem(),
+    },
+  });
 });
 
 // Serve frontend build files in production or proxy to Vite in development
