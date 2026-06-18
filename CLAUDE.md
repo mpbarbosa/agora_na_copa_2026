@@ -75,5 +75,13 @@ Reference guides live in `docs/guides/`. Consult the relevant guide before makin
 | Spotting or removing duplication | `DRY_GUIDE.md` |
 | Splitting or scoping a module's responsibilities | `HIGH_COHESION_GUIDE.md` |
 | Managing imports and inter-module dependencies | `LOW_COUPLING_GUIDE.md` |
-| Naming domain concepts or adapting FIFA API shapes | `LIGHTWEIGHT_DDD_GUIDE.md` |
+| Naming domain concepts or adapting FIFA API shapes | `LIGHTWEIGHT_DDD_GUIDE.md`, `NAMING_GUIDE.md` |
 | Reviewing implementation quality of adapters and boundaries | `CODE_QUALITY_CONTROL_GUIDE.md` |
+| Deciding which layer a file or function belongs to | `CLEAN_ARCHITECTURE_GUIDE.md` |
+| Structuring `fifa-sync-core.ts` or extracting backend modules | `NODE_MODULE_GUIDE.md` |
+| Declaring a new API response type or function signature | `INTERFACE_FIRST_GUIDE.md` |
+| Reviewing domain-design quality of a PR | `DOMAIN_DESIGN_CONTROL_GUIDE.md` |
+| Handling FIFA API errors, fallbacks, and the resilience shape | `ERROR_HANDLING_GUIDE.md` |
+| Validating route params or FIFA API responses at the boundary | `DEFENSIVE_CODING_GUIDE.md` |
+| Structuring Claude Code sessions for this codebase | `CLAUDE_CODE_WORKFLOW_GUIDE.md`, `INCREMENTAL_CHANGE_GUIDE.md` |
+| Reducing context cost for Claude Code sessions | `LLM_CONTEXT_GUIDE.md` |
