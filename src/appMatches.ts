@@ -1,18 +1,9 @@
 import baseMatchesData from "./matches.json";
 import { FIFA_MATCH_VENUES } from "./data/fifaMatchVenues";
+import { FIFA_SCHEDULED_MATCHES, type FifaScheduledMatchSeed } from "./data/fifaScheduledMatches";
 import { standings as seedStandings } from "./data/tournament";
 import { resolvePlayerEntry } from "./data/playerRegistry";
 import type { Match } from "./types";
-
-interface SupplementalMatchSeed {
-  teamA: string;
-  teamB: string;
-  kickoffTimestamp: string;
-  status: Match["status"];
-  stadiumName: string;
-  city: string;
-  score?: Match["score"];
-}
 
 const PT_MONTHS = [
   "Janeiro",
@@ -29,35 +20,9 @@ const PT_MONTHS = [
   "Dezembro",
 ];
 
-const FIFA_SUPPLEMENTAL_MATCHES: SupplementalMatchSeed[] = [
-  {
-    teamA: "QAT",
-    teamB: "SUI",
-    kickoffTimestamp: "2026-06-13T16:00:00-03:00",
-    status: "FINISHED",
-    stadiumName: "Estádio da Baía de São Francisco",
-    city: "ÁREA DA BAÍA DE SÃO FRANCISCO",
-    score: { teamA: 1, teamB: 1 },
-  },
-  {
-    teamA: "AUT",
-    teamB: "JOR",
-    kickoffTimestamp: "2026-06-17T01:00:00-03:00",
-    status: "FINISHED",
-    stadiumName: "Estádio da Baía de São Francisco",
-    city: "ÁREA DA BAÍA DE SÃO FRANCISCO",
-    score: { teamA: 3, teamB: 1 },
-  },
-];
-
 const BASE_MATCHES = baseMatchesData as Match[];
 
-const existingIds = new Set([
-  ...BASE_MATCHES.map((match) => match.id),
-  ...FIFA_SUPPLEMENTAL_MATCHES.map(
-    ({ teamA, teamB }) => `${teamA.toLowerCase()}-${teamB.toLowerCase()}-2026`,
-  ),
-]);
+const existingIds = new Set(BASE_MATCHES.map((match) => match.id));
 
 const lineupByTeamCode = new Map<string, Match["teamA"]["lineup"]>();
 for (const match of BASE_MATCHES) {
@@ -123,7 +88,7 @@ const buildTeamEntry = (teamCode: string): Match["teamA"] => {
 };
 
 const buildSupplementalMatch = (
-  seed: SupplementalMatchSeed,
+  seed: FifaScheduledMatchSeed,
 ): Match => {
   const { teamA: teamACode, teamB: teamBCode, kickoffTimestamp, status, score, stadiumName, city } =
     seed;
@@ -149,7 +114,7 @@ const buildSupplementalMatch = (
 
 export const APP_MATCHES: Match[] = [
   ...BASE_MATCHES,
-  ...FIFA_SUPPLEMENTAL_MATCHES.filter(
+  ...FIFA_SCHEDULED_MATCHES.filter(
     ({ teamA, teamB }) => !existingIds.has(`${teamA.toLowerCase()}-${teamB.toLowerCase()}-2026`),
   ).map(buildSupplementalMatch),
 ].map((match) => {
