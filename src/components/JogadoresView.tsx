@@ -355,6 +355,7 @@ export function JogadoresView({ theme, onSelectTeamLineup }: JogadoresViewProps)
   const [selected, setSelected] = useState<SelectedContext | null>(null);
   const [expandedPlayer, setExpandedPlayer] = useState<Player | null>(null);
   const [filterTeamCode, setFilterTeamCode] = useState<string | null>(null);
+  const [filterPlayerName, setFilterPlayerName] = useState("");
   const selectedStats = usePlayerStats(selected?.team.code, selected?.player.name);
 
   const allGroupedTeams = useMemo(() => {
@@ -367,19 +368,40 @@ export function JogadoresView({ theme, onSelectTeamLineup }: JogadoresViewProps)
   }, [teams]);
 
   const displayedGroups = useMemo(() => {
-    const source = filterTeamCode ? teams.filter((t) => t.code === filterTeamCode) : teams;
+    const nameQuery = filterPlayerName.trim().toLowerCase();
+    const teamSource = filterTeamCode ? teams.filter((t) => t.code === filterTeamCode) : teams;
+    const filtered = teamSource.flatMap((team) => {
+      const players = nameQuery
+        ? team.players.filter(
+            (p) =>
+              p.name.toLowerCase().includes(nameQuery) ||
+              (p.fullName ?? "").toLowerCase().includes(nameQuery),
+          )
+        : team.players;
+      return players.length > 0 ? [{ ...team, players }] : [];
+    });
     const map = new Map<string, TeamEntry[]>();
-    for (const team of source) {
+    for (const team of filtered) {
       if (!map.has(team.group)) map.set(team.group, []);
       map.get(team.group)!.push(team);
     }
     return Array.from(map.entries());
-  }, [teams, filterTeamCode]);
+  }, [teams, filterTeamCode, filterPlayerName]);
 
   const headingColor = theme === "classic-light" ? "text-slate-900" : "text-white";
   const mutedColor = theme === "classic-light" ? "text-slate-500" : "text-slate-400";
   const groupLabelColor = theme === "classic-light" ? "text-slate-700 border-slate-300" : "text-slate-300 border-white/20";
   const selectBg = theme === "classic-light" ? "bg-white text-slate-900" : "bg-[#0f1112] text-white";
+  const inputBg = theme === "classic-light" ? "bg-white text-slate-900 placeholder-slate-400" : "bg-[#0f1112] text-white placeholder-slate-500";
+
+  const totalDisplayed = displayedGroups.reduce(
+    (n, [, groupTeams]) => n + groupTeams.reduce((m, t) => m + t.players.length, 0),
+    0,
+  );
+  const hasActiveFilter = Boolean(filterTeamCode || filterPlayerName.trim());
+  const subtitleText = hasActiveFilter
+    ? `${totalDisplayed} atleta${totalDisplayed !== 1 ? "s" : ""} encontrado${totalDisplayed !== 1 ? "s" : ""}`
+    : `${teams.length} seleções · ${teams.reduce((n, t) => n + t.players.length, 0)} atletas`;
 
   const toTeamRef = (team: TeamEntry): TeamRef => ({
     name: team.name,
@@ -399,16 +421,35 @@ export function JogadoresView({ theme, onSelectTeamLineup }: JogadoresViewProps)
             Jogadores
           </h1>
           <p className={`mt-1 font-mono text-xs uppercase tracking-wider ${mutedColor}`}>
-            {filterTeamCode
-              ? (() => {
-                  const t = teams.find((t) => t.code === filterTeamCode);
-                  return t ? `${t.name} · ${t.players.length} atletas` : "";
-                })()
-              : `${teams.length} seleções · ${teams.reduce((n, t) => n + t.players.length, 0)} atletas`}
+            {subtitleText}
           </p>
         </div>
 
         <div className="flex flex-wrap items-center gap-3">
+          {/* Name search */}
+          <div className="relative">
+            <input
+              type="search"
+              value={filterPlayerName}
+              onChange={(e) => setFilterPlayerName(e.target.value)}
+              placeholder="Buscar jogador..."
+              className={`border-2 border-black font-archivo text-xs px-3 py-1.5 pr-8 w-44 ${inputBg}`}
+              style={{ boxShadow: "2px 2px 0 #000" }}
+              aria-label="Buscar jogador por nome"
+            />
+            {filterPlayerName && (
+              <button
+                type="button"
+                onClick={() => setFilterPlayerName("")}
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 leading-none"
+                aria-label="Limpar busca"
+              >
+                ×
+              </button>
+            )}
+          </div>
+
+          {/* Team filter */}
           <span className={`font-mono text-xs uppercase tracking-wider shrink-0 ${mutedColor}`}>
             Seleção
           </span>
@@ -430,10 +471,12 @@ export function JogadoresView({ theme, onSelectTeamLineup }: JogadoresViewProps)
               </optgroup>
             ))}
           </select>
-          {filterTeamCode && (
+
+          {/* Clear all filters */}
+          {hasActiveFilter && (
             <button
               type="button"
-              onClick={() => setFilterTeamCode(null)}
+              onClick={() => { setFilterTeamCode(null); setFilterPlayerName(""); }}
               className="font-mono text-xs uppercase px-3 py-1.5 border-2 border-black bg-white text-black hover:bg-slate-100 transition-colors"
               style={{ boxShadow: "2px 2px 0 #000" }}
             >
@@ -442,6 +485,18 @@ export function JogadoresView({ theme, onSelectTeamLineup }: JogadoresViewProps)
           )}
         </div>
       </div>
+
+      {/* Empty state */}
+      {displayedGroups.length === 0 && hasActiveFilter && (
+        <div className="flex flex-col items-center justify-center py-20 gap-3">
+          <p className={`font-anton text-xl uppercase tracking-wide ${headingColor}`}>
+            Nenhum jogador encontrado
+          </p>
+          <p className={`font-mono text-xs uppercase tracking-wider ${mutedColor}`}>
+            Tente outro nome ou seleção
+          </p>
+        </div>
+      )}
 
       {/* Groups */}
       <div className="flex flex-col gap-12">
