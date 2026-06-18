@@ -2,6 +2,7 @@ import express from "express";
 import os from "node:os";
 import { createServer as createHttpServer } from "node:http";
 import { createServer as createNetServer } from "node:net";
+import { readFileSync } from "node:fs";
 import path from "path";
 import { createServer as createViteServer } from "vite";
 import dotenv from "dotenv";
@@ -46,6 +47,16 @@ import {
 } from "./src/types";
 
 dotenv.config();
+
+// Read version from package.json at startup. process.env.npm_package_version is
+// only set when running via npm; the production systemd service runs node directly.
+const APP_VERSION: string = (() => {
+  try {
+    return JSON.parse(readFileSync("package.json", "utf8")).version as string;
+  } catch {
+    return process.env.npm_package_version ?? "unknown";
+  }
+})();
 
 const app = express();
 const DEFAULT_PORT = Number(process.env.PORT || 3000);
@@ -2050,7 +2061,7 @@ app.get("/api/health", (_req, res) => {
   res.set("Cache-Control", "no-store");
   res.json({
     status: "ok",
-    version: process.env.npm_package_version ?? "unknown",
+    version: APP_VERSION,
     uptime: Math.round(process.uptime()),
     load: os.loadavg(),
     memory: {
