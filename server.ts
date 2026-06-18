@@ -41,6 +41,7 @@ import {
   type TriviaQuestion,
   type StandingsRow,
   type CountryInfoResponse,
+  type PlayerStatsResponse,
 } from "./src/types";
 
 dotenv.config();
@@ -1643,11 +1644,27 @@ app.get("/api/player-stats/:teamCode/:playerName", async (req, res) => {
       return;
     }
 
+    const payload: PlayerStatsResponse = {
+      goals: leader.goals,
+      yellowCards: leader.yellowCards,
+      redCards: leader.redCards,
+      source: aggregated.source,
+      note: aggregated.note,
+      updatedAt: aggregated.updatedAt,
+    };
     res.set("Cache-Control", "no-store");
-    res.json({ goals: leader.goals, yellowCards: leader.yellowCards, redCards: leader.redCards });
+    res.json(payload);
   } catch (error: any) {
     console.error("FIFA API Error in /api/player-stats:", error);
-    res.status(502).json({ error: error?.message || "Erro ao carregar estatísticas do jogador" });
+    const fallback: PlayerStatsResponse = {
+      goals: 0,
+      yellowCards: 0,
+      redCards: 0,
+      source: "fallback",
+      note: "Estatísticas indisponíveis — FIFA API inacessível.",
+      updatedAt: new Date().toISOString(),
+    };
+    res.json(fallback);
   }
 });
 
@@ -1670,7 +1687,20 @@ app.get("/api/player-incidents/:teamCode/:playerName", async (req, res) => {
     res.json(payload);
   } catch (error: any) {
     console.error("FIFA API Error in /api/player-incidents:", error);
-    res.status(502).json({ error: error?.message || "Erro ao carregar incidentes do jogador" });
+    const fallback: PlayerIncidentsPayload = {
+      player: {
+        name: req.params.playerName,
+        teamCode: req.params.teamCode.toUpperCase(),
+        teamName: req.params.teamCode.toUpperCase(),
+        teamFlagSvg: req.params.teamCode.toLowerCase(),
+      },
+      incidents: [],
+      summary: { goals: 0, yellowCards: 0, redCards: 0, substitutionsOff: 0, substitutionsOn: 0 },
+      source: "fallback",
+      note: "Incidentes indisponíveis — FIFA API inacessível.",
+      updatedAt: new Date().toISOString(),
+    };
+    res.json(fallback);
   }
 });
 
@@ -1735,6 +1765,7 @@ async function fetchCountryInfo(code: string): Promise<CountryInfoResponse | nul
       government: null,
       currency: null,
       source: "fallback",
+      note: "Informações indisponíveis — Wikipedia inacessível.",
       updatedAt: now,
     };
   }
@@ -1867,6 +1898,7 @@ async function fetchCountryInfo(code: string): Promise<CountryInfoResponse | nul
     government,
     currency,
     source: "wikipedia",
+    note: "Dados da Wikipedia e Wikidata.",
     updatedAt: now,
   };
 
@@ -1878,8 +1910,8 @@ async function fetchCountryInfo(code: string): Promise<CountryInfoResponse | nul
 }
 
 app.get("/api/country-info/:code", async (req, res) => {
+  const code = req.params.code.toUpperCase();
   try {
-    const code = req.params.code.toUpperCase();
     const payload = await fetchCountryInfo(code);
     if (!payload) {
       res.status(404).json({ error: "País não encontrado" });
@@ -1889,7 +1921,30 @@ app.get("/api/country-info/:code", async (req, res) => {
     res.json(payload);
   } catch (error: any) {
     console.error("Wikipedia API Error in /api/country-info:", error);
-    res.status(502).json({ error: error?.message || "Erro ao carregar informações do país" });
+    const stale = countryInfoCache.get(code);
+    if (stale) {
+      res.set("Cache-Control", "public, max-age=3600");
+      res.json({ ...stale.payload, source: "fallback", note: "Usando dados em cache — Wikipedia inacessível." } satisfies CountryInfoResponse);
+      return;
+    }
+    const fallback: CountryInfoResponse = {
+      code,
+      description: "",
+      extract: "",
+      thumbnailUrl: null,
+      flagSvgUrl: null,
+      wikipediaUrl: "",
+      population: null,
+      areaSqKm: null,
+      capital: null,
+      language: null,
+      government: null,
+      currency: null,
+      source: "fallback",
+      note: "Informações indisponíveis — Wikipedia inacessível.",
+      updatedAt: new Date().toISOString(),
+    };
+    res.json(fallback);
   }
 });
 

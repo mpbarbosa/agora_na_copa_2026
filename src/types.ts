@@ -335,6 +335,15 @@ export interface TeamViewMatchSummary {
   updatedAt: string;
 }
 
+export interface PlayerStatsResponse {
+  goals: number;
+  yellowCards: number;
+  redCards: number;
+  source: "fifa" | "fallback" | "mixed";
+  note: string;
+  updatedAt: string;
+}
+
 export interface CountryInfoResponse {
   code: string;
   /** Short one-line description in pt-BR */
@@ -360,6 +369,7 @@ export interface CountryInfoResponse {
   /** Currency name in Portuguese (Wikidata P38) */
   currency: string | null;
   source: "wikipedia" | "fallback";
+  note: string;
   updatedAt: string;
 }
 
