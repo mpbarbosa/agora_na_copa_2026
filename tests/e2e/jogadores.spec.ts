@@ -85,10 +85,7 @@ test.describe("Jogadores view — player overlay stats", () => {
   });
 
   test("fetches stats for the correct team and player", async ({ page }) => {
-    const capturedUrls: string[] = [];
-
     await page.route("**/api/player-stats/**", async (route) => {
-      capturedUrls.push(route.request().url());
       await route.fulfill({
         contentType: "application/json",
         body: JSON.stringify({ goals: 1, yellowCards: 0, redCards: 0 }),
@@ -99,12 +96,13 @@ test.describe("Jogadores view — player overlay stats", () => {
     await page.click("#btn-nav-jogadores");
     await expect(page.locator("#jogadores-view")).toBeVisible();
 
+    // Start waiting for the request before clicking so we don't miss it
+    const statsRequestPromise = page.waitForRequest("**/api/player-stats/**");
     await page.click("#jogador-card-405742");
     await expect(page.locator("#jogadores-player-overlay")).toBeVisible();
 
-    expect(capturedUrls.length).toBeGreaterThan(0);
-    const statsUrl = capturedUrls[0];
-    expect(statsUrl).toContain("/api/player-stats/BRA/");
-    expect(statsUrl).toContain("Vinicius");
+    const statsRequest = await statsRequestPromise;
+    expect(statsRequest.url()).toContain("/api/player-stats/BRA/");
+    expect(statsRequest.url()).toContain("Vinicius");
   });
 });
