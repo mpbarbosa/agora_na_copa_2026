@@ -81,8 +81,20 @@ O aplicativo está estruturado com alta modularidade em três camadas funcionais
 - Distribuição espacial dinâmica para o time escalado (Brasil ou França no clássico do MetLife Stadium).
 - Gaveta lateral detalhada para exibição dos clubes originais, valor de mercado simulado e notas táticas dos atletas selecionados.
 
-## 📱 6. Design Responsivo & Transições
+## 📱 6. Responsive GUI Architecture
 
-- **Desktop**: Grade de 12 colunas com layout fluido agrupado em bento-boxes dinâmicos.
-- **Mobile**: Compressão ágil para 4 colunas; o campo de futebol converte-se em layout de rolagem suave com botões ajustáveis de toque suave minimizando erros de digitação (Targets de no mínimo 44px).
+The interface adapts natively to any device, transitioning between a **highly compact vertical mobile layout** and a **spacious multi-column desktop command center**.
+
+- **Desktop (lg+)**: Multi-column layouts — 12-column fluid grid with bento-box groupings; overlay cards split into portrait + stats/details side by side.
+- **Mobile (default → sm)**: Single-column vertical stacks; overlays become bottom-sheets anchored to the viewport bottom (`items-end`, `rounded-t-2xl`), scrollable within `max-h-[88vh]`. Tap targets minimum 44px.
 - **Micro-interações**: Efeitos de brilho e pulsação em cards ativos e botões hover para dar "vida" broadcast à arena.
+
+### Overlay card breakpoints (`PlayerOverlayCard`)
+
+| Breakpoint | Layout | Portrait height | Player name |
+|------------|--------|-----------------|-------------|
+| Mobile (default) | Bottom-sheet, single column, `rounded-t-2xl`, `max-h-[88vh] overflow-y-auto` | `min-h-[180px]` | `text-2xl` |
+| `sm` (640px+) | Centered floating card, `rounded-xl`, scroll constraints removed | `min-h-[320px]` | `text-4xl` |
+| `lg` (1024px+) | Two-column: portrait (`1.1fr`) ∥ stats + details (`0.9fr`) | `min-h-[320px]` | `text-4xl` |
+
+Stats tiles always render in a 3-column grid (`grid-cols-3`) — the `border-l-[3px]` left-border blocks are compact enough to fit three across even on a 360px phone screen.

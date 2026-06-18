@@ -259,12 +259,12 @@ export function PlayerOverlayCard({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 p-4 backdrop-blur-md"
+      className="fixed inset-0 z-50 flex items-end justify-center bg-black/85 p-0 backdrop-blur-md sm:items-center sm:p-4"
       id={id}
       onClick={onClose}
     >
       <div
-        className={`relative w-full max-w-2xl overflow-hidden rounded-xl shadow-2xl border ${cardBg}`}
+        className={`relative w-full max-w-2xl max-h-[88vh] overflow-y-auto rounded-t-2xl border shadow-2xl sm:max-h-none sm:overflow-visible sm:rounded-xl ${cardBg}`}
         style={{ borderColor }}
         onClick={(event) => event.stopPropagation()}
       >
@@ -272,7 +272,7 @@ export function PlayerOverlayCard({
         <div className="h-1 w-full" style={{ background: accent }} />
 
         {/* Header */}
-        <div className="relative overflow-hidden border-b px-5 py-4" style={{ borderColor }}>
+        <div className="relative overflow-hidden border-b px-4 py-3 sm:px-5 sm:py-4" style={{ borderColor }}>
           {/* Jersey number watermark */}
           {player.number != null && (
             <span
@@ -298,7 +298,7 @@ export function PlayerOverlayCard({
             Card completo do jogador
           </p>
 
-          <div className="mt-2 flex items-center gap-3 pr-20">
+          <div className="mt-2 flex items-center gap-3 pr-16 sm:pr-20">
             {flagSvg && onOpenTeamView && (
               <button
                 type="button"
@@ -311,7 +311,7 @@ export function PlayerOverlayCard({
             )}
             <div className="min-w-0">
               <div className="flex items-center gap-2">
-                <h4 className="font-anton text-4xl uppercase leading-none tracking-wide">
+                <h4 className="font-anton text-2xl uppercase leading-none tracking-wide sm:text-4xl">
                   {player.name}
                 </h4>
                 {player.captain && (
@@ -350,7 +350,7 @@ export function PlayerOverlayCard({
           {/* Portrait column */}
           <div className="border-b p-4 lg:border-b-0 lg:border-r" style={{ borderColor }}>
             <div
-              className="flex min-h-[320px] items-center justify-center overflow-hidden rounded-lg border"
+              className="flex min-h-[180px] items-center justify-center overflow-hidden rounded-lg border sm:min-h-[320px]"
               style={{ background: photoBg, borderColor }}
             >
               <PlayerPortrait
@@ -379,10 +379,10 @@ export function PlayerOverlayCard({
           </div>
 
           {/* Stats + details column */}
-          <div className="p-5">
+          <div className="p-4 sm:p-5">
             {/* Stat tiles — editorial left-border blocks */}
             <div
-              className="grid grid-cols-1 gap-2 sm:grid-cols-3"
+              className="grid grid-cols-3 gap-2"
               id={id ? `${id}-stats` : undefined}
             >
               {stats.map((stat) => (
