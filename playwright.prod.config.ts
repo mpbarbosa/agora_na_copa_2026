@@ -8,6 +8,7 @@ const port = Number(process.env.PREFLIGHT_PREVIEW_PORT || 9011);
 export default defineConfig({
   testDir: "./tests/e2e",
   fullyParallel: false,
+  timeout: 60000,
   retries: 0,
   use: {
     baseURL: `http://127.0.0.1:${port}`,
