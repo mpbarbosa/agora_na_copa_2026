@@ -13,6 +13,7 @@ One-time production server provisioning scripts for the AWS host running the `ag
 | `05_setup_tls.sh` | Once | Issues TLS certificate via certbot nginx plugin |
 | `06_redeploy.sh` | Every deploy | Syncs the latest staging payload and restarts the service. Called by `scripts/deploy.sh` on production hosts |
 | `07_add_portfolio_link.sh` | Once | Adds portfolio backlink to the `mpbarbosa.com` landing pages |
+| `08_setup_monitoring.sh` | Once | Enables timed nginx access logging (`agora_timed` log format with `rt=` and `urt=` fields); safe to run after certbot — injects surgically rather than overwriting |
 
 ## lib/
 
