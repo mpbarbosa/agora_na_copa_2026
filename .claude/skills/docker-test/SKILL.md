@@ -138,9 +138,17 @@ This `node -e` expression uses CJS (`require`) regardless of the project's
 
 ## When to rebuild vs. reuse the image
 
+`--no-build` skips `docker build` entirely — the image retains the source
+snapshot from the last build. Any source change (including test files) is
+invisible to the running container unless the image is rebuilt.
+
+Docker's layer cache makes rebuilds after source-only changes fast: only the
+`COPY . .` layer re-runs; `npm ci` and `playwright install` layers are cached.
+
 | Change | `--no-build` safe? |
 |--------|--------------------|
-| Source files only (`src/`, `server.ts`, `tests/`) | Yes |
+| No changes at all — re-running the same code | Yes |
+| Any source file changed (`src/`, `server.ts`, `tests/`, etc.) | **No** — `COPY . .` layer must re-run |
 | `package.json` or `package-lock.json` changed | No — `npm ci` layer is stale |
 | `playwright install` version changed (via `@playwright/test` version bump) | No |
 | `Dockerfile.test` changed | No |
