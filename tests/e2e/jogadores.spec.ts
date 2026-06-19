@@ -105,4 +105,44 @@ test.describe("Jogadores view — player overlay stats", () => {
     expect(statsRequest.url()).toContain("/api/player-stats/BRA/");
     expect(statsRequest.url()).toContain("Vinicius");
   });
+
+  test("shows 'Destaque no Instagram' in the Jogadores player overlay (jogadores-player-overlay)", async ({
+    page,
+  }) => {
+    const instagramPostUrl = "https://www.instagram.com/reel/DZno5Zsxo6V/";
+
+    await page.route("**/api/player-stats/**", async (route) => {
+      await route.fulfill({
+        contentType: "application/json",
+        body: JSON.stringify({ goals: 0, yellowCards: 0, redCards: 0 }),
+      });
+    });
+
+    await page.goto("/");
+    await page.click("#btn-nav-jogadores");
+    await expect(page.locator("#jogadores-view")).toBeVisible();
+
+    // Vozinha (CPV GK, fifaId 364752) has instagramPostUrl in squads.json
+    await page.click("#jogador-card-364752");
+    await expect(page.locator("#jogadores-player-overlay")).toBeVisible();
+
+    const toggle = page.locator("#jogadores-player-overlay-ig-toggle");
+    await expect(toggle).toBeVisible();
+    await expect(toggle).toContainText("Destaque no Instagram");
+    await expect(toggle).toHaveAttribute("aria-expanded", "false");
+
+    await toggle.click();
+    await expect(toggle).toHaveAttribute("aria-expanded", "true");
+
+    const panel = page.locator("#jogadores-player-overlay-ig-panel");
+    await expect(panel).toBeVisible();
+    await expect(panel.locator("blockquote.instagram-media")).toHaveAttribute(
+      "data-instgrm-permalink",
+      instagramPostUrl,
+    );
+    await expect(page.locator("#jogadores-player-overlay-ig-open")).toHaveAttribute(
+      "href",
+      instagramPostUrl,
+    );
+  });
 });
