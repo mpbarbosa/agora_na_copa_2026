@@ -64,6 +64,16 @@ const buildTeamRef = (team: Match["teamA"] | Match["teamB"]): TeamRef => ({
   group: team.group,
 });
 
+function matchPoints(scoreA: number, scoreB: number): { a: number; b: number } {
+  if (scoreA > scoreB) return { a: 3, b: 0 };
+  if (scoreA < scoreB) return { a: 0, b: 3 };
+  return { a: 1, b: 1 };
+}
+
+function ptLabel(pts: number): string {
+  return pts === 1 ? "+1 pt" : pts > 0 ? `+${pts} pts` : "0 pts";
+}
+
 const sortMatchesForStatus = (status: MatchStatus, matches: Match[]) => {
   const sorted = [...matches];
   sorted.sort((left, right) => {
@@ -280,6 +290,20 @@ export function PartidasView({ matches, theme, onSelectTeamLineup, onSelectMatch
                               <p className={`font-mono text-[10px] uppercase tracking-[0.22em] ${softMutedClasses}`}>
                                 {match.teamA.code}
                               </p>
+                              {match.status === "FINISHED" && match.score && (() => {
+                                const pts = matchPoints(match.score.teamA, match.score.teamB).a;
+                                return (
+                                  <p className={`font-mono text-[10px] font-bold uppercase tracking-[0.18em] ${
+                                    pts === 3
+                                      ? theme === "classic-light" ? "text-[#009c3b]" : "text-[#00e476]"
+                                      : pts === 1
+                                        ? theme === "classic-light" ? "text-amber-600" : "text-amber-400"
+                                        : softMutedClasses
+                                  }`}>
+                                    {ptLabel(pts)}
+                                  </p>
+                                );
+                              })()}
                             </div>
                           </button>
 
@@ -327,6 +351,20 @@ export function PartidasView({ matches, theme, onSelectTeamLineup, onSelectMatch
                               <p className={`font-mono text-[10px] uppercase tracking-[0.22em] ${softMutedClasses}`}>
                                 {match.teamB.code}
                               </p>
+                              {match.status === "FINISHED" && match.score && (() => {
+                                const pts = matchPoints(match.score.teamA, match.score.teamB).b;
+                                return (
+                                  <p className={`font-mono text-[10px] font-bold uppercase tracking-[0.18em] ${
+                                    pts === 3
+                                      ? theme === "classic-light" ? "text-[#009c3b]" : "text-[#00e476]"
+                                      : pts === 1
+                                        ? theme === "classic-light" ? "text-amber-600" : "text-amber-400"
+                                        : softMutedClasses
+                                  }`}>
+                                    {ptLabel(pts)}
+                                  </p>
+                                );
+                              })()}
                             </div>
                             <FlagIcon flag={match.teamB.flagSvg} className="h-8 w-10 shrink-0 rounded-sm object-contain" />
                           </button>
