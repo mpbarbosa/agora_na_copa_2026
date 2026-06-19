@@ -635,6 +635,7 @@
     "position": "GK",
     "club": "Liverpool",
     "pictureUrl": "https://digitalhub.fifa.com/transform/6b051628-d407-41ce-8a60-dc354ac4ccb8/ALISSON_308370",
+    "socials": { "instagram": "alissonbecker" },
     "dateOfBirth": "1992-10-02",
     "height": 193
   },
@@ -755,6 +756,7 @@
     "position": "GK",
     "club": "Palmeiras",
     "pictureUrl": "https://digitalhub.fifa.com/transform/c66a5712-81fa-4527-9e5a-8221f11b3274/WEVERTON_396315",
+    "socials": { "instagram": "weverton010" },
     "dateOfBirth": "1987-12-13",
     "height": 189
   },
@@ -2694,6 +2696,7 @@
     "position": "FW",
     "club": "Cruz Azul",
     "pictureUrl": "https://digitalhub.fifa.com/transform/ea06becb-97b2-4f89-8464-5e0854cb7f81/QUINONES-Julian_429157",
+    "socials": { "instagram": "julianquinones33" },
     "dateOfBirth": "1997-03-24",
     "height": 177
   },
@@ -11896,6 +11899,7 @@
     "position": "DF",
     "club": "Bayern Munique",
     "pictureUrl": "https://digitalhub.fifa.com/transform/743f3b76-7c6e-484c-8f62-4f4e22c082ae/KIM-Minjae_395088",
+    "socials": { "instagram": "kimmin.jae" },
     "dateOfBirth": "1996-11-15",
     "height": 190
   },
