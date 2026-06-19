@@ -301,7 +301,7 @@ export function PlayerOverlayCard({
       onClick={onClose}
     >
       <div
-        className={`relative w-full max-w-2xl max-h-[88vh] overflow-y-auto rounded-t-2xl border shadow-2xl sm:max-h-none sm:overflow-visible sm:rounded-xl ${cardBg}`}
+        className={`relative w-full max-w-2xl max-h-[88vh] overflow-y-auto rounded-t-2xl border shadow-2xl sm:max-h-[90vh] sm:overflow-y-auto sm:rounded-xl ${cardBg}`}
         style={{ borderColor }}
         onClick={(event) => event.stopPropagation()}
       >
