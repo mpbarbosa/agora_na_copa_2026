@@ -114,6 +114,7 @@ async function mockTeamView(page: Page) {
                 instagram: "https://instagram.com/atacanteteste",
                 x: "https://x.com/atacanteteste",
               },
+              instagramPostUrl: "https://www.instagram.com/p/test-fw-post/",
             },
           ],
           source: "fifa",
@@ -554,6 +555,47 @@ test.describe("Team view", () => {
     await expect(page.locator("#player-picture-overlay img")).toHaveAttribute(
       "src",
       /LUKAKU-Romelu_358112/,
+    );
+  });
+
+  test("shows 'Destaque no Instagram' in the squad player overlay card (player-feature-overlay)", async ({
+    page,
+  }) => {
+    const instagramPostUrl = "https://www.instagram.com/p/test-fw-post/";
+
+    await mockTeamView(page);
+
+    await page.goto("/");
+    await page.click("#btn-nav-selecoes");
+    await page.click("#btn-team-card-bra");
+    await expect(page.locator("#team-lineup-view")).toBeVisible();
+
+    await page.locator('[id^="squad-player-row-"]').filter({ hasText: "Atacante Teste" }).click();
+    await expect(page.locator("#selected-player-info")).toContainText("Atacante Teste");
+
+    await page.click("#btn-open-player-overlay-card");
+    await expect(page.locator("#player-feature-overlay")).toBeVisible();
+
+    // Toggle button must be visible and initially collapsed
+    const toggle = page.locator("#player-feature-overlay-ig-toggle");
+    await expect(toggle).toBeVisible();
+    await expect(toggle).toContainText("Destaque no Instagram");
+    await expect(toggle).toHaveAttribute("aria-expanded", "false");
+
+    // Expand the section
+    await toggle.click();
+    await expect(toggle).toHaveAttribute("aria-expanded", "true");
+
+    // Panel shows the embed blockquote and redirect link
+    const panel = page.locator("#player-feature-overlay-ig-panel");
+    await expect(panel).toBeVisible();
+    await expect(panel.locator("blockquote.instagram-media")).toHaveAttribute(
+      "data-instgrm-permalink",
+      instagramPostUrl,
+    );
+    await expect(page.locator("#player-feature-overlay-ig-open")).toHaveAttribute(
+      "href",
+      instagramPostUrl,
     );
   });
 });

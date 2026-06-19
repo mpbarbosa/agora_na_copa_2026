@@ -302,4 +302,73 @@ test.describe("Leaders view (Líderes)", () => {
     await expect(page.locator("#team-lineup-title")).toContainText("BRASIL");
     await expect(page.locator("#team-view-campanha-card")).toBeVisible();
   });
+
+  test("shows 'Destaque no Instagram' collapsible in the player overlay when instagramPostUrl is set", async ({
+    page,
+  }) => {
+    const instagramPostUrl = "https://www.instagram.com/reel/DZno5Zsxo6V/";
+
+    await page.route("**/api/tournament-leaders", async (route) => {
+      await route.fulfill({
+        contentType: "application/json",
+        body: JSON.stringify({
+          updatedAt: "2026-06-15T18:00:00.000Z",
+          source: "fifa",
+          note: "Teste do Destaque no Instagram.",
+          playerLeaders: {
+            topScorers: [
+              {
+                id: "cpv-vozinha",
+                name: "VOZINHA",
+                teamCode: "CPV",
+                teamName: "CABO VERDE",
+                teamFlagSvg: "cape-verde",
+                shirtNumber: 1,
+                goals: 1,
+                yellowCards: 0,
+                redCards: 0,
+                instagramPostUrl,
+              },
+            ],
+            yellowCards: [],
+            redCards: [],
+          },
+          teamLeaders: {
+            bestAttack: [],
+            bestDefense: [],
+            cleanSheets: [],
+          },
+        }),
+      });
+    });
+
+    await page.goto("/");
+    await page.click("#btn-nav-lideres");
+    await expect(page.locator("#tournament-leaders-view")).toBeVisible();
+
+    await page.click("#btn-leader-player-cpv-vozinha");
+    await expect(page.locator("#leaders-player-overlay")).toBeVisible();
+
+    // Toggle button must be visible and initially collapsed
+    const toggle = page.locator("#leaders-player-overlay-ig-toggle");
+    await expect(toggle).toBeVisible();
+    await expect(toggle).toContainText("Destaque no Instagram");
+    await expect(toggle).toHaveAttribute("aria-expanded", "false");
+
+    // Expand the section
+    await toggle.click();
+    await expect(toggle).toHaveAttribute("aria-expanded", "true");
+
+    // Panel shows the embed blockquote and redirect link
+    const panel = page.locator("#leaders-player-overlay-ig-panel");
+    await expect(panel).toBeVisible();
+    await expect(panel.locator("blockquote.instagram-media")).toHaveAttribute(
+      "data-instgrm-permalink",
+      instagramPostUrl,
+    );
+    await expect(page.locator("#leaders-player-overlay-ig-open")).toHaveAttribute(
+      "href",
+      instagramPostUrl,
+    );
+  });
 });

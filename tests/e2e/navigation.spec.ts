@@ -527,4 +527,108 @@ test.describe("Navigation shell", () => {
     );
     await expect(page.locator("#match-incidents-list > div")).toHaveCount(10);
   });
+
+  test("shows 'Destaque no Instagram' in the match incident player overlay (match-incident-player-overlay)", async ({
+    page,
+  }) => {
+    const instagramPostUrl = "https://www.instagram.com/p/test-alamri-post/";
+
+    await page.route("**/api/team-lineups", async (route) => {
+      await route.fulfill({
+        contentType: "application/json",
+        body: JSON.stringify({
+          refreshAfterMs: 60000,
+          lineups: {
+            "ksa-uru-2026": {
+              teamA: {
+                players: [
+                  {
+                    id: "ksa-alamri",
+                    name: "Abdulilah Alamri",
+                    number: 4,
+                    position: "DF",
+                    x: 38,
+                    y: 75,
+                    club: "Al-Nassr",
+                    instagramPostUrl,
+                  },
+                ],
+                source: "fifa",
+                note: "Escalação teste.",
+                updatedAt: "2026-06-15T20:00:00.000Z",
+              },
+              teamB: { players: [], source: "fallback", note: "", updatedAt: "2026-06-15T20:00:00.000Z" },
+            },
+          },
+        }),
+      });
+    });
+
+    await page.route("**/api/match-overlays", async (route) => {
+      await route.fulfill({
+        contentType: "application/json",
+        body: JSON.stringify({
+          refreshAfterMs: 60000,
+          overlays: {
+            "ksa-uru-2026": {
+              broadcastGuide: {
+                broadcasters: [],
+                source: "fallback",
+                note: "Teste do Destaque no Instagram nos lances.",
+                updatedAt: "2026-06-15T20:00:00.000Z",
+              },
+              matchState: {
+                status: "LIVE",
+                incidents: [
+                  {
+                    id: "ksa-goal-alamri",
+                    time: "41'",
+                    type: "GOAL",
+                    text: "ALAMRI marcou.",
+                    team: "A",
+                    playerMentions: [
+                      { id: "ksa-alamri", name: "Abdulilah Alamri", number: 4, position: "DF" },
+                    ],
+                  },
+                ],
+                source: "fifa",
+                note: "Feed oficial da FIFA.",
+                updatedAt: "2026-06-15T20:00:00.000Z",
+              },
+            },
+          },
+        }),
+      });
+    });
+
+    await page.goto("/");
+    await page.click("#btn-match-ksa-uru-2026");
+    await expect(page.locator("#match-incidents-panel")).toBeVisible();
+
+    await page.click("#btn-incident-player-ksa-goal-alamri-0");
+    await expect(page.locator("#match-incident-player-overlay")).toBeVisible();
+    await expect(page.locator("#match-incident-player-overlay")).toContainText("Abdulilah Alamri");
+
+    // Toggle button must be visible and initially collapsed
+    const toggle = page.locator("#match-incident-player-overlay-ig-toggle");
+    await expect(toggle).toBeVisible();
+    await expect(toggle).toContainText("Destaque no Instagram");
+    await expect(toggle).toHaveAttribute("aria-expanded", "false");
+
+    // Expand the section
+    await toggle.click();
+    await expect(toggle).toHaveAttribute("aria-expanded", "true");
+
+    // Panel shows the embed blockquote and redirect link
+    const panel = page.locator("#match-incident-player-overlay-ig-panel");
+    await expect(panel).toBeVisible();
+    await expect(panel.locator("blockquote.instagram-media")).toHaveAttribute(
+      "data-instgrm-permalink",
+      instagramPostUrl,
+    );
+    await expect(page.locator("#match-incident-player-overlay-ig-open")).toHaveAttribute(
+      "href",
+      instagramPostUrl,
+    );
+  });
 });
