@@ -13,6 +13,7 @@ import { FanZoneView } from "./components/FanZoneView";
 import { JogadoresView } from "./components/JogadoresView";
 import { TeamLineupView } from "./components/TeamLineupView";
 import { PartidasView } from "./components/PartidasView";
+import { BrazilCountdownBadge } from "./components/BrazilCountdownBadge";
 import { useTeamLineups } from "./hooks/useTeamLineups";
 import { NAV_ITEMS } from "./navigation";
 import { Sun, Moon } from "lucide-react";
@@ -272,6 +273,8 @@ export default function App() {
           renderActiveView()
         )}
       </main>
+
+      <BrazilCountdownBadge matches={matches} />
 
       {/* FOOTER METADATA DETAIL */}
       <footer
