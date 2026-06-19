@@ -129,7 +129,7 @@ test.describe("Standings view (Grupos)", () => {
       );
 
       await expect(card).toBeVisible();
-      await expect(card.locator("thead th")).toHaveCount(9);
+      await expect(card.locator("thead th")).toHaveCount(10);
       await expect(card.locator("tbody tr")).toHaveCount(expectation?.teamCodes.length ?? 0);
     }
 
@@ -148,7 +148,7 @@ test.describe("Standings view (Grupos)", () => {
       await expect(card).toBeVisible();
       await expect(card.locator("h3")).toHaveText(expectation.group);
 
-      const teamCells = card.locator('tbody tr td:first-child span[title]');
+      const teamCells = card.locator('tbody tr td:nth-child(2) span[title]');
       await expect(teamCells).toHaveCount(expectation.teamCodes.length);
 
       const renderedCodes = await teamCells.evaluateAll((nodes) =>

@@ -11,14 +11,14 @@ interface StandingsViewProps {
 }
 
 const COLUMNS = [
-  { key: "played", label: "J" },
-  { key: "won", label: "V" },
-  { key: "drawn", label: "E" },
-  { key: "lost", label: "D" },
-  { key: "goalsFor", label: "GF" },
-  { key: "goalsAgainst", label: "GA" },
-  { key: "goalDifference", label: "SG" },
-  { key: "points", label: "PTS" },
+  { key: "points",         label: "PTS" },
+  { key: "goalDifference", label: "SG"  },
+  { key: "played",         label: "J"   },
+  { key: "won",            label: "V"   },
+  { key: "drawn",          label: "E"   },
+  { key: "lost",           label: "D"   },
+  { key: "goalsFor",       label: "GF"  },
+  { key: "goalsAgainst",   label: "GA"  },
 ] as const;
 
 const groupSlug = (group: string) => group.replace(/\s+/g, "-").toLowerCase();
@@ -125,13 +125,18 @@ export function StandingsView({
                 <table className="min-w-[420px] w-full font-mono text-[11px] sm:text-xs">
                   <thead>
                     <tr className={`border-b ${rowBorderClasses}`}>
+                      <th className={`w-5 py-1.5 text-left font-normal uppercase tracking-wider ${headerCellClasses}`} aria-label="Posição" />
                       <th className={`py-1.5 text-left font-normal uppercase tracking-wider ${headerCellClasses}`}>
                         Equipe
                       </th>
                       {COLUMNS.map((col) => (
                         <th
                           key={col.key}
-                          className={`px-1 py-1.5 text-right font-normal uppercase tracking-wider ${headerCellClasses}`}
+                          className={`px-1 py-1.5 text-right font-normal uppercase tracking-wider ${
+                            col.key === "points"
+                              ? `font-bold ${headingClasses}`
+                              : headerCellClasses
+                          }`}
                         >
                           {col.label}
                         </th>
@@ -139,37 +144,51 @@ export function StandingsView({
                     </tr>
                   </thead>
                   <tbody>
-                    {rows.map((row, index) => (
-                      <tr
-                        key={row.id}
-                        id={`standings-row-${row.code.toLowerCase()}`}
-                        className={`border-b last:border-b-0 ${rowBorderClasses} ${
-                          index < 2 ? `border-l-2 ${qualifiedClasses}` : ""
-                        }`}
-                      >
-                        <td className={`whitespace-nowrap py-1.5 pl-2 font-archivo ${headingClasses}`}>
-                          <div className="flex items-center gap-2">
-                            <FlagIcon
-                              flag={row.flagSvg}
-                              className="h-4 w-6"
-                              onClick={() => onSelectTeamLineup(row)}
-                            />
-                            <span title={row.name}>{row.code}</span>
-                          </div>
-                        </td>
-                        {COLUMNS.map((col) => (
-                          <td
-                            key={col.key}
-                            id={`standings-cell-${row.code.toLowerCase()}-${col.key}`}
-                            className={`whitespace-nowrap px-1 py-1.5 text-right ${
-                              col.key === "points" ? `font-bold ${headingClasses}` : mutedClasses
-                            }`}
-                          >
-                            {row[col.key]}
+                    {rows.map((row, index) => {
+                      const isQualifying = index < 2;
+                      const ptsCellColor =
+                        isQualifying
+                          ? theme === "classic-light" ? "text-[#009c3b]" : "text-[#00e476]"
+                          : headingClasses;
+                      return (
+                        <tr
+                          key={row.id}
+                          id={`standings-row-${row.code.toLowerCase()}`}
+                          className={`border-b last:border-b-0 ${rowBorderClasses} ${
+                            isQualifying ? `border-l-2 ${qualifiedClasses}` : "border-l-2 border-l-transparent"
+                          }`}
+                        >
+                          <td className={`py-1.5 pl-1 text-center font-mono text-[9px] ${mutedClasses}`}>
+                            {index + 1}
                           </td>
-                        ))}
-                      </tr>
-                    ))}
+                          <td className={`whitespace-nowrap py-1.5 pl-2 font-archivo ${headingClasses}`}>
+                            <div className="flex items-center gap-2">
+                              <FlagIcon
+                                flag={row.flagSvg}
+                                className="h-4 w-6"
+                                onClick={() => onSelectTeamLineup(row)}
+                              />
+                              <span title={row.name}>{row.code}</span>
+                            </div>
+                          </td>
+                          {COLUMNS.map((col) => (
+                            <td
+                              key={col.key}
+                              id={`standings-cell-${row.code.toLowerCase()}-${col.key}`}
+                              className={`whitespace-nowrap px-1 py-1.5 text-right ${
+                                col.key === "points"
+                                  ? `font-bold text-sm ${ptsCellColor}`
+                                  : col.key === "goalDifference"
+                                    ? `font-semibold ${isQualifying ? ptsCellColor : mutedClasses}`
+                                    : mutedClasses
+                              }`}
+                            >
+                              {row[col.key]}
+                            </td>
+                          ))}
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>
