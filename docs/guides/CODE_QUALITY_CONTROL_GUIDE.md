@@ -40,7 +40,7 @@ Primary integration boundaries to review:
 | Internal model → API response | `server.ts` route handlers | Consistent resilience shape (`source`, `note`, `updatedAt`) |
 | API response → React components | `src/types.ts` interfaces | Components consuming typed shapes, not raw fetch results |
 | External data → match fixtures | `src/appMatches.ts` | Merge logic stays correct when FIFA data shape changes |
-| React component tree | `src/components/` | Single responsibility per component; props typed; state local; side effects in named hooks — see [React Guide](./REACT_GUIDE.md) |
+| React component tree | `src/components/` | Single responsibility per component; props typed; state local; reusable side effects in named hooks (`src/hooks/`); view-scoped fetches may stay in component `useEffect` with proper cancellation — see [React Guide](./REACT_GUIDE.md) |
 
 When reviewing `server.ts` changes: verify each new route follows the resilience
 shape, returns the narrowest accurate status code, and delegates domain logic to
@@ -155,8 +155,11 @@ The project's layering (see `CLAUDE.md` for the full architecture):
 - `fifa-sync-core.ts` must not import from `server.ts` — dependency is one-way.
 - `src/types.ts` shapes should not embed FIFA API response structures directly —
   translate at the `fifa-sync-core.ts` boundary.
-- React components (`src/components/`) must not fetch data directly — consume
-  props or API responses typed by `src/types.ts`.
+- React components (`src/components/`) must not import from `server.ts`. They
+  consume typed shapes from `src/types.ts`. Reusable or view-spanning fetch logic
+  belongs in a named hook in `src/hooks/` (e.g. `useTeamLineups`,
+  `usePlayerStats`); view-specific one-off fetches may live in a component
+  `useEffect` but must use an `active`/`cancelled` flag and return a cleanup.
 - `server.ts` is the composition root: it owns routing, caching, and wiring. Do
   not spread these concerns into `fifa-sync-core.ts` or component files.
 - New pure logic extracted from `server.ts` must be unit-testable without
@@ -170,8 +173,8 @@ Apply [React Guide](./REACT_GUIDE.md) rules to every component change:
 - Props are typed; components accept only the fields they use, not whole domain objects.
 - Data flows down through props; events flow up through callback props.
 - State is placed at the narrowest scope where correctness allows.
-- Logic that produces no JSX belongs in a named custom hook, not the render body.
-- Each `useEffect` targets one external side effect and returns a cleanup function when it opens a resource.
+- Reusable logic with side effects belongs in a named custom hook in `src/hooks/`. View-specific data loading can stay in a component `useEffect` when it does not need to be shared.
+- Each `useEffect` targets one external side effect and returns a cleanup function when it opens a resource or issues a fetch (use an `active`/`cancelled` flag to discard stale responses).
 - Derived values are computed inline rather than stored as parallel state.
 
 ### 10. Validation gate
@@ -234,5 +237,5 @@ Run these commands for substantive code changes:
 - [ ] Each React component has one describable responsibility (no "and").
 - [ ] Component props are typed and carry only the fields the component uses.
 - [ ] State is placed at the narrowest correct scope; derived values are computed inline.
-- [ ] Side effects are in named custom hooks with explicit dependencies and cleanup.
-- [ ] No component fetches data directly — API responses arrive via typed props.
+- [ ] Reusable or view-spanning fetch logic is in a named hook in `src/hooks/`; view-scoped `useEffect` fetches use an `active`/`cancelled` flag and return a cleanup.
+- [ ] No component imports from `server.ts`; consumed API shapes are typed via `src/types.ts`.

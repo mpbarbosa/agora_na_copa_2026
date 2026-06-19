@@ -12,7 +12,7 @@ This skill builds the Docker test image (if needed) and runs all three test
 suites in isolation:
 
 1. **Type check** — `npm run lint` (TypeScript `tsc --noEmit`)
-2. **Unit tests** — `npm run test:unit` (Node built-in test runner, `tests/fifa-sync-core.test.ts` + `tests/standings.test.ts`)
+2. **Unit tests** — `npm run test:unit` (Node built-in test runner, `tests/fifa-sync-core.test.ts` only — run `tests/standings.test.ts` separately with `node --import tsx --test tests/standings.test.ts` if needed)
 3. **End-to-end tests** — `npm run test:e2e` (Playwright + Chromium, all specs in `tests/e2e/`)
 
 The entry point is `scripts/docker-test.sh`. All test infrastructure lives in
@@ -131,8 +131,10 @@ script resolves the path at runtime using:
 node -e "const {chromium}=require('playwright-core');process.stdout.write(chromium.executablePath())"
 ```
 
-This `node -e` expression uses CJS (`require`) regardless of the project's
-`"type": "module"` setting, matching the same technique used in `.github/workflows/ci.yml`.
+This `node -e` expression uses CJS (`require('playwright-core')`) regardless of the
+project's `"type": "module"` setting. Note: `.github/workflows/ci.yml` uses
+`require('playwright')` instead — functionally equivalent since both expose the
+same `chromium.executablePath()` via `@playwright/test`'s bundled packages.
 
 ---
 
