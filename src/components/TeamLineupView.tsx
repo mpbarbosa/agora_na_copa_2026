@@ -9,6 +9,8 @@ import type {
 } from "../types";
 import { FlagIcon } from "./FlagIcon";
 import { TeamPitchBoard } from "./TeamPitchBoard";
+import { PlayerOverlayCard } from "./PlayerOverlayCard";
+import { getPositionLabel } from "../utils/playerDisplay";
 import { ArrowLeft } from "lucide-react";
 
 interface TeamLineupViewProps {
@@ -153,12 +155,14 @@ function LeaderStrip({
   entries,
   metricFor,
   theme,
+  onSelectPlayer,
 }: {
   title: string;
   metricLabel: string;
   entries: TournamentPlayerLeader[];
   metricFor: (entry: TournamentPlayerLeader) => number;
   theme: TeamLineupViewProps["theme"];
+  onSelectPlayer: (entry: TournamentPlayerLeader) => void;
 }) {
   const headingClasses = theme === "classic-light" ? "text-slate-900" : "text-white";
   const mutedClasses = theme === "classic-light" ? "text-slate-600" : "text-slate-300";
@@ -189,9 +193,13 @@ function LeaderStrip({
                   </div>
                 )}
                 <div className="min-w-0">
-                  <p className={`truncate font-anton text-sm uppercase tracking-wide ${headingClasses}`}>
+                  <button
+                    type="button"
+                    onClick={() => onSelectPlayer(entry)}
+                    className={`truncate font-anton text-sm uppercase tracking-wide transition hover:opacity-75 ${headingClasses}`}
+                  >
                     {entry.name}
-                  </p>
+                  </button>
                   <p className={`mt-1 font-archivo text-sm ${mutedClasses}`}>
                     {typeof entry.shirtNumber === "number" ? `Camisa ${entry.shirtNumber}` : "Sem camisa confirmada"}
                   </p>
@@ -341,6 +349,7 @@ export const TeamLineupView: React.FC<TeamLineupViewProps> = ({ team, theme, onB
   const [teamView, setTeamView] = useState<TeamViewResponse | null>(null);
   const [status, setStatus] = useState<LoadStatus>("loading");
   const [countryInfo, setCountryInfo] = useState<CountryInfoResponse | null>(null);
+  const [selectedPlayer, setSelectedPlayer] = useState<TournamentPlayerLeader | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -636,6 +645,7 @@ export const TeamLineupView: React.FC<TeamLineupViewProps> = ({ team, theme, onB
                   entries={teamView.leaders.topScorers}
                   metricFor={(entry) => entry.goals}
                   theme={theme}
+                  onSelectPlayer={setSelectedPlayer}
                 />
                 <LeaderStrip
                   title="Cartões amarelos"
@@ -643,6 +653,7 @@ export const TeamLineupView: React.FC<TeamLineupViewProps> = ({ team, theme, onB
                   entries={teamView.leaders.yellowCards}
                   metricFor={(entry) => entry.yellowCards}
                   theme={theme}
+                  onSelectPlayer={setSelectedPlayer}
                 />
                 <LeaderStrip
                   title="Cartões vermelhos"
@@ -650,6 +661,7 @@ export const TeamLineupView: React.FC<TeamLineupViewProps> = ({ team, theme, onB
                   entries={teamView.leaders.redCards}
                   metricFor={(entry) => entry.redCards}
                   theme={theme}
+                  onSelectPlayer={setSelectedPlayer}
                 />
               </div>
             </section>
@@ -685,6 +697,56 @@ export const TeamLineupView: React.FC<TeamLineupViewProps> = ({ team, theme, onB
           </div>
         </div>
       ) : null}
+
+      {selectedPlayer && (
+        <PlayerOverlayCard
+          id="team-view-player-overlay"
+          theme={theme}
+          player={{
+            name: selectedPlayer.name,
+            number: selectedPlayer.shirtNumber,
+            position: selectedPlayer.position,
+            club: selectedPlayer.club,
+            socials: selectedPlayer.socials,
+            pictureUrl: selectedPlayer.pictureUrl,
+          }}
+          teamName={selectedPlayer.teamName}
+          primaryColor={selectedPlayer.teamPrimaryColor}
+          secondaryColor={selectedPlayer.teamSecondaryColor}
+          flagSvg={selectedPlayer.teamFlagSvg}
+          onOpenTeamView={() => setSelectedPlayer(null)}
+          stats={[
+            {
+              label: "Gols",
+              value: selectedPlayer.goals,
+              accent: theme === "classic-light" ? "text-[#065f2c]" : "text-[#00e476]",
+            },
+            {
+              label: "Amarelos",
+              value: selectedPlayer.yellowCards,
+              accent: theme === "classic-light" ? "text-[#9a6700]" : "text-[#ffd84d]",
+            },
+            {
+              label: "Vermelhos",
+              value: selectedPlayer.redCards,
+              accent: theme === "classic-light" ? "text-[#9f1239]" : "text-[#ff879d]",
+            },
+          ]}
+          details={[
+            ...(selectedPlayer.club
+              ? [{ label: "Clube atual", value: selectedPlayer.club }]
+              : []),
+            ...(selectedPlayer.position
+              ? [{ label: "Posição", value: getPositionLabel(selectedPlayer.position) }]
+              : []),
+            {
+              value: `Destaque da seleção de ${selectedPlayer.teamName}.`,
+              fullWidth: true,
+            },
+          ]}
+          onClose={() => setSelectedPlayer(null)}
+        />
+      )}
     </div>
   );
 };
