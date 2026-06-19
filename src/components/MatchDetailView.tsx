@@ -525,6 +525,7 @@ interface MatchDetailViewProps {
   onSelectTeamLineup: (team: TeamRef) => void;
   onOpenStandingsGroup: (group: string) => void;
   teamLineups: TeamLineupsMap;
+  initialMatchId?: string;
 }
 
 export function MatchDetailView({
@@ -534,6 +535,7 @@ export function MatchDetailView({
   onSelectTeamLineup,
   onOpenStandingsGroup,
   teamLineups,
+  initialMatchId,
 }: MatchDetailViewProps) {
   const [matchOverlays, setMatchOverlays] = useState<
     Record<string, MatchOverlayEntry>
@@ -542,10 +544,10 @@ export function MatchDetailView({
     Record<string, SimulatedMatchState>
   >({});
   const [selectedMatchId, setSelectedMatchId] = useState<string>(() =>
-    getInitialMatchId(matches),
+    initialMatchId ?? getInitialMatchId(matches),
   );
   const [matchSelectionMode, setMatchSelectionMode] = useState<"auto" | "manual">(
-    "auto",
+    initialMatchId ? "manual" : "auto",
   );
   const [activeTab, setActiveTab] = useState<"broadcast" | "lineup">(
     "broadcast",
@@ -567,6 +569,22 @@ export function MatchDetailView({
   useEffect(() => {
     simulatedMatchStatesRef.current = simulatedMatchStates;
   }, [simulatedMatchStates]);
+
+  useEffect(() => {
+    if (initialMatchId) {
+      setMatchSelectionMode("manual");
+      setSelectedMatchId(initialMatchId);
+      setStoredIncidentPlayer(null);
+      setExpandedIncidentPlayerKey(null);
+    } else {
+      setMatchSelectionMode("auto");
+      setSelectedMatchId(getInitialMatchId(matches));
+      setStoredIncidentPlayer(null);
+      setExpandedIncidentPlayerKey(null);
+    }
+  // matches intentionally omitted — this effect only responds to external navigation signals
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialMatchId]);
   const currentMatch =
     matches.find((m) => m.id === selectedMatchId) || matches[0];
   const currentSimulatedState = simulatedMatchStates[currentMatch.id];

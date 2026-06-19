@@ -29,6 +29,7 @@ export default function App() {
   const [activeNavId, setActiveNavId] = useState<string>(NAV_ITEMS[0].id);
   const [lineupTeam, setLineupTeam] = useState<TeamRef | null>(null);
   const [standingsFocusGroupSlug, setStandingsFocusGroupSlug] = useState<string | null>(null);
+  const [aoVivoMatchId, setAoVivoMatchId] = useState<string | null>(null);
   const isAoVivoViewActive = activeNavId === "ao-vivo" && lineupTeam === null;
   const teamLineups = useTeamLineups(isAoVivoViewActive);
   const hasLiveMatch = matches.some((match) => match.status === "LIVE");
@@ -43,6 +44,14 @@ export default function App() {
     if (navId !== "grupos") {
       setStandingsFocusGroupSlug(null);
     }
+    if (navId !== "ao-vivo" || activeNavId === "ao-vivo") {
+      setAoVivoMatchId(null);
+    }
+  };
+
+  const handleSelectMatch = (matchId: string) => {
+    setAoVivoMatchId(matchId);
+    setActiveNavId("ao-vivo");
   };
 
   const handleOpenStandingsGroup = (group: string) => {
@@ -68,6 +77,7 @@ export default function App() {
             onSelectTeamLineup={setLineupTeam}
             onOpenStandingsGroup={handleOpenStandingsGroup}
             teamLineups={teamLineups}
+            initialMatchId={aoVivoMatchId ?? undefined}
           />
         );
       case "partidas":
@@ -76,6 +86,7 @@ export default function App() {
             matches={matches}
             theme={theme}
             onSelectTeamLineup={setLineupTeam}
+            onSelectMatch={handleSelectMatch}
           />
         );
       case "grupos":
@@ -110,6 +121,7 @@ export default function App() {
             onSelectTeamLineup={setLineupTeam}
             onOpenStandingsGroup={handleOpenStandingsGroup}
             teamLineups={teamLineups}
+            initialMatchId={aoVivoMatchId ?? undefined}
           />
         );
     }

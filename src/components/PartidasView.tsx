@@ -6,6 +6,7 @@ interface PartidasViewProps {
   matches: Match[];
   theme: "classic-light" | "stadium-dark";
   onSelectTeamLineup: (team: TeamRef) => void;
+  onSelectMatch: (matchId: string) => void;
 }
 
 interface MatchFilterOption {
@@ -111,7 +112,7 @@ const getMatchCenterDisplay = (match: Match) => {
   };
 };
 
-export function PartidasView({ matches, theme, onSelectTeamLineup }: PartidasViewProps) {
+export function PartidasView({ matches, theme, onSelectTeamLineup, onSelectMatch }: PartidasViewProps) {
   const [activeFilter, setActiveFilter] = useState<MatchStatus>("PRE_GAME");
 
   const headingClasses = theme === "classic-light" ? "text-slate-900" : "text-white";
@@ -232,7 +233,8 @@ export function PartidasView({ matches, theme, onSelectTeamLineup }: PartidasVie
                       <article
                         key={match.id}
                         id={`partidas-card-${match.id}`}
-                        className={`overflow-hidden rounded-2xl border transition ${listCardClasses}`}
+                        onClick={match.status === "FINISHED" ? () => onSelectMatch(match.id) : undefined}
+                        className={`overflow-hidden rounded-2xl border transition ${listCardClasses} ${match.status === "FINISHED" ? "cursor-pointer" : ""}`}
                       >
                         <div
                           className={`flex items-center justify-between gap-3 border-b px-4 py-2 ${stripBaseClasses} ${stripClasses}`}
@@ -267,7 +269,7 @@ export function PartidasView({ matches, theme, onSelectTeamLineup }: PartidasVie
                           <button
                             type="button"
                             id={`btn-partidas-team-${match.id}-${match.teamA.code.toLowerCase()}`}
-                            onClick={() => onSelectTeamLineup(buildTeamRef(match.teamA))}
+                            onClick={(e) => { if (match.status === "FINISHED") e.stopPropagation(); onSelectTeamLineup(buildTeamRef(match.teamA)); }}
                             className="flex min-w-0 items-center gap-3 text-left"
                           >
                             <FlagIcon flag={match.teamA.flagSvg} className="h-8 w-10 shrink-0 rounded-sm object-contain" />
@@ -282,7 +284,7 @@ export function PartidasView({ matches, theme, onSelectTeamLineup }: PartidasVie
                           </button>
 
                           <div
-                            className="min-w-[78px] text-center"
+                            className={`min-w-[78px] text-center ${match.status === "FINISHED" ? "group/score" : ""}`}
                             id={`partidas-center-${match.id}`}
                             aria-label={`${STATUS_COPY[match.status].accessibleLabel}: ${centerDisplay.top}`}
                           >
@@ -290,7 +292,13 @@ export function PartidasView({ matches, theme, onSelectTeamLineup }: PartidasVie
                               className={`uppercase ${
                                 match.status === "PRE_GAME"
                                   ? `font-mono text-[9px] tracking-[0.28em] ${softMutedClasses}`
-                                  : `font-anton text-xl tracking-wider ${headingClasses}`
+                                  : `font-anton text-xl tracking-wider transition-all duration-200 ${headingClasses} ${
+                                      match.status === "FINISHED"
+                                        ? theme === "classic-light"
+                                          ? "group-hover/score:scale-110 group-hover/score:text-[#009c3b] group-hover/score:drop-shadow-[0_0_8px_rgba(0,156,59,0.4)]"
+                                          : "group-hover/score:scale-110 group-hover/score:text-[#00e476] group-hover/score:drop-shadow-[0_0_8px_rgba(0,228,118,0.45)]"
+                                        : ""
+                                    }`
                               }`}
                             >
                               {centerDisplay.top}
@@ -309,7 +317,7 @@ export function PartidasView({ matches, theme, onSelectTeamLineup }: PartidasVie
                           <button
                             type="button"
                             id={`btn-partidas-team-${match.id}-${match.teamB.code.toLowerCase()}`}
-                            onClick={() => onSelectTeamLineup(buildTeamRef(match.teamB))}
+                            onClick={(e) => { if (match.status === "FINISHED") e.stopPropagation(); onSelectTeamLineup(buildTeamRef(match.teamB)); }}
                             className="flex min-w-0 items-center justify-end gap-3 text-right"
                           >
                             <div className="min-w-0">
