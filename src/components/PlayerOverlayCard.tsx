@@ -5,6 +5,12 @@ import { FlagIcon } from "./FlagIcon";
 import { useEscapeKey } from "../hooks/useEscapeKey";
 import { getPlayerSocialEntries } from "../utils/playerDisplay";
 
+declare global {
+  interface Window {
+    instgrm?: { Embeds: { process: () => void } };
+  }
+}
+
 export const getPlayerAge = (dateOfBirth: string): number =>
   Math.floor((Date.now() - new Date(dateOfBirth).getTime()) / (365.25 * 24 * 3600 * 1000));
 
@@ -210,6 +216,7 @@ interface PlayerOverlayCardProps {
     club?: string;
     pictureUrl?: string;
     socials?: PlayerSocials;
+    instagramPostUrl?: string;
     captain?: boolean;
     dateOfBirth?: string;
     height?: number;
@@ -225,6 +232,12 @@ interface PlayerOverlayCardProps {
   onOpenPicture?: () => void;
   openPictureButtonId?: string;
   id?: string;
+}
+
+const INSTAGRAM_ORIGIN = "https://www.instagram.com/";
+
+function isSafeInstagramUrl(url: string): boolean {
+  return url.startsWith(INSTAGRAM_ORIGIN);
 }
 
 export function PlayerOverlayCard({
@@ -243,6 +256,8 @@ export function PlayerOverlayCard({
   id,
 }: PlayerOverlayCardProps) {
   useEscapeKey(onClose);
+  const [igExpanded, setIgExpanded] = useState(false);
+  const igScriptLoadedRef = React.useRef(false);
 
   const accent = primaryColor ?? "#00e476";
   const isLight = theme === "classic-light";
@@ -256,6 +271,28 @@ export function PlayerOverlayCard({
   const photoBg = isLight ? `${accent}12` : "#111314";
 
   const socials = getPlayerSocialEntries(player.socials);
+  const safeInstagramPostUrl =
+    player.instagramPostUrl && isSafeInstagramUrl(player.instagramPostUrl)
+      ? player.instagramPostUrl
+      : null;
+
+  const handleToggleIg = () => {
+    setIgExpanded((prev) => {
+      const opening = !prev;
+      if (opening) {
+        if (!igScriptLoadedRef.current) {
+          const script = document.createElement("script");
+          script.src = "https://www.instagram.com/embed.js";
+          script.async = true;
+          document.head.appendChild(script);
+          igScriptLoadedRef.current = true;
+        } else {
+          window.instgrm?.Embeds.process();
+        }
+      }
+      return opening;
+    });
+  };
 
   return (
     <div
@@ -462,6 +499,57 @@ export function PlayerOverlayCard({
                     </a>
                   ))}
                 </div>
+              </div>
+            )}
+
+            {/* Destaque no Instagram */}
+            {safeInstagramPostUrl && (
+              <div className="mt-5" id={id ? `${id}-ig-highlight` : undefined}>
+                <button
+                  type="button"
+                  onClick={handleToggleIg}
+                  className={`flex w-full items-center justify-between rounded-xl border px-3 py-2.5 transition ${
+                    isLight
+                      ? "border-slate-200 bg-slate-50 hover:bg-slate-100"
+                      : "border-white/10 bg-white/5 hover:bg-white/10"
+                  }`}
+                  aria-expanded={igExpanded}
+                  id={id ? `${id}-ig-toggle` : undefined}
+                >
+                  <span className="flex items-center gap-2">
+                    <InstagramBrandIcon size={16} />
+                    <span className="font-mono text-[10px] font-bold uppercase tracking-wider">
+                      Destaque no Instagram
+                    </span>
+                  </span>
+                  <span
+                    className={`font-mono text-[10px] transition-transform duration-200 ${igExpanded ? "rotate-180" : ""} ${mutedClasses}`}
+                  >
+                    ▾
+                  </span>
+                </button>
+
+                {igExpanded && (
+                  <div className="mt-3 space-y-3" id={id ? `${id}-ig-panel` : undefined}>
+                    <blockquote
+                      className="instagram-media"
+                      data-instgrm-permalink={safeInstagramPostUrl}
+                      data-instgrm-version="14"
+                      style={{ width: "100%", minWidth: 0, margin: 0 }}
+                    />
+                    <a
+                      href={safeInstagramPostUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      id={id ? `${id}-ig-open` : undefined}
+                      className={`inline-flex w-full items-center justify-center gap-2 rounded-xl border py-2.5 font-mono text-[10px] font-bold uppercase tracking-wider transition ${closeClasses}`}
+                      style={{ borderColor: `${accent}40` }}
+                    >
+                      <InstagramBrandIcon size={14} />
+                      Abrir no Instagram
+                    </a>
+                  </div>
+                )}
               </div>
             )}
           </div>

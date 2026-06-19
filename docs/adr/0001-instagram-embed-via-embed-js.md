@@ -1,0 +1,3 @@
+# Instagram post embed via official embed.js
+
+The "Destaque no Instagram" section in `PlayerOverlayCard` embeds a specific player post using Instagram's official `<blockquote class="instagram-media">` + `embed.js` approach, loaded lazily on first expansion. We chose this over a static thumbnail preview (which would require a server-side proxy to fetch Instagram's OEmbed API) and over `<iframe>` (blocked by Instagram's `X-Frame-Options`). The `embed.js` script is injected once into `document.head` and subsequent calls reuse it via `window.instgrm.Embeds.process()`. A direct `"Abrir no Instagram"` button is always rendered below the embed as a fallback, so the user is never stranded if the script fails to load.

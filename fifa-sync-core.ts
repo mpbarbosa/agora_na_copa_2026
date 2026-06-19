@@ -472,6 +472,7 @@ const mergeLineupWithLocalMetadata = (
       return {
         ...player,
         socials: player.socials ?? entry?.socials,
+        instagramPostUrl: player.instagramPostUrl ?? entry?.instagramPostUrl,
         fullName: player.fullName ?? entry?.fullName,
         dateOfBirth: player.dateOfBirth ?? entry?.dateOfBirth,
         height: player.height ?? entry?.height,
@@ -483,6 +484,7 @@ const mergeLineupWithLocalMetadata = (
       club: player.club ?? fallbackPlayer.club ?? entry?.club,
       pictureUrl: player.pictureUrl ?? fallbackPlayer.pictureUrl,
       socials: player.socials ?? fallbackPlayer.socials ?? entry?.socials,
+      instagramPostUrl: player.instagramPostUrl ?? fallbackPlayer.instagramPostUrl ?? entry?.instagramPostUrl,
       fullName: player.fullName ?? fallbackPlayer.fullName ?? entry?.fullName,
       dateOfBirth: player.dateOfBirth ?? fallbackPlayer.dateOfBirth ?? entry?.dateOfBirth,
       height: player.height ?? fallbackPlayer.height ?? entry?.height,
@@ -512,6 +514,7 @@ const enrichFallbackLineupWithFifaPictures = (
       number: fifaPlayer.ShirtNumber || player.number,
       pictureUrl: pictureUrl ?? player.pictureUrl,
       socials: player.socials ?? entry?.socials,
+      instagramPostUrl: player.instagramPostUrl ?? entry?.instagramPostUrl,
       fullName: player.fullName ?? entry?.fullName,
       dateOfBirth: player.dateOfBirth ?? entry?.dateOfBirth,
       height: player.height ?? entry?.height,

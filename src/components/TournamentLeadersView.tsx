@@ -445,6 +445,7 @@ export function TournamentLeadersView({ theme, onSelectTeamLineup }: TournamentL
             club: selectedPlayer.club,
             socials: selectedPlayer.socials,
             pictureUrl: selectedPlayer.pictureUrl,
+            instagramPostUrl: selectedPlayer.instagramPostUrl,
           }}
           teamName={selectedPlayer.teamName}
           primaryColor={selectedPlayer.teamPrimaryColor}

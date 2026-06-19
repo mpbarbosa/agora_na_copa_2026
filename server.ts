@@ -258,6 +258,7 @@ interface PlayerLeaderMetadata {
   club?: string;
   socials?: PlayerSocials;
   pictureUrl?: string;
+  instagramPostUrl?: string;
 }
 
 const buildPlayerLeaderKey = (teamCode: string, playerName: string) =>
@@ -292,6 +293,7 @@ const upsertPlayerLeaderMetadata = (
     club?: string;
     socials?: PlayerSocials;
     pictureUrl?: string;
+    instagramPostUrl?: string;
   },
 ) => {
   const playerKey = buildPlayerLeaderKey(teamCode, player.name);
@@ -305,6 +307,7 @@ const upsertPlayerLeaderMetadata = (
       club: player.club,
       socials: player.socials,
       pictureUrl: player.pictureUrl,
+      instagramPostUrl: player.instagramPostUrl,
     });
     return;
   }
@@ -316,6 +319,7 @@ const upsertPlayerLeaderMetadata = (
     club: current.club ?? player.club,
     socials: current.socials ?? player.socials,
     pictureUrl: current.pictureUrl ?? player.pictureUrl,
+    instagramPostUrl: current.instagramPostUrl ?? player.instagramPostUrl,
   });
 };
 
@@ -335,6 +339,7 @@ const buildPlayerLeaderMetadataMap = (lineupsPayload: TeamLineupsResponse) => {
         club: player.club ?? entry?.club,
         socials: player.socials ?? entry?.socials,
         pictureUrl: player.pictureUrl ?? entry?.pictureUrl,
+        instagramPostUrl: player.instagramPostUrl ?? entry?.instagramPostUrl,
       });
       const fifaId = player.fifaId ?? (isNumericFifaId(player.id) ? player.id : undefined);
       if (fifaId) {
@@ -514,6 +519,7 @@ const aggregateTournamentLeaders = async (
         club: metadata?.club,
         socials: metadata?.socials,
         pictureUrl: metadata?.pictureUrl,
+        instagramPostUrl: metadata?.instagramPostUrl,
         goals: 0,
         yellowCards: 0,
         redCards: 0,

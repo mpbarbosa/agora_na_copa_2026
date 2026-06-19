@@ -24,6 +24,7 @@ export interface Player {
   club?: string;
   pictureUrl?: string;
   socials?: PlayerSocials;
+  instagramPostUrl?: string;
   fifaId?: string;
   fullName?: string;
   dateOfBirth?: string; // ISO 8601, e.g. "2000-07-21"
@@ -41,6 +42,7 @@ export interface SquadPlayer {
   club?: string;
   pictureUrl?: string;
   socials?: PlayerSocials;
+  instagramPostUrl?: string;
   dateOfBirth?: string; // ISO 8601
   height?: number; // cm
 }
@@ -272,6 +274,7 @@ export interface TournamentPlayerLeader {
   club?: string;
   socials?: PlayerSocials;
   pictureUrl?: string;
+  instagramPostUrl?: string;
   goals: number;
   yellowCards: number;
   redCards: number;
