@@ -46,6 +46,7 @@ for (const [teamCode, lineup] of lineupByTeamCode) {
         club: player.club ?? entry.club,
         pictureUrl: player.pictureUrl ?? entry.pictureUrl,
         socials: player.socials ?? entry.socials,
+        instagramPostUrl: player.instagramPostUrl ?? entry.instagramPostUrl,
         dateOfBirth: player.dateOfBirth ?? entry.dateOfBirth,
         height: player.height ?? entry.height,
       };
