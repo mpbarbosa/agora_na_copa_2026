@@ -1404,6 +1404,14 @@ const buildTeamViewPayload = async (
       )
     : null;
 
+  const matchHistory = teamMatches.map((reference) =>
+    buildTeamViewMatchSummary(
+      reference,
+      matchStatesPayload.states[reference.match.id],
+      broadcastGuidePayload.guides[reference.match.id],
+    ),
+  );
+
   const lineupReference =
     currentMatchReference ?? nextMatchReference ?? lastMatchReference ?? teamMatches[0] ?? null;
   const lineup = lineupReference
@@ -1465,6 +1473,7 @@ const buildTeamViewPayload = async (
     currentMatch,
     nextMatch,
     lastMatch,
+    matchHistory,
     lineup,
     leaders: {
       topScorers,

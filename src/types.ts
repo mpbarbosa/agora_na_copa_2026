@@ -386,6 +386,8 @@ export interface TeamViewResponse {
   currentMatch: TeamViewMatchSummary | null;
   nextMatch: TeamViewMatchSummary | null;
   lastMatch: TeamViewMatchSummary | null;
+  /** Every World Cup 2026 fixture for this team, chronological (finished, live and scheduled). */
+  matchHistory: TeamViewMatchSummary[];
   lineup: LineupEntry | null;
   leaders: {
     topScorers: TournamentPlayerLeader[];

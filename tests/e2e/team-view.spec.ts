@@ -89,6 +89,71 @@ async function mockTeamView(page: Page) {
         },
         nextMatch: null,
         lastMatch: null,
+        matchHistory: [
+          {
+            matchId: "bra-rsa-2026",
+            team: {
+              name: `SELEÇÃO ${teamCode}`,
+              code: teamCode,
+              flagSvg: "brazil",
+              primaryColor: "#009c3b",
+              secondaryColor: "#ffdf00",
+              group: "Grupo C",
+            },
+            opponent: {
+              name: "ÁFRICA DO SUL",
+              code: "RSA",
+              flagSvg: "south-africa",
+              primaryColor: "#007a4d",
+              secondaryColor: "#ffb612",
+              group: "Grupo C",
+            },
+            stageName: "Group Stage",
+            stadiumName: "Estádio de Los Angeles",
+            city: "LOS ANGELES",
+            kickoffTime: "18:00",
+            kickoffDate: "11 Junho, 2026",
+            kickoffTimestamp: "2026-06-11T18:00:00-03:00",
+            status: "FINISHED",
+            score: { team: 1, opponent: 0 },
+            broadcasters: [],
+            source: "fifa",
+            note: "Dados oficiais da FIFA.",
+            updatedAt: "2026-06-15T19:00:00.000Z",
+          },
+          {
+            matchId: "bra-mar-2026",
+            team: {
+              name: `SELEÇÃO ${teamCode}`,
+              code: teamCode,
+              flagSvg: "brazil",
+              primaryColor: "#009c3b",
+              secondaryColor: "#ffdf00",
+              group: "Grupo C",
+            },
+            opponent: {
+              name: "MARROCOS",
+              code: "MAR",
+              flagSvg: "morocco",
+              primaryColor: "#c1272d",
+              secondaryColor: "#006233",
+              group: "Grupo C",
+            },
+            stageName: "Group Stage",
+            stadiumName: "Estádio de Los Angeles",
+            city: "LOS ANGELES",
+            kickoffTime: "21:30",
+            kickoffDate: "15 Junho, 2026",
+            kickoffTimestamp: "2026-06-15T21:30:00-03:00",
+            status: "LIVE",
+            matchTime: "44'",
+            score: { team: 2, opponent: 1 },
+            broadcasters: [],
+            source: "fifa",
+            note: "Dados oficiais da FIFA.",
+            updatedAt: "2026-06-15T19:00:00.000Z",
+          },
+        ],
         lineup: {
           players: [
             {
@@ -404,6 +469,24 @@ test.describe("Team view", () => {
 
     await page.click("#btn-team-lineup-back");
     await expect(page.locator("#match-detail-view")).toBeVisible();
+  });
+
+  test("shows the compact World Cup match-history table with results and live state", async ({ page }) => {
+    await mockTeamView(page);
+
+    await page.goto("/");
+    await page.click("#team-a-display button[aria-label^='Ver escalação']");
+
+    const history = page.locator("#team-view-match-history");
+    await expect(history).toBeVisible();
+    await expect(history).toContainText("Histórico na Copa 2026");
+    // Finished fixture: opponent code, score and a win/draw/loss chip.
+    await expect(history).toContainText("RSA");
+    await expect(history).toContainText("1 x 0");
+    await expect(history.locator("tbody tr")).toHaveCount(2);
+    // Live fixture surfaces a "Vivo" badge instead of a result letter.
+    await expect(history).toContainText("MAR");
+    await expect(history).toContainText("Vivo");
   });
 
   test("opens the full team page from the standings table", async ({ page }) => {

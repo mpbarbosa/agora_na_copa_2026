@@ -215,6 +215,115 @@ function MatchSummaryCard({
   );
 }
 
+type MatchOutcome = "V" | "E" | "D";
+
+const getMatchOutcome = (match: TeamViewMatchSummary): MatchOutcome | null => {
+  if (match.status !== "FINISHED" || !match.score) return null;
+  if (match.score.team > match.score.opponent) return "V";
+  if (match.score.team < match.score.opponent) return "D";
+  return "E";
+};
+
+function MatchHistoryTable({
+  theme,
+  matches,
+}: {
+  theme: TeamLineupViewProps["theme"];
+  matches: TeamViewMatchSummary[];
+}) {
+  const cardClasses =
+    theme === "classic-light"
+      ? "bg-white border-slate-200 shadow-sm"
+      : "bg-[#121414] border-white/10";
+  const headingClasses = theme === "classic-light" ? "text-slate-900" : "text-white";
+  const mutedClasses = theme === "classic-light" ? "text-slate-600" : "text-slate-300";
+  const subtleClasses = theme === "classic-light" ? "text-slate-500" : "text-slate-400";
+  const rowBorderClasses = theme === "classic-light" ? "border-slate-100" : "border-white/5";
+
+  const outcomeChipClasses = (outcome: MatchOutcome) => {
+    if (outcome === "V") return "bg-[#00e476] text-[#052814]";
+    if (outcome === "D")
+      return theme === "classic-light" ? "bg-rose-100 text-rose-700" : "bg-rose-500/20 text-rose-200";
+    return theme === "classic-light" ? "bg-slate-200 text-slate-700" : "bg-white/10 text-slate-200";
+  };
+
+  return (
+    <section className={`rounded-3xl border p-4 md:p-6 ${cardClasses}`} id="team-view-match-history">
+      <h3 className={`font-anton text-xl uppercase tracking-wide ${headingClasses}`}>
+        Histórico na Copa 2026
+      </h3>
+      <p className={`mt-1 font-mono text-[10px] uppercase tracking-wider ${mutedClasses}`}>
+        {matches.length} {matches.length === 1 ? "jogo" : "jogos"} no Mundial
+      </p>
+
+      <div className="mt-4 overflow-x-auto">
+        <table className="w-full border-collapse text-left">
+          <thead>
+            <tr className={`font-mono text-[9px] uppercase tracking-wider ${subtleClasses}`}>
+              <th className="py-2 pr-3 font-normal">Fase</th>
+              <th className="py-2 pr-3 font-normal">Adversário</th>
+              <th className="py-2 pr-3 text-center font-normal">Placar</th>
+              <th className="py-2 text-right font-normal">Res.</th>
+            </tr>
+          </thead>
+          <tbody>
+            {matches.map((match) => {
+              const outcome = getMatchOutcome(match);
+              const isLive = match.status === "LIVE";
+              return (
+                <tr key={match.matchId} className={`border-t ${rowBorderClasses}`}>
+                  <td className={`py-2.5 pr-3 align-middle font-archivo text-xs ${mutedClasses}`}>
+                    <span className="block leading-tight">{match.stageName}</span>
+                    <span className={`block font-mono text-[9px] uppercase tracking-wider ${subtleClasses}`}>
+                      {match.kickoffDate}
+                    </span>
+                  </td>
+                  <td className="py-2.5 pr-3 align-middle">
+                    <div className="flex items-center gap-2">
+                      <span className="flex h-6 w-8 shrink-0 items-center justify-center rounded bg-white p-0.5">
+                        <FlagIcon flag={match.opponent.flagSvg} className="h-full w-full object-contain" />
+                      </span>
+                      <span className={`truncate font-anton text-sm uppercase tracking-wide ${headingClasses}`}>
+                        {match.opponent.code}
+                      </span>
+                    </div>
+                  </td>
+                  <td className="py-2.5 pr-3 text-center align-middle">
+                    {match.score ? (
+                      <span className={`font-mono text-sm font-bold ${isLive ? "text-[#00e476]" : headingClasses}`}>
+                        {match.score.team} x {match.score.opponent}
+                      </span>
+                    ) : (
+                      <span className={`font-mono text-[11px] ${subtleClasses}`}>
+                        {match.kickoffTime}
+                      </span>
+                    )}
+                  </td>
+                  <td className="py-2.5 text-right align-middle">
+                    {isLive ? (
+                      <span className="inline-flex rounded-full bg-[#00e476] px-2 py-0.5 font-mono text-[9px] font-bold uppercase tracking-wider text-[#052814]">
+                        Vivo
+                      </span>
+                    ) : outcome ? (
+                      <span
+                        className={`inline-flex h-6 w-6 items-center justify-center rounded-full font-mono text-[11px] font-black ${outcomeChipClasses(outcome)}`}
+                      >
+                        {outcome}
+                      </span>
+                    ) : (
+                      <span className={`font-mono text-[10px] uppercase tracking-wider ${subtleClasses}`}>—</span>
+                    )}
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  );
+}
+
 function LeaderStrip({
   title,
   metricLabel,
@@ -605,6 +714,10 @@ export const TeamLineupView: React.FC<TeamLineupViewProps> = ({ team, theme, onB
                   <MatchSummaryCard theme={theme} title="Última" match={teamView.lastMatch} />
                 )}
               </div>
+            )}
+
+            {teamView.matchHistory && teamView.matchHistory.length > 0 && (
+              <MatchHistoryTable theme={theme} matches={teamView.matchHistory} />
             )}
 
             <section className={`rounded-3xl border p-4 md:p-6 ${cardClasses}`} id="team-lineup-board-card">
