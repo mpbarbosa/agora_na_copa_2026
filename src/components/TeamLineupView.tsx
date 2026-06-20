@@ -19,32 +19,70 @@ interface TeamLineupViewProps {
   onBack: () => void;
 }
 
-// Official football-federation crests, sourced from Wikimedia Commons like
-// every team flag (see FlagIcon.tsx). Shown in the team header, linking to the
-// federation's official site. Keyed by FIFA team code; add entries as needed.
+// Official football-federation badges shown in the team header, linking to the
+// federation's official site. Keyed by FIFA team code. `logoFile` is a Wikimedia
+// Commons filename (same source as the team flags, see FlagIcon.tsx) and is
+// omitted when no free crest exists on Commons — the badge then renders as a
+// text-only link.
 interface TeamFederation {
   abbr: string;
   name: string;
-  logoUrl: string;
   site: string;
+  logoFile?: string;
 }
 
+const commonsLogoUrl = (file: string): string =>
+  `https://commons.wikimedia.org/wiki/Special:FilePath/${encodeURIComponent(file)}`;
+
 const TEAM_FEDERATIONS: Record<string, TeamFederation> = {
-  BRA: {
-    abbr: "CBF",
-    name: "Confederação Brasileira de Futebol",
-    logoUrl:
-      "https://commons.wikimedia.org/wiki/Special:FilePath/Brazilian_Football_Confederation_logo.svg",
-    site: "https://www.cbf.com.br/",
-  },
-  MEX: {
-    abbr: "FMF",
-    name: "Federación Mexicana de Fútbol",
-    logoUrl:
-      "https://commons.wikimedia.org/wiki/Special:FilePath/" +
-      encodeURIComponent("Federación Mexicana de Fútbol logo (2025).svg"),
-    site: "https://fmf.mx",
-  },
+  ALG: { abbr: "FAF", name: "Fédération Algérienne de Football", site: "https://www.algerianfootballfederation.com" },
+  ARG: { abbr: "AFA", name: "Asociación del Fútbol Argentino", site: "https://www.afa.com.ar", logoFile: "Argentine Football Association logo.svg" },
+  AUS: { abbr: "FA", name: "Football Australia", site: "https://www.footballaustralia.com.au", logoFile: "Australia national football team badge.svg" },
+  AUT: { abbr: "ÖFB", name: "Österreichischer Fußball-Bund", site: "https://www.oefb.at", logoFile: "Austrian Football Association Logo.svg" },
+  BEL: { abbr: "RBFA", name: "Royal Belgian Football Association", site: "https://www.rbfa.be" },
+  BIH: { abbr: "NFSBiH", name: "Football Association of Bosnia and Herzegovina", site: "https://www.nfsbih.ba" },
+  BRA: { abbr: "CBF", name: "Confederação Brasileira de Futebol", site: "https://www.cbf.com.br/", logoFile: "Brazilian Football Confederation logo.svg" },
+  CAN: { abbr: "CSA", name: "Canadian Soccer Association", site: "https://www.canadasoccer.com", logoFile: "Canadian Soccer Association logo.svg" },
+  CIV: { abbr: "FIF", name: "Fédération Ivoirienne de Football", site: "https://www.fifciv.com" },
+  COD: { abbr: "FECOFA", name: "Fédération Congolaise de Football Association", site: "https://www.fecofa.cd" },
+  COL: { abbr: "FCF", name: "Federación Colombiana de Fútbol", site: "https://www.fcf.com.co", logoFile: "Escudo de la Federación Colombiana de Fútbol.png" },
+  CPV: { abbr: "FCF", name: "Federação Cabo-verdiana de Futebol", site: "http://fcf.cv/" },
+  CRO: { abbr: "HNS", name: "Hrvatski nogometni savez", site: "https://hns.family" },
+  CUW: { abbr: "FFK", name: "Federashon Futbòl Kòrsou", site: "https://ffk.cw" },
+  CZE: { abbr: "FAČR", name: "Football Association of the Czech Republic", site: "https://www.fotbal.cz" },
+  ECU: { abbr: "FEF", name: "Federación Ecuatoriana de Fútbol", site: "https://www.fef.ec", logoFile: "Logo de la Federación Ecuatoriana de Fútbol (2).svg" },
+  EGY: { abbr: "EFA", name: "Egyptian Football Association", site: "https://www.efa.com.eg" },
+  ENG: { abbr: "The FA", name: "The Football Association", site: "https://www.thefa.com", logoFile: "Arms of The Football Association.svg" },
+  ESP: { abbr: "RFEF", name: "Real Federación Española de Fútbol", site: "https://rfef.es", logoFile: "Royal Spanish Football Federation logo.svg" },
+  FRA: { abbr: "FFF", name: "Fédération Française de Football", site: "https://www.fff.fr" },
+  GER: { abbr: "DFB", name: "Deutscher Fußball-Bund", site: "https://www.dfb.de", logoFile: "Deutscher Fußball-Bund Logo 2025–.svg" },
+  GHA: { abbr: "GFA", name: "Ghana Football Association", site: "https://ghanafa.org", logoFile: "Ghana Football Association logo.png" },
+  HAI: { abbr: "FHF", name: "Fédération Haïtienne de Football", site: "https://fhf.ht", logoFile: "Federation Haitienne de Football.png" },
+  IRN: { abbr: "FFIRI", name: "Football Federation Islamic Republic of Iran", site: "https://www.ffiri.ir" },
+  IRQ: { abbr: "IFA", name: "Iraq Football Association", site: "https://ifa.iq", logoFile: "Iraq Football Association logo.svg" },
+  JOR: { abbr: "JFA", name: "Jordan Football Association", site: "https://www.jfa.jo", logoFile: "Jordan Football Association logo.svg" },
+  JPN: { abbr: "JFA", name: "Japan Football Association", site: "https://www.jfa.jp", logoFile: "JFA logo.svg" },
+  KOR: { abbr: "KFA", name: "Korea Football Association", site: "https://www.kfa.or.kr" },
+  KSA: { abbr: "SAFF", name: "Saudi Arabian Football Federation", site: "https://www.saff.com.sa" },
+  MAR: { abbr: "FRMF", name: "Fédération Royale Marocaine de Football", site: "https://www.frmf.ma" },
+  MEX: { abbr: "FMF", name: "Federación Mexicana de Fútbol", site: "https://fmf.mx", logoFile: "Federación Mexicana de Fútbol logo (2025).svg" },
+  NED: { abbr: "KNVB", name: "Koninklijke Nederlandse Voetbalbond", site: "https://www.knvb.nl" },
+  NOR: { abbr: "NFF", name: "Norges Fotballforbund", site: "https://www.fotball.no", logoFile: "NFFlogo.png" },
+  NZL: { abbr: "NZF", name: "New Zealand Football", site: "https://www.nzfootball.co.nz" },
+  PAN: { abbr: "FEPAFUT", name: "Federación Panameña de Fútbol", site: "https://www.fepafut.com", logoFile: "Panamá FEPAFUT.jpg" },
+  PAR: { abbr: "APF", name: "Asociación Paraguaya de Fútbol", site: "https://www.apf.org.py", logoFile: "Asociación Paraguaya de Fútbol logo.svg" },
+  POR: { abbr: "FPF", name: "Federação Portuguesa de Futebol", site: "https://www.fpf.pt" },
+  QAT: { abbr: "QFA", name: "Qatar Football Association", site: "https://www.qfa.qa" },
+  RSA: { abbr: "SAFA", name: "South African Football Association", site: "https://www.safa.net" },
+  SCO: { abbr: "SFA", name: "Scottish Football Association", site: "https://www.scottishfa.co.uk", logoFile: "Arms of the Scottish Football Association.svg" },
+  SEN: { abbr: "FSF", name: "Fédération Sénégalaise de Football", site: "https://www.fsfoot.sn" },
+  SUI: { abbr: "SFV-ASF", name: "Swiss Football Association", site: "https://www.football.ch" },
+  SWE: { abbr: "SvFF", name: "Svenska Fotbollförbundet", site: "https://www.svenskfotboll.se" },
+  TUN: { abbr: "FTF", name: "Fédération Tunisienne de Football", site: "https://www.ftf.org.tn" },
+  TUR: { abbr: "TFF", name: "Türkiye Futbol Federasyonu", site: "https://www.tff.org", logoFile: "TurkishFootballFederation.png" },
+  URU: { abbr: "AUF", name: "Asociación Uruguaya de Fútbol", site: "https://www.auf.org.uy" },
+  USA: { abbr: "USSF", name: "United States Soccer Federation", site: "https://www.ussoccer.com", logoFile: "United States Soccer Federation logo.svg" },
+  UZB: { abbr: "UFA", name: "Uzbekistan Football Association", site: "https://ufa.uz", logoFile: "Uzbekistan Football Federation.svg" },
 };
 
 type LoadStatus = "loading" | "ready" | "error";
@@ -495,18 +533,28 @@ export const TeamLineupView: React.FC<TeamLineupViewProps> = ({ team, theme, onB
               rel="noopener noreferrer"
               id="team-lineup-federation-link"
               data-federation={federation.abbr}
-              title={`Site oficial da ${federation.abbr}`}
+              title={`Site oficial da ${federation.abbr} — ${federation.name}`}
               aria-label={`Abrir o site oficial da ${federation.abbr}`}
               className="group flex shrink-0 flex-col items-center gap-1.5"
             >
-              <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white p-2 shadow-sm transition-transform group-hover:scale-105 md:h-16 md:w-16">
-                <img
-                  src={federation.logoUrl}
-                  alt={federation.name}
-                  className="h-full w-full object-contain"
-                  loading="lazy"
-                />
-              </span>
+              {federation.logoFile ? (
+                <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white p-2 shadow-sm transition-transform group-hover:scale-105 md:h-16 md:w-16">
+                  <img
+                    src={commonsLogoUrl(federation.logoFile)}
+                    alt={federation.name}
+                    className="h-full w-full object-contain"
+                    loading="lazy"
+                  />
+                </span>
+              ) : (
+                <span
+                  className={`flex h-14 w-14 items-center justify-center rounded-2xl border bg-white px-1 text-center font-anton text-[11px] uppercase leading-tight tracking-wide text-slate-800 shadow-sm transition-transform group-hover:scale-105 md:h-16 md:w-16 ${
+                    theme === "classic-light" ? "border-slate-200" : "border-white/10"
+                  }`}
+                >
+                  {federation.abbr}
+                </span>
+              )}
               <span className={`inline-flex items-center gap-1 font-mono text-[9px] font-bold uppercase tracking-wider ${mutedClasses}`}>
                 {federation.abbr} <ExternalLink size={9} />
               </span>

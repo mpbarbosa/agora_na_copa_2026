@@ -439,7 +439,7 @@ test.describe("Team view", () => {
     await expect(fedLink.locator("img")).toHaveAttribute("alt", "Confederação Brasileira de Futebol");
     await page.click("#btn-team-lineup-back");
 
-    // Mexico → FMF
+    // Mexico → FMF (logo image)
     await openTeam("mex");
     await expect(fedLink).toBeVisible();
     await expect(fedLink).toHaveAttribute("href", "https://fmf.mx");
@@ -447,9 +447,14 @@ test.describe("Team view", () => {
     await expect(fedLink.locator("img")).toHaveAttribute("alt", "Federación Mexicana de Fútbol");
     await page.click("#btn-team-lineup-back");
 
-    // Teams without a registered federation show no badge.
+    // Morocco → FRMF has no free Commons crest, so it renders a text-only badge
+    // (the link is still present and points to the official site).
     await openTeam("mar");
-    await expect(page.locator("#team-lineup-federation-link")).toHaveCount(0);
+    await expect(fedLink).toBeVisible();
+    await expect(fedLink).toHaveAttribute("href", "https://www.frmf.ma");
+    await expect(fedLink).toHaveAttribute("data-federation", "FRMF");
+    await expect(fedLink.locator("img")).toHaveCount(0);
+    await expect(fedLink).toContainText("FRMF");
   });
 
   test("opens the full team page from the venue hosted matches list", async ({ page }) => {
