@@ -28,7 +28,7 @@ export function TeamsView({ matches, theme, onSelectTeamLineup }: TeamsViewProps
         Seleções
       </h2>
       <p className={`mt-1 mb-6 font-mono text-[11px] uppercase tracking-wider ${mutedClasses}`}>
-        Todas as 48 seleções da Copa com acesso direto ao painel completo de cada equipe • <span className={theme === "classic-light" ? "text-[#065f2c]" : "text-[#00e476]"}>✓ Classificada</span> indica vaga garantida no mata-mata
+        Todas as 48 seleções da Copa com acesso direto ao painel completo de cada equipe • <span className={theme === "classic-light" ? "text-[#065f2c]" : "text-[#00e476]"}>✓ Classificada</span> = vaga garantida no mata-mata • <span className={theme === "classic-light" ? "text-rose-700" : "text-rose-300"}>✕ Eliminada</span> = sem chances de classificação
       </p>
 
       <div
@@ -52,7 +52,9 @@ export function TeamsView({ matches, theme, onSelectTeamLineup }: TeamsViewProps
 
             <div className="mt-4 space-y-3">
               {rows.map((team) => {
-                const isQualified = qualification.get(team.code) === "qualified";
+                const status = qualification.get(team.code);
+                const isQualified = status === "qualified";
+                const isEliminated = status === "eliminated";
 
                 return (
                   <button
@@ -90,6 +92,20 @@ export function TeamsView({ matches, theme, onSelectTeamLineup }: TeamsViewProps
                         }`}
                       >
                         <span aria-hidden="true">✓</span> Classificada
+                      </span>
+                    )}
+
+                    {isEliminated && (
+                      <span
+                        data-testid={`team-eliminated-${team.code.toLowerCase()}`}
+                        title="Sem chances de classificação para o mata-mata"
+                        className={`inline-flex shrink-0 items-center gap-1 rounded-full border px-2.5 py-1 font-mono text-[10px] font-bold uppercase tracking-wider ${
+                          theme === "classic-light"
+                            ? "border-rose-300 bg-rose-50 text-rose-700"
+                            : "border-rose-400/30 bg-rose-500/10 text-rose-300"
+                        }`}
+                      >
+                        <span aria-hidden="true">✕</span> Eliminada
                       </span>
                     )}
                   </button>

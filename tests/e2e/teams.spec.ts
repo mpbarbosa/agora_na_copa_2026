@@ -93,4 +93,17 @@ test.describe("Teams view (Seleções)", () => {
     await expect(page.getByTestId("team-qualified-mex")).toContainText("Classificada");
     await expect(page.locator("#btn-team-card-mex")).toContainText("✓");
   });
+
+  test("marks teams that can no longer qualify for the knockout phase", async ({ page }) => {
+    await page.goto("/");
+    await page.click("#btn-nav-selecoes");
+    await expect(page.locator("#teams-view")).toBeVisible();
+
+    // Haiti is mathematically out of a top-2 finish, so its card carries the
+    // eliminated badge. A qualified team must not also show it.
+    await expect(page.getByTestId("team-eliminated-hai")).toBeVisible();
+    await expect(page.getByTestId("team-eliminated-hai")).toContainText("Eliminada");
+    await expect(page.locator("#btn-team-card-hai")).toContainText("✕");
+    await expect(page.getByTestId("team-eliminated-mex")).toHaveCount(0);
+  });
 });
