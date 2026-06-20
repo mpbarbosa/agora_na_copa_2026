@@ -119,7 +119,7 @@ export function StandingsView({
         className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 xl:grid-cols-3 2xl:grid-cols-4"
         id="standings-grid"
       >
-        {groups.map(({ group, rows }) => {
+        {groups.map(({ group, rows, qualification }) => {
           const seedCount = rows.filter((row) => row.dataSource === "seed").length;
           const isFocusedGroup = resolvedFocusGroupSlug === groupSlug(group);
 
@@ -180,20 +180,38 @@ export function StandingsView({
                   <tbody>
                     {rows.map((row, index) => {
                       const isQualifying = index < 2;
+                      const status = qualification.get(row.code) ?? "contention";
                       const ptsCellColor =
                         isQualifying
                           ? theme === "classic-light" ? "text-[#009c3b]" : "text-[#00e476]"
                           : headingClasses;
+                      const rowLeftBorder =
+                        status === "qualified"
+                          ? `border-l-2 ${theme === "classic-light" ? "border-l-[#009c3b]" : "border-l-[#00e476]"}`
+                          : isQualifying
+                          ? `border-l-2 ${qualifiedClasses}`
+                          : "border-l-2 border-l-transparent";
+                      const rowTitle =
+                        status === "qualified"
+                          ? "Classificado matematicamente para o mata-mata"
+                          : status === "eliminated"
+                          ? "Eliminado da fase de grupos"
+                          : undefined;
                       return (
                         <tr
                           key={row.id}
                           id={`standings-row-${row.code.toLowerCase()}`}
-                          className={`border-b last:border-b-0 ${rowBorderClasses} ${
-                            isQualifying ? `border-l-2 ${qualifiedClasses}` : "border-l-2 border-l-transparent"
+                          title={rowTitle}
+                          className={`border-b last:border-b-0 ${rowBorderClasses} ${rowLeftBorder} ${
+                            status === "eliminated" ? "opacity-60" : ""
                           }`}
                         >
-                          <td className={`py-1.5 pl-1 text-center font-mono text-[9px] ${mutedClasses}`}>
-                            {index + 1}
+                          <td className="py-1.5 pl-1 text-center font-mono text-[9px]">
+                            {status === "qualified" ? (
+                              <span className={`font-bold ${theme === "classic-light" ? "text-[#009c3b]" : "text-[#00e476]"}`}>✓</span>
+                            ) : (
+                              <span className={mutedClasses}>{index + 1}</span>
+                            )}
                           </td>
                           <td className={`whitespace-nowrap py-1.5 pl-2 font-archivo ${headingClasses}`}>
                             <div className="flex items-center gap-2">

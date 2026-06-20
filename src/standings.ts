@@ -126,6 +126,71 @@ export function computeStandings(matches: Match[] = APP_MATCHES): StandingsRow[]
   });
 }
 
+// --- Qualification status (Art. 12.5) ---
+
+export type QualificationStatus = "qualified" | "eliminated" | "contention";
+
+// Determines whether each team in a group has mathematically secured or been
+// eliminated from a top-2 finish (i.e. guaranteed knockout-round qualification).
+//
+// "qualified"  – even losing all remaining matches, at most 1 rival can reach
+//                the team's current points → top-2 is guaranteed.
+// "eliminated" – even winning all remaining matches, 3 rivals already have
+//                strictly more points than the team's theoretical maximum →
+//                4th place is guaranteed, team is out of the tournament.
+// "contention" – outcome still undecided. Note: 3rd-place teams may still
+//                advance as one of the 8 best thirds (Art. 12.5).
+//
+// sortedRows must already be in final group order (output of sortGroupTable).
+function computeGroupQualification(
+  sortedRows: StandingsRow[],
+  allMatches: Match[],
+): Map<string, QualificationStatus> {
+  const codes = new Set(sortedRows.map((r) => r.code));
+
+  // Remaining = non-FINISHED Group Stage matches for each team in this group
+  const remaining = new Map<string, number>(sortedRows.map((r) => [r.code, 0]));
+  for (const m of allMatches) {
+    if (m.stageName !== "Group Stage" || m.status === "FINISHED") continue;
+    if (codes.has(m.teamA.code)) remaining.set(m.teamA.code, remaining.get(m.teamA.code)! + 1);
+    if (codes.has(m.teamB.code)) remaining.set(m.teamB.code, remaining.get(m.teamB.code)! + 1);
+  }
+
+  // When the group is fully played, use final sorted positions directly
+  const totalRemaining = [...remaining.values()].reduce((a, b) => a + b, 0);
+  if (totalRemaining === 0) {
+    return new Map(
+      sortedRows.map((row, i) => [
+        row.code,
+        i < 2 ? "qualified" : i === 3 ? "eliminated" : "contention",
+      ]),
+    );
+  }
+
+  const result = new Map<string, QualificationStatus>();
+  for (const row of sortedRows) {
+    const rivals = sortedRows.filter((r) => r.code !== row.code);
+    const myPts = row.points;
+    const myRem = remaining.get(row.code) ?? 0;
+    const myMax = myPts + myRem * 3;
+
+    // Each rival's theoretical maximum (wins every remaining match)
+    const rivalMaxes = rivals
+      .map((r) => r.points + (remaining.get(r.code) ?? 0) * 3)
+      .sort((a, b) => b - a); // descending
+
+    // Qualified: 2nd-best rival can't reach my current points even at their max
+    const qualified = rivalMaxes[1] < myPts;
+
+    // Eliminated: 3 rivals already have strictly more points than my theoretical max
+    const eliminated = rivals.filter((r) => r.points > myMax).length >= 3;
+
+    result.set(row.code, qualified ? "qualified" : eliminated ? "eliminated" : "contention");
+  }
+
+  return result;
+}
+
 // --- Tiebreaker logic (Art. 13, FIFA WC 2026 Regulations) ---
 
 // Accumulates head-to-head stats for `teamCode` against the given `opponents`
@@ -249,7 +314,7 @@ function sortGroupTable(rows: StandingsRow[], matches: Match[]): StandingsRow[] 
 export function groupStandings(
   rows: StandingsRow[],
   matches: Match[] = APP_MATCHES,
-): { group: string; rows: StandingsRow[] }[] {
+): { group: string; rows: StandingsRow[]; qualification: Map<string, QualificationStatus> }[] {
   const byGroup = new Map<string, StandingsRow[]>();
   for (const row of rows) {
     const existing = byGroup.get(row.group);
@@ -259,5 +324,12 @@ export function groupStandings(
 
   return Array.from(byGroup.entries())
     .sort(([a], [b]) => a.localeCompare(b))
-    .map(([group, groupRows]) => ({ group, rows: sortGroupTable(groupRows, matches) }));
+    .map(([group, groupRows]) => {
+      const sortedRows = sortGroupTable(groupRows, matches);
+      return {
+        group,
+        rows: sortedRows,
+        qualification: computeGroupQualification(sortedRows, matches),
+      };
+    });
 }
