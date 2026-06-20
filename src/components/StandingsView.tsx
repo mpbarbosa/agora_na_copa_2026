@@ -91,12 +91,22 @@ export function StandingsView({
           title="Critérios de classificação"
           className={`mt-1 shrink-0 flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg font-mono text-[10px] uppercase tracking-wider border transition ${
             theme === "classic-light"
-              ? "border-slate-200 text-slate-500 hover:text-[#009c3b] hover:border-[#009c3b]/30 hover:bg-[#009c3b]/5"
-              : "border-white/10 text-slate-400 hover:text-[#ffd84d] hover:border-[#ffd84d]/20 hover:bg-[#ffd84d]/5"
+              ? "border-[#009c3b]/35 text-[#009c3b] shadow-[0_0_0_1px_rgba(0,156,59,0.08),0_0_12px_rgba(0,156,59,0.18)] hover:shadow-[0_0_0_1px_rgba(0,156,59,0.15),0_0_18px_rgba(0,156,59,0.3)]"
+              : "border-[#ffd84d]/25 text-[#ffd84d] shadow-[0_0_0_1px_rgba(255,216,77,0.08),0_0_12px_rgba(255,216,77,0.15)] hover:shadow-[0_0_0_1px_rgba(255,216,77,0.15),0_0_18px_rgba(255,216,77,0.25)]"
           }`}
           data-testid="standings-rules-btn"
         >
-          <Info size={12} />
+          <span className="relative">
+            <Info size={12} />
+            <span className="absolute -top-1 -right-1 flex h-1.5 w-1.5">
+              <span className={`absolute inline-flex h-full w-full animate-ping rounded-full opacity-75 ${
+                theme === "classic-light" ? "bg-[#009c3b]" : "bg-[#ffd84d]"
+              }`} />
+              <span className={`relative inline-flex h-1.5 w-1.5 rounded-full ${
+                theme === "classic-light" ? "bg-[#009c3b]" : "bg-[#ffd84d]"
+              }`} />
+            </span>
+          </span>
           Critérios
         </button>
       </div>
