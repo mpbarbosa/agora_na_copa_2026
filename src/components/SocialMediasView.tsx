@@ -11,6 +11,7 @@ import {
   TrendingUp,
 } from "lucide-react";
 import type { GoogleTrendTopic, GoogleTrendsResponse } from "../types";
+import { InstagramBrandIcon } from "./InstagramBrandIcon";
 
 interface SocialMediasViewProps {
   theme: "classic-light" | "stadium-dark";
@@ -286,6 +287,43 @@ export function SocialMediasView({ theme }: SocialMediasViewProps) {
           Multiview ao vivo
         </span>
       </div>
+
+      {/* Official FIFA World Cup profile card */}
+      <a
+        href="https://www.instagram.com/fifaworldcup"
+        target="_blank"
+        rel="noopener noreferrer"
+        id="social-medias-fifa-profile"
+        data-testid="social-fifa-profile"
+        aria-label="Perfil oficial da Copa do Mundo FIFA no Instagram"
+        className={`mt-6 flex items-center gap-4 rounded-3xl border p-5 transition ${shellClasses} ${
+          theme === "classic-light" ? "hover:border-slate-300" : "hover:border-white/20"
+        }`}
+      >
+        <span className="shrink-0">
+          <InstagramBrandIcon size={52} />
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className="flex items-center gap-1.5">
+            <span className={`truncate font-anton text-lg uppercase tracking-wide ${headingClasses}`}>
+              FIFA World Cup
+            </span>
+            <BadgeCheck size={16} className="shrink-0 text-[#3897f0]" />
+          </span>
+          <span className={`block font-mono text-[11px] uppercase tracking-wider ${subtleClasses}`}>
+            @fifaworldcup • Perfil oficial
+          </span>
+          <span className={`mt-1 block font-archivo text-sm leading-5 ${mutedClasses}`}>
+            Siga a conta oficial da Copa do Mundo FIFA 2026 e acompanhe tudo do Mundial em primeira mão.
+          </span>
+        </span>
+        <span
+          className={`hidden shrink-0 items-center gap-1.5 rounded-full border px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-wider sm:inline-flex ${activeChipClasses}`}
+        >
+          <InstagramBrandIcon size={14} />
+          Seguir
+        </span>
+      </a>
 
       {/* Google Trends card */}
       {trendsStatus !== "empty" && (

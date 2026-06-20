@@ -46,14 +46,14 @@ export const NAV_ITEMS: NavItem[] = [
     description: "Mapa e curiosidades das 16 sedes do Mundial.",
   },
   {
-    id: "noticias",
-    label: "Notícias",
-    description: "Feed de novidades sobre seleções, sedes e ingressos.",
-  },
-  {
     id: "social-medias",
     label: "Redes Sociais",
     description: "Feed social do Mundo na Copa com filtros, tendências, curtidas e comentários.",
+  },
+  {
+    id: "noticias",
+    label: "Notícias",
+    description: "Feed de novidades sobre seleções, sedes e ingressos.",
   },
   {
     id: "fanzone",

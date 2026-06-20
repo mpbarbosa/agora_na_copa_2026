@@ -52,6 +52,19 @@ test.describe("Redes Sociais view", () => {
     expect(consoleErrors).toEqual([]);
   });
 
+  test("shows the official FIFA World Cup Instagram profile card linking to the account", async ({ page }) => {
+    await page.goto("/");
+    await page.click("#btn-nav-social-medias");
+
+    const card = page.getByTestId("social-fifa-profile");
+    await expect(card).toBeVisible();
+    await expect(card).toContainText("FIFA World Cup");
+    await expect(card).toContainText("@fifaworldcup");
+    await expect(card).toHaveAttribute("href", "https://www.instagram.com/fifaworldcup");
+    await expect(card).toHaveAttribute("target", "_blank");
+    await expect(card).toHaveAttribute("rel", /noopener/);
+  });
+
   test("shows the Google Trends card at the top from the API", async ({ page }) => {
     await page.route("**/api/google-trends", async (route) => {
       await route.fulfill({
