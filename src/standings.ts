@@ -130,11 +130,61 @@ export function computeStandings(matches: Match[] = APP_MATCHES): StandingsRow[]
 
 export type QualificationStatus = "qualified" | "eliminated" | "contention";
 
+// Returns true when teamA and teamB have a remaining (non-FINISHED) Group Stage
+// match scheduled against each other.
+function haveMutualRemainingMatch(
+  codeA: string,
+  codeB: string,
+  allMatches: Match[],
+): boolean {
+  return allMatches.some(
+    (m) =>
+      m.stageName === "Group Stage" &&
+      m.status !== "FINISHED" &&
+      ((m.teamA.code === codeA && m.teamB.code === codeB) ||
+        (m.teamA.code === codeB && m.teamB.code === codeA)),
+  );
+}
+
+// Returns true when rivals A and B can SIMULTANEOUSLY both reach `targetPts`.
+// When they play each other in a remaining match only one can win that game,
+// so each scenario (A wins / B wins / draw) is tested separately.
+function canPairReachTogether(
+  A: StandingsRow,
+  B: StandingsRow,
+  targetPts: number,
+  remaining: Map<string, number>,
+  allMatches: Match[],
+): boolean {
+  if (!haveMutualRemainingMatch(A.code, B.code, allMatches)) {
+    // No direct remaining match — they play different opponents and can
+    // independently win all their games, so both reaching targetPts is possible.
+    return true;
+  }
+  // Subtract the shared fixture from each team's remaining count to find their
+  // "other" remaining matches (matches not against the rival).
+  const aOther = (remaining.get(A.code) ?? 0) - 1;
+  const bOther = (remaining.get(B.code) ?? 0) - 1;
+
+  // A wins the direct match (+3 for A, +0 for B)
+  if (A.points + 3 + aOther * 3 >= targetPts && B.points + 0 + bOther * 3 >= targetPts)
+    return true;
+  // B wins the direct match (+3 for B, +0 for A)
+  if (B.points + 3 + bOther * 3 >= targetPts && A.points + 0 + aOther * 3 >= targetPts)
+    return true;
+  // Draw (+1 for each)
+  if (A.points + 1 + aOther * 3 >= targetPts && B.points + 1 + bOther * 3 >= targetPts)
+    return true;
+
+  return false;
+}
+
 // Determines whether each team in a group has mathematically secured or been
 // eliminated from a top-2 finish (i.e. guaranteed knockout-round qualification).
 //
-// "qualified"  – even losing all remaining matches, at most 1 rival can reach
-//                the team's current points → top-2 is guaranteed.
+// "qualified"  – no two rivals can SIMULTANEOUSLY reach the team's current
+//                points, accounting for head-to-head fixtures between rivals
+//                (e.g. when two chasers still play each other, only one can win).
 // "eliminated" – even winning all remaining matches, 3 rivals already have
 //                strictly more points than the team's theoretical maximum →
 //                4th place is guaranteed, team is out of the tournament.
@@ -174,13 +224,21 @@ function computeGroupQualification(
     const myRem = remaining.get(row.code) ?? 0;
     const myMax = myPts + myRem * 3;
 
-    // Each rival's theoretical maximum (wins every remaining match)
-    const rivalMaxes = rivals
-      .map((r) => r.points + (remaining.get(r.code) ?? 0) * 3)
-      .sort((a, b) => b - a); // descending
-
-    // Qualified: 2nd-best rival can't reach my current points even at their max
-    const qualified = rivalMaxes[1] < myPts;
+    // Rivals that can individually reach the team's current points
+    const threats = rivals.filter(
+      (r) => r.points + (remaining.get(r.code) ?? 0) * 3 >= myPts,
+    );
+    // Qualified: fewer than 2 rivals can reach my points, OR every pair of rivals
+    // that can reach my points plays each other in a remaining fixture and
+    // neither can reach my points without winning that mutual match — so they
+    // cannot both simultaneously reach my points.
+    const qualified =
+      threats.length <= 1 ||
+      !threats.some((a, ai) =>
+        threats.some(
+          (b, bi) => bi > ai && canPairReachTogether(a, b, myPts, remaining, allMatches),
+        ),
+      );
 
     // Eliminated: 3 rivals already have strictly more points than my theoretical max
     const eliminated = rivals.filter((r) => r.points > myMax).length >= 3;
@@ -396,6 +454,29 @@ export function computeQualificationNote(
 
   if (canCatch.length === 0) {
     return `Com ${myPts} pontos, nenhuma seleção do grupo pode mais alcançar ${team.name}. Vaga no mata-mata garantida independentemente dos demais resultados.`;
+  }
+
+  // 2+ rivals can individually reach the team's points, but the team is still
+  // qualified because every pair of chasers plays each other in a remaining
+  // fixture — they cannot simultaneously both win that match.
+  if (canCatch.length >= 2) {
+    const chaserNames = canCatch.map((r) => r.name);
+    const chaserText =
+      chaserNames.length === 2
+        ? `${chaserNames[0]} e ${chaserNames[1]}`
+        : chaserNames.slice(0, -1).join(", ") + " e " + chaserNames[chaserNames.length - 1];
+    const blockedNames = cannotCatch.map((r) => r.name);
+    const blockedPart =
+      blockedNames.length === 0
+        ? ""
+        : blockedNames.length === 1
+          ? ` ${blockedNames[0]} já não tem mais como alcançar essa pontuação.`
+          : ` ${blockedNames.join(" e ")} não têm mais como alcançar essa pontuação.`;
+    return (
+      `Com ${myPts} pontos, ${chaserText} ainda se enfrentam nos jogos restantes — ` +
+      `apenas uma pode alcançar essa pontuação.${blockedPart} ` +
+      `Vaga no mata-mata garantida matematicamente.`
+    );
   }
 
   // Exactly 1 rival can still match or exceed the team's points
