@@ -610,6 +610,51 @@ test("buildTeamLineupEntry preserves local socials when FIFA starters replace fa
   assert.equal(vozinha?.pictureUrl, "https://digitalhub.fifa.com/VOZINHA");
 });
 
+test("buildTeamLineupEntry recovers a missing FIFA shirt number from the local lineup", () => {
+  const roster: Array<[string, Position]> = [
+    ["Vozinha", Position.GK],
+    ["Stopira", Position.DF],
+    ["Roberto Lopes", Position.DF],
+    ["Logan Costa", Position.DF],
+    ["João Paulo", Position.DF],
+    ["Kevin Pina", Position.MF],
+    ["Deroy Duarte", Position.MF],
+    ["Jovane Cabral", Position.MF],
+    ["Ryan Mendes", Position.FW],
+    ["Bebé", Position.FW],
+    ["Willy Semedo", Position.FW],
+  ];
+  const fallbackLineup = roster.map(([name, position], i) =>
+    createPlayer({ id: `cv${i + 1}`, name, number: i + 1, position }),
+  );
+
+  const fifaPositionFor = (position: Position) =>
+    position === Position.GK ? 0 : position === Position.DF ? 1 : position === Position.MF ? 2 : 3;
+  const fifaTeam: FifaLiveTeam = {
+    Tactics: "4-3-3",
+    Players: roster.map(([name, position], i) => ({
+      IdPlayer: `${name}-fifa`,
+      PlayerName: [{ Locale: "en", Description: name }],
+      ShortName: [{ Locale: "en", Description: name }],
+      // Vozinha (the GK) is published by FIFA without a shirt number.
+      ShirtNumber: name === "Vozinha" ? undefined : i + 1,
+      Position: fifaPositionFor(position),
+    })),
+  };
+
+  const entry = buildTeamLineupEntry(
+    "CPV",
+    fallbackLineup,
+    { IdMatch: "400021999", Date: "2026-06-15T20:00:00Z" },
+    fifaTeam,
+  );
+
+  assert.equal(entry.source, "fifa");
+  const vozinha = entry.players.find((player) => player.name === "Vozinha");
+  // Without recovery this would render as 0; the local lineup supplies 1.
+  assert.equal(vozinha?.number, 1);
+});
+
 test("buildTeamLineupEntry adds supplemental metadata for FIFA starters missing from local lineup", () => {
   const fallbackLineup = [
     createPlayer({

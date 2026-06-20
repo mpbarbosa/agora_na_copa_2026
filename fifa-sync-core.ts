@@ -471,6 +471,10 @@ const mergeLineupWithLocalMetadata = (
     if (!fallbackPlayer) {
       return {
         ...player,
+        // FIFA sometimes publishes a starter without a shirt number (ShirtNumber
+        // missing → 0 from getStartingLineupFromLiveFifa). Recover it from the
+        // local registry rather than rendering "0".
+        number: player.number || entry?.number || player.number,
         socials: player.socials ?? entry?.socials,
         instagramPostUrl: player.instagramPostUrl ?? entry?.instagramPostUrl,
         fullName: player.fullName ?? entry?.fullName,
@@ -481,6 +485,8 @@ const mergeLineupWithLocalMetadata = (
 
     return {
       ...player,
+      // Recover a missing FIFA shirt number from the local lineup, then registry.
+      number: player.number || fallbackPlayer.number || entry?.number || player.number,
       club: player.club ?? fallbackPlayer.club ?? entry?.club,
       pictureUrl: player.pictureUrl ?? fallbackPlayer.pictureUrl,
       socials: player.socials ?? fallbackPlayer.socials ?? entry?.socials,
