@@ -1,10 +1,27 @@
 import { test, expect } from "@playwright/test";
 
 test.describe("Redes Sociais view", () => {
+  // Block Instagram's embed.js so the embedded FIFA reel stays as the raw,
+  // as-authored blockquote. Otherwise, in environments with network access the
+  // script rewrites the blockquote into an iframe (non-deterministic), which both
+  // hides the permalink attribute we assert on and emits third-party console noise.
+  test.beforeEach(async ({ page }) => {
+    await page.route(/embed\.js/, (route) => route.abort());
+  });
+
   test("filters, likes and comments work without console errors", async ({ page }) => {
+    // The FIFA card embeds an Instagram reel via Instagram's embed.js, which logs
+    // its own internal errors (ErrorUtils / fburl.com) when network is available.
+    // Those are third-party and outside our control, so ignore them and only
+    // assert on errors originating from our own code.
+    const IGNORED_CONSOLE_NOISE = [/instagram\.com/i, /ErrorUtils caught an error/i, /fburl\.com/i];
     const consoleErrors: string[] = [];
     page.on("console", (msg) => {
-      if (msg.type() === "error") consoleErrors.push(msg.text());
+      if (msg.type() !== "error") return;
+      const text = msg.text();
+      const url = msg.location()?.url ?? "";
+      if (IGNORED_CONSOLE_NOISE.some((re) => re.test(text) || re.test(url))) return;
+      consoleErrors.push(text);
     });
 
     await page.goto("/");
