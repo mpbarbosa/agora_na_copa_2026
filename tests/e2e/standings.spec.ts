@@ -86,6 +86,13 @@ test.describe("Standings view (Grupos)", () => {
       });
     });
 
+    await page.route("**/api/match-states", async (route) => {
+      await route.fulfill({
+        contentType: "application/json",
+        body: JSON.stringify({ states: {}, refreshAfterMs: 60000 }),
+      });
+    });
+
     await page.goto("/");
     await page.click("#match-selector-chips-finished #btn-match-bra-mar-2026");
     await page.click("#btn-edit-match");

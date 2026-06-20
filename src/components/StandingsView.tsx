@@ -25,6 +25,11 @@ const COLUMNS = [
 
 const groupSlug = (group: string) => group.replace(/\s+/g, "-").toLowerCase();
 
+interface LiveState {
+  status: string;
+  score?: { teamA: number; teamB: number };
+}
+
 export function StandingsView({
   matches,
   theme,
@@ -32,7 +37,46 @@ export function StandingsView({
   focusGroupSlug = null,
 }: StandingsViewProps) {
   const [showRules, setShowRules] = useState(false);
-  const groups = useMemo(() => groupStandings(computeStandings(matches), matches), [matches]);
+  const [liveStates, setLiveStates] = useState<Record<string, LiveState>>({});
+
+  useEffect(() => {
+    let active = true;
+    let timer: ReturnType<typeof setTimeout>;
+
+    const poll = async () => {
+      try {
+        const res = await fetch("/api/match-states");
+        if (!res.ok || !active) return;
+        const data: { states: Record<string, LiveState>; refreshAfterMs?: number } = await res.json();
+        if (active) setLiveStates(data.states ?? {});
+        if (active) timer = setTimeout(poll, data.refreshAfterMs ?? 30000);
+      } catch {
+        if (active) timer = setTimeout(poll, 30000);
+      }
+    };
+
+    void poll();
+    return () => {
+      active = false;
+      clearTimeout(timer);
+    };
+  }, []);
+
+  const liveMatches = useMemo(
+    () =>
+      matches.map((m) => {
+        const state = liveStates[m.id];
+        if (!state) return m;
+        return {
+          ...m,
+          status: state.status as Match["status"],
+          ...(state.score !== undefined ? { score: state.score } : {}),
+        };
+      }),
+    [matches, liveStates],
+  );
+
+  const groups = useMemo(() => groupStandings(computeStandings(liveMatches), liveMatches), [liveMatches]);
 
   const cardClasses =
     theme === "classic-light"
@@ -122,6 +166,14 @@ export function StandingsView({
         {groups.map(({ group, rows, qualification }) => {
           const seedCount = rows.filter((row) => row.dataSource === "seed").length;
           const isFocusedGroup = resolvedFocusGroupSlug === groupSlug(group);
+          const groupCodes = new Set(rows.map((r) => r.code));
+          const liveMatch = liveMatches.find(
+            (m) =>
+              m.status === "LIVE" &&
+              groupCodes.has(m.teamA.code) &&
+              groupCodes.has(m.teamB.code),
+          );
+          const liveColor = theme === "classic-light" ? "text-red-600" : "text-red-400";
 
           return (
             <div
@@ -137,13 +189,26 @@ export function StandingsView({
                   : ""
               } ${cardClasses}`}
             >
-              <h3
-                className={`font-anton text-lg uppercase tracking-wide ${headingClasses}`}
-              >
-                {group}
-              </h3>
+              <div className="flex items-center gap-2">
+                <h3
+                  className={`font-anton text-lg uppercase tracking-wide ${headingClasses}`}
+                >
+                  {group}
+                </h3>
+                {liveMatch && (
+                  <span className={`inline-flex items-center gap-1 font-mono text-[9px] uppercase tracking-wider ${liveColor}`}>
+                    <span className="inline-block w-1.5 h-1.5 rounded-full animate-pulse bg-current" />
+                    Ao Vivo
+                  </span>
+                )}
+              </div>
 
-              {seedCount === rows.length ? (
+              {liveMatch ? (
+                <p className={`mt-1 mb-3 font-mono text-[10px] uppercase tracking-wider ${liveColor}`}
+                   data-testid={`live-match-${group.toLowerCase().replace(/\s+/g, "-")}`}>
+                  {liveMatch.teamA.code} {liveMatch.score?.teamA ?? 0}–{liveMatch.score?.teamB ?? 0} {liveMatch.teamB.code} · em andamento
+                </p>
+              ) : seedCount === rows.length ? (
                 <p className={`mt-1 mb-3 font-mono text-[10px] uppercase tracking-wider ${mutedClasses}`}>
                   Resultados da fase de grupos ainda não disputados
                 </p>
