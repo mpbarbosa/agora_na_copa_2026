@@ -1,7 +1,9 @@
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { Info } from "lucide-react";
 import type { Match, TeamRef } from "../types";
 import { computeStandings, groupStandings } from "../standings";
 import { FlagIcon } from "./FlagIcon";
+import { StandingsRulesCard } from "./StandingsRulesCard";
 
 interface StandingsViewProps {
   matches: Match[];
@@ -29,7 +31,8 @@ export function StandingsView({
   onSelectTeamLineup,
   focusGroupSlug = null,
 }: StandingsViewProps) {
-  const groups = useMemo(() => groupStandings(computeStandings(matches)), [matches]);
+  const [showRules, setShowRules] = useState(false);
+  const groups = useMemo(() => groupStandings(computeStandings(matches), matches), [matches]);
 
   const cardClasses =
     theme === "classic-light"
@@ -71,15 +74,36 @@ export function StandingsView({
 
   return (
     <div className="mx-auto mt-8 max-w-7xl px-4 2xl:max-w-[1600px]" id="standings-view">
-      <h2
-        className={`font-anton text-2xl md:text-3xl uppercase tracking-wider ${headingClasses}`}
-        id="standings-title"
-      >
-        Tabela de Classificação
-      </h2>
-      <p className={`mt-1 mb-6 font-mono text-[11px] uppercase tracking-wider ${mutedClasses}`}>
-        Fase de grupos • 12 chaves de 4 seleções
-      </p>
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h2
+            className={`font-anton text-2xl md:text-3xl uppercase tracking-wider ${headingClasses}`}
+            id="standings-title"
+          >
+            Tabela de Classificação
+          </h2>
+          <p className={`mt-1 mb-6 font-mono text-[11px] uppercase tracking-wider ${mutedClasses}`}>
+            Fase de grupos • 12 chaves de 4 seleções
+          </p>
+        </div>
+        <button
+          onClick={() => setShowRules(true)}
+          title="Critérios de classificação"
+          className={`mt-1 shrink-0 flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg font-mono text-[10px] uppercase tracking-wider border transition ${
+            theme === "classic-light"
+              ? "border-slate-200 text-slate-500 hover:text-[#009c3b] hover:border-[#009c3b]/30 hover:bg-[#009c3b]/5"
+              : "border-white/10 text-slate-400 hover:text-[#ffd84d] hover:border-[#ffd84d]/20 hover:bg-[#ffd84d]/5"
+          }`}
+          data-testid="standings-rules-btn"
+        >
+          <Info size={12} />
+          Critérios
+        </button>
+      </div>
+
+      {showRules && (
+        <StandingsRulesCard theme={theme} onClose={() => setShowRules(false)} />
+      )}
 
       <div
         className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 xl:grid-cols-3 2xl:grid-cols-4"
