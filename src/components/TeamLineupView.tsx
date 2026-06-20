@@ -11,13 +11,19 @@ import { FlagIcon } from "./FlagIcon";
 import { TeamPitchBoard } from "./TeamPitchBoard";
 import { PlayerOverlayCard } from "./PlayerOverlayCard";
 import { getPositionLabel } from "../utils/playerDisplay";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, ExternalLink } from "lucide-react";
 
 interface TeamLineupViewProps {
   team: TeamRef;
   theme: "classic-light" | "stadium-dark";
   onBack: () => void;
 }
+
+// Official CBF crest, sourced from Wikimedia Commons like every team flag
+// (see FlagIcon.tsx). Shown only on the Brazil page, linking to cbf.com.br.
+const CBF_LOGO_URL =
+  "https://commons.wikimedia.org/wiki/Special:FilePath/Brazilian_Football_Confederation_logo.svg";
+const CBF_OFFICIAL_SITE = "https://www.cbf.com.br/";
 
 type LoadStatus = "loading" | "ready" | "error";
 
@@ -431,31 +437,57 @@ export const TeamLineupView: React.FC<TeamLineupViewProps> = ({ team, theme, onB
         id="team-lineup-header"
         style={{ backgroundImage: `linear-gradient(135deg, ${team.primaryColor}18 0%, transparent 55%)` }}
       >
-        <div className="flex items-center gap-4">
-          <div
-            className="flex h-16 w-24 items-center justify-center rounded-2xl bg-white p-3 shadow-sm"
-            style={{ border: `2px solid ${team.primaryColor}70` }}
-          >
-            <FlagIcon flag={team.flagSvg} className="h-full w-full object-contain" />
-          </div>
-          <div>
-            <h2 className={`font-anton text-2xl md:text-4xl uppercase tracking-wider ${headingClasses}`} id="team-lineup-title">
-              {teamView?.team.name ?? team.name}
-            </h2>
-            <p className={`mt-1 font-mono text-[11px] uppercase tracking-wider ${mutedClasses}`}>
-              {team.code} {team.group ? `• Grupo ${team.group.replace("Grupo ", "")}` : ""}
-            </p>
-            {countryInfo?.description && (
-              <p className={`mt-0.5 font-archivo text-xs opacity-60 ${mutedClasses}`}>
-                {countryInfo.description}
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <div
+              className="flex h-16 w-24 items-center justify-center rounded-2xl bg-white p-3 shadow-sm"
+              style={{ border: `2px solid ${team.primaryColor}70` }}
+            >
+              <FlagIcon flag={team.flagSvg} className="h-full w-full object-contain" />
+            </div>
+            <div>
+              <h2 className={`font-anton text-2xl md:text-4xl uppercase tracking-wider ${headingClasses}`} id="team-lineup-title">
+                {teamView?.team.name ?? team.name}
+              </h2>
+              <p className={`mt-1 font-mono text-[11px] uppercase tracking-wider ${mutedClasses}`}>
+                {team.code} {team.group ? `• Grupo ${team.group.replace("Grupo ", "")}` : ""}
               </p>
-            )}
-            {teamView && (
-              <p className={`mt-1 font-mono text-[9px] uppercase tracking-wider opacity-40 ${mutedClasses}`}>
-                {formatUpdatedAt(teamView.updatedAt)}
-              </p>
-            )}
+              {countryInfo?.description && (
+                <p className={`mt-0.5 font-archivo text-xs opacity-60 ${mutedClasses}`}>
+                  {countryInfo.description}
+                </p>
+              )}
+              {teamView && (
+                <p className={`mt-1 font-mono text-[9px] uppercase tracking-wider opacity-40 ${mutedClasses}`}>
+                  {formatUpdatedAt(teamView.updatedAt)}
+                </p>
+              )}
+            </div>
           </div>
+
+          {team.code === "BRA" && (
+            <a
+              href={CBF_OFFICIAL_SITE}
+              target="_blank"
+              rel="noopener noreferrer"
+              id="team-lineup-cbf-link"
+              title="Site oficial da CBF"
+              aria-label="Abrir o site oficial da CBF"
+              className="group flex shrink-0 flex-col items-center gap-1.5"
+            >
+              <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white p-2 shadow-sm transition-transform group-hover:scale-105 md:h-16 md:w-16">
+                <img
+                  src={CBF_LOGO_URL}
+                  alt="Confederação Brasileira de Futebol"
+                  className="h-full w-full object-contain"
+                  loading="lazy"
+                />
+              </span>
+              <span className={`inline-flex items-center gap-1 font-mono text-[9px] font-bold uppercase tracking-wider ${mutedClasses}`}>
+                CBF <ExternalLink size={9} />
+              </span>
+            </a>
+          )}
         </div>
       </section>
 
