@@ -160,6 +160,24 @@ export function StandingsView({
       )}
 
       <div
+        className={`mb-6 flex items-start gap-2.5 rounded-xl border px-3.5 py-2.5 ${
+          theme === "classic-light"
+            ? "border-slate-200 bg-slate-50 text-slate-500"
+            : "border-white/10 bg-white/5 text-slate-400"
+        }`}
+        id="standings-tooltip-hint"
+      >
+        <Info size={13} className="mt-px shrink-0" />
+        <p className="font-mono text-[10px] uppercase tracking-wider leading-relaxed">
+          Passe o cursor sobre o{" "}
+          <span className={`font-bold ${theme === "classic-light" ? "text-[#009c3b]" : "text-[#00e476]"}`}>✓</span>
+          {" "}(classificado) ou sobre o{" "}
+          <span className={`font-bold ${theme === "classic-light" ? "text-slate-700" : "text-slate-200"}`}>nº de posição</span>
+          {" "}(1º/2º ainda em disputa) para ver a análise matemática da situação de cada seleção.
+        </p>
+      </div>
+
+      <div
         className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 xl:grid-cols-3 2xl:grid-cols-4"
         id="standings-grid"
       >
