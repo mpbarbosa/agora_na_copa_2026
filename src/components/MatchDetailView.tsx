@@ -417,10 +417,17 @@ function formatOverlayUpdatedAt(value: string | undefined) {
 }
 
 function formatCountdown(totalSecs: number) {
-  const h = Math.floor(totalSecs / 3600);
+  const d = Math.floor(totalSecs / 86400);
+  const h = Math.floor((totalSecs % 86400) / 3600);
   const m = Math.floor((totalSecs % 3600) / 60);
   const s = totalSecs % 60;
-  return `${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
+  const hh = h.toString().padStart(2, "0");
+  const mm = m.toString().padStart(2, "0");
+  const ss = s.toString().padStart(2, "0");
+  if (d > 0) {
+    return `${d.toString().padStart(2, "0")}d ${hh}h ${mm}m ${ss}s`;
+  }
+  return `${hh}h ${mm}m ${ss}s`;
 }
 
 interface StoredIncidentPlayerKey {

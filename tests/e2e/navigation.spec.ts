@@ -151,7 +151,7 @@ test.describe("Navigation shell", () => {
     await page.click("#btn-apply-match-config");
 
     await expect(page.locator("#scoreboard-clock")).toHaveText("21:30");
-    await expect(page.locator("#countdown-sub-wrapper")).toContainText("00:02:03");
+    await expect(page.locator("#countdown-sub-wrapper")).toContainText("00h 02m 03s");
     await expect(page.locator("#game-state-badge")).toContainText("PRÉ-JOGO");
   });
 

@@ -30,9 +30,9 @@ function formatCountdown(totalSecs: number): string {
   const mm = m.toString().padStart(2, "0");
   const ss = s.toString().padStart(2, "0");
   if (d > 0) {
-    return `${d.toString().padStart(2, "0")}:${hh}:${mm}:${ss}`;
+    return `${d.toString().padStart(2, "0")}d ${hh}h ${mm}m ${ss}s`;
   }
-  return `${hh}:${mm}:${ss}`;
+  return `${hh}h ${mm}m ${ss}s`;
 }
 
 interface BrazilCountdownBadgeProps {
