@@ -30,6 +30,14 @@ interface LiveState {
   score?: { teamA: number; teamB: number };
 }
 
+interface TooltipState {
+  key: string;
+  note: string;
+  left: number;
+  top?: number;
+  bottom?: number;
+}
+
 export function StandingsView({
   matches,
   theme,
@@ -38,7 +46,7 @@ export function StandingsView({
 }: StandingsViewProps) {
   const [showRules, setShowRules] = useState(false);
   const [liveStates, setLiveStates] = useState<Record<string, LiveState>>({});
-  const [openTooltip, setOpenTooltip] = useState<string | null>(null);
+  const [openTooltip, setOpenTooltip] = useState<TooltipState | null>(null);
 
   useEffect(() => {
     if (!openTooltip) return;
@@ -48,11 +56,32 @@ export function StandingsView({
     };
     document.addEventListener("click", close);
     document.addEventListener("keydown", onKey);
+    // The popover is position:fixed, so it does not follow scroll/resize —
+    // dismiss it instead of letting it detach from its trigger.
+    window.addEventListener("scroll", close, true);
+    window.addEventListener("resize", close);
     return () => {
       document.removeEventListener("click", close);
       document.removeEventListener("keydown", onKey);
+      window.removeEventListener("scroll", close, true);
+      window.removeEventListener("resize", close);
     };
   }, [openTooltip]);
+
+  const openTooltipAt = (key: string, note: string, trigger: HTMLElement) => {
+    const r = trigger.getBoundingClientRect();
+    const POPOVER_WIDTH = 208; // matches w-52
+    const left = Math.max(8, Math.min(r.left, window.innerWidth - POPOVER_WIDTH - 8));
+    const openUp = r.top > window.innerHeight * 0.55;
+    setOpenTooltip({
+      key,
+      note,
+      left,
+      ...(openUp
+        ? { bottom: window.innerHeight - r.top + 4 }
+        : { top: r.bottom + 4 }),
+    });
+  };
 
   useEffect(() => {
     let active = true;
@@ -308,7 +337,7 @@ export function StandingsView({
                           ? computeContentionNote(row.code, rows, liveMatches)
                           : null;
                       const tooltipKey = `${group}-${row.code}`;
-                      const isTooltipOpen = openTooltip === tooltipKey;
+                      const isTooltipOpen = openTooltip?.key === tooltipKey;
                       return (
                         <tr
                           key={row.id}
@@ -330,46 +359,34 @@ export function StandingsView({
                         >
                           <td className="py-1.5 pl-1 text-center font-mono text-[9px]">
                             {note ? (
-                              <span className="relative inline-flex">
-                                <button
-                                  type="button"
-                                  title={note}
-                                  aria-label={note}
-                                  aria-expanded={isTooltipOpen}
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    setOpenTooltip(isTooltipOpen ? null : tooltipKey);
-                                  }}
-                                  className={
-                                    status === "qualified"
-                                      ? `inline-flex items-center justify-center w-[14px] h-[14px] rounded-full text-[8px] font-bold cursor-help ${
-                                          theme === "classic-light"
-                                            ? "bg-[#009c3b] text-white"
-                                            : "bg-[#00e476] text-black"
-                                        }`
-                                      : status === "eliminated"
-                                      ? "inline-flex items-center justify-center w-[14px] h-[14px] rounded-full text-[8px] font-bold cursor-help bg-red-500 text-white"
-                                      : `cursor-help underline decoration-dotted underline-offset-2 ${mutedClasses}`
+                              <button
+                                type="button"
+                                title={note}
+                                aria-label={note}
+                                aria-expanded={isTooltipOpen}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  if (isTooltipOpen) {
+                                    setOpenTooltip(null);
+                                  } else {
+                                    openTooltipAt(tooltipKey, note, e.currentTarget);
                                   }
-                                  data-testid={`standings-note-trigger-${row.code.toLowerCase()}`}
-                                >
-                                  {status === "qualified" ? "✓" : status === "eliminated" ? "✕" : index + 1}
-                                </button>
-                                {isTooltipOpen && (
-                                  <span
-                                    role="tooltip"
-                                    onClick={(e) => e.stopPropagation()}
-                                    className={`absolute left-0 top-full z-20 mt-1 w-52 max-w-[60vw] rounded-lg border p-2.5 text-left font-mono text-[10px] normal-case leading-relaxed tracking-normal shadow-lg ${
-                                      theme === "classic-light"
-                                        ? "border-slate-200 bg-white text-slate-700"
-                                        : "border-white/15 bg-[#1a1c1c] text-slate-200"
-                                    }`}
-                                    data-testid={`standings-note-popover-${row.code.toLowerCase()}`}
-                                  >
-                                    {note}
-                                  </span>
-                                )}
-                              </span>
+                                }}
+                                className={
+                                  status === "qualified"
+                                    ? `inline-flex items-center justify-center w-[14px] h-[14px] rounded-full text-[8px] font-bold cursor-help ${
+                                        theme === "classic-light"
+                                          ? "bg-[#009c3b] text-white"
+                                          : "bg-[#00e476] text-black"
+                                      }`
+                                    : status === "eliminated"
+                                    ? "inline-flex items-center justify-center w-[14px] h-[14px] rounded-full text-[8px] font-bold cursor-help bg-red-500 text-white"
+                                    : `cursor-help underline decoration-dotted underline-offset-2 ${mutedClasses}`
+                                }
+                                data-testid={`standings-note-trigger-${row.code.toLowerCase()}`}
+                              >
+                                {status === "qualified" ? "✓" : status === "eliminated" ? "✕" : index + 1}
+                              </button>
                             ) : (
                               <span className={mutedClasses}>{index + 1}</span>
                             )}
@@ -409,6 +426,26 @@ export function StandingsView({
           );
         })}
       </div>
+
+      {openTooltip && (
+        <div
+          role="tooltip"
+          onClick={(e) => e.stopPropagation()}
+          style={{
+            left: openTooltip.left,
+            ...(openTooltip.top !== undefined ? { top: openTooltip.top } : {}),
+            ...(openTooltip.bottom !== undefined ? { bottom: openTooltip.bottom } : {}),
+          }}
+          className={`fixed z-50 w-52 max-w-[calc(100vw-16px)] rounded-lg border p-2.5 text-left font-mono text-[10px] normal-case leading-relaxed tracking-normal shadow-lg ${
+            theme === "classic-light"
+              ? "border-slate-200 bg-white text-slate-700"
+              : "border-white/15 bg-[#1a1c1c] text-slate-200"
+          }`}
+          data-testid="standings-note-popover"
+        >
+          {openTooltip.note}
+        </div>
+      )}
     </div>
   );
 }
