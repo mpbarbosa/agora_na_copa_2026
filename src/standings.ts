@@ -308,6 +308,55 @@ function sortGroupTable(rows: StandingsRow[], matches: Match[]): StandingsRow[] 
   return result;
 }
 
+// Returns a Portuguese explanation of why a top-2 team has not yet secured
+// their knockout-round spot. Only meaningful when status === "contention" and
+// the team is currently in position 1 or 2.
+export function computeContentionNote(
+  teamCode: string,
+  sortedRows: StandingsRow[],
+  allMatches: Match[],
+): string {
+  const codes = new Set(sortedRows.map((r) => r.code));
+  const remaining = new Map<string, number>(sortedRows.map((r) => [r.code, 0]));
+
+  for (const m of allMatches) {
+    if (m.stageName !== "Group Stage" || m.status === "FINISHED") continue;
+    if (codes.has(m.teamA.code))
+      remaining.set(m.teamA.code, (remaining.get(m.teamA.code) ?? 0) + 1);
+    if (codes.has(m.teamB.code))
+      remaining.set(m.teamB.code, (remaining.get(m.teamB.code) ?? 0) + 1);
+  }
+
+  const team = sortedRows.find((r) => r.code === teamCode);
+  if (!team) return "Classificação ainda não garantida.";
+
+  const myPts = team.points;
+  const pos = sortedRows.findIndex((r) => r.code === teamCode) + 1;
+  const posLabel = pos === 1 ? "1ª colocação" : "2ª colocação";
+
+  const threats = sortedRows
+    .filter((r) => r.code !== teamCode)
+    .map((r) => ({ name: r.name, max: r.points + (remaining.get(r.code) ?? 0) * 3 }))
+    .filter((r) => r.max >= myPts)
+    .sort((a, b) => b.max - a.max);
+
+  if (threats.length === 0) {
+    return `${team.name} já garantiu matematicamente a vaga no mata-mata.`;
+  }
+
+  const parts = threats.map((t) => `${t.name} (máx. ${t.max} pts)`);
+  const threatText =
+    parts.length === 1
+      ? parts[0]
+      : parts.slice(0, -1).join(", ") + " e " + parts[parts.length - 1];
+
+  return (
+    `Em ${posLabel} com ${myPts} pontos, mas ` +
+    `${threatText} ${threats.length === 1 ? "ainda pode" : "ainda podem"} igualá-la. ` +
+    `A vaga no mata-mata ainda não está matematicamente garantida.`
+  );
+}
+
 // Returns a Portuguese explanation of why a team is mathematically qualified.
 // Intended for tooltip text on the ✓ badge in the Grupos view.
 export function computeQualificationNote(

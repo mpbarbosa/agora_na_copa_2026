@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Info } from "lucide-react";
 import type { Match, TeamRef } from "../types";
-import { computeStandings, groupStandings, computeQualificationNote } from "../standings";
+import { computeStandings, groupStandings, computeQualificationNote, computeContentionNote } from "../standings";
 import { FlagIcon } from "./FlagIcon";
 import { StandingsRulesCard } from "./StandingsRulesCard";
 
@@ -288,6 +288,13 @@ export function StandingsView({
                                 }`}
                               >
                                 ✓
+                              </span>
+                            ) : index < 2 && status === "contention" ? (
+                              <span
+                                title={computeContentionNote(row.code, rows, liveMatches)}
+                                className={`cursor-help ${mutedClasses}`}
+                              >
+                                {index + 1}
                               </span>
                             ) : (
                               <span className={mutedClasses}>{index + 1}</span>
