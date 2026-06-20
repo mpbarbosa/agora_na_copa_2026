@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import packageInfo from "../package.json";
 import { APP_MATCHES } from "./appMatches";
 import type { Match, TeamRef } from "./types";
@@ -14,6 +14,7 @@ import { JogadoresView } from "./components/JogadoresView";
 import { TeamLineupView } from "./components/TeamLineupView";
 import { PartidasView } from "./components/PartidasView";
 import { BrazilCountdownBadge } from "./components/BrazilCountdownBadge";
+import { BrazilGoalFireworks } from "./components/BrazilGoalFireworks";
 import { useTeamLineups } from "./hooks/useTeamLineups";
 import { NAV_ITEMS } from "./navigation";
 import { Sun, Moon } from "lucide-react";
@@ -34,6 +35,43 @@ export default function App() {
   const isAoVivoViewActive = activeNavId === "ao-vivo" && lineupTeam === null;
   const teamLineups = useTeamLineups(isAoVivoViewActive);
   const hasLiveMatch = matches.some((match) => match.status === "LIVE");
+
+  // Fireworks when Brazil scores during a live match
+  const [fireworksActive, setFireworksActive] = useState(false);
+  const brazilMatchRef = useRef<{ matchId: string; score: number } | null>(null);
+  const fireworksTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+
+  useEffect(() => {
+    const braMatch = matches.find(
+      (m) => m.status === "LIVE" && (m.teamA.code === "BRA" || m.teamB.code === "BRA"),
+    );
+
+    if (!braMatch) {
+      brazilMatchRef.current = null;
+      return;
+    }
+
+    const braScore =
+      braMatch.teamA.code === "BRA"
+        ? (braMatch.score?.teamA ?? 0)
+        : (braMatch.score?.teamB ?? 0);
+
+    const prev = brazilMatchRef.current;
+    const sameMatch = prev?.matchId === braMatch.id;
+
+    if (sameMatch && prev !== null && braScore > prev.score) {
+      setFireworksActive(true);
+      clearTimeout(fireworksTimerRef.current);
+      // 6s matches shader duration: last burst starts at 2.45s and fades by ~5.95s
+      fireworksTimerRef.current = setTimeout(() => setFireworksActive(false), 6000);
+    }
+
+    brazilMatchRef.current = { matchId: braMatch.id, score: braScore };
+  }, [matches]);
+
+  useEffect(() => {
+    return () => clearTimeout(fireworksTimerRef.current);
+  }, []);
 
   useEffect(() => {
     document.getElementById(`btn-nav-${activeNavId}`)
@@ -275,6 +313,7 @@ export default function App() {
       </main>
 
       <BrazilCountdownBadge matches={matches} />
+      <BrazilGoalFireworks active={fireworksActive} />
 
       {/* FOOTER METADATA DETAIL */}
       <footer
