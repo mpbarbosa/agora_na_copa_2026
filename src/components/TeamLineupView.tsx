@@ -19,11 +19,33 @@ interface TeamLineupViewProps {
   onBack: () => void;
 }
 
-// Official CBF crest, sourced from Wikimedia Commons like every team flag
-// (see FlagIcon.tsx). Shown only on the Brazil page, linking to cbf.com.br.
-const CBF_LOGO_URL =
-  "https://commons.wikimedia.org/wiki/Special:FilePath/Brazilian_Football_Confederation_logo.svg";
-const CBF_OFFICIAL_SITE = "https://www.cbf.com.br/";
+// Official football-federation crests, sourced from Wikimedia Commons like
+// every team flag (see FlagIcon.tsx). Shown in the team header, linking to the
+// federation's official site. Keyed by FIFA team code; add entries as needed.
+interface TeamFederation {
+  abbr: string;
+  name: string;
+  logoUrl: string;
+  site: string;
+}
+
+const TEAM_FEDERATIONS: Record<string, TeamFederation> = {
+  BRA: {
+    abbr: "CBF",
+    name: "Confederação Brasileira de Futebol",
+    logoUrl:
+      "https://commons.wikimedia.org/wiki/Special:FilePath/Brazilian_Football_Confederation_logo.svg",
+    site: "https://www.cbf.com.br/",
+  },
+  MEX: {
+    abbr: "FMF",
+    name: "Federación Mexicana de Fútbol",
+    logoUrl:
+      "https://commons.wikimedia.org/wiki/Special:FilePath/" +
+      encodeURIComponent("Federación Mexicana de Fútbol logo (2025).svg"),
+    site: "https://fmf.mx",
+  },
+};
 
 type LoadStatus = "loading" | "ready" | "error";
 
@@ -416,6 +438,7 @@ export const TeamLineupView: React.FC<TeamLineupViewProps> = ({ team, theme, onB
       ? "bg-slate-100 text-slate-700 hover:bg-slate-200"
       : "bg-white/10 text-white hover:bg-white/15";
 
+  const federation = TEAM_FEDERATIONS[team.code];
   const featuredMatch = teamView?.currentMatch ?? teamView?.nextMatch ?? null;
   const activeMatchCount = teamView
     ? [teamView.currentMatch, teamView.nextMatch, teamView.lastMatch].filter(Boolean).length
@@ -465,26 +488,27 @@ export const TeamLineupView: React.FC<TeamLineupViewProps> = ({ team, theme, onB
             </div>
           </div>
 
-          {team.code === "BRA" && (
+          {federation && (
             <a
-              href={CBF_OFFICIAL_SITE}
+              href={federation.site}
               target="_blank"
               rel="noopener noreferrer"
-              id="team-lineup-cbf-link"
-              title="Site oficial da CBF"
-              aria-label="Abrir o site oficial da CBF"
+              id="team-lineup-federation-link"
+              data-federation={federation.abbr}
+              title={`Site oficial da ${federation.abbr}`}
+              aria-label={`Abrir o site oficial da ${federation.abbr}`}
               className="group flex shrink-0 flex-col items-center gap-1.5"
             >
               <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white p-2 shadow-sm transition-transform group-hover:scale-105 md:h-16 md:w-16">
                 <img
-                  src={CBF_LOGO_URL}
-                  alt="Confederação Brasileira de Futebol"
+                  src={federation.logoUrl}
+                  alt={federation.name}
                   className="h-full w-full object-contain"
                   loading="lazy"
                 />
               </span>
               <span className={`inline-flex items-center gap-1 font-mono text-[9px] font-bold uppercase tracking-wider ${mutedClasses}`}>
-                CBF <ExternalLink size={9} />
+                {federation.abbr} <ExternalLink size={9} />
               </span>
             </a>
           )}

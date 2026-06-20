@@ -419,28 +419,37 @@ test.describe("Team view", () => {
     await expect(page.locator("#team-performance-aproveitamento")).toHaveText("67%");
   });
 
-  test("shows the CBF logo linking to the official site only on the Brazil page", async ({ page }) => {
+  test("shows the federation logo linking to the official site for Brazil and Mexico", async ({ page }) => {
     await mockTeamView(page);
 
+    const openTeam = async (code: string) => {
+      await page.click("#btn-nav-grupos");
+      await page.click(`#standings-row-${code} button[aria-label^='Ver escalação']`);
+      await expect(page.locator("#team-lineup-view")).toBeVisible();
+    };
+
     await page.goto("/");
-    await page.click("#btn-nav-grupos");
-    await page.click("#standings-row-bra button[aria-label^='Ver escalação']");
 
-    await expect(page.locator("#team-lineup-view")).toBeVisible();
-    const cbfLink = page.locator("#team-lineup-cbf-link");
-    await expect(cbfLink).toBeVisible();
-    await expect(cbfLink).toHaveAttribute("href", "https://www.cbf.com.br/");
-    await expect(cbfLink.locator("img")).toHaveAttribute(
-      "alt",
-      "Confederação Brasileira de Futebol",
-    );
-
-    // The CBF badge is Brazil-specific and must not appear for other teams.
+    // Brazil → CBF
+    await openTeam("bra");
+    const fedLink = page.locator("#team-lineup-federation-link");
+    await expect(fedLink).toBeVisible();
+    await expect(fedLink).toHaveAttribute("href", "https://www.cbf.com.br/");
+    await expect(fedLink).toHaveAttribute("data-federation", "CBF");
+    await expect(fedLink.locator("img")).toHaveAttribute("alt", "Confederação Brasileira de Futebol");
     await page.click("#btn-team-lineup-back");
-    await page.click("#btn-nav-grupos");
-    await page.click("#standings-row-mar button[aria-label^='Ver escalação']");
-    await expect(page.locator("#team-lineup-view")).toBeVisible();
-    await expect(page.locator("#team-lineup-cbf-link")).toHaveCount(0);
+
+    // Mexico → FMF
+    await openTeam("mex");
+    await expect(fedLink).toBeVisible();
+    await expect(fedLink).toHaveAttribute("href", "https://fmf.mx");
+    await expect(fedLink).toHaveAttribute("data-federation", "FMF");
+    await expect(fedLink.locator("img")).toHaveAttribute("alt", "Federación Mexicana de Fútbol");
+    await page.click("#btn-team-lineup-back");
+
+    // Teams without a registered federation show no badge.
+    await openTeam("mar");
+    await expect(page.locator("#team-lineup-federation-link")).toHaveCount(0);
   });
 
   test("opens the full team page from the venue hosted matches list", async ({ page }) => {
