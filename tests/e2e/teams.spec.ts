@@ -81,4 +81,16 @@ test.describe("Teams view (Seleções)", () => {
     await expect(page.locator("#team-lineup-view")).toBeVisible();
     await expect(page.locator("#team-lineup-title")).toContainText("BRASIL");
   });
+
+  test("marks teams that have qualified for the knockout phase", async ({ page }) => {
+    await page.goto("/");
+    await page.click("#btn-nav-selecoes");
+    await expect(page.locator("#teams-view")).toBeVisible();
+
+    // México has mathematically secured a top-2 spot, so its card carries the
+    // qualified badge; a team still in contention does not.
+    await expect(page.getByTestId("team-qualified-mex")).toBeVisible();
+    await expect(page.getByTestId("team-qualified-mex")).toContainText("Classificada");
+    await expect(page.locator("#btn-team-card-mex")).toContainText("✓");
+  });
 });

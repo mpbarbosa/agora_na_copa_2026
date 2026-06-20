@@ -28,14 +28,14 @@ export function TeamsView({ matches, theme, onSelectTeamLineup }: TeamsViewProps
         Seleções
       </h2>
       <p className={`mt-1 mb-6 font-mono text-[11px] uppercase tracking-wider ${mutedClasses}`}>
-        Todas as 48 seleções da Copa com acesso direto ao painel completo de cada equipe
+        Todas as 48 seleções da Copa com acesso direto ao painel completo de cada equipe • <span className={theme === "classic-light" ? "text-[#065f2c]" : "text-[#00e476]"}>✓ Classificada</span> indica vaga garantida no mata-mata
       </p>
 
       <div
         className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 xl:grid-cols-3 2xl:grid-cols-4"
         id="teams-groups-grid"
       >
-        {groups.map(({ group, rows }) => (
+        {groups.map(({ group, rows, qualification }) => (
           <section
             key={group}
             id={`teams-group-${group.replace(/\s+/g, "-").toLowerCase()}`}
@@ -51,32 +51,50 @@ export function TeamsView({ matches, theme, onSelectTeamLineup }: TeamsViewProps
             </div>
 
             <div className="mt-4 space-y-3">
-              {rows.map((team) => (
-                <button
-                  key={team.id}
-                  id={`btn-team-card-${team.code.toLowerCase()}`}
-                  type="button"
-                  onClick={() => onSelectTeamLineup(team)}
-                  className={`flex w-full items-center gap-3 rounded-2xl border px-3 py-3 text-left transition ${
-                    theme === "classic-light"
-                      ? "border-slate-100 bg-slate-50 hover:border-slate-200 hover:bg-white"
-                      : "border-white/5 bg-white/5 hover:border-white/10 hover:bg-white/10"
-                  }`}
-                >
-                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-white p-2">
-                    <FlagIcon flag={team.flagSvg} className="h-full w-full object-contain" />
-                  </div>
+              {rows.map((team) => {
+                const isQualified = qualification.get(team.code) === "qualified";
 
-                  <div className="min-w-0 flex-1">
-                    <p className={`truncate font-anton text-sm uppercase tracking-wide ${headingClasses}`}>
-                      {team.name}
-                    </p>
-                    <p className={`mt-1 font-archivo text-sm ${mutedClasses}`}>
-                      {team.code} • {team.points} pt{team.points === 1 ? "" : "s"} • {team.played} jogo{team.played === 1 ? "" : "s"}
-                    </p>
-                  </div>
-                </button>
-              ))}
+                return (
+                  <button
+                    key={team.id}
+                    id={`btn-team-card-${team.code.toLowerCase()}`}
+                    type="button"
+                    onClick={() => onSelectTeamLineup(team)}
+                    className={`flex w-full items-center gap-3 rounded-2xl border px-3 py-3 text-left transition ${
+                      theme === "classic-light"
+                        ? "border-slate-100 bg-slate-50 hover:border-slate-200 hover:bg-white"
+                        : "border-white/5 bg-white/5 hover:border-white/10 hover:bg-white/10"
+                    }`}
+                  >
+                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-white p-2">
+                      <FlagIcon flag={team.flagSvg} className="h-full w-full object-contain" />
+                    </div>
+
+                    <div className="min-w-0 flex-1">
+                      <p className={`truncate font-anton text-sm uppercase tracking-wide ${headingClasses}`}>
+                        {team.name}
+                      </p>
+                      <p className={`mt-1 font-archivo text-sm ${mutedClasses}`}>
+                        {team.code} • {team.points} pt{team.points === 1 ? "" : "s"} • {team.played} jogo{team.played === 1 ? "" : "s"}
+                      </p>
+                    </div>
+
+                    {isQualified && (
+                      <span
+                        data-testid={`team-qualified-${team.code.toLowerCase()}`}
+                        title="Classificada para o mata-mata"
+                        className={`inline-flex shrink-0 items-center gap-1 rounded-full border px-2.5 py-1 font-mono text-[10px] font-bold uppercase tracking-wider ${
+                          theme === "classic-light"
+                            ? "border-[#009c3b]/30 bg-[#009c3b]/10 text-[#065f2c]"
+                            : "border-[#00e476]/25 bg-[#00e476]/10 text-[#00e476]"
+                        }`}
+                      >
+                        <span aria-hidden="true">✓</span> Classificada
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
             </div>
           </section>
         ))}
