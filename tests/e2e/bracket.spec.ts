@@ -19,7 +19,7 @@ test.describe("Bracket view (Chaveamento)", () => {
     await page.click("#bracket-pick-F-1-a");
 
     await expect(page.locator("#bracket-champion-callout")).toBeVisible();
-    await expect(page.locator("#bracket-champion-name")).toHaveText("1º Grupo A");
+    await expect(page.locator("#bracket-champion-name")).toHaveText("MÉXICO");
 
     await page.click("#bracket-reset-button");
 

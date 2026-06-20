@@ -2,14 +2,23 @@ import { useMemo, useState } from "react";
 import { Trophy, RotateCcw } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { bracket as baseBracket } from "../data/tournament";
-import type { BracketNode } from "../types";
+import type { BracketNode, Match } from "../types";
+import { computeStandings, groupStandings } from "../standings";
+import type { QualificationStatus } from "../standings";
+import { FlagIcon } from "./FlagIcon";
 
 interface BracketViewProps {
   theme: "classic-light" | "stadium-dark";
+  matches: Match[];
 }
 
 type BracketSlot = "A" | "B";
 type SelectionMap = Partial<Record<string, BracketSlot>>;
+
+interface ProvisionalSlot {
+  team: { name: string; code: string; flagSvg: string };
+  status: QualificationStatus;
+}
 
 const STAGES: BracketNode["stage"][] = ["R32", "R16", "QF", "SF", "F"];
 
@@ -29,12 +38,30 @@ function cloneBracket(): BracketNode[] {
   return baseBracket.map((node) => ({ ...node }));
 }
 
-function getSlotLabel(node: BracketNode, slot: BracketSlot) {
-  if (slot === "A") {
-    return node.teamA?.name ?? node.placeholderA;
+function getSlotLabel(node: BracketNode, slot: BracketSlot): string | null {
+  if (slot === "A") return node.teamA?.name ?? node.placeholderA ?? null;
+  return node.teamB?.name ?? node.placeholderB ?? null;
+}
+
+// Like getSlotLabel but resolves R32 provisional teams by name so winner
+// propagation uses the real team name, not the group-position placeholder string.
+function resolveEffectiveLabel(
+  node: BracketNode,
+  slot: BracketSlot,
+  groupSlotMap: Map<string, ProvisionalSlot>,
+): string | null {
+  const teamProp = slot === "A" ? node.teamA : node.teamB;
+  if (teamProp) return teamProp.name;
+
+  const placeholder = slot === "A" ? node.placeholderA : node.placeholderB;
+  if (!placeholder) return null;
+
+  if (node.stage === "R32") {
+    const provisional = groupSlotMap.get(placeholder);
+    if (provisional) return provisional.team.name;
   }
 
-  return node.teamB?.name ?? node.placeholderB;
+  return placeholder;
 }
 
 function getAdvancingSlot(matchId: string): BracketSlot {
@@ -59,7 +86,35 @@ function getDescendantSelectionIds(matchId: string) {
   return ids;
 }
 
-function deriveBracket(selections: SelectionMap) {
+// Builds a map from group-position placeholder strings (e.g. "1º Grupo A") to the
+// team currently holding that position, along with their qualification status.
+function buildGroupSlotMap(matches: Match[]): Map<string, ProvisionalSlot> {
+  const rows = computeStandings(matches);
+  const groups = groupStandings(rows, matches);
+  const map = new Map<string, ProvisionalSlot>();
+
+  for (const { group, rows: groupRows, qualification } of groups) {
+    const letterMatch = group.match(/Grupo ([A-L])/);
+    if (!letterMatch) continue;
+    const letter = letterMatch[1];
+
+    groupRows.slice(0, 2).forEach((row, idx) => {
+      const status = qualification.get(row.code) ?? "contention";
+      if (status === "eliminated") return;
+      map.set(`${idx + 1}º Grupo ${letter}`, {
+        team: { name: row.name, code: row.code, flagSvg: row.flagSvg },
+        status,
+      });
+    });
+  }
+
+  return map;
+}
+
+function deriveBracket(
+  selections: SelectionMap,
+  groupSlotMap: Map<string, ProvisionalSlot>,
+): BracketNode[] {
   const nodes = cloneBracket();
   const byId = new Map(nodes.map((node) => [node.id, node]));
 
@@ -75,7 +130,7 @@ function deriveBracket(selections: SelectionMap) {
       }
 
       const target = byId.get(node.nextMatchId);
-      const label = getSlotLabel(node, winner);
+      const label = resolveEffectiveLabel(node, winner, groupSlotMap);
       if (!target || !label) {
         continue;
       }
@@ -98,9 +153,10 @@ interface BracketMatchCardProps {
   node: BracketNode;
   theme: "classic-light" | "stadium-dark";
   onAdvance: (matchId: string, slot: BracketSlot) => void;
+  groupSlotMap: Map<string, ProvisionalSlot>;
 }
 
-function BracketMatchCard({ node, theme, onAdvance }: BracketMatchCardProps) {
+function BracketMatchCard({ node, theme, onAdvance, groupSlotMap }: BracketMatchCardProps) {
   const matchClasses =
     theme === "classic-light"
       ? "bg-white border-slate-200"
@@ -119,6 +175,24 @@ function BracketMatchCard({ node, theme, onAdvance }: BracketMatchCardProps) {
     theme === "classic-light"
       ? "border-slate-100 bg-slate-50 text-slate-300"
       : "border-white/5 bg-white/5 text-slate-500";
+  const provisionalQualifiedClasses =
+    theme === "classic-light"
+      ? "border-[#009c3b]/40 bg-[#009c3b]/5 text-[#065f2c] hover:border-[#009c3b]/70"
+      : "border-[#00e476]/30 bg-[#00e476]/5 text-[#a7e6bf] hover:border-[#00e476]/50";
+  const provisionalLeadingClasses =
+    theme === "classic-light"
+      ? "border-dashed border-amber-400/60 bg-amber-50/40 text-slate-700 hover:border-amber-400/80"
+      : "border-dashed border-[#ffd84d]/35 bg-[#ffd84d]/5 text-slate-200 hover:border-[#ffd84d]/55";
+  const provisionalBadgeClasses =
+    theme === "classic-light"
+      ? "border-amber-400/60 text-amber-700"
+      : "border-[#ffd84d]/40 text-[#ffd84d]/70";
+
+  const getProvisional = (slot: BracketSlot): ProvisionalSlot | null => {
+    if (node.stage !== "R32") return null;
+    const placeholder = slot === "A" ? node.placeholderA : node.placeholderB;
+    return placeholder ? (groupSlotMap.get(placeholder) ?? null) : null;
+  };
 
   return (
     <article
@@ -151,23 +225,58 @@ function BracketMatchCard({ node, theme, onAdvance }: BracketMatchCardProps) {
         {(["A", "B"] as const).map((slot) => {
           const label = getSlotLabel(node, slot);
           const isActive = node.winner === slot;
+          const provisional = !label ? getProvisional(slot) : null;
+          const effectiveLabel = label ?? provisional?.team.name ?? null;
+          const isProvisional = !label && !!provisional;
+          const isQualified = provisional?.status === "qualified";
+
+          const buttonClasses = !effectiveLabel
+            ? disabledPickClasses
+            : isActive
+              ? activePickClasses
+              : isProvisional
+                ? isQualified
+                  ? provisionalQualifiedClasses
+                  : provisionalLeadingClasses
+                : idlePickClasses;
 
           return (
             <button
               key={slot}
               id={`bracket-pick-${node.id}-${slot.toLowerCase()}`}
               type="button"
-              disabled={!label}
+              disabled={!effectiveLabel}
               onClick={() => onAdvance(node.id, slot)}
-              className={`min-h-11 rounded-2xl border px-3 py-3 text-left font-archivo text-sm leading-5 break-words transition ${
-                !label
-                  ? disabledPickClasses
-                  : isActive
-                    ? activePickClasses
-                    : idlePickClasses
-              }`}
+              className={`min-h-11 w-full rounded-2xl border px-3 py-2.5 text-left font-archivo text-sm leading-5 break-words transition ${buttonClasses}`}
             >
-              {label ?? "Aguardando classificado"}
+              {isProvisional && provisional ? (
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex min-w-0 items-center gap-2">
+                    <FlagIcon
+                      flag={provisional.team.flagSvg}
+                      className="h-4 w-6 shrink-0 rounded-[2px]"
+                    />
+                    <span className="truncate">{provisional.team.name}</span>
+                  </div>
+                  {isQualified ? (
+                    <span
+                      className={`shrink-0 font-mono text-[9px] font-bold ${
+                        theme === "classic-light" ? "text-[#009c3b]" : "text-[#00e476]"
+                      }`}
+                    >
+                      ✓
+                    </span>
+                  ) : (
+                    <span
+                      className={`shrink-0 rounded border px-1 py-0.5 font-mono text-[8px] uppercase tracking-wider ${provisionalBadgeClasses}`}
+                    >
+                      prov.
+                    </span>
+                  )}
+                </div>
+              ) : (
+                effectiveLabel ?? "Aguardando classificado"
+              )}
             </button>
           );
         })}
@@ -181,9 +290,10 @@ interface BracketStageSectionProps {
   nodes: BracketNode[];
   theme: "classic-light" | "stadium-dark";
   onAdvance: (matchId: string, slot: BracketSlot) => void;
+  groupSlotMap: Map<string, ProvisionalSlot>;
 }
 
-function BracketStageSection({ stage, nodes, theme, onAdvance }: BracketStageSectionProps) {
+function BracketStageSection({ stage, nodes, theme, onAdvance, groupSlotMap }: BracketStageSectionProps) {
   const stageClasses =
     theme === "classic-light"
       ? "bg-slate-50 border-slate-200"
@@ -209,9 +319,13 @@ function BracketStageSection({ stage, nodes, theme, onAdvance }: BracketStageSec
 
       <div className="flex flex-col gap-3">
         {nodes.map((node) => (
-          // key on the native div — custom components don't support key in this project's TS setup
           <div key={node.id}>
-            <BracketMatchCard node={node} theme={theme} onAdvance={onAdvance} />
+            <BracketMatchCard
+              node={node}
+              theme={theme}
+              onAdvance={onAdvance}
+              groupSlotMap={groupSlotMap}
+            />
           </div>
         ))}
       </div>
@@ -221,10 +335,11 @@ function BracketStageSection({ stage, nodes, theme, onAdvance }: BracketStageSec
 
 // --- Main component ---
 
-export function BracketView({ theme }: BracketViewProps) {
+export function BracketView({ theme, matches }: BracketViewProps) {
   const [selections, setSelections] = useState<SelectionMap>({});
 
-  const nodes = useMemo(() => deriveBracket(selections), [selections]);
+  const groupSlotMap = useMemo(() => buildGroupSlotMap(matches), [matches]);
+  const nodes = useMemo(() => deriveBracket(selections, groupSlotMap), [selections, groupSlotMap]);
   const finalNode = nodes.find((node) => node.id === "F-1");
   const championSlot = selections["F-1"];
   const championLabel = finalNode && championSlot ? getSlotLabel(finalNode, championSlot) : null;
@@ -296,27 +411,47 @@ export function BracketView({ theme }: BracketViewProps) {
             </p>
           </div>
 
-          <span
-            className={`inline-flex w-full rounded-full border px-3 py-1 font-mono text-[10px] uppercase tracking-wider sm:w-auto ${
-              theme === "classic-light"
-                ? "border-slate-200 bg-slate-50 text-slate-600"
-                : "border-white/10 bg-white/5 text-slate-200"
-            }`}
-            id="bracket-reset-note"
-          >
-            Estado local • sem persistência
-          </span>
+          <div className="flex flex-wrap items-center gap-2">
+            <span
+              className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 font-mono text-[10px] uppercase tracking-wider ${
+                theme === "classic-light"
+                  ? "border-[#009c3b]/30 bg-[#009c3b]/5 text-[#009c3b]"
+                  : "border-[#00e476]/25 bg-[#00e476]/5 text-[#00e476]"
+              }`}
+            >
+              <span className="font-bold">✓</span> Classificado
+            </span>
+            <span
+              className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 font-mono text-[10px] uppercase tracking-wider ${
+                theme === "classic-light"
+                  ? "border-dashed border-amber-400/60 text-amber-700"
+                  : "border-dashed border-[#ffd84d]/40 text-[#ffd84d]/80"
+              }`}
+            >
+              prov. Provisório
+            </span>
+            <span
+              className={`inline-flex rounded-full border px-3 py-1 font-mono text-[10px] uppercase tracking-wider ${
+                theme === "classic-light"
+                  ? "border-slate-200 bg-slate-50 text-slate-600"
+                  : "border-white/10 bg-white/5 text-slate-200"
+              }`}
+              id="bracket-reset-note"
+            >
+              Estado local • sem persistência
+            </span>
+          </div>
         </div>
 
         <div className="mt-6 grid grid-cols-1 gap-4 xl:grid-cols-5 2xl:gap-5" id="bracket-stage-grid">
           {STAGES.map((stage) => (
-            // key on the native div — custom components don't support key in this project's TS setup
             <div key={stage}>
               <BracketStageSection
                 stage={stage}
                 nodes={getStageNodes(nodes, stage)}
                 theme={theme}
                 onAdvance={handleAdvance}
+                groupSlotMap={groupSlotMap}
               />
             </div>
           ))}
