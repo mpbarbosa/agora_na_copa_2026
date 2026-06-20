@@ -9,18 +9,22 @@ test.describe("Phase 7 polish", () => {
     await expect(page.locator("#standings-view")).toBeVisible();
     await expect(page.locator("#standings-grid")).toBeVisible();
     await expect(page.locator("#standings-group-grupo-a")).toBeVisible();
-    expect(
-      await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth),
-    ).toBe(true);
+    // Wait for web fonts to finish loading: before they do, the fallback font can
+    // render wider and momentarily overflow at 320px, flaking this measurement.
+    await page.evaluate(() => document.fonts.ready);
+    await expect
+      .poll(() => page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth))
+      .toBe(true);
 
     await page.goto("/");
     await page.click("#btn-nav-chaveamento");
     await expect(page.locator("#bracket-view")).toBeVisible();
     await expect(page.locator("#bracket-stage-grid")).toBeVisible();
     await expect(page.locator("#bracket-stage-r32")).toBeVisible();
-    expect(
-      await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth),
-    ).toBe(true);
+    await page.evaluate(() => document.fonts.ready);
+    await expect
+      .poll(() => page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth))
+      .toBe(true);
   });
 
   test("ultra-wide layouts expand the standings and bracket grids", async ({ page }) => {
