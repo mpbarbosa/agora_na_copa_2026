@@ -268,6 +268,46 @@ test("buildMatchStateEntry includes sorted FIFA incidents from live data", () =>
   );
 });
 
+test("buildMatchStateEntry recovers a goal scorer's shirt number from the registry when FIFA omits it", () => {
+  // Regression: FIFA's live feed often publishes a substitute goal scorer with a
+  // null ShirtNumber, which previously left the player card showing "Camisa 0".
+  // The mention should recover number and position from the local squad registry
+  // (Deniz Undav, FIFA id 484851 → GER #26, forward).
+  const localMatch = createMatch({ status: "LIVE" });
+  const calendarMatch: FifaCalendarMatch = {
+    IdMatch: "400021464",
+    Date: "2026-06-20T17:00:00Z",
+    MatchStatus: 3,
+    HomeTeamScore: 1,
+    AwayTeamScore: 0,
+  };
+  const liveMatch: FifaLiveMatch = {
+    IdMatch: "400021464",
+    Date: "2026-06-20T17:00:00Z",
+    MatchStatus: 3,
+    MatchTime: "90'+4'",
+    HomeTeam: {
+      Score: 1,
+      Players: [
+        {
+          IdPlayer: "484851",
+          ShortName: [{ Locale: "pt-BR", Description: "UNDAV" }],
+          ShirtNumber: null,
+          Position: null,
+        },
+      ],
+      Goals: [{ IdPlayer: "484851", Minute: "90'+4'", Period: 5 }],
+    },
+    AwayTeam: { Score: 0, Players: [], Goals: [] },
+  };
+
+  const entry = buildMatchStateEntry(localMatch, calendarMatch, liveMatch);
+  const mention = entry.incidents?.find((i) => i.type === "GOAL")?.playerMentions?.[0];
+
+  assert.equal(mention?.number, 26);
+  assert.equal(mention?.position, "FW");
+});
+
 test("buildMatchStateEntry falls back to local match state when FIFA data is unavailable", () => {
   const localMatch = createMatch({
     status: "FINISHED",

@@ -546,25 +546,44 @@ const buildFifaPlayerMap = (team: FifaLiveTeam | undefined) => {
 const toIncidentPlayerMention = (
   fifaPlayer: FifaLivePlayer | undefined,
   fallbackName: string,
-) => ({
-  id: fifaPlayer?.IdPlayer,
-  name: fallbackName,
-  number:
-    typeof fifaPlayer?.ShirtNumber === "number" ? fifaPlayer.ShirtNumber : undefined,
-  position:
+  teamCode?: string,
+) => {
+  const fifaNumber =
+    typeof fifaPlayer?.ShirtNumber === "number" ? fifaPlayer.ShirtNumber : undefined;
+  const fifaPosition =
     typeof fifaPlayer?.Position === "number"
       ? FIFA_POSITION_TO_LOCAL[fifaPlayer.Position] ?? Position.MF
-      : undefined,
-  pictureUrl: getFifaPlayerPictureUrl(fifaPlayer),
-});
+      : undefined;
+  const fifaPicture = getFifaPlayerPictureUrl(fifaPlayer);
+
+  // FIFA's live feed frequently omits the shirt number (and sometimes position
+  // and picture) for substitutes and bench scorers, which previously left the
+  // player card showing "Camisa 0". Recover the missing fields from the local
+  // squad registry, matched by FIFA player id first, then team squad.
+  const registryEntry =
+    fifaNumber === undefined || fifaPosition === undefined || !fifaPicture
+      ? resolvePlayerEntry(teamCode ?? "", fallbackName, fifaNumber ?? -1, fifaPlayer?.IdPlayer)
+      : null;
+
+  return {
+    id: fifaPlayer?.IdPlayer ?? registryEntry?.fifaId,
+    name: fallbackName,
+    number: fifaNumber ?? registryEntry?.number ?? undefined,
+    position: fifaPosition ?? registryEntry?.position ?? undefined,
+    pictureUrl: fifaPicture ?? registryEntry?.pictureUrl,
+  };
+};
 
 export const getIncidentsFromLiveFifa = (
   fifaMatch: FifaLiveMatch,
+  homeTeamCode?: string,
+  awayTeamCode?: string,
 ): CommentaryEvent[] => {
   const homePlayerNames = buildPlayerNameMap(fifaMatch.HomeTeam);
   const awayPlayerNames = buildPlayerNameMap(fifaMatch.AwayTeam);
   const homePlayers = buildFifaPlayerMap(fifaMatch.HomeTeam);
   const awayPlayers = buildFifaPlayerMap(fifaMatch.AwayTeam);
+  const teamCodeFor = (team: "A" | "B") => (team === "A" ? homeTeamCode : awayTeamCode);
 
   const buildGoalIncidents = (
     goals: FifaLiveGoal[] | undefined,
@@ -583,7 +602,7 @@ export const getIncidentsFromLiveFifa = (
         type: "GOAL" as const,
         text: `${playerName} marcou.`,
         team,
-        playerMentions: [toIncidentPlayerMention(goal.IdPlayer ? players.get(goal.IdPlayer) : undefined, playerName)],
+        playerMentions: [toIncidentPlayerMention(goal.IdPlayer ? players.get(goal.IdPlayer) : undefined, playerName, teamCodeFor(team))],
         period: goal.Period,
       };
     });
@@ -614,6 +633,7 @@ export const getIncidentsFromLiveFifa = (
             toIncidentPlayerMention(
               booking.IdPlayer ? players.get(booking.IdPlayer) : undefined,
               playerName,
+              teamCodeFor(team),
             ),
           ],
           period: booking.Period,
@@ -652,10 +672,12 @@ export const getIncidentsFromLiveFifa = (
           toIncidentPlayerMention(
             substitution.IdPlayerOff ? players.get(substitution.IdPlayerOff) : undefined,
             playerOffName,
+            teamCodeFor(team),
           ),
           toIncidentPlayerMention(
             substitution.IdPlayerOn ? players.get(substitution.IdPlayerOn) : undefined,
             playerOnName,
+            teamCodeFor(team),
           ),
         ],
         period: substitution.Period,
@@ -708,7 +730,9 @@ export const buildMatchStateEntry = (
 
   const fifaScore = getScoreFromFifa(fifaMatch);
   const liveScore = fifaLiveMatch ? getScoreFromLiveFifa(fifaLiveMatch) : undefined;
-  const incidents = fifaLiveMatch ? getIncidentsFromLiveFifa(fifaLiveMatch) : undefined;
+  const incidents = fifaLiveMatch
+    ? getIncidentsFromLiveFifa(fifaLiveMatch, localMatch.teamA.code, localMatch.teamB.code)
+    : undefined;
   const status = fifaLiveMatch
     ? getMatchStatusFromFifa(localMatch, {
         ...fifaMatch,
