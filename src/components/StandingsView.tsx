@@ -122,7 +122,7 @@ export function StandingsView({
               )}
 
               <div className="-mx-1 overflow-x-auto pb-1">
-                <table className="min-w-[420px] w-full font-mono text-[11px] sm:text-xs">
+                <table className="w-full font-mono text-[11px] sm:text-xs">
                   <thead>
                     <tr className={`border-b ${rowBorderClasses}`}>
                       <th className={`w-5 py-1.5 text-left font-normal uppercase tracking-wider ${headerCellClasses}`} aria-label="Posição" />
