@@ -204,11 +204,25 @@ export function StandingsView({
                           title={rowTitle}
                           className={`border-b last:border-b-0 ${rowBorderClasses} ${rowLeftBorder} ${
                             status === "eliminated" ? "opacity-60" : ""
+                          } ${
+                            status === "qualified"
+                              ? theme === "classic-light"
+                                ? "bg-emerald-50"
+                                : "bg-[#00e476]/[0.06]"
+                              : ""
                           }`}
                         >
                           <td className="py-1.5 pl-1 text-center font-mono text-[9px]">
                             {status === "qualified" ? (
-                              <span className={`font-bold ${theme === "classic-light" ? "text-[#009c3b]" : "text-[#00e476]"}`}>✓</span>
+                              <span
+                                className={`inline-flex items-center justify-center w-[14px] h-[14px] rounded-full text-[8px] font-bold ${
+                                  theme === "classic-light"
+                                    ? "bg-[#009c3b] text-white"
+                                    : "bg-[#00e476] text-black"
+                                }`}
+                              >
+                                ✓
+                              </span>
                             ) : (
                               <span className={mutedClasses}>{index + 1}</span>
                             )}
