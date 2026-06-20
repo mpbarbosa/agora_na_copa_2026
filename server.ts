@@ -18,7 +18,7 @@ import type {
   FifaLiveMatch,
   FifaWatchSource,
 } from "./fifa-sync-core";
-import { buildGoogleTrendsRssUrl, parseGoogleTrendsRss } from "./trends-core";
+import { GOOGLE_TRENDS_BATCH_URL, buildGoogleTrendsRequestBody, parseGoogleTrendsBatch } from "./trends-core";
 import { APP_MATCHES } from "./src/appMatches";
 import { resolvePlayerEntry } from "./src/data/playerRegistry";
 import { triviaQuestions } from "./src/data/questions";
@@ -1996,25 +1996,28 @@ const fetchGoogleTrends = async (): Promise<GoogleTrendsResponse> => {
 
   let response: Response;
   try {
-    response = await fetch(buildGoogleTrendsRssUrl("BR"), {
+    response = await fetch(GOOGLE_TRENDS_BATCH_URL, {
+      method: "POST",
       signal: controller.signal,
       headers: {
-        "User-Agent": "agora-na-copa-2026/1.0",
-        Accept: "application/rss+xml, application/xml, text/xml",
+        "User-Agent":
+          "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Safari/537.36",
+        "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
       },
+      body: buildGoogleTrendsRequestBody("BR", 24),
     });
   } finally {
     clearTimeout(timeout);
   }
 
   if (!response.ok) {
-    throw new Error(`Google Trends RSS request failed (${response.status})`);
+    throw new Error(`Google Trends request failed (${response.status})`);
   }
 
-  const xml = await response.text();
-  const topics = parseGoogleTrendsRss(xml, 12);
+  const raw = await response.text();
+  const topics = parseGoogleTrendsBatch(raw, 12);
   if (topics.length === 0) {
-    throw new Error("Google Trends RSS returned no topics");
+    throw new Error("Google Trends returned no topics");
   }
 
   return {
