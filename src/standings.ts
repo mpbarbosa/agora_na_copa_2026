@@ -146,6 +146,45 @@ function haveMutualRemainingMatch(
   );
 }
 
+// Returns true when `team` cannot possibly finish top-2 in any remaining-match
+// outcome. Enumerates all 3^n scenarios (win/draw/loss per remaining match).
+// For a 4-team group this is at most 3^4 = 81 iterations — trivially fast.
+function cannotPossiblyFinishTop2(
+  team: StandingsRow,
+  allRows: StandingsRow[],
+  groupRemainingMatches: Match[],
+): boolean {
+  const n = groupRemainingMatches.length;
+  const totalScenarios = 3 ** n;
+
+  for (let scenario = 0; scenario < totalScenarios; scenario++) {
+    const pts = new Map(allRows.map((r) => [r.code, r.points]));
+    let s = scenario;
+
+    for (const match of groupRemainingMatches) {
+      const outcome = s % 3;
+      s = Math.floor(s / 3);
+      const a = match.teamA.code;
+      const b = match.teamB.code;
+      if (outcome === 0) pts.set(a, (pts.get(a) ?? 0) + 3);
+      else if (outcome === 1) pts.set(b, (pts.get(b) ?? 0) + 3);
+      else {
+        pts.set(a, (pts.get(a) ?? 0) + 1);
+        pts.set(b, (pts.get(b) ?? 0) + 1);
+      }
+    }
+
+    const teamPts = pts.get(team.code) ?? 0;
+    const rivalsAbove = allRows.filter(
+      (r) => r.code !== team.code && (pts.get(r.code) ?? 0) > teamPts,
+    ).length;
+
+    if (rivalsAbove < 2) return false; // team can finish top-2 in this scenario
+  }
+
+  return true; // every scenario has ≥ 2 rivals above team
+}
+
 // Returns true when rivals A and B can SIMULTANEOUSLY both reach `targetPts`.
 // When they play each other in a remaining match only one can win that game,
 // so each scenario (A wins / B wins / draw) is tested separately.
@@ -185,9 +224,9 @@ function canPairReachTogether(
 // "qualified"  – no two rivals can SIMULTANEOUSLY reach the team's current
 //                points, accounting for head-to-head fixtures between rivals
 //                (e.g. when two chasers still play each other, only one can win).
-// "eliminated" – even winning all remaining matches, 3 rivals already have
-//                strictly more points than the team's theoretical maximum →
-//                4th place is guaranteed, team is out of the tournament.
+// "eliminated" – in every possible outcome of remaining matches, at least 2
+//                rivals end up with strictly more points than the team →
+//                top-2 is mathematically impossible, team is out.
 // "contention" – outcome still undecided. Note: 3rd-place teams may still
 //                advance as one of the 8 best thirds (Art. 12.5).
 //
@@ -217,12 +256,19 @@ function computeGroupQualification(
     );
   }
 
+  // Pre-filter remaining matches for this group once (shared across all team checks)
+  const groupRemainingMatches = allMatches.filter(
+    (m) =>
+      m.stageName === "Group Stage" &&
+      m.status !== "FINISHED" &&
+      codes.has(m.teamA.code) &&
+      codes.has(m.teamB.code),
+  );
+
   const result = new Map<string, QualificationStatus>();
   for (const row of sortedRows) {
     const rivals = sortedRows.filter((r) => r.code !== row.code);
     const myPts = row.points;
-    const myRem = remaining.get(row.code) ?? 0;
-    const myMax = myPts + myRem * 3;
 
     // Rivals that can individually reach the team's current points
     const threats = rivals.filter(
@@ -240,8 +286,10 @@ function computeGroupQualification(
         ),
       );
 
-    // Eliminated: 3 rivals already have strictly more points than my theoretical max
-    const eliminated = rivals.filter((r) => r.points > myMax).length >= 3;
+    // Eliminated: brute-force check — if every possible outcome of remaining
+    // matches leaves at least 2 rivals with strictly more points, top-2 is gone.
+    const eliminated =
+      !qualified && cannotPossiblyFinishTop2(row, sortedRows, groupRemainingMatches);
 
     result.set(row.code, qualified ? "qualified" : eliminated ? "eliminated" : "contention");
   }
@@ -491,6 +539,73 @@ export function computeQualificationNote(
     `Com ${myPts} pontos, apenas ${chaser.name} ainda poderia igualá-la ` +
     `(máximo de ${chaser.max} pts). ${blockedText} ` +
     `Vaga no mata-mata garantida matematicamente.`
+  );
+}
+
+// Returns a Portuguese explanation of why a team is mathematically eliminated.
+// Intended for tooltip text on the ✕ badge in the Grupos view.
+export function computeEliminationNote(
+  teamCode: string,
+  sortedRows: StandingsRow[],
+  allMatches: Match[],
+): string {
+  const team = sortedRows.find((r) => r.code === teamCode);
+  if (!team) return "Eliminada matematicamente da fase mata-mata.";
+
+  const codes = new Set(sortedRows.map((r) => r.code));
+  const remaining = new Map<string, number>(sortedRows.map((r) => [r.code, 0]));
+  for (const m of allMatches) {
+    if (m.stageName !== "Group Stage" || m.status === "FINISHED") continue;
+    if (codes.has(m.teamA.code))
+      remaining.set(m.teamA.code, (remaining.get(m.teamA.code) ?? 0) + 1);
+    if (codes.has(m.teamB.code))
+      remaining.set(m.teamB.code, (remaining.get(m.teamB.code) ?? 0) + 1);
+  }
+
+  const myPts = team.points;
+  const myRem = remaining.get(teamCode) ?? 0;
+  const myMax = myPts + myRem * 3;
+  const totalRemaining = [...remaining.values()].reduce((a, b) => a + b, 0);
+
+  if (totalRemaining === 0) {
+    const pos = sortedRows.findIndex((r) => r.code === teamCode) + 1;
+    return `Fase de grupos encerrada. ${team.name} terminou em ${pos}º lugar e foi eliminada.`;
+  }
+
+  const remPhrase =
+    myRem === 0
+      ? "sem mais jogos a disputar"
+      : myRem === 1
+        ? "mesmo vencendo o jogo restante"
+        : `mesmo vencendo os ${myRem} jogos restantes`;
+
+  // Rivals whose current points already exceed the team's theoretical max
+  const lockedAbove = sortedRows
+    .filter((r) => r.code !== teamCode && r.points > myMax)
+    .map((r) => r.name);
+
+  if (lockedAbove.length >= 2) {
+    const locked =
+      lockedAbove.length === 2
+        ? `${lockedAbove[0]} e ${lockedAbove[1]}`
+        : lockedAbove.slice(0, -1).join(", ") + " e " + lockedAbove[lockedAbove.length - 1];
+    return (
+      `Eliminada matematicamente. ${team.name}, ${remPhrase}, pode somar no máximo ${myMax} pontos. ` +
+      `${locked} já ${lockedAbove.length === 1 ? "tem" : "têm"} mais pontos e garantem posições superiores.`
+    );
+  }
+
+  if (lockedAbove.length === 1) {
+    return (
+      `Eliminada matematicamente. ${team.name}, ${remPhrase}, pode somar no máximo ${myMax} pontos. ` +
+      `${lockedAbove[0]} já tem mais pontos (acima do alcançável) e ao menos mais um rival ` +
+      `também terminará à frente, independentemente dos resultados restantes.`
+    );
+  }
+
+  return (
+    `Eliminada matematicamente. ${team.name}, ${remPhrase}, pode somar no máximo ${myMax} pontos. ` +
+    `Ao menos dois rivais sempre terminarão com mais pontos, independentemente dos resultados restantes.`
   );
 }
 

@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Info } from "lucide-react";
 import type { Match, TeamRef } from "../types";
-import { computeStandings, groupStandings, computeQualificationNote, computeContentionNote } from "../standings";
+import { computeStandings, groupStandings, computeQualificationNote, computeContentionNote, computeEliminationNote } from "../standings";
 import { FlagIcon } from "./FlagIcon";
 import { StandingsRulesCard } from "./StandingsRulesCard";
 
@@ -171,7 +171,9 @@ export function StandingsView({
         <p className="font-mono text-[10px] uppercase tracking-wider leading-relaxed">
           Passe o cursor sobre o{" "}
           <span className={`font-bold ${theme === "classic-light" ? "text-[#009c3b]" : "text-[#00e476]"}`}>✓</span>
-          {" "}(classificado) ou sobre o{" "}
+          {" "}(classificado),{" "}
+          <span className="font-bold text-red-500">✕</span>
+          {" "}(eliminado) ou sobre o{" "}
           <span className={`font-bold ${theme === "classic-light" ? "text-slate-700" : "text-slate-200"}`}>nº de posição</span>
           {" "}(1º/2º ainda em disputa) para ver a análise matemática da situação de cada seleção.
         </p>
@@ -271,6 +273,8 @@ export function StandingsView({
                       const rowLeftBorder =
                         status === "qualified"
                           ? `border-l-2 ${theme === "classic-light" ? "border-l-[#009c3b]" : "border-l-[#00e476]"}`
+                          : status === "eliminated"
+                          ? "border-l-2 border-l-red-500"
                           : isQualifying
                           ? `border-l-2 ${qualifiedClasses}`
                           : "border-l-2 border-l-transparent";
@@ -292,6 +296,10 @@ export function StandingsView({
                               ? theme === "classic-light"
                                 ? "bg-emerald-50"
                                 : "bg-[#00e476]/[0.06]"
+                              : status === "eliminated"
+                              ? theme === "classic-light"
+                                ? "bg-red-50"
+                                : "bg-red-500/[0.05]"
                               : ""
                           }`}
                         >
@@ -306,6 +314,13 @@ export function StandingsView({
                                 }`}
                               >
                                 ✓
+                              </span>
+                            ) : status === "eliminated" ? (
+                              <span
+                                title={computeEliminationNote(row.code, rows, liveMatches)}
+                                className="inline-flex items-center justify-center w-[14px] h-[14px] rounded-full text-[8px] font-bold cursor-help bg-red-500 text-white"
+                              >
+                                ✕
                               </span>
                             ) : index < 2 && status === "contention" ? (
                               <span
