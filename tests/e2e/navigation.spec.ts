@@ -13,6 +13,7 @@ const NAV_VIEW_IDS: Record<string, string> = {
   estadios: "#venue-map-view",
   noticias: "#news-view",
   fanzone: "#fanzone-view",
+  "redes-sociais": "#redes-sociais-view",
 };
 
 test.describe("Navigation shell", () => {

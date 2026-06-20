@@ -55,4 +55,9 @@ export const NAV_ITEMS: NavItem[] = [
     label: "Fan Zone",
     description: "Quiz e minijogos para o torcedor acompanhar a Copa em clima de resenha.",
   },
+  {
+    id: "redes-sociais",
+    label: "Redes Sociais",
+    description: "Feed social do Mundo na Copa com filtros, tendências, curtidas e comentários.",
+  },
 ];
