@@ -16,6 +16,7 @@ import { PartidasView } from "./components/PartidasView";
 import { BrazilCountdownBadge } from "./components/BrazilCountdownBadge";
 import { BrazilGoalFireworks } from "./components/BrazilGoalFireworks";
 import { useTeamLineups } from "./hooks/useTeamLineups";
+import { useVersionCheck } from "./hooks/useVersionCheck";
 import { NAV_ITEMS } from "./navigation";
 import { Sun, Moon } from "lucide-react";
 
@@ -35,6 +36,7 @@ export default function App() {
   const isAoVivoViewActive = activeNavId === "ao-vivo" && lineupTeam === null;
   const teamLineups = useTeamLineups(isAoVivoViewActive);
   const hasLiveMatch = matches.some((match) => match.status === "LIVE");
+  const newVersionAvailable = useVersionCheck(APP_VERSION);
 
   // Fireworks when Brazil scores during a live match
   const [fireworksActive, setFireworksActive] = useState(false);
@@ -175,6 +177,25 @@ export default function App() {
       }`}
       id="main-layout-container"
     >
+      {/* NEW VERSION BANNER */}
+      {newVersionAvailable && (
+        <div
+          id="new-version-banner"
+          className="fixed top-0 left-0 right-0 z-[60] flex items-center justify-center gap-3 bg-[#ffd84d] px-4 py-2 shadow-md"
+        >
+          <span className="font-mono text-[11px] font-bold uppercase tracking-wider text-[#111]">
+            Nova versão disponível
+          </span>
+          <button
+            type="button"
+            onClick={() => window.location.reload()}
+            className="rounded-md bg-[#111] px-3 py-1 font-mono text-[10px] font-bold uppercase tracking-wider text-[#ffd84d] transition hover:bg-[#333]"
+          >
+            Atualizar agora
+          </button>
+        </div>
+      )}
+
       {/* HEADER SECTION */}
       <header
         className={`border-b ${
