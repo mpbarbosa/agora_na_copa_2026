@@ -12,10 +12,10 @@ import {
 // prefix, then a row ["wrb.fr","i0OFE","<json string>"] whose JSON is
 // [null, [ entry, entry ... ]] with entry[0]=title and entry[6]=volume.
 const sampleEntries = [
-  ["misantropia", null, "BR", [1781923200], null, null, 2000000, null, 1000, ["misantropia", "defesa civil"]],
-  ["brasil x haiti", null, "BR", [1781910000], null, null, 500000, null, 1000, ["brasil", "haiti"]],
-  ["londrina x athletic", null, "BR", [1781900000], null, null, 20000, null, 1, ["londrina"]],
-  ["", null, "BR", [0], null, null, 5000, null, 1, []], // empty title → skipped
+  ["misantropia", null, "BR", [1781923200], null, null, 2000000, null, 1000, ["misantropia", "defesa civil"], [11]],
+  ["brasil x haiti", null, "BR", [1781910000], null, null, 500000, null, 1000, ["brasil", "haiti"], [17]],
+  ["londrina x athletic", null, "BR", [1781900000], null, null, 20000, null, 1, ["londrina"], [17, 4]],
+  ["", null, "BR", [0], null, null, 5000, null, 1, []], // empty title → skipped (no category field)
 ];
 const SAMPLE = ")]}'\n\n" + JSON.stringify([
   ["wrb.fr", "i0OFE", JSON.stringify([null, sampleEntries])],
@@ -52,10 +52,20 @@ test("parseGoogleTrendsBatch extracts ranked topics with formatted volume", () =
     traffic: "2 mi+",
     pictureUrl: null,
     news: null,
+    categories: [11],
   });
   assert.equal(topics[1].title, "brasil x haiti");
   assert.equal(topics[1].traffic, "500 mil+");
+  assert.deepEqual(topics[1].categories, [17]);
   assert.equal(topics[2].traffic, "20 mil+");
+  assert.deepEqual(topics[2].categories, [17, 4]);
+});
+
+test("parseGoogleTrendsBatch defaults categories to [] when the field is absent", () => {
+  const entries = [["sem categoria", null, "BR", [1], null, null, 1000, null, 1, ["x"]]];
+  const sample = ")]}'\n" + JSON.stringify([["wrb.fr", "i0OFE", JSON.stringify([null, entries])]]);
+  const topics = parseGoogleTrendsBatch(sample);
+  assert.deepEqual(topics[0].categories, []);
 });
 
 test("parseGoogleTrendsBatch honours the limit and feed order", () => {

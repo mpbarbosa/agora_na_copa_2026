@@ -16,6 +16,9 @@ interface SocialMediasViewProps {
   theme: "classic-light" | "stadium-dark";
 }
 
+/** Google Trends "trending now" category code for Sports (Esportes). */
+const SPORTS_CATEGORY_CODE = 17;
+
 type PostCategory = "foto" | "noticia" | "oficial";
 type CategoryFilter = "tudo" | PostCategory;
 
@@ -141,6 +144,7 @@ export function SocialMediasView({ theme }: SocialMediasViewProps) {
   const [commentDrafts, setCommentDrafts] = useState<Record<string, string>>({});
   const [googleTrends, setGoogleTrends] = useState<GoogleTrendTopic[]>([]);
   const [trendsStatus, setTrendsStatus] = useState<"loading" | "ready" | "empty">("loading");
+  const [sportsOnly, setSportsOnly] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -173,6 +177,19 @@ export function SocialMediasView({ theme }: SocialMediasViewProps) {
     }
     return [...counts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 8);
   }, []);
+
+  const hasSportsTrends = useMemo(
+    () => googleTrends.some((topic) => topic.categories.includes(SPORTS_CATEGORY_CODE)),
+    [googleTrends],
+  );
+
+  const visibleTrends = useMemo(
+    () =>
+      sportsOnly
+        ? googleTrends.filter((topic) => topic.categories.includes(SPORTS_CATEGORY_CODE))
+        : googleTrends,
+    [googleTrends, sportsOnly],
+  );
 
   const visiblePosts = useMemo(
     () =>
@@ -277,11 +294,24 @@ export function SocialMediasView({ theme }: SocialMediasViewProps) {
           id="social-medias-google-trends"
           aria-label="Buscas em alta no Google"
         >
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <Flame size={16} className={accentText} />
             <p className={`font-anton text-lg uppercase tracking-wide ${headingClasses}`}>
               Em alta no Google
             </p>
+            {trendsStatus === "ready" && hasSportsTrends && (
+              <button
+                type="button"
+                aria-pressed={sportsOnly}
+                onClick={() => setSportsOnly((prev) => !prev)}
+                data-testid="social-trend-sports-toggle"
+                className={`min-h-8 rounded-full border px-3 py-1 font-mono text-[10px] font-bold uppercase tracking-wider transition ${
+                  sportsOnly ? activeChipClasses : idleChipClasses
+                }`}
+              >
+                Só esportes
+              </button>
+            )}
             <span className={`ml-auto font-mono text-[9px] uppercase tracking-wider ${subtleClasses}`}>
               Google Trends • Brasil
             </span>
@@ -291,9 +321,13 @@ export function SocialMediasView({ theme }: SocialMediasViewProps) {
             <p className={`mt-3 font-archivo text-sm leading-6 ${mutedClasses}`}>
               Carregando buscas em alta…
             </p>
+          ) : visibleTrends.length === 0 ? (
+            <p className={`mt-3 font-archivo text-sm leading-6 ${mutedClasses}`} data-testid="social-trend-vazio">
+              Nenhuma busca de esportes em alta agora.
+            </p>
           ) : (
             <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-3">
-              {googleTrends.map((topic, index) => {
+              {visibleTrends.map((topic, index) => {
                 const href = topic.news?.url
                   ? topic.news.url
                   : `https://www.google.com/search?q=${encodeURIComponent(topic.title)}`;

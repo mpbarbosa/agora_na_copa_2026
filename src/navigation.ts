@@ -51,13 +51,13 @@ export const NAV_ITEMS: NavItem[] = [
     description: "Feed de novidades sobre seleções, sedes e ingressos.",
   },
   {
-    id: "fanzone",
-    label: "Fan Zone",
-    description: "Quiz e minijogos para o torcedor acompanhar a Copa em clima de resenha.",
-  },
-  {
     id: "social-medias",
     label: "Redes Sociais",
     description: "Feed social do Mundo na Copa com filtros, tendências, curtidas e comentários.",
+  },
+  {
+    id: "fanzone",
+    label: "Fan Zone",
+    description: "Quiz e minijogos para o torcedor acompanhar a Copa em clima de resenha.",
   },
 ];

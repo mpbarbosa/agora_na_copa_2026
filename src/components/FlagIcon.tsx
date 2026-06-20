@@ -35,7 +35,7 @@ const WIKIPEDIA_FLAG_FILENAMES: Record<string, string> = {
   iran:         "Flag_of_Iran.svg",
   iraq:         "Flag_of_Iraq.svg",
   italy:        "Flag_of_Italy.svg",
-  ivorycoast:   "Flag_of_Côte_d’Ivoire.svg",
+  ivorycoast:   "Flag_of_Côte_d'Ivoire.svg",
   jamaica:      "Flag_of_Jamaica.svg",
   japan:        "Flag_of_Japan.svg",
   jordan:       "Flag_of_Jordan.svg",

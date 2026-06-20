@@ -407,6 +407,8 @@ export interface GoogleTrendTopic {
   traffic: string | null;
   pictureUrl: string | null;
   news: GoogleTrendNewsItem | null;
+  /** Google Trends category codes for this topic (e.g. 17 = Esportes). Empty when uncategorized. */
+  categories: number[];
 }
 
 export interface GoogleTrendsResponse {

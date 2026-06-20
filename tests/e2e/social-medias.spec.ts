@@ -66,8 +66,9 @@ test.describe("Redes Sociais view", () => {
               traffic: "1000+",
               pictureUrl: null,
               news: { title: "Malen no WK", url: "https://news.example.com/malen", source: "Sporza" },
+              categories: [17],
             },
-            { title: "países baixos", traffic: "500+", pictureUrl: null, news: null },
+            { title: "países baixos", traffic: "500+", pictureUrl: null, news: null, categories: [11] },
           ],
         }),
       });
@@ -89,6 +90,39 @@ test.describe("Redes Sociais view", () => {
       "href",
       /google\.com\/search\?q=/,
     );
+  });
+
+  test("the 'Só esportes' toggle filters trends to the sports category", async ({ page }) => {
+    await page.route("**/api/google-trends", async (route) => {
+      await route.fulfill({
+        contentType: "application/json",
+        body: JSON.stringify({
+          source: "google-trends",
+          note: "Buscas em alta no Brasil • Google Trends",
+          updatedAt: "2026-06-20T12:00:00.000Z",
+          topics: [
+            { title: "brasil x haiti", traffic: "2 mi+", pictureUrl: null, news: null, categories: [17] },
+            { title: "defesa civil", traffic: "500 mil+", pictureUrl: null, news: null, categories: [11] },
+          ],
+        }),
+      });
+    });
+
+    await page.goto("/");
+    await page.click("#btn-nav-social-medias");
+
+    const toggle = page.getByTestId("social-trend-sports-toggle");
+    await expect(toggle).toBeVisible();
+    await expect(toggle).toHaveAttribute("aria-pressed", "false");
+
+    // Both topics shown before filtering.
+    await expect(page.getByTestId("social-trend-1")).toContainText("defesa civil");
+
+    await toggle.click();
+    await expect(toggle).toHaveAttribute("aria-pressed", "true");
+    // Only the sports topic remains.
+    await expect(page.getByTestId("social-trend-0")).toContainText("brasil x haiti");
+    await expect(page.getByTestId("social-trend-1")).toHaveCount(0);
   });
 
   test("hides the Google Trends card when the API returns no topics", async ({ page }) => {

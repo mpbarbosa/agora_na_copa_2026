@@ -13,6 +13,9 @@ import type { GoogleTrendTopic } from "./src/types";
 
 const TRENDS_RPC_ID = "i0OFE";
 
+/** Google Trends "trending now" category code for Sports (Esportes). */
+export const SPORTS_CATEGORY_CODE = 17;
+
 export const GOOGLE_TRENDS_BATCH_URL =
   "https://trends.google.com/_/TrendsUi/data/batchexecute" +
   "?rpcids=" + TRENDS_RPC_ID + "&source-path=%2Ftrending&hl=pt-BR";
@@ -41,7 +44,7 @@ export const formatTrafficPtBr = (volume: unknown): string | null => {
  * Parses the `batchexecute` response into trending topics. The response is a
  * `)]}'`-prefixed JSON array; the relevant row is `["wrb.fr","i0OFE","<json>"]`
  * whose third element is itself a JSON string of `[null,[ entry, entry, ... ]]`.
- * Each entry: [title, , geo, [startTs], , , volume, , growth, [relatedQueries], ...].
+ * Each entry: [title, , geo, [startTs], , , volume, , growth, [relatedQueries], [categoryCodes], ...].
  *
  * Resilient to shape changes: returns [] rather than throwing on bad input.
  * Returns at most `limit` topics in Google's ranking order.
@@ -73,11 +76,15 @@ export const parseGoogleTrendsBatch = (
     if (!Array.isArray(entry)) continue;
     const title = entry[0];
     if (typeof title !== "string" || !title.trim()) continue;
+    const categories = Array.isArray(entry[10])
+      ? (entry[10] as unknown[]).filter((c): c is number => typeof c === "number")
+      : [];
     topics.push({
       title: title.trim(),
       traffic: formatTrafficPtBr(entry[6]),
       pictureUrl: null,
       news: null,
+      categories,
     });
     if (topics.length >= limit) break;
   }
