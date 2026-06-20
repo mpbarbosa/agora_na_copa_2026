@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Info } from "lucide-react";
 import type { Match, TeamRef } from "../types";
-import { computeStandings, groupStandings } from "../standings";
+import { computeStandings, groupStandings, computeQualificationNote } from "../standings";
 import { FlagIcon } from "./FlagIcon";
 import { StandingsRulesCard } from "./StandingsRulesCard";
 
@@ -280,7 +280,8 @@ export function StandingsView({
                           <td className="py-1.5 pl-1 text-center font-mono text-[9px]">
                             {status === "qualified" ? (
                               <span
-                                className={`inline-flex items-center justify-center w-[14px] h-[14px] rounded-full text-[8px] font-bold ${
+                                title={computeQualificationNote(row.code, rows, liveMatches)}
+                                className={`inline-flex items-center justify-center w-[14px] h-[14px] rounded-full text-[8px] font-bold cursor-help ${
                                   theme === "classic-light"
                                     ? "bg-[#009c3b] text-white"
                                     : "bg-[#00e476] text-black"

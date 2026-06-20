@@ -308,6 +308,62 @@ function sortGroupTable(rows: StandingsRow[], matches: Match[]): StandingsRow[] 
   return result;
 }
 
+// Returns a Portuguese explanation of why a team is mathematically qualified.
+// Intended for tooltip text on the ✓ badge in the Grupos view.
+export function computeQualificationNote(
+  teamCode: string,
+  sortedRows: StandingsRow[],
+  allMatches: Match[],
+): string {
+  const codes = new Set(sortedRows.map((r) => r.code));
+  const remaining = new Map<string, number>(sortedRows.map((r) => [r.code, 0]));
+
+  for (const m of allMatches) {
+    if (m.stageName !== "Group Stage" || m.status === "FINISHED") continue;
+    if (codes.has(m.teamA.code))
+      remaining.set(m.teamA.code, (remaining.get(m.teamA.code) ?? 0) + 1);
+    if (codes.has(m.teamB.code))
+      remaining.set(m.teamB.code, (remaining.get(m.teamB.code) ?? 0) + 1);
+  }
+
+  const team = sortedRows.find((r) => r.code === teamCode);
+  if (!team) return "Classificado matematicamente para o mata-mata.";
+
+  const myPts = team.points;
+  const rivals = sortedRows.filter((r) => r.code !== teamCode);
+  const totalRemaining = [...remaining.values()].reduce((a, b) => a + b, 0);
+
+  if (totalRemaining === 0) {
+    const pos = sortedRows.findIndex((r) => r.code === teamCode) + 1;
+    return `Fase de grupos encerrada. ${team.name} terminou em ${pos}º lugar com ${myPts} pontos e avançou para o mata-mata.`;
+  }
+
+  const rivalMaxes = rivals
+    .map((r) => ({ name: r.name, max: r.points + (remaining.get(r.code) ?? 0) * 3 }))
+    .sort((a, b) => b.max - a.max);
+
+  const canCatch = rivalMaxes.filter((r) => r.max >= myPts);
+  const cannotCatch = rivalMaxes.filter((r) => r.max < myPts);
+
+  if (canCatch.length === 0) {
+    return `Com ${myPts} pontos, nenhuma seleção do grupo pode mais alcançar ${team.name}. Vaga no mata-mata garantida independentemente dos demais resultados.`;
+  }
+
+  // Exactly 1 rival can still match or exceed the team's points
+  const chaser = canCatch[0];
+  const blockedNames = cannotCatch.map((r) => r.name);
+  const blockedText =
+    blockedNames.length === 1
+      ? `${blockedNames[0]} já não tem mais como alcançar essa pontuação.`
+      : `${blockedNames.join(" e ")} não têm mais como alcançar essa pontuação.`;
+
+  return (
+    `Com ${myPts} pontos, apenas ${chaser.name} ainda poderia igualá-la ` +
+    `(máximo de ${chaser.max} pts). ${blockedText} ` +
+    `Vaga no mata-mata garantida matematicamente.`
+  );
+}
+
 // Groups standings rows by their "Grupo X" label, sorted A-L, with each
 // group's rows sorted per Art. 13 (Pts → H2H → overall GD → overall GF).
 // Pass the same `matches` array used by computeStandings for correct H2H data.
