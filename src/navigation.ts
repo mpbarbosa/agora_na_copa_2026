@@ -56,7 +56,7 @@ export const NAV_ITEMS: NavItem[] = [
     description: "Quiz e minijogos para o torcedor acompanhar a Copa em clima de resenha.",
   },
   {
-    id: "redes-sociais",
+    id: "social-medias",
     label: "Redes Sociais",
     description: "Feed social do Mundo na Copa com filtros, tendências, curtidas e comentários.",
   },

@@ -1,6 +1,7 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   BadgeCheck,
+  Flame,
   Hash,
   Heart,
   Image as ImageIcon,
@@ -9,8 +10,9 @@ import {
   Send,
   TrendingUp,
 } from "lucide-react";
+import type { GoogleTrendTopic, GoogleTrendsResponse } from "../types";
 
-interface RedesSociaisViewProps {
+interface SocialMediasViewProps {
   theme: "classic-light" | "stadium-dark";
 }
 
@@ -125,7 +127,7 @@ const SEED_POSTS: SocialPost[] = [
 
 let localCommentSeq = 0;
 
-export function RedesSociaisView({ theme }: RedesSociaisViewProps) {
+export function SocialMediasView({ theme }: SocialMediasViewProps) {
   const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>("tudo");
   const [tagFilter, setTagFilter] = useState<string | null>(null);
   const [likes, setLikes] = useState<Record<string, number>>(() =>
@@ -137,6 +139,30 @@ export function RedesSociaisView({ theme }: RedesSociaisViewProps) {
     Object.fromEntries(SEED_POSTS.map((p) => [p.id, p.comments])),
   );
   const [commentDrafts, setCommentDrafts] = useState<Record<string, string>>({});
+  const [googleTrends, setGoogleTrends] = useState<GoogleTrendTopic[]>([]);
+  const [trendsStatus, setTrendsStatus] = useState<"loading" | "ready" | "empty">("loading");
+
+  useEffect(() => {
+    let active = true;
+
+    const loadTrends = async () => {
+      try {
+        const res = await fetch("/api/google-trends");
+        if (!res.ok) throw new Error("Falha ao carregar tendências do Google.");
+        const data: GoogleTrendsResponse = await res.json();
+        if (!active) return;
+        setGoogleTrends(data.topics);
+        setTrendsStatus(data.topics.length > 0 ? "ready" : "empty");
+      } catch {
+        if (active) setTrendsStatus("empty");
+      }
+    };
+
+    void loadTrends();
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const trending = useMemo(() => {
     const counts = new Map<string, number>();
@@ -214,12 +240,12 @@ export function RedesSociaisView({ theme }: RedesSociaisViewProps) {
       : "bg-white/10 text-slate-100";
 
   return (
-    <div className="max-w-7xl mx-auto px-4 mt-8" id="redes-sociais-view">
+    <div className="max-w-7xl mx-auto px-4 mt-8" id="social-medias-view">
       <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div>
           <h2
             className={`font-anton text-2xl md:text-3xl uppercase tracking-wider ${headingClasses}`}
-            id="redes-sociais-title"
+            id="social-medias-title"
           >
             Redes Sociais
           </h2>
@@ -234,7 +260,7 @@ export function RedesSociaisView({ theme }: RedesSociaisViewProps) {
               ? "border-slate-200 bg-slate-50 text-slate-600"
               : "border-white/10 bg-white/5 text-slate-200"
           }`}
-          id="redes-sociais-scope-note"
+          id="social-medias-scope-note"
         >
           <span className="relative flex h-2 w-2">
             <span className={`absolute inline-flex h-full w-full animate-ping rounded-full opacity-75 ${theme === "classic-light" ? "bg-[#009c3b]" : "bg-[#00e476]"}`} />
@@ -244,8 +270,65 @@ export function RedesSociaisView({ theme }: RedesSociaisViewProps) {
         </span>
       </div>
 
+      {/* Google Trends card */}
+      {trendsStatus !== "empty" && (
+        <section
+          className={`mt-6 rounded-3xl border p-5 ${shellClasses}`}
+          id="social-medias-google-trends"
+          aria-label="Buscas em alta no Google"
+        >
+          <div className="flex items-center gap-2">
+            <Flame size={16} className={accentText} />
+            <p className={`font-anton text-lg uppercase tracking-wide ${headingClasses}`}>
+              Em alta no Google
+            </p>
+            <span className={`ml-auto font-mono text-[9px] uppercase tracking-wider ${subtleClasses}`}>
+              Google Trends • Brasil
+            </span>
+          </div>
+
+          {trendsStatus === "loading" ? (
+            <p className={`mt-3 font-archivo text-sm leading-6 ${mutedClasses}`}>
+              Carregando buscas em alta…
+            </p>
+          ) : (
+            <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-3">
+              {googleTrends.map((topic, index) => {
+                const href = topic.news?.url
+                  ? topic.news.url
+                  : `https://www.google.com/search?q=${encodeURIComponent(topic.title)}`;
+                return (
+                  <a
+                    key={`${topic.title}-${index}`}
+                    href={href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    data-testid={`social-trend-${index}`}
+                    className={`flex items-start gap-3 rounded-2xl border px-3 py-2.5 transition ${idleChipClasses}`}
+                  >
+                    <span className={`mt-0.5 font-anton text-base leading-none ${accentText}`}>
+                      {index + 1}
+                    </span>
+                    <span className="min-w-0 flex-1">
+                      <span className={`block truncate font-archivo text-sm font-semibold capitalize ${headingClasses}`}>
+                        {topic.title}
+                      </span>
+                      <span className={`mt-0.5 flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-wider ${subtleClasses}`}>
+                        {topic.traffic && <span>{topic.traffic} buscas</span>}
+                        {topic.traffic && topic.news?.source && <span>•</span>}
+                        {topic.news?.source && <span className="truncate">{topic.news.source}</span>}
+                      </span>
+                    </span>
+                  </a>
+                );
+              })}
+            </div>
+          )}
+        </section>
+      )}
+
       {/* Filter chips */}
-      <div className="mt-6 flex flex-wrap items-center gap-2" id="redes-sociais-filtros" role="tablist" aria-label="Filtrar publicações">
+      <div className="mt-6 flex flex-wrap items-center gap-2" id="social-medias-filtros" role="tablist" aria-label="Filtrar publicações">
         {FILTERS.map((filter) => {
           const isActive = categoryFilter === filter.id;
           return (
@@ -255,7 +338,7 @@ export function RedesSociaisView({ theme }: RedesSociaisViewProps) {
               role="tab"
               aria-selected={isActive}
               onClick={() => setCategoryFilter(filter.id)}
-              data-testid={`redes-filtro-${filter.id}`}
+              data-testid={`social-filtro-${filter.id}`}
               className={`min-h-9 rounded-full border px-4 py-1.5 font-mono text-[11px] font-bold uppercase tracking-wider transition ${
                 isActive ? activeChipClasses : idleChipClasses
               }`}
@@ -268,7 +351,7 @@ export function RedesSociaisView({ theme }: RedesSociaisViewProps) {
           <button
             type="button"
             onClick={() => setTagFilter(null)}
-            data-testid="redes-limpar-tag"
+            data-testid="social-limpar-tag"
             className={`min-h-9 inline-flex items-center gap-1 rounded-full border px-3 py-1.5 font-mono text-[11px] font-bold uppercase tracking-wider transition ${activeChipClasses}`}
           >
             <Hash size={12} />
@@ -280,9 +363,9 @@ export function RedesSociaisView({ theme }: RedesSociaisViewProps) {
 
       <div className="mt-6 grid grid-cols-1 gap-5 xl:grid-cols-[minmax(0,1fr)_minmax(0,320px)]">
         {/* Feed */}
-        <section className="flex flex-col gap-4" id="redes-sociais-feed" aria-label="Feed social">
+        <section className="flex flex-col gap-4" id="social-medias-feed" aria-label="Feed social">
           {visiblePosts.length === 0 ? (
-            <div className={`rounded-3xl border p-8 text-center ${shellClasses}`} data-testid="redes-feed-vazio">
+            <div className={`rounded-3xl border p-8 text-center ${shellClasses}`} data-testid="social-feed-vazio">
               <p className={`font-archivo text-sm leading-6 ${mutedClasses}`}>
                 Nenhuma publicação para esse filtro agora. Tente outra tag ou volte para{" "}
                 <span className={accentText}>Tudo</span>.
@@ -305,7 +388,7 @@ export function RedesSociaisView({ theme }: RedesSociaisViewProps) {
                 <article
                   key={post.id}
                   className={`rounded-3xl border p-5 ${shellClasses}`}
-                  data-testid={`redes-post-${post.id}`}
+                  data-testid={`social-post-${post.id}`}
                 >
                   <header className="flex items-start gap-3">
                     <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full font-anton text-sm uppercase ${avatarClasses}`}>
@@ -353,7 +436,7 @@ export function RedesSociaisView({ theme }: RedesSociaisViewProps) {
                         key={tag}
                         type="button"
                         onClick={() => toggleTagFilter(tag)}
-                        data-testid={`redes-post-tag-${tag}`}
+                        data-testid={`social-post-tag-${tag}`}
                         className={`inline-flex items-center gap-0.5 rounded-full px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-wider transition ${
                           tagFilter === tag
                             ? activeChipClasses
@@ -371,7 +454,7 @@ export function RedesSociaisView({ theme }: RedesSociaisViewProps) {
                       type="button"
                       onClick={() => toggleLike(post.id)}
                       aria-pressed={isLiked}
-                      data-testid={`redes-curtir-${post.id}`}
+                      data-testid={`social-curtir-${post.id}`}
                       className={`inline-flex items-center gap-1.5 font-mono text-[11px] font-bold uppercase tracking-wider transition ${
                         isLiked
                           ? "text-[#ed2939]"
@@ -382,7 +465,7 @@ export function RedesSociaisView({ theme }: RedesSociaisViewProps) {
                         size={15}
                         className={`transition-transform ${isLiked ? "scale-110 fill-current" : ""}`}
                       />
-                      <span data-testid={`redes-curtidas-${post.id}`}>
+                      <span data-testid={`social-curtidas-${post.id}`}>
                         {(likes[post.id] ?? 0).toLocaleString("pt-BR")}
                       </span>
                     </button>
@@ -391,7 +474,7 @@ export function RedesSociaisView({ theme }: RedesSociaisViewProps) {
                       type="button"
                       onClick={() => toggleComments(post.id)}
                       aria-expanded={commentsOpen}
-                      data-testid={`redes-comentar-${post.id}`}
+                      data-testid={`social-comentar-${post.id}`}
                       className={`inline-flex items-center gap-1.5 font-mono text-[11px] font-bold uppercase tracking-wider transition ${mutedClasses} hover:${theme === "classic-light" ? "text-slate-900" : "text-white"}`}
                     >
                       <MessageCircle size={15} />
@@ -400,7 +483,7 @@ export function RedesSociaisView({ theme }: RedesSociaisViewProps) {
                   </div>
 
                   {commentsOpen && (
-                    <div className="mt-3 flex flex-col gap-2" data-testid={`redes-comentarios-${post.id}`}>
+                    <div className="mt-3 flex flex-col gap-2" data-testid={`social-comentarios-${post.id}`}>
                       {postComments.length === 0 ? (
                         <p className={`font-archivo text-xs leading-5 ${subtleClasses}`}>
                           Seja o primeiro a comentar essa publicação.
@@ -432,7 +515,7 @@ export function RedesSociaisView({ theme }: RedesSociaisViewProps) {
                             setCommentDrafts((prev) => ({ ...prev, [post.id]: e.target.value }))
                           }
                           placeholder="Manda a real…"
-                          data-testid={`redes-comentario-input-${post.id}`}
+                          data-testid={`social-comentario-input-${post.id}`}
                           className={`min-h-10 flex-1 rounded-full border px-4 font-archivo text-sm outline-none transition ${
                             theme === "classic-light"
                               ? "border-slate-200 bg-white text-slate-800 placeholder:text-slate-400 focus:border-[#009c3b]"
@@ -442,7 +525,7 @@ export function RedesSociaisView({ theme }: RedesSociaisViewProps) {
                         <button
                           type="submit"
                           aria-label="Enviar comentário"
-                          data-testid={`redes-comentario-enviar-${post.id}`}
+                          data-testid={`social-comentario-enviar-${post.id}`}
                           className={`inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border transition ${idleChipClasses}`}
                         >
                           <Send size={15} />
@@ -457,7 +540,7 @@ export function RedesSociaisView({ theme }: RedesSociaisViewProps) {
         </section>
 
         {/* Trending sidebar */}
-        <aside className="xl:sticky xl:top-28 xl:self-start" id="redes-sociais-tendencias">
+        <aside className="xl:sticky xl:top-28 xl:self-start" id="social-medias-tendencias">
           <div className={`rounded-3xl border p-5 ${shellClasses}`}>
             <div className="flex items-center gap-2">
               <TrendingUp size={16} className={accentText} />
@@ -477,7 +560,7 @@ export function RedesSociaisView({ theme }: RedesSociaisViewProps) {
                     key={tag}
                     type="button"
                     onClick={() => toggleTagFilter(tag)}
-                    data-testid={`redes-tendencia-${tag}`}
+                    data-testid={`social-tendencia-${tag}`}
                     className={`flex items-center justify-between gap-2 rounded-2xl border px-3 py-2 text-left transition ${
                       isActive ? activeChipClasses : idleChipClasses
                     }`}

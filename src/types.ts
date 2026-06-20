@@ -395,3 +395,23 @@ export interface TeamViewResponse {
   };
   broadcastGuide: BroadcastGuideEntry | null;
 }
+
+export interface GoogleTrendNewsItem {
+  title: string;
+  url: string;
+  source: string | null;
+}
+
+export interface GoogleTrendTopic {
+  title: string;
+  traffic: string | null;
+  pictureUrl: string | null;
+  news: GoogleTrendNewsItem | null;
+}
+
+export interface GoogleTrendsResponse {
+  source: "google-trends" | "fallback";
+  note: string;
+  updatedAt: string;
+  topics: GoogleTrendTopic[];
+}

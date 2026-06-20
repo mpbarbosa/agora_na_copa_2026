@@ -32,14 +32,16 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 - **`server.ts`** — single Express server. Owns the API routes, loads `APP_MATCHES`, proxies Vite in dev, serves `dist/` statically in production.
 - **`fifa-sync-core.ts`** — pure FIFA API integration logic (match-finding, broadcaster normalization, lineup building, match-state building). Extracted from `server.ts` so it can be unit-tested independently. Imported by both `server.ts` and `tests/fifa-sync-core.test.ts`.
-- API endpoints: `/api/broadcast-guide`, `/api/match-states`, `/api/match-overlays`, `/api/team-lineups`, `/api/tournament-leaders`, `/api/player-stats/:teamCode/:playerName`, `/api/player-incidents/:teamCode/:playerName`, `/api/team-view/:teamCode`, `/api/country-info/:code`, `/api/questions`, `/api/fifa-sync-status`, `/api/health`.
+- **`trends-core.ts`** — pure parser for the Google Trends RSS feed (XML → topics). Extracted from `server.ts` for independent unit testing. Imported by `server.ts` and `tests/trends-core.test.ts`.
+- API endpoints: `/api/broadcast-guide`, `/api/match-states`, `/api/match-overlays`, `/api/team-lineups`, `/api/tournament-leaders`, `/api/player-stats/:teamCode/:playerName`, `/api/player-incidents/:teamCode/:playerName`, `/api/team-view/:teamCode`, `/api/country-info/:code`, `/api/google-trends`, `/api/questions`, `/api/fifa-sync-status`, `/api/health`.
+- **`/api/google-trends`** proxies the public Google Trends "Daily Search Trends" RSS feed (geo=BR), parsed by `trends-core.ts`. Not FIFA-sourced, but follows the resilience shape (`source: "google-trends" | "fallback"`, `note`, `updatedAt`, `topics`) with a 20-min cache and graceful fallback. Consumed by the Social Medias view (`SocialMediasView`, "Redes Sociais" tab).
 - **`/api/health`** returns `{ status, version, uptime, load, memory, system }` — real-time server vitals for external uptime monitors (no cache). Not a FIFA-sourced endpoint; does not carry the resilience shape.
 - Every FIFA-sourced response carries `source: "fifa" | "fallback"`, a human-readable `note`, and `updatedAt`. Any new endpoint must follow this resilience shape and fall back gracefully when the FIFA API is unreachable.
 
 ### Frontend
 
 - **`src/App.tsx`** — shell: global header (theme toggle) + top-level nav + routed view. Theme state (`"classic-light"` | `"stadium-dark"`) and match-selection state live here.
-- **`src/navigation.ts`** — `NAV_ITEMS` array (10 tabs: Ao Vivo, Partidas, Grupos, Seleções, Jogadores, Líderes, Chaveamento, Estádios, Notícias, Fan Zone). Each entry has `id`, `label`, `description`. Tabs without a shipped view render `ComingSoonView`.
+- **`src/navigation.ts`** — `NAV_ITEMS` array (11 tabs: Ao Vivo, Partidas, Grupos, Seleções, Jogadores, Líderes, Chaveamento, Estádios, Notícias, Fan Zone, Redes Sociais). Each entry has `id`, `label`, `description`. Tabs without a shipped view render `ComingSoonView`.
 - **`src/types.ts`** — single source of truth for all TypeScript shapes (`Match`, `Player`, `Broadcaster`, `BroadcastGuideEntry`, `MatchStateEntry`, `Team`, `StandingsRow`, `Stadium`, `BracketNode`, `NewsArticle`, etc.). Extend here first before touching data or components.
 
 ### Components

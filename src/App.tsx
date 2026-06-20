@@ -10,7 +10,7 @@ import { VenueMapView } from "./components/VenueMapView";
 import { NewsView } from "./components/NewsView";
 import { BracketView } from "./components/BracketView";
 import { FanZoneView } from "./components/FanZoneView";
-import { RedesSociaisView } from "./components/RedesSociaisView";
+import { SocialMediasView } from "./components/SocialMediasView";
 import { JogadoresView } from "./components/JogadoresView";
 import { TeamLineupView } from "./components/TeamLineupView";
 import { PartidasView } from "./components/PartidasView";
@@ -154,8 +154,8 @@ export default function App() {
         return <BracketView theme={theme} matches={matches} />;
       case "fanzone":
         return <FanZoneView theme={theme} />;
-      case "redes-sociais":
-        return <RedesSociaisView theme={theme} />;
+      case "social-medias":
+        return <SocialMediasView theme={theme} />;
       default:
         return (
           <MatchDetailView

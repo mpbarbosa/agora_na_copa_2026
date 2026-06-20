@@ -13,7 +13,7 @@ const NAV_VIEW_IDS: Record<string, string> = {
   estadios: "#venue-map-view",
   noticias: "#news-view",
   fanzone: "#fanzone-view",
-  "redes-sociais": "#redes-sociais-view",
+  "social-medias": "#social-medias-view",
 };
 
 test.describe("Navigation shell", () => {
@@ -157,6 +157,10 @@ test.describe("Navigation shell", () => {
   });
 
   test("all live nav tabs open in both themes without console errors", async ({ page }) => {
+    // This smoke test walks every nav tab and toggles the theme twice per tab.
+    // With 11 tabs it runs long under Docker load, so give it extra headroom
+    // beyond the 30s default.
+    test.setTimeout(90_000);
     const consoleErrors: string[] = [];
     page.on("console", (msg) => {
       if (msg.type() === "error") consoleErrors.push(msg.text());

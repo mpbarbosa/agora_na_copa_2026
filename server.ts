@@ -18,6 +18,7 @@ import type {
   FifaLiveMatch,
   FifaWatchSource,
 } from "./fifa-sync-core";
+import { buildGoogleTrendsRssUrl, parseGoogleTrendsRss } from "./trends-core";
 import { APP_MATCHES } from "./src/appMatches";
 import { resolvePlayerEntry } from "./src/data/playerRegistry";
 import { triviaQuestions } from "./src/data/questions";
@@ -44,6 +45,7 @@ import {
   type StandingsRow,
   type CountryInfoResponse,
   type PlayerStatsResponse,
+  type GoogleTrendsResponse,
 } from "./src/types";
 
 dotenv.config();
@@ -82,6 +84,7 @@ const WIKIPEDIA_API_BASE = "https://pt.wikipedia.org/api/rest_v1";
 const WIKIDATA_API_BASE = "https://www.wikidata.org/w/api.php";
 const COUNTRY_INFO_CACHE_TTL_MS = 24 * 60 * 60 * 1000; // Wikipedia data changes rarely
 const WIKIPEDIA_USER_AGENT = "agora-na-copa-2026 (https://github.com/mpbarbosa/agora_na_copa_2026)";
+const GOOGLE_TRENDS_CACHE_TTL_MS = 20 * 60 * 1000; // Trends RSS refreshes a few times per hour
 const APP_MATCHES_BY_ID = new Map(APP_MATCHES.map((match) => [match.id, match]));
 const GOAL_INCIDENT_SUFFIX = " marcou.";
 const YELLOW_CARD_INCIDENT_SUFFIX = " recebeu amarelo.";
@@ -1982,6 +1985,95 @@ app.get("/api/country-info/:code", async (req, res) => {
     res.json(fallback);
   }
 });
+
+let googleTrendsCache: { payload: GoogleTrendsResponse; expiresAt: number } | null = null;
+
+const GOOGLE_TRENDS_FETCH_TIMEOUT_MS = 6000;
+
+const fetchGoogleTrends = async (): Promise<GoogleTrendsResponse> => {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), GOOGLE_TRENDS_FETCH_TIMEOUT_MS);
+
+  let response: Response;
+  try {
+    response = await fetch(buildGoogleTrendsRssUrl("BR"), {
+      signal: controller.signal,
+      headers: {
+        "User-Agent": "agora-na-copa-2026/1.0",
+        Accept: "application/rss+xml, application/xml, text/xml",
+      },
+    });
+  } finally {
+    clearTimeout(timeout);
+  }
+
+  if (!response.ok) {
+    throw new Error(`Google Trends RSS request failed (${response.status})`);
+  }
+
+  const xml = await response.text();
+  const topics = parseGoogleTrendsRss(xml, 12);
+  if (topics.length === 0) {
+    throw new Error("Google Trends RSS returned no topics");
+  }
+
+  return {
+    source: "google-trends",
+    note: "Buscas em alta no Brasil • Google Trends",
+    updatedAt: new Date().toISOString(),
+    topics,
+  };
+};
+
+// Refreshes the trends cache in the background. Never throws and never blocks
+// a request — the endpoint always responds instantly from cache (or a fast
+// fallback), so a slow/unreachable Google never leaves a browser request
+// hanging (which would surface as a console resource error in the UI).
+let googleTrendsRefreshing = false;
+const refreshGoogleTrendsCache = async (): Promise<void> => {
+  if (googleTrendsRefreshing) return;
+  googleTrendsRefreshing = true;
+  try {
+    const payload = await fetchGoogleTrends();
+    googleTrendsCache = { payload, expiresAt: Date.now() + GOOGLE_TRENDS_CACHE_TTL_MS };
+  } catch (error) {
+    console.error("Google Trends background refresh failed:", error);
+  } finally {
+    googleTrendsRefreshing = false;
+  }
+};
+
+app.get("/api/google-trends", (_req, res) => {
+  if (googleTrendsCache && googleTrendsCache.expiresAt > Date.now()) {
+    res.set("Cache-Control", "public, max-age=600");
+    res.json(googleTrendsCache.payload);
+    return;
+  }
+
+  // Cache missing or stale: kick off a background refresh and respond now.
+  void refreshGoogleTrendsCache();
+
+  if (googleTrendsCache) {
+    res.set("Cache-Control", "public, max-age=60");
+    res.json({
+      ...googleTrendsCache.payload,
+      source: "fallback",
+      note: "Atualizando tendências do Google…",
+    } satisfies GoogleTrendsResponse);
+    return;
+  }
+
+  res.set("Cache-Control", "public, max-age=60");
+  res.json({
+    source: "fallback",
+    note: "Tendências indisponíveis no momento.",
+    updatedAt: new Date().toISOString(),
+    topics: [],
+  } satisfies GoogleTrendsResponse);
+});
+
+// Warm the cache at startup so the first visitor gets real data when possible.
+void refreshGoogleTrendsCache();
 
 app.get("/api/fifa-sync-status", (_req, res) => {
   const now = Date.now();

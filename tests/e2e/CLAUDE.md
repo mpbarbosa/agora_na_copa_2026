@@ -17,7 +17,7 @@ Playwright end-to-end specs for "Agora na Copa 26". The suite boots the dev serv
 | `bracket.spec.ts` | Knockout bracket rendering | 1.1 KB |
 | `news.spec.ts` | News feed, article cards | 1.6 KB |
 | `fanzone.spec.ts` | Fan Zone quiz, answer interaction | 1.5 KB |
-| `redes-sociais.spec.ts` | Redes Sociais feed: category/hashtag filters, likes, nested comments | 2.7 KB |
+| `social-medias.spec.ts` | Social Medias feed ("Redes Sociais" tab): Google Trends card, category/hashtag filters, likes, nested comments | 4.0 KB |
 | `polish.spec.ts` | Visual/UX polish checks (no broken images, no empty text nodes, etc.) | 2.0 KB |
 
 ## Fixtures
@@ -38,7 +38,7 @@ Playwright end-to-end specs for "Agora na Copa 26". The suite boots the dev serv
 | Bracket | `bracket.spec.ts` |
 | News | `news.spec.ts` |
 | Fan Zone | `fanzone.spec.ts` |
-| Redes Sociais | `redes-sociais.spec.ts` |
+| Social Medias ("Redes Sociais" tab) | `social-medias.spec.ts` |
 | Full regression | `npm run test:e2e` |
 
 ## Adding a new spec
