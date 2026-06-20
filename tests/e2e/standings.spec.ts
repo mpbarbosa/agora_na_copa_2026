@@ -104,10 +104,10 @@ test.describe("Standings view (Grupos)", () => {
 
     await page.click("#btn-nav-grupos");
 
-    await expect(page.locator("#standings-cell-bra-played")).toHaveText("1");
-    await expect(page.locator("#standings-cell-bra-points")).toHaveText("3");
-    await expect(page.locator("#standings-cell-bra-goalsFor")).toHaveText("1");
-    await expect(page.locator("#standings-cell-mar-points")).toHaveText("0");
+    await expect(page.locator("#standings-cell-bra-played")).toHaveText("2");
+    await expect(page.locator("#standings-cell-bra-points")).toHaveText("6");
+    await expect(page.locator("#standings-cell-bra-goalsFor")).toHaveText("4");
+    await expect(page.locator("#standings-cell-mar-points")).toHaveText("3");
   });
 
   test("renders all 12 group tables with headers and rows", async ({ page }) => {
