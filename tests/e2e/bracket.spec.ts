@@ -30,4 +30,19 @@ test.describe("Bracket view (Chaveamento)", () => {
 
     expect(consoleErrors).toEqual([]);
   });
+
+  test("fills the best-third knockout slots provisionally from current standings", async ({ page }) => {
+    await page.goto("/");
+    await page.click("#btn-nav-chaveamento");
+
+    await expect(page.locator("#bracket-view")).toBeVisible();
+
+    // R32-13 holds the "Melhor 3º colocado #1/#2" placeholders. With group-stage
+    // results in, these slots are now seeded with the current best-third teams
+    // (shown as provisional) instead of the empty "Aguardando classificado".
+    const bestThirdPick = page.locator("#bracket-pick-R32-13-a");
+    await expect(bestThirdPick).toBeEnabled();
+    await expect(bestThirdPick).not.toContainText("Aguardando classificado");
+    await expect(bestThirdPick).toContainText("prov.");
+  });
 });

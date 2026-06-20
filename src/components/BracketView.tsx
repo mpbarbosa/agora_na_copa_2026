@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { Trophy, RotateCcw } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { bracket as baseBracket } from "../data/tournament";
-import type { BracketNode, Match } from "../types";
+import type { BracketNode, Match, StandingsRow } from "../types";
 import { computeStandings, groupStandings } from "../standings";
 import type { QualificationStatus } from "../standings";
 import { FlagIcon } from "./FlagIcon";
@@ -86,12 +86,21 @@ function getDescendantSelectionIds(matchId: string) {
   return ids;
 }
 
-// Builds a map from group-position placeholder strings (e.g. "1º Grupo A") to the
-// team currently holding that position, along with their qualification status.
+// Builds a map from R32 placeholder strings to the team currently holding that
+// slot, along with a qualification status. Two kinds of placeholder are filled
+// provisionally from live standings:
+//   - "1º Grupo X" / "2º Grupo Y" — the current top-2 of each group.
+//   - "Melhor 3º colocado #1..#8" — the 8 best-ranked third-placed teams across
+//     all 12 groups (the WC 2026 32-team format). This is intentionally a
+//     simplified, temporary allocation: the official group→slot table (which
+//     depends on *which* eight groups supply a qualifying third) is only applied
+//     once the group stage ends. Until then we just show the current best eight.
 function buildGroupSlotMap(matches: Match[]): Map<string, ProvisionalSlot> {
   const rows = computeStandings(matches);
   const groups = groupStandings(rows, matches);
   const map = new Map<string, ProvisionalSlot>();
+
+  const thirdPlaced: StandingsRow[] = [];
 
   for (const { group, rows: groupRows, qualification } of groups) {
     const letterMatch = group.match(/Grupo ([A-L])/);
@@ -106,7 +115,31 @@ function buildGroupSlotMap(matches: Match[]): Map<string, ProvisionalSlot> {
         status,
       });
     });
+
+    // The team currently sitting third in this group — a candidate for one of
+    // the eight best-third knockout slots.
+    const third = groupRows[2];
+    if (third) thirdPlaced.push(third);
   }
+
+  // Rank the (up to) 12 third-placed teams the same way group tables break ties
+  // on overall stats (points → goal difference → goals for) and take the best
+  // eight. Their best-third spot is never mathematically secured pre-allocation,
+  // so they are always shown as provisional.
+  thirdPlaced
+    .sort(
+      (a, b) =>
+        b.points - a.points ||
+        b.goalDifference - a.goalDifference ||
+        b.goalsFor - a.goalsFor,
+    )
+    .slice(0, 8)
+    .forEach((row, idx) => {
+      map.set(`Melhor 3º colocado #${idx + 1}`, {
+        team: { name: row.name, code: row.code, flagSvg: row.flagSvg },
+        status: "contention",
+      });
+    });
 
   return map;
 }
@@ -223,12 +256,17 @@ function BracketMatchCard({ node, theme, onAdvance, groupSlotMap }: BracketMatch
 
       <div className="mt-3 flex flex-col gap-2">
         {(["A", "B"] as const).map((slot) => {
-          const label = getSlotLabel(node, slot);
+          const concreteTeam = slot === "A" ? node.teamA : node.teamB;
+          const placeholder = slot === "A" ? node.placeholderA : node.placeholderB;
+          // Resolve the team currently occupying a group-position placeholder from
+          // live standings. getProvisional is a no-op outside R32 and is skipped
+          // once a concrete team is locked in after the group stage.
+          const provisional = concreteTeam ? null : getProvisional(slot);
           const isActive = node.winner === slot;
-          const provisional = !label ? getProvisional(slot) : null;
-          const effectiveLabel = label ?? provisional?.team.name ?? null;
-          const isProvisional = !label && !!provisional;
+          const isProvisional = !concreteTeam && !!provisional;
           const isQualified = provisional?.status === "qualified";
+          // Display priority: confirmed team → provisional team → raw placeholder.
+          const effectiveLabel = concreteTeam?.name ?? provisional?.team.name ?? placeholder ?? null;
 
           const buttonClasses = !effectiveLabel
             ? disabledPickClasses
@@ -407,7 +445,7 @@ export function BracketView({ theme, matches }: BracketViewProps) {
               Rota até MetLife Stadium
             </p>
             <p className={`mt-1 font-mono text-[10px] uppercase tracking-wider ${mutedClasses}`}>
-              East Rutherford • final em palco único • progressão manual partida a partida
+              East Rutherford • final em palco único • vagas dos 16 avos preenchidas provisoriamente pela classificação atual
             </p>
           </div>
 
