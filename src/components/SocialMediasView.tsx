@@ -20,6 +20,9 @@ interface SocialMediasViewProps {
 /** Google Trends "trending now" category code for Sports (Esportes). */
 const SPORTS_CATEGORY_CODE = 17;
 
+/** Reel oficial da FIFA destacado no card "FIFA World Cup" (permalink sem query params de tracking). */
+const FIFA_REEL_URL = "https://www.instagram.com/reel/DZ0HLA4iZDN/";
+
 type PostCategory = "foto" | "noticia" | "oficial";
 type CategoryFilter = "tudo" | PostCategory;
 
@@ -55,19 +58,6 @@ const CATEGORY_META: Record<PostCategory, { label: string; Icon: typeof ImageIco
 };
 
 const SEED_POSTS: SocialPost[] = [
-  {
-    id: "post-cazetv-abertura",
-    author: "CazéTV",
-    handle: "@cazetvoficial",
-    category: "oficial",
-    time: "há 12 min",
-    text: "TÔ ON, TORCIDA! 🎙️ A bola já tá rolando e a resenha tá garantida do primeiro ao último minuto. Bora juntos? #Copa2026 #VaiBrasil",
-    tags: ["Copa2026", "VaiBrasil"],
-    likes: 4820,
-    comments: [
-      { id: "c1", author: "@torcedor_fanatico", text: "Melhor transmissão do Mundial, disparado! 🟢🟡" },
-    ],
-  },
   {
     id: "post-selecao-treino",
     author: "Seleção Brasileira",
@@ -167,6 +157,19 @@ export function SocialMediasView({ theme }: SocialMediasViewProps) {
     return () => {
       active = false;
     };
+  }, []);
+
+  // Carrega o embed.js da Instagram uma vez e renderiza o reel oficial da FIFA.
+  useEffect(() => {
+    if (window.instgrm) {
+      window.instgrm.Embeds.process();
+      return;
+    }
+
+    const script = document.createElement("script");
+    script.src = "https://www.instagram.com/embed.js";
+    script.async = true;
+    document.head.appendChild(script);
   }, []);
 
   const trending = useMemo(() => {
@@ -289,41 +292,55 @@ export function SocialMediasView({ theme }: SocialMediasViewProps) {
       </div>
 
       {/* Official FIFA World Cup profile card */}
-      <a
-        href="https://www.instagram.com/fifaworldcup"
-        target="_blank"
-        rel="noopener noreferrer"
-        id="social-medias-fifa-profile"
-        data-testid="social-fifa-profile"
-        aria-label="Perfil oficial da Copa do Mundo FIFA no Instagram"
-        className={`mt-6 flex items-center gap-4 rounded-3xl border p-5 transition ${shellClasses} ${
-          theme === "classic-light" ? "hover:border-slate-300" : "hover:border-white/20"
-        }`}
+      <section
+        id="social-medias-fifa-profile-card"
+        aria-label="Card oficial da Copa do Mundo FIFA"
+        className={`mt-6 rounded-3xl border p-5 ${shellClasses}`}
       >
-        <span className="shrink-0">
-          <InstagramBrandIcon size={52} />
-        </span>
-        <span className="min-w-0 flex-1">
-          <span className="flex items-center gap-1.5">
-            <span className={`truncate font-anton text-lg uppercase tracking-wide ${headingClasses}`}>
-              FIFA World Cup
-            </span>
-            <BadgeCheck size={16} className="shrink-0 text-[#3897f0]" />
-          </span>
-          <span className={`block font-mono text-[11px] uppercase tracking-wider ${subtleClasses}`}>
-            @fifaworldcup • Perfil oficial
-          </span>
-          <span className={`mt-1 block font-archivo text-sm leading-5 ${mutedClasses}`}>
-            Siga a conta oficial da Copa do Mundo FIFA 2026 e acompanhe tudo do Mundial em primeira mão.
-          </span>
-        </span>
-        <span
-          className={`hidden shrink-0 items-center gap-1.5 rounded-full border px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-wider sm:inline-flex ${activeChipClasses}`}
+        <a
+          href="https://www.instagram.com/fifaworldcup"
+          target="_blank"
+          rel="noopener noreferrer"
+          id="social-medias-fifa-profile"
+          data-testid="social-fifa-profile"
+          aria-label="Perfil oficial da Copa do Mundo FIFA no Instagram"
+          className="flex items-center gap-4 transition hover:opacity-80"
         >
-          <InstagramBrandIcon size={14} />
-          Seguir
-        </span>
-      </a>
+          <span className="shrink-0">
+            <InstagramBrandIcon size={52} />
+          </span>
+          <span className="min-w-0 flex-1">
+            <span className="flex items-center gap-1.5">
+              <span className={`truncate font-anton text-lg uppercase tracking-wide ${headingClasses}`}>
+                FIFA World Cup
+              </span>
+              <BadgeCheck size={16} className="shrink-0 text-[#3897f0]" />
+            </span>
+            <span className={`block font-mono text-[11px] uppercase tracking-wider ${subtleClasses}`}>
+              @fifaworldcup • Perfil oficial
+            </span>
+            <span className={`mt-1 block font-archivo text-sm leading-5 ${mutedClasses}`}>
+              Siga a conta oficial da Copa do Mundo FIFA 2026 e acompanhe tudo do Mundial em primeira mão.
+            </span>
+          </span>
+          <span
+            className={`hidden shrink-0 items-center gap-1.5 rounded-full border px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-wider sm:inline-flex ${activeChipClasses}`}
+          >
+            <InstagramBrandIcon size={14} />
+            Seguir
+          </span>
+        </a>
+
+        {/* Reel oficial em destaque, embutido via embed.js da Instagram */}
+        <div className="mt-4" id="social-medias-fifa-reel" data-testid="social-fifa-reel">
+          <blockquote
+            className="instagram-media"
+            data-instgrm-permalink={FIFA_REEL_URL}
+            data-instgrm-version="14"
+            style={{ width: "100%", minWidth: 0, margin: 0 }}
+          />
+        </div>
+      </section>
 
       {/* Google Trends card */}
       {trendsStatus !== "empty" && (

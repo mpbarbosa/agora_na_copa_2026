@@ -33,9 +33,9 @@ test.describe("Redes Sociais view", () => {
     await expect(noticiaPost).toBeVisible();
 
     // Like toggles the incremental counter.
-    const likeCount = page.getByTestId("social-curtidas-post-cazetv-abertura");
+    const likeCount = page.getByTestId("social-curtidas-post-selecao-treino");
     const before = (await likeCount.textContent())?.replace(/\D/g, "");
-    await page.getByTestId("social-curtir-post-cazetv-abertura").click();
+    await page.getByTestId("social-curtir-post-selecao-treino").click();
     const after = (await likeCount.textContent())?.replace(/\D/g, "");
     expect(Number(after)).toBe(Number(before) + 1);
 
@@ -63,6 +63,16 @@ test.describe("Redes Sociais view", () => {
     await expect(card).toHaveAttribute("href", "https://www.instagram.com/fifaworldcup");
     await expect(card).toHaveAttribute("target", "_blank");
     await expect(card).toHaveAttribute("rel", /noopener/);
+
+    // The card also embeds the official FIFA reel via the Instagram embed blockquote.
+    // (The blockquote is hydrated by Instagram's embed.js at runtime, so we assert it
+    // is present in the DOM with the correct permalink rather than visually rendered.)
+    const reel = page.getByTestId("social-fifa-reel");
+    await expect(reel).toBeAttached();
+    await expect(reel.locator("blockquote.instagram-media")).toHaveAttribute(
+      "data-instgrm-permalink",
+      "https://www.instagram.com/reel/DZ0HLA4iZDN/",
+    );
   });
 
   test("shows the Google Trends card at the top from the API", async ({ page }) => {
@@ -165,7 +175,7 @@ test.describe("Redes Sociais view", () => {
 
     await expect(page.locator("#social-medias-view")).toBeVisible();
     await page.getByTestId("social-filtro-oficial").click();
-    await expect(page.getByTestId("social-post-post-cazetv-abertura")).toBeVisible();
+    await expect(page.getByTestId("social-post-post-selecao-treino")).toBeVisible();
     await expect(page.getByTestId("social-post-post-foto-mosaico")).toHaveCount(0);
   });
 });
