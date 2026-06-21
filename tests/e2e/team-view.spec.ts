@@ -180,7 +180,7 @@ async function mockTeamView(page: Page) {
                 x: "https://x.com/atacanteteste",
               },
               instagramPostUrl: "https://www.instagram.com/p/test-fw-post/",
-              worldCupNote: "Leitura de teste: peça-chave da seleção no Mundial.",
+              worldCupNote: "## Desempenho\nGrande atuação no jogo de teste.\n## Leitura\nPeça-chave da seleção no Mundial.",
             },
           ],
           source: "fifa",
@@ -667,10 +667,11 @@ test.describe("Team view", () => {
       "href",
       "https://instagram.com/atacanteteste",
     );
-    // Editorial "Leitura" note renders when the player has a worldCupNote.
+    // Editorial note renders its labeled sections when the player has a worldCupNote.
     await expect(page.locator("#player-feature-overlay-leitura")).toBeVisible();
+    await expect(page.locator("#player-feature-overlay-leitura")).toContainText("Desempenho");
     await expect(page.locator("#player-feature-overlay-leitura")).toContainText("Leitura");
-    await expect(page.locator("#player-feature-overlay-leitura")).toContainText("peça-chave da seleção");
+    await expect(page.locator("#player-feature-overlay-leitura")).toContainText("Peça-chave da seleção");
     await expect(page.locator("#btn-open-player-feature-picture")).toBeVisible();
   });
 

@@ -242,6 +242,27 @@ function isSafeInstagramUrl(url: string): boolean {
   return url.startsWith(INSTAGRAM_ORIGIN);
 }
 
+// A worldCupNote may be a single paragraph (rendered under a "Leitura" heading)
+// or several "## Section" blocks, each rendered with its own heading.
+function parseWorldCupSections(note: string): { label: string; body: string }[] {
+  const trimmed = note.trim();
+  if (!trimmed.includes("## ")) return [{ label: "Leitura", body: trimmed }];
+
+  const sections: { label: string; body: string }[] = [];
+  let current: { label: string; body: string[] } | null = null;
+  for (const line of trimmed.split("\n")) {
+    const header = line.match(/^##\s+(.+)$/);
+    if (header) {
+      if (current) sections.push({ label: current.label, body: current.body.join(" ").trim() });
+      current = { label: header[1].trim(), body: [] };
+    } else if (current) {
+      current.body.push(line.trim());
+    }
+  }
+  if (current) sections.push({ label: current.label, body: current.body.join(" ").trim() });
+  return sections.filter((s) => s.body);
+}
+
 export function PlayerOverlayCard({
   theme,
   player,
@@ -480,17 +501,21 @@ export function PlayerOverlayCard({
               </div>
             )}
 
-            {/* Leitura — editorial World Cup performance note */}
+            {/* Editorial World Cup note — one or more labeled sections */}
             {player.worldCupNote && (
               <div
                 className={`mt-5 rounded-xl border p-3 ${isLight ? "border-slate-200 bg-slate-50" : "border-white/10 bg-white/5"}`}
                 id={id ? `${id}-leitura` : undefined}
                 data-testid="player-leitura"
               >
-                <p className={`font-mono text-[10px] uppercase tracking-wider ${mutedClasses}`}>
-                  Leitura
-                </p>
-                <p className="mt-1.5 font-archivo text-sm leading-6">{player.worldCupNote}</p>
+                {parseWorldCupSections(player.worldCupNote).map((section, i) => (
+                  <div key={section.label} className={i > 0 ? "mt-3" : ""}>
+                    <p className={`font-mono text-[10px] uppercase tracking-wider ${mutedClasses}`}>
+                      {section.label}
+                    </p>
+                    <p className="mt-1.5 font-archivo text-sm leading-6">{section.body}</p>
+                  </div>
+                ))}
               </div>
             )}
 
