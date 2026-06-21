@@ -286,20 +286,19 @@ const getMatchOutcome = (match: TeamViewMatchSummary): MatchOutcome | null => {
   return "E";
 };
 
-function TeamMatchVideos({
+// Renders the per-match video thumbnails as a sub-section inside the match
+// history card (merged from the former standalone "Vídeos das partidas" card).
+function MatchVideosList({
   theme,
   matches,
 }: {
   theme: TeamLineupViewProps["theme"];
   matches: TeamViewMatchSummary[];
 }) {
-  const cardClasses =
-    theme === "classic-light"
-      ? "bg-white border-slate-200 shadow-sm"
-      : "bg-[#121414] border-white/10";
   const headingClasses = theme === "classic-light" ? "text-slate-900" : "text-white";
   const mutedClasses = theme === "classic-light" ? "text-slate-600" : "text-slate-300";
   const subtleClasses = theme === "classic-light" ? "text-slate-500" : "text-slate-400";
+  const dividerClasses = theme === "classic-light" ? "border-slate-200" : "border-white/10";
 
   const withVideos = matches
     .map((match) => ({ match, videos: MATCH_VIDEOS_BY_ID[match.matchId] ?? [] }))
@@ -308,15 +307,12 @@ function TeamMatchVideos({
   if (withVideos.length === 0) return null;
 
   return (
-    <section className={`rounded-3xl border p-4 md:p-6 ${cardClasses}`} id="team-view-match-videos">
-      <h3 className={`font-anton text-xl uppercase tracking-wide ${headingClasses}`}>
-        Vídeos das partidas
-      </h3>
-      <p className={`mt-1 font-mono text-[10px] uppercase tracking-wider ${mutedClasses}`}>
-        Jogo completo e melhores momentos de cada partida
+    <div className={`mt-5 border-t pt-4 ${dividerClasses}`} id="team-view-match-videos">
+      <p className={`font-mono text-[10px] uppercase tracking-wider ${subtleClasses}`}>
+        Vídeos das partidas — jogo completo e melhores momentos
       </p>
 
-      <div className="mt-4 space-y-5">
+      <div className="mt-3 space-y-5">
         {withVideos.map(({ match, videos }) => (
           <div key={match.matchId}>
             <div className="flex items-center gap-2">
@@ -367,7 +363,7 @@ function TeamMatchVideos({
           </div>
         ))}
       </div>
-    </section>
+    </div>
   );
 }
 
@@ -467,6 +463,8 @@ function MatchHistoryTable({
           </tbody>
         </table>
       </div>
+
+      <MatchVideosList theme={theme} matches={matches} />
     </section>
   );
 }
@@ -874,10 +872,6 @@ export const TeamLineupView: React.FC<TeamLineupViewProps> = ({ team, theme, onB
 
             {teamView.matchHistory && teamView.matchHistory.length > 0 && (
               <MatchHistoryTable theme={theme} matches={teamView.matchHistory} />
-            )}
-
-            {teamView.matchHistory && teamView.matchHistory.length > 0 && (
-              <TeamMatchVideos theme={theme} matches={teamView.matchHistory} />
             )}
 
             <section className={`rounded-3xl border p-4 md:p-6 ${cardClasses}`} id="team-lineup-board-card">
