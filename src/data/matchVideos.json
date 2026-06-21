@@ -13,12 +13,20 @@
     {
       "embedUrl": "https://www.youtube.com/embed/JUQeHxlK6mk",
       "title": "Brasil x Haiti — Copa do Mundo 2026"
+    },
+    {
+      "embedUrl": "https://www.youtube.com/embed/klEtq83CchQ",
+      "title": "Melhores Momentos: Brasil x Haiti — Copa do Mundo 2026"
     }
   ],
   "tur-par-2026": [
     {
       "embedUrl": "https://www.youtube.com/embed/vHIqfIpEr7U",
       "title": "Turquia x Paraguai — Copa do Mundo 2026"
+    },
+    {
+      "embedUrl": "https://www.youtube.com/embed/dAkr_yuPUMQ",
+      "title": "Melhores Momentos: Turquia x Paraguai — Copa do Mundo 2026"
     }
   ],
   "usa-par-2026": [
@@ -215,6 +223,110 @@
     {
       "embedUrl": "https://www.youtube.com/embed/xN4B1527vDc",
       "title": "Holanda x Suécia — Copa do Mundo 2026"
+    },
+    {
+      "embedUrl": "https://www.youtube.com/embed/ZZbQm7WtMa4",
+      "title": "Melhores Momentos: Holanda x Suécia — Copa do Mundo 2026"
+    }
+  ],
+  "cze-rsa-2026": [
+    {
+      "embedUrl": "https://www.youtube.com/embed/SVwg-Aiy2po",
+      "title": "Tchéquia x África do Sul — Copa do Mundo 2026"
+    },
+    {
+      "embedUrl": "https://www.youtube.com/embed/r53ImtCSNog",
+      "title": "Melhores Momentos: Tchéquia x África do Sul — Copa do Mundo 2026"
+    }
+  ],
+  "mex-kor-2026": [
+    {
+      "embedUrl": "https://www.youtube.com/embed/jTTH_MrgnUk",
+      "title": "México x Coreia do Sul — Copa do Mundo 2026"
+    },
+    {
+      "embedUrl": "https://www.youtube.com/embed/ntouCePny7Q",
+      "title": "Melhores Momentos: México x Coreia do Sul — Copa do Mundo 2026"
+    }
+  ],
+  "qat-sui-2026": [
+    {
+      "embedUrl": "https://www.youtube.com/embed/ljah6d9m7Z0",
+      "title": "Catar x Suíça — Copa do Mundo 2026"
+    },
+    {
+      "embedUrl": "https://www.youtube.com/embed/kjsD442TPCw",
+      "title": "Melhores Momentos: Catar x Suíça — Copa do Mundo 2026"
+    }
+  ],
+  "sui-bih-2026": [
+    {
+      "embedUrl": "https://www.youtube.com/embed/MEiBvRGi2xI",
+      "title": "Suíça x Bósnia e Herzegovina — Copa do Mundo 2026"
+    },
+    {
+      "embedUrl": "https://www.youtube.com/embed/P9ogWhz09D8",
+      "title": "Melhores Momentos: Suíça x Bósnia e Herzegovina — Copa do Mundo 2026"
+    }
+  ],
+  "can-qat-2026": [
+    {
+      "embedUrl": "https://www.youtube.com/embed/1M374lj_XRo",
+      "title": "Canadá x Catar — Copa do Mundo 2026"
+    },
+    {
+      "embedUrl": "https://www.youtube.com/embed/IBiGl8eMiRg",
+      "title": "Melhores Momentos: Canadá x Catar — Copa do Mundo 2026"
+    }
+  ],
+  "sco-mar-2026": [
+    {
+      "embedUrl": "https://www.youtube.com/embed/cpDw2AKZE2c",
+      "title": "Escócia x Marrocos — Copa do Mundo 2026"
+    },
+    {
+      "embedUrl": "https://www.youtube.com/embed/lleabQ1DIm8",
+      "title": "Melhores Momentos: Escócia x Marrocos — Copa do Mundo 2026"
+    }
+  ],
+  "usa-aus-2026": [
+    {
+      "embedUrl": "https://www.youtube.com/embed/_6cfUXA1UUw",
+      "title": "Estados Unidos x Austrália — Copa do Mundo 2026"
+    },
+    {
+      "embedUrl": "https://www.youtube.com/embed/UGlWSV-T83E",
+      "title": "Melhores Momentos: Estados Unidos x Austrália — Copa do Mundo 2026"
+    }
+  ],
+  "aut-jor-2026": [
+    {
+      "embedUrl": "https://www.youtube.com/embed/r97R-p-TlNM",
+      "title": "Áustria x Jordânia — Copa do Mundo 2026"
+    },
+    {
+      "embedUrl": "https://www.youtube.com/embed/DJbXSHFjFLA",
+      "title": "Melhores Momentos: Áustria x Jordânia — Copa do Mundo 2026"
+    }
+  ],
+  "uzb-col-2026": [
+    {
+      "embedUrl": "https://www.youtube.com/embed/rUaJfV-rPVQ",
+      "title": "Uzbequistão x Colômbia — Copa do Mundo 2026"
+    },
+    {
+      "embedUrl": "https://www.youtube.com/embed/YL5EZzCQee4",
+      "title": "Melhores Momentos: Uzbequistão x Colômbia — Copa do Mundo 2026"
+    }
+  ],
+  "gha-pan-2026": [
+    {
+      "embedUrl": "https://www.youtube.com/embed/BWsf2c4zKZs",
+      "title": "Gana x Panamá — Copa do Mundo 2026"
+    },
+    {
+      "embedUrl": "https://www.youtube.com/embed/eplGK1Sge4I",
+      "title": "Melhores Momentos: Gana x Panamá — Copa do Mundo 2026"
     }
   ]
 }
