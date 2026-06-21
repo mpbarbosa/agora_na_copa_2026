@@ -557,9 +557,10 @@ test.describe("Team view", () => {
     await expect(page.locator("#team-lineup-coach")).toContainText("Javier Aguirre");
     await page.click("#btn-team-lineup-back");
 
-    // A team with no coach entry omits the line entirely.
+    // Another team resolves its own coach from the lookup.
     await openTeam("mar");
-    await expect(page.locator("#team-lineup-coach")).toHaveCount(0);
+    await expect(page.locator("#team-lineup-coach")).toBeVisible();
+    await expect(page.locator("#team-lineup-coach")).toContainText("Walid Regragui");
   });
 
   test("opens the full team page from the venue hosted matches list", async ({ page }) => {
