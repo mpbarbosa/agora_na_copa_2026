@@ -48,7 +48,7 @@ export const FIFA_SCHEDULED_MATCHES: FifaScheduledMatchSeed[] = [
   { teamA: "TUR", teamB: "USA", kickoffTimestamp: "2026-06-25T23:00:00-03:00", status: "PRE_GAME", ...v("TUR", "USA") },
 
   // ── Grupo E ───────────────────────────────────────────────────────────────
-  { teamA: "GER", teamB: "CIV", kickoffTimestamp: "2026-06-20T17:00:00-03:00", status: "PRE_GAME", ...v("GER", "CIV") },
+  { teamA: "GER", teamB: "CIV", kickoffTimestamp: "2026-06-20T17:00:00-03:00", status: "FINISHED", score: { teamA: 2, teamB: 1 }, ...v("GER", "CIV") },
   { teamA: "ECU", teamB: "CUW", kickoffTimestamp: "2026-06-20T21:00:00-03:00", status: "PRE_GAME", ...v("ECU", "CUW") },
   { teamA: "CUW", teamB: "CIV", kickoffTimestamp: "2026-06-25T17:00:00-03:00", status: "PRE_GAME", ...v("CUW", "CIV") },
   { teamA: "ECU", teamB: "GER", kickoffTimestamp: "2026-06-25T17:00:00-03:00", status: "PRE_GAME", ...v("ECU", "GER") },
