@@ -16,6 +16,7 @@ Static data layer for "Agora na Copa 26". Each file has a different owner and ed
 | `wikipediaCountries.ts` | Hand-maintained | Maps country codes to Wikipedia article titles used by `/api/country-info`. Add entries for new country codes. |
 | `matchVideos.json` | Hand-maintained | Match highlight video links. Small; edit directly. |
 | `matchAnalysis.json` | Hand-maintained | Editorial per-match analysis ("Destaques da partida"), keyed by match id. Value is a string with optional `## Section` headers (parsed by `src/utils/noteSections.ts`); rendered in `MatchDetailView`. Edit directly. |
+| `groupAnalysis.json` | Hand-maintained | Editorial per-group analysis ("Análise do grupo"), keyed by group letter (`A`–`L`). Same `## Section` string format (parsed by `src/utils/noteSections.ts`); rendered inside each group card in `StandingsView`. Edit directly. |
 
 ## Source-of-truth hierarchy
 

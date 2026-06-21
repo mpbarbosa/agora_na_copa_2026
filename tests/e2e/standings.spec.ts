@@ -181,4 +181,17 @@ test.describe("Standings view (Grupos)", () => {
 
     expect(consoleErrors).toEqual([]);
   });
+
+  test("shows the group analysis for a group that has one", async ({ page }) => {
+    await page.goto("/");
+    await page.click("#btn-nav-grupos");
+    await expect(page.locator("#standings-view")).toBeVisible();
+
+    // Group H has an editorial analysis; Group A (no entry) does not.
+    const analysis = page.getByTestId("group-analysis-grupo-h");
+    await expect(analysis).toBeVisible();
+    await expect(analysis).toContainText("Análise do grupo");
+    await expect(analysis).toContainText("Veredito");
+    await expect(page.getByTestId("group-analysis-grupo-a")).toHaveCount(0);
+  });
 });

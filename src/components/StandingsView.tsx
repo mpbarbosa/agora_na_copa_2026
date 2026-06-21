@@ -4,6 +4,10 @@ import type { Match, TeamRef } from "../types";
 import { computeStandings, groupStandings, computeQualificationNote, computeContentionNote, computeEliminationNote } from "../standings";
 import { FlagIcon } from "./FlagIcon";
 import { StandingsRulesCard } from "./StandingsRulesCard";
+import { parseNoteSections } from "../utils/noteSections";
+import GROUP_ANALYSIS from "../data/groupAnalysis.json";
+
+const GROUP_ANALYSIS_BY_LETTER = GROUP_ANALYSIS as Record<string, string>;
 
 interface StandingsViewProps {
   matches: Match[];
@@ -422,6 +426,35 @@ export function StandingsView({
                   </tbody>
                 </table>
               </div>
+
+              {(() => {
+                const letter = group.match(/Grupo ([A-L])/)?.[1];
+                const analysis = letter ? GROUP_ANALYSIS_BY_LETTER[letter] : undefined;
+                if (!analysis) return null;
+                return (
+                  <div
+                    className={`mt-4 border-t pt-3 ${rowBorderClasses}`}
+                    id={`standings-group-analysis-${groupSlug(group)}`}
+                    data-testid={`group-analysis-${groupSlug(group)}`}
+                  >
+                    <p className={`font-anton text-sm uppercase tracking-wide ${headingClasses}`}>
+                      Análise do grupo
+                    </p>
+                    <div className="mt-2 space-y-2">
+                      {parseNoteSections(analysis).map((section) => (
+                        <div key={section.label}>
+                          <p className={`font-mono text-[9px] uppercase tracking-wider ${mutedClasses}`}>
+                            {section.label}
+                          </p>
+                          <p className={`mt-0.5 font-archivo text-xs leading-5 ${headingClasses}`}>
+                            {section.body}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })()}
             </div>
           );
         })}
