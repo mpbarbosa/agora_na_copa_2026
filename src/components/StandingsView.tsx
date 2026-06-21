@@ -432,14 +432,22 @@ export function StandingsView({
                 const analysis = letter ? GROUP_ANALYSIS_BY_LETTER[letter] : undefined;
                 if (!analysis) return null;
                 return (
-                  <div
-                    className={`mt-4 border-t pt-3 ${rowBorderClasses}`}
+                  <details
+                    className={`group mt-4 border-t pt-3 ${rowBorderClasses}`}
                     id={`standings-group-analysis-${groupSlug(group)}`}
                     data-testid={`group-analysis-${groupSlug(group)}`}
                   >
-                    <p className={`font-anton text-sm uppercase tracking-wide ${headingClasses}`}>
-                      Análise do grupo
-                    </p>
+                    <summary
+                      className={`flex cursor-pointer list-none items-center justify-between font-anton text-sm uppercase tracking-wide ${headingClasses} [&::-webkit-details-marker]:hidden`}
+                    >
+                      <span>Análise do grupo</span>
+                      <span
+                        aria-hidden="true"
+                        className={`font-mono text-[10px] transition-transform group-open:rotate-180 ${mutedClasses}`}
+                      >
+                        ▾
+                      </span>
+                    </summary>
                     <div className="mt-2 space-y-2">
                       {parseNoteSections(analysis).map((section) => (
                         <div key={section.label}>
@@ -452,7 +460,7 @@ export function StandingsView({
                         </div>
                       ))}
                     </div>
-                  </div>
+                  </details>
                 );
               })()}
             </div>
