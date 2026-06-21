@@ -65,6 +65,7 @@ const SOCIAL_PLATFORM_LABELS: Record<keyof PlayerSocials, string> = {
   youtube: "YouTube",
   facebook: "Facebook",
   site: "Site oficial",
+  wikipedia: "Wikipédia",
 };
 
 const SOCIAL_BASE_URLS: Partial<Record<keyof PlayerSocials, string>> = {

@@ -12,6 +12,8 @@ export interface PlayerSocials {
   youtube?: string;
   facebook?: string;
   site?: string;
+  /** Full Wikipedia article URL for the player. */
+  wikipedia?: string;
 }
 
 export interface Player {
