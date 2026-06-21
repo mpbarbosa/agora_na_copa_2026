@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { Match, TeamRef } from "../types";
 import { computeStandings, groupStandings } from "../standings";
 import { FlagIcon } from "./FlagIcon";
@@ -9,8 +9,56 @@ interface TeamsViewProps {
   onSelectTeamLineup: (team: TeamRef) => void;
 }
 
+interface LiveState {
+  status: string;
+  score?: { teamA: number; teamB: number };
+}
+
 export function TeamsView({ matches, theme, onSelectTeamLineup }: TeamsViewProps) {
-  const groups = useMemo(() => groupStandings(computeStandings(matches)), [matches]);
+  const [liveStates, setLiveStates] = useState<Record<string, LiveState>>({});
+
+  // Poll live match states so qualification/elimination here matches the Grupos
+  // view (which merges the same /api/match-states feed). Without this, the raw
+  // `matches` prop can be stale and a clinched team (e.g. USA) would miss its
+  // badge even though Grupos shows it qualified.
+  useEffect(() => {
+    let active = true;
+    let timer: ReturnType<typeof setTimeout>;
+
+    const poll = async () => {
+      try {
+        const res = await fetch("/api/match-states");
+        if (!res.ok || !active) return;
+        const data: { states: Record<string, LiveState>; refreshAfterMs?: number } = await res.json();
+        if (active) setLiveStates(data.states ?? {});
+        if (active) timer = setTimeout(poll, data.refreshAfterMs ?? 30000);
+      } catch {
+        if (active) timer = setTimeout(poll, 30000);
+      }
+    };
+
+    void poll();
+    return () => {
+      active = false;
+      clearTimeout(timer);
+    };
+  }, []);
+
+  const liveMatches = useMemo(
+    () =>
+      matches.map((m) => {
+        const state = liveStates[m.id];
+        if (!state) return m;
+        return {
+          ...m,
+          status: state.status as Match["status"],
+          ...(state.score !== undefined ? { score: state.score } : {}),
+        };
+      }),
+    [matches, liveStates],
+  );
+
+  const groups = useMemo(() => groupStandings(computeStandings(liveMatches), liveMatches), [liveMatches]);
 
   const cardClasses =
     theme === "classic-light"
