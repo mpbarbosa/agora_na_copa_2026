@@ -240,22 +240,13 @@ export default function App() {
                 )
               }
               title="Alternar estilo visual"
+              aria-label="Alternar estilo visual"
               className="p-2 rounded-lg bg-[#1e2020]/5 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/10 transition"
             >
               {theme === "classic-light" ? (
-                <div className="flex items-center space-x-1.5">
-                  <Moon size={14} className="text-indigo-600" />
-                  <span className="text-xs font-mono font-bold uppercase">
-                    Escuro (Arena)
-                  </span>
-                </div>
+                <Moon size={14} className="text-indigo-600" />
               ) : (
-                <div className="flex items-center space-x-1.5">
-                  <Sun size={14} className="text-amber-400" />
-                  <span className="text-xs font-mono font-bold uppercase text-amber-300">
-                    Claro (Estúdio)
-                  </span>
-                </div>
+                <Sun size={14} className="text-amber-400" />
               )}
             </button>
           </div>
