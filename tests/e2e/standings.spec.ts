@@ -187,13 +187,14 @@ test.describe("Standings view (Grupos)", () => {
     await page.click("#btn-nav-grupos");
     await expect(page.locator("#standings-view")).toBeVisible();
 
-    // Group H has an editorial analysis; Group B (no entry) does not.
+    // Group H has an editorial analysis.
     const analysis = page.getByTestId("group-analysis-grupo-h");
     await expect(analysis).toBeVisible();
     await expect(analysis).toContainText("Análise do grupo");
     await expect(analysis).toContainText("Veredito");
     // The analysis carries an "Atualizado em ..." timestamp.
     await expect(page.getByTestId("group-analysis-updated-grupo-h")).toContainText("Atualizado em");
-    await expect(page.getByTestId("group-analysis-grupo-b")).toHaveCount(0);
+    // All 12 groups now carry an editorial analysis.
+    await expect(page.locator('[data-testid^="group-analysis-grupo-"]')).toHaveCount(12);
   });
 });
