@@ -43,7 +43,7 @@ export const FIFA_SCHEDULED_MATCHES: FifaScheduledMatchSeed[] = [
 
   // ── Grupo D ───────────────────────────────────────────────────────────────
   { teamA: "USA", teamB: "AUS", kickoffTimestamp: "2026-06-19T16:00:00-03:00", status: "FINISHED", score: { teamA: 2, teamB: 0 }, ...v("USA", "AUS") },
-  { teamA: "TUR", teamB: "PAR", kickoffTimestamp: "2026-06-20T00:00:00-03:00", status: "LIVE", score: { teamA: 0, teamB: 1 }, ...v("TUR", "PAR") },
+  { teamA: "TUR", teamB: "PAR", kickoffTimestamp: "2026-06-20T00:00:00-03:00", status: "FINISHED", score: { teamA: 0, teamB: 1 }, ...v("TUR", "PAR") },
   { teamA: "PAR", teamB: "AUS", kickoffTimestamp: "2026-06-25T23:00:00-03:00", status: "PRE_GAME", ...v("PAR", "AUS") },
   { teamA: "TUR", teamB: "USA", kickoffTimestamp: "2026-06-25T23:00:00-03:00", status: "PRE_GAME", ...v("TUR", "USA") },
 
