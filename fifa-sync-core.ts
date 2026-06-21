@@ -504,23 +504,38 @@ const enrichFallbackLineupWithFifaPictures = (
   fifaTeam: FifaLiveTeam | undefined,
   teamCode: string,
 ): Player[] => {
-  const fifaPlayers = fifaTeam?.Players;
-  if (!fifaPlayers || fifaPlayers.length === 0) return fallbackLineup;
+  const fifaPlayers = fifaTeam?.Players ?? [];
 
+  // Always enrich each local player from the squad registry (picture, socials,
+  // instagramPostUrl, worldCupNote, metadata) so the player card is complete even
+  // when no live FIFA lineup is available (finished/upcoming matches). When a
+  // matching FIFA player exists, also overlay its picture/id/shirt number.
   return fallbackLineup.map((player) => {
-    const fifaPlayer = findMatchingFifaPlayer(player, fifaPlayers);
-    const pictureUrl = getFifaPlayerPictureUrl(fifaPlayer);
+    const fifaPlayer = fifaPlayers.length ? findMatchingFifaPlayer(player, fifaPlayers) : undefined;
+    const fifaPicture = getFifaPlayerPictureUrl(fifaPlayer);
+    const resolved = resolvePlayerEntry(
+      teamCode,
+      player.name,
+      player.number,
+      player.fifaId ?? fifaPlayer?.IdPlayer,
+    );
+    // Only trust the registry entry when it is a confident match (same name or
+    // FIFA id) — never a number-only fallback, which could pull a different
+    // player's data for a lineup name that isn't in the squad registry.
+    const entry =
+      resolved &&
+      (normalizeText(resolved.name) === normalizeText(player.name) ||
+        (player.fifaId !== undefined && resolved.fifaId === player.fifaId) ||
+        (fifaPlayer?.IdPlayer !== undefined && resolved.fifaId === fifaPlayer.IdPlayer))
+        ? resolved
+        : null;
 
-    if (!fifaPlayer) {
-      return player;
-    }
-
-    const entry = resolvePlayerEntry(teamCode, player.name, player.number, fifaPlayer.IdPlayer);
     return {
       ...player,
-      fifaId: fifaPlayer.IdPlayer,
-      number: fifaPlayer.ShirtNumber || player.number,
-      pictureUrl: pictureUrl ?? player.pictureUrl,
+      fifaId: player.fifaId ?? fifaPlayer?.IdPlayer ?? entry?.fifaId,
+      number: fifaPlayer?.ShirtNumber || player.number,
+      club: player.club ?? entry?.club,
+      pictureUrl: fifaPicture ?? player.pictureUrl ?? entry?.pictureUrl,
       socials: player.socials ?? entry?.socials,
       instagramPostUrl: player.instagramPostUrl ?? entry?.instagramPostUrl,
       worldCupNote: player.worldCupNote ?? entry?.worldCupNote,

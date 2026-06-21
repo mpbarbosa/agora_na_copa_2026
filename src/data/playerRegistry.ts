@@ -42,9 +42,12 @@ export const resolvePlayerEntry = (
   }
   const squad = getTeamSquad(teamCode);
   const normalizedName = normalizeText(name);
+  // Prefer an exact name match over shirt number: a name is more specific, and
+  // two squad players can share a number (e.g. a late call-up reusing #9), in
+  // which case number-first would resolve the wrong player.
   return (
-    squad.find((p) => p.number === number) ??
     squad.find((p) => normalizeText(p.name) === normalizedName) ??
+    squad.find((p) => p.number === number) ??
     null
   );
 };

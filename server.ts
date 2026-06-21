@@ -1249,8 +1249,29 @@ const getTeamViewNote = (source: TeamViewResponse["source"]) => {
   return "Painel da seleção combinando dados oficiais da FIFA com fallback local do aplicativo.";
 };
 
-const buildFallbackLineupEntry = (players: LineupEntry["players"]): LineupEntry => ({
-  players,
+const buildFallbackLineupEntry = (
+  players: LineupEntry["players"],
+  teamCode: string,
+): LineupEntry => ({
+  // Enrich the local lineup from the squad registry so editorial/profile fields
+  // (worldCupNote, instagramPostUrl, socials, picture, metadata) reach the player
+  // card even when no live FIFA lineup is available (finished/upcoming matches).
+  players: players.map((player) => {
+    const entry = resolvePlayerEntry(teamCode, player.name, player.number, player.fifaId);
+    if (!entry) return player;
+    return {
+      ...player,
+      club: player.club ?? entry.club,
+      pictureUrl: player.pictureUrl ?? entry.pictureUrl,
+      socials: player.socials ?? entry.socials,
+      instagramPostUrl: player.instagramPostUrl ?? entry.instagramPostUrl,
+      worldCupNote: player.worldCupNote ?? entry.worldCupNote,
+      fullName: player.fullName ?? entry.fullName,
+      dateOfBirth: player.dateOfBirth ?? entry.dateOfBirth,
+      height: player.height ?? entry.height,
+      fifaId: player.fifaId ?? entry.fifaId,
+    };
+  }),
   source: "fallback",
   note: "Escalação estimada a partir da base local do aplicativo.",
   updatedAt: new Date().toISOString(),
@@ -1417,9 +1438,9 @@ const buildTeamViewPayload = async (
   const lineup = lineupReference
     ? lineupReference.isTeamA
       ? teamLineupsPayload.lineups[lineupReference.match.id]?.teamA ??
-        buildFallbackLineupEntry(lineupReference.team.lineup)
+        buildFallbackLineupEntry(lineupReference.team.lineup, lineupReference.team.code)
       : teamLineupsPayload.lineups[lineupReference.match.id]?.teamB ??
-        buildFallbackLineupEntry(lineupReference.team.lineup)
+        buildFallbackLineupEntry(lineupReference.team.lineup, lineupReference.team.code)
     : null;
   const featuredGuideReference = currentMatchReference ?? nextMatchReference ?? null;
   const broadcastGuide = featuredGuideReference
