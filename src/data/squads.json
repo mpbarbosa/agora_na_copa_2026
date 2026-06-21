@@ -4158,7 +4158,7 @@
   "402876": {
     "fifaId": "402876",
     "teamCode": "URU",
-    "name": "A. Cannobio",
+    "name": "A. Canobbio",
     "fullName": "Agustin Canobbio",
     "number": 14,
     "position": "MF",
@@ -4169,7 +4169,8 @@
     "socials": {
       "instagram": "agus_cano7",
       "wikipedia": "https://pt.wikipedia.org/wiki/Agust%C3%ADn_Canobbio"
-    }
+    },
+    "instagramPostUrl": "https://www.instagram.com/reel/DZ2ZDoSIGay/"
   },
   "402884": {
     "fifaId": "402884",
@@ -6091,13 +6092,15 @@
     "fullName": "Maxi Araujo",
     "number": 20,
     "position": "MF",
-    "club": "Sporting",
+    "club": "Sporting CP",
     "pictureUrl": "https://digitalhub.fifa.com/transform/f1a7af03-ada1-4642-927c-5fe06844c89c/ARAUJO-Maxi_419100",
     "socials": {
-      "instagram": "maximilianoaraujo6"
+      "instagram": "maximilianoaraujo6",
+      "wikipedia": "https://pt.wikipedia.org/wiki/Maxi_Araújo"
     },
     "dateOfBirth": "2000-02-15",
-    "height": 176
+    "height": 176,
+    "worldCupNote": "## Leitura\nMaximiliano Araújo virou a principal arma ofensiva do Uruguai de Bielsa no início do Mundial. Ponta-esquerda veloz que brilha no Sporting de Portugal — onde foi campeão português e chegou a marcar sobre o Manchester City na Liga dos Campeões —, o camisa 20 já é o artilheiro da Celeste na competição, dando profundidade e gols a um time que ainda busca o ritmo ideal.\n## Desempenho\nMaxi Araújo abriu sua conta logo na estreia, marcando o gol uruguaio no 1 a 1 com a Arábia Saudita, e seguiu como o jogador mais incisivo da equipe. Rápido pelo lado e perigoso na finalização, tem sido a referência ofensiva de um Uruguai que peca na pontaria — quando a Celeste cria, é quase sempre por ele.\n## Números\nArtilheiro do Uruguai na Copa até aqui, com 2 gols — entre eles o da estreia contra a Arábia Saudita. Montevideano formado no Wanderers, passou por Puebla e Toluca, no México, antes de se firmar no Sporting CP. O Uruguai, em 2º no Grupo H, conta com ele para deslanchar diante de Cabo Verde e Espanha."
   },
   "419108": {
     "fifaId": "419108",
