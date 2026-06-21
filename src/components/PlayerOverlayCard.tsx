@@ -218,6 +218,7 @@ interface PlayerOverlayCardProps {
     pictureUrl?: string;
     socials?: PlayerSocials;
     instagramPostUrl?: string;
+    worldCupNote?: string;
     captain?: boolean;
     dateOfBirth?: string;
     height?: number;
@@ -476,6 +477,20 @@ export function PlayerOverlayCard({
                     </div>
                   ),
                 )}
+              </div>
+            )}
+
+            {/* Leitura — editorial World Cup performance note */}
+            {player.worldCupNote && (
+              <div
+                className={`mt-5 rounded-xl border p-3 ${isLight ? "border-slate-200 bg-slate-50" : "border-white/10 bg-white/5"}`}
+                id={id ? `${id}-leitura` : undefined}
+                data-testid="player-leitura"
+              >
+                <p className={`font-mono text-[10px] uppercase tracking-wider ${mutedClasses}`}>
+                  Leitura
+                </p>
+                <p className="mt-1.5 font-archivo text-sm leading-6">{player.worldCupNote}</p>
               </div>
             )}
 

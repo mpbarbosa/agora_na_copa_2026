@@ -27,6 +27,8 @@ export interface Player {
   pictureUrl?: string;
   socials?: PlayerSocials;
   instagramPostUrl?: string;
+  /** Editorial World Cup performance note ("Leitura") shown on the player card. */
+  worldCupNote?: string;
   fifaId?: string;
   fullName?: string;
   dateOfBirth?: string; // ISO 8601, e.g. "2000-07-21"
@@ -45,6 +47,8 @@ export interface SquadPlayer {
   pictureUrl?: string;
   socials?: PlayerSocials;
   instagramPostUrl?: string;
+  /** Editorial World Cup performance note ("Leitura") shown on the player card. */
+  worldCupNote?: string;
   dateOfBirth?: string; // ISO 8601
   height?: number; // cm
 }

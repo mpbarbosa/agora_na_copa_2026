@@ -47,6 +47,7 @@ function extractTeams(): TeamEntry[] {
                 pictureUrl: sp.pictureUrl,
                 socials: sp.socials,
                 instagramPostUrl: sp.instagramPostUrl,
+                worldCupNote: sp.worldCupNote,
                 fullName: sp.fullName,
                 dateOfBirth: sp.dateOfBirth,
                 height: sp.height,
