@@ -1179,12 +1179,11 @@ export function MatchDetailView({
             <button
               id="btn-edit-match"
               onClick={() => setShowConfig(!showConfig)}
+              title="Mudar Relógio"
+              aria-label="Mudar Relógio"
               className="p-2 rounded-lg bg-[#1e2020]/5 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/10 transition flex items-center space-x-1"
             >
               <Settings size={14} />
-              <span className="text-xs font-mono font-bold uppercase">
-                Mudar Relógio
-              </span>
             </button>
           </div>
         </div>
