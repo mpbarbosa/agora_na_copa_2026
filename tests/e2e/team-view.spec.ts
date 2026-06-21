@@ -540,6 +540,28 @@ test.describe("Team view", () => {
     await expect(fedLink).toContainText("FRMF");
   });
 
+  test("shows the head coach in the team header for Mexico", async ({ page }) => {
+    await mockTeamView(page);
+
+    const openTeam = async (code: string) => {
+      await page.click("#btn-nav-grupos");
+      await page.click(`#standings-row-${code} button[aria-label^='Ver escalação']`);
+      await expect(page.locator("#team-lineup-view")).toBeVisible();
+    };
+
+    await page.goto("/");
+
+    await openTeam("mex");
+    await expect(page.locator("#team-lineup-coach")).toBeVisible();
+    await expect(page.locator("#team-lineup-coach")).toContainText("Técnico");
+    await expect(page.locator("#team-lineup-coach")).toContainText("Javier Aguirre");
+    await page.click("#btn-team-lineup-back");
+
+    // A team with no coach entry omits the line entirely.
+    await openTeam("mar");
+    await expect(page.locator("#team-lineup-coach")).toHaveCount(0);
+  });
+
   test("opens the full team page from the venue hosted matches list", async ({ page }) => {
     await mockTeamView(page);
 

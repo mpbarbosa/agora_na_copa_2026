@@ -85,6 +85,12 @@ const TEAM_FEDERATIONS: Record<string, TeamFederation> = {
   UZB: { abbr: "UFA", name: "Uzbekistan Football Association", site: "https://ufa.uz", logoFile: "Uzbekistan Football Federation.svg" },
 };
 
+// Head coaches for the 2026 World Cup, keyed by FIFA team code. Shown in the
+// team header when known; teams without an entry simply omit the coach line.
+const TEAM_COACHES: Record<string, string> = {
+  MEX: "Javier Aguirre",
+};
+
 type LoadStatus = "loading" | "ready" | "error";
 
 const formatUpdatedAt = (value: string) => {
@@ -586,6 +592,7 @@ export const TeamLineupView: React.FC<TeamLineupViewProps> = ({ team, theme, onB
       : "bg-white/10 text-white hover:bg-white/15";
 
   const federation = TEAM_FEDERATIONS[team.code];
+  const coach = TEAM_COACHES[team.code];
   const featuredMatch = teamView?.currentMatch ?? teamView?.nextMatch ?? null;
   const activeMatchCount = teamView
     ? [teamView.currentMatch, teamView.nextMatch, teamView.lastMatch].filter(Boolean).length
@@ -622,6 +629,14 @@ export const TeamLineupView: React.FC<TeamLineupViewProps> = ({ team, theme, onB
               <p className={`mt-1 font-mono text-[11px] uppercase tracking-wider ${mutedClasses}`}>
                 {team.code} {team.group ? `• Grupo ${team.group.replace("Grupo ", "")}` : ""}
               </p>
+              {coach && (
+                <p
+                  className={`mt-1 font-mono text-[11px] uppercase tracking-wider ${mutedClasses}`}
+                  id="team-lineup-coach"
+                >
+                  <span className="opacity-60">Técnico</span> {coach}
+                </p>
+              )}
               {countryInfo?.description && (
                 <p className={`mt-0.5 font-archivo text-xs opacity-60 ${mutedClasses}`}>
                   {countryInfo.description}
