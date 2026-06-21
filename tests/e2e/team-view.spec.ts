@@ -489,6 +489,24 @@ test.describe("Team view", () => {
     await expect(history).toContainText("Vivo");
   });
 
+  test("shows the team's match videos (full game and highlights)", async ({ page }) => {
+    await mockTeamView(page);
+
+    await page.goto("/");
+    await page.click("#team-a-display button[aria-label^='Ver escalação']");
+
+    const videos = page.locator("#team-view-match-videos");
+    await expect(videos).toBeVisible();
+    await expect(videos).toContainText("Vídeos das partidas");
+    // The bra-mar-2026 fixture has both a full game and a highlights video.
+    await expect(page.getByTestId("team-video-bra-mar-2026-fullgame")).toBeVisible();
+    await expect(page.getByTestId("team-video-bra-mar-2026-highlights")).toBeVisible();
+    await expect(page.getByTestId("team-video-bra-mar-2026-fullgame")).toHaveAttribute(
+      "href",
+      /youtube\.com\/watch/,
+    );
+  });
+
   test("opens the full team page from the standings table", async ({ page }) => {
     await mockTeamView(page);
 

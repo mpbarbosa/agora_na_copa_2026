@@ -12,7 +12,7 @@ description: >
 
 Three stages:
 
-1. **Identify** — compare `src/data/matchVideos.json` against `src/matches.json` (and live server `/api/match-states`) to find FINISHED matches with no video entry
+1. **Identify** — reconcile `src/data/matchVideos.json` against the **production** live match-states to find FINISHED matches with no video entry
 2. **Search** — for each missing match, search YouTube: `Jogo Completo <team A> vs <team B> Copa do Mundo 2026 Cazé TV`
 3. **Update + deploy** — add confirmed entries to `matchVideos.json` and run test-bump-deploy
 
@@ -20,38 +20,42 @@ Three stages:
 
 ## Stage 1 — Identify missing matches
 
-Run this to get the current gap:
+**Production is the authoritative source of finished-match truth.** The local dev
+server's FIFA sync and `src/matches.json` both lag (the FIFA API is often
+unreachable from the dev environment, and `matches.json` only curates a subset —
+many fixtures live in the runtime merge layer of `src/appMatches.ts`). So
+reconcile against `https://copa2026.mpbarbosa.com/api/match-states`, which runs on
+AWS and reaches FIFA reliably. Match the missing ids against `APP_MATCHES` (the
+merged set) for team names — not `matches.json`, which would miss supplemental
+fixtures.
 
 ```bash
-node -e "
-const fs = require('fs');
-const matches = JSON.parse(fs.readFileSync('src/matches.json', 'utf8'));
-const videos  = JSON.parse(fs.readFileSync('src/data/matchVideos.json', 'utf8'));
-const missing = matches.filter(m => m.status === 'FINISHED' && !videos[m.id]);
-if (!missing.length) { console.log('All finished matches have videos.'); process.exit(0); }
-missing.forEach(m => console.log(m.id + '\t' + m.teamA.name + ' vs ' + m.teamB.name));
+# Fetch production live match-states (authoritative).
+curl -sk --max-time 30 https://copa2026.mpbarbosa.com/api/match-states -o /tmp/prod-match-states.json
+
+# List FINISHED matches with no full-game video, naming them from APP_MATCHES.
+npx tsx -e "
+import { APP_MATCHES } from './src/appMatches';
+import * as fs from 'fs';
+const prod = JSON.parse(fs.readFileSync('/tmp/prod-match-states.json','utf8')).states ?? {};
+const videos = JSON.parse(fs.readFileSync('src/data/matchVideos.json','utf8'));
+const byId = Object.fromEntries(APP_MATCHES.map(m => [m.id, m]));
+const missing = Object.entries(prod)
+  .filter(([id, s]: any) => s.status === 'FINISHED' && !videos[id]);
+if (!missing.length) { console.log('All finished matches have full-game videos.'); process.exit(0); }
+for (const [id, s] of missing) {
+  const m = byId[id]; const sc: any = (s as any).score;
+  console.log(id + '\t' + (m ? m.teamA.name + ' x ' + m.teamB.name : '(unknown)') + '\t' + (sc ? sc.teamA + '-' + sc.teamB : ''));
+}
 "
 ```
 
-If the server is running and live match states differ from the static JSON, also check:
+> If the `curl` fails (sandboxed network), retry it with the sandbox disabled —
+> the production host is read-only and safe to query. As a last-resort fallback,
+> use the local check `node -e "..."` against `src/matches.json`, but treat its
+> result as a lower bound (it under-reports).
 
-```bash
-curl -s http://localhost:3000/api/match-states | node -e "
-const fs = require('fs');
-const d = JSON.parse(require('fs').readFileSync('/dev/stdin','utf8'));
-const videos = JSON.parse(fs.readFileSync('src/data/matchVideos.json','utf8'));
-const matches = JSON.parse(fs.readFileSync('src/matches.json','utf8'));
-const states = d.states ?? {};
-const byId = Object.fromEntries(matches.map(m=>[m.id,m]));
-for (const [id, state] of Object.entries(states)) {
-  if (state.status === 'FINISHED' && !videos[id] && byId[id]) {
-    const m = byId[id]; console.log(id + '\t' + m.teamA.name + ' vs ' + m.teamB.name);
-  }
-}
-" 2>/dev/null || echo "(server not running — static check only)"
-```
-
-If output is "All finished matches have videos." — stop here, nothing to do.
+If output is "All finished matches have full-game videos." — stop here, nothing to do.
 
 ---
 

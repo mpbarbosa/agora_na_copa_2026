@@ -12,6 +12,13 @@ import { TeamPitchBoard } from "./TeamPitchBoard";
 import { PlayerOverlayCard } from "./PlayerOverlayCard";
 import { getPositionLabel } from "../utils/playerDisplay";
 import { ArrowLeft, ExternalLink } from "lucide-react";
+import MATCH_VIDEOS from "../data/matchVideos.json";
+
+type MatchVideo = { embedUrl: string; title: string };
+const MATCH_VIDEOS_BY_ID = MATCH_VIDEOS as Record<string, MatchVideo[]>;
+
+const getYoutubeId = (embedUrl: string) => embedUrl.match(/\/embed\/([^?/]+)/)?.[1] ?? "";
+const isHighlightVideo = (title: string) => /^melhores momentos:/i.test(title);
 
 interface TeamLineupViewProps {
   team: TeamRef;
@@ -278,6 +285,91 @@ const getMatchOutcome = (match: TeamViewMatchSummary): MatchOutcome | null => {
   if (match.score.team < match.score.opponent) return "D";
   return "E";
 };
+
+function TeamMatchVideos({
+  theme,
+  matches,
+}: {
+  theme: TeamLineupViewProps["theme"];
+  matches: TeamViewMatchSummary[];
+}) {
+  const cardClasses =
+    theme === "classic-light"
+      ? "bg-white border-slate-200 shadow-sm"
+      : "bg-[#121414] border-white/10";
+  const headingClasses = theme === "classic-light" ? "text-slate-900" : "text-white";
+  const mutedClasses = theme === "classic-light" ? "text-slate-600" : "text-slate-300";
+  const subtleClasses = theme === "classic-light" ? "text-slate-500" : "text-slate-400";
+
+  const withVideos = matches
+    .map((match) => ({ match, videos: MATCH_VIDEOS_BY_ID[match.matchId] ?? [] }))
+    .filter((entry) => entry.videos.length > 0);
+
+  if (withVideos.length === 0) return null;
+
+  return (
+    <section className={`rounded-3xl border p-4 md:p-6 ${cardClasses}`} id="team-view-match-videos">
+      <h3 className={`font-anton text-xl uppercase tracking-wide ${headingClasses}`}>
+        Vídeos das partidas
+      </h3>
+      <p className={`mt-1 font-mono text-[10px] uppercase tracking-wider ${mutedClasses}`}>
+        Jogo completo e melhores momentos de cada partida
+      </p>
+
+      <div className="mt-4 space-y-5">
+        {withVideos.map(({ match, videos }) => (
+          <div key={match.matchId}>
+            <div className="flex items-center gap-2">
+              <FlagIcon flag={match.opponent.flagSvg} className="h-4 w-6 shrink-0 rounded-[2px]" />
+              <p className={`font-anton text-sm uppercase tracking-wide ${headingClasses}`}>
+                {match.team.code} {match.score ? `${match.score.team} x ${match.score.opponent}` : "x"} {match.opponent.code}
+              </p>
+              <span className={`font-mono text-[9px] uppercase tracking-wider ${subtleClasses}`}>
+                {match.stageName}
+              </span>
+            </div>
+
+            <div className="mt-2 flex items-center gap-3 overflow-x-auto">
+              {videos.map((video, idx) => {
+                const videoId = getYoutubeId(video.embedUrl);
+                const watchUrl = `https://www.youtube.com/watch?v=${videoId}`;
+                const thumbUrl = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
+                const highlight = isHighlightVideo(video.title);
+                return (
+                  <a
+                    key={idx}
+                    href={watchUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    data-testid={`team-video-${match.matchId}-${highlight ? "highlights" : "fullgame"}`}
+                    aria-label={`Assistir no YouTube: ${video.title}`}
+                    title={video.title}
+                    className="group shrink-0"
+                  >
+                    <span className="relative block overflow-hidden rounded-xl border border-white/10" style={{ width: 168, height: 94 }}>
+                      <img src={thumbUrl} alt={video.title} className="h-full w-full object-cover" loading="lazy" />
+                      <span className="absolute inset-0 bg-black/30 transition-colors group-hover:bg-black/20" />
+                      <span className="absolute inset-0 flex items-center justify-center">
+                        <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#ff0000] transition-transform group-hover:scale-110">
+                          <svg viewBox="0 0 24 24" className="h-3.5 w-3.5 translate-x-px fill-white" aria-hidden="true">
+                            <path d="M8 5v14l11-7z" />
+                          </svg>
+                        </span>
+                      </span>
+                    </span>
+                    <span className={`mt-1 block font-mono text-[9px] uppercase tracking-wider ${mutedClasses}`}>
+                      {highlight ? "Melhores momentos" : "Jogo completo"}
+                    </span>
+                  </a>
+                );
+              })}
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
 
 function MatchHistoryTable({
   theme,
@@ -782,6 +874,10 @@ export const TeamLineupView: React.FC<TeamLineupViewProps> = ({ team, theme, onB
 
             {teamView.matchHistory && teamView.matchHistory.length > 0 && (
               <MatchHistoryTable theme={theme} matches={teamView.matchHistory} />
+            )}
+
+            {teamView.matchHistory && teamView.matchHistory.length > 0 && (
+              <TeamMatchVideos theme={theme} matches={teamView.matchHistory} />
             )}
 
             <section className={`rounded-3xl border p-4 md:p-6 ${cardClasses}`} id="team-lineup-board-card">
