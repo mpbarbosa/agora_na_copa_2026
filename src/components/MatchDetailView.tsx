@@ -18,6 +18,8 @@ import {
 } from "../types";
 import { APP_MATCHES } from "../appMatches";
 import MATCH_VIDEOS from "../data/matchVideos.json";
+import MATCH_ANALYSIS from "../data/matchAnalysis.json";
+import { parseNoteSections } from "../utils/noteSections";
 import type { TeamLineupsMap } from "../utils/teamLineup";
 import { FlagIcon } from "./FlagIcon";
 import { PlayerOverlayCard, PlayerPictureOverlay, buildTournamentStatCells, getPlayerAge, formatBirthDate } from "./PlayerOverlayCard";
@@ -1761,6 +1763,48 @@ export function MatchDetailView({
                         )}
                       </a>
                     ))}
+                  </div>
+                </div>
+              )}
+
+              {(MATCH_ANALYSIS as Record<string, string>)[currentMatch.id] && (
+                <div
+                  className={`mt-5 rounded-2xl border px-4 py-4 ${
+                    theme === "classic-light"
+                      ? "bg-slate-50 border-slate-200"
+                      : "bg-[#121414]/70 border-white/10"
+                  }`}
+                  id="match-analysis-panel"
+                  data-testid="match-analysis"
+                >
+                  <p
+                    className={`font-anton text-base uppercase tracking-wide ${
+                      theme === "classic-light" ? "text-slate-900" : "text-white"
+                    }`}
+                  >
+                    Destaques da partida
+                  </p>
+                  <div className="mt-3 space-y-3">
+                    {parseNoteSections((MATCH_ANALYSIS as Record<string, string>)[currentMatch.id], "Destaques").map(
+                      (section) => (
+                        <div key={section.label}>
+                          <p
+                            className={`font-mono text-[10px] uppercase tracking-wider ${
+                              theme === "classic-light" ? "text-slate-500" : "text-slate-300"
+                            }`}
+                          >
+                            {section.label}
+                          </p>
+                          <p
+                            className={`mt-1 font-archivo text-sm leading-6 ${
+                              theme === "classic-light" ? "text-slate-700" : "text-slate-200"
+                            }`}
+                          >
+                            {section.body}
+                          </p>
+                        </div>
+                      ),
+                    )}
                   </div>
                 </div>
               )}

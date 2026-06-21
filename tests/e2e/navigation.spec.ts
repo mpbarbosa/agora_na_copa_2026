@@ -133,6 +133,22 @@ test.describe("Navigation shell", () => {
     await expect(page.locator("#scoreboard-clock")).toBeVisible();
   });
 
+  test("shows the match analysis panel for a match that has one", async ({ page }) => {
+    await page.goto("/");
+
+    await page.click("#match-selector-chips-finished #btn-match-esp-cpv-2026");
+
+    const analysis = page.getByTestId("match-analysis");
+    await expect(analysis).toBeVisible();
+    await expect(analysis).toContainText("Destaques da partida");
+    await expect(analysis).toContainText("Cabo Verde");
+    await expect(analysis).toContainText("Leitura");
+
+    // A match without an analysis entry does not render the panel.
+    await page.click("#match-selector-chips-finished #btn-match-bra-mar-2026");
+    await expect(page.getByTestId("match-analysis")).toHaveCount(0);
+  });
+
   test("bra-mar custom countdown demo still works", async ({ page }) => {
     await page.route("**/api/match-overlays", async (route) => {
       await route.fulfill({

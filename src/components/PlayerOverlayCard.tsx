@@ -4,6 +4,7 @@ import { InstagramBrandIcon } from "./InstagramBrandIcon";
 import { FlagIcon } from "./FlagIcon";
 import { useEscapeKey } from "../hooks/useEscapeKey";
 import { getPlayerSocialEntries } from "../utils/playerDisplay";
+import { parseNoteSections } from "../utils/noteSections";
 
 declare global {
   interface Window {
@@ -240,27 +241,6 @@ const INSTAGRAM_ORIGIN = "https://www.instagram.com/";
 
 function isSafeInstagramUrl(url: string): boolean {
   return url.startsWith(INSTAGRAM_ORIGIN);
-}
-
-// A worldCupNote may be a single paragraph (rendered under a "Leitura" heading)
-// or several "## Section" blocks, each rendered with its own heading.
-function parseWorldCupSections(note: string): { label: string; body: string }[] {
-  const trimmed = note.trim();
-  if (!trimmed.includes("## ")) return [{ label: "Leitura", body: trimmed }];
-
-  const sections: { label: string; body: string }[] = [];
-  let current: { label: string; body: string[] } | null = null;
-  for (const line of trimmed.split("\n")) {
-    const header = line.match(/^##\s+(.+)$/);
-    if (header) {
-      if (current) sections.push({ label: current.label, body: current.body.join(" ").trim() });
-      current = { label: header[1].trim(), body: [] };
-    } else if (current) {
-      current.body.push(line.trim());
-    }
-  }
-  if (current) sections.push({ label: current.label, body: current.body.join(" ").trim() });
-  return sections.filter((s) => s.body);
 }
 
 export function PlayerOverlayCard({
@@ -508,7 +488,7 @@ export function PlayerOverlayCard({
                 id={id ? `${id}-leitura` : undefined}
                 data-testid="player-leitura"
               >
-                {parseWorldCupSections(player.worldCupNote).map((section, i) => (
+                {parseNoteSections(player.worldCupNote).map((section, i) => (
                   <div key={section.label} className={i > 0 ? "mt-3" : ""}>
                     <p className={`font-mono text-[10px] uppercase tracking-wider ${mutedClasses}`}>
                       {section.label}
