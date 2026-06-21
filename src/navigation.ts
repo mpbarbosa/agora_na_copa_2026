@@ -31,14 +31,14 @@ export const NAV_ITEMS: NavItem[] = [
     description: "Perfis individuais dos atletas classificados para a Copa.",
   },
   {
-    id: "lideres",
-    label: "Líderes",
-    description: "Artilharia, disciplina e destaques coletivos da Copa.",
-  },
-  {
     id: "chaveamento",
     label: "Chaveamento",
     description: "Mata-mata interativo até a grande final.",
+  },
+  {
+    id: "lideres",
+    label: "Líderes",
+    description: "Artilharia, disciplina e destaques coletivos da Copa.",
   },
   {
     id: "estadios",

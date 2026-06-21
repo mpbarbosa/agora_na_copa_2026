@@ -68,7 +68,8 @@ test.describe("Teams view (Seleções)", () => {
     await expect(navButtons.nth(2)).toHaveText("Grupos");
     await expect(navButtons.nth(3)).toHaveText("Seleções");
     await expect(navButtons.nth(4)).toHaveText("Jogadores");
-    await expect(navButtons.nth(5)).toHaveText("Líderes");
+    await expect(navButtons.nth(5)).toHaveText("Chaveamento");
+    await expect(navButtons.nth(6)).toHaveText("Líderes");
 
     await page.click("#btn-nav-selecoes");
 
