@@ -23,6 +23,9 @@ import { APP_MATCHES } from "./src/appMatches";
 import { resolvePlayerEntry } from "./src/data/playerRegistry";
 import { triviaQuestions } from "./src/data/questions";
 import WIKIPEDIA_COUNTRIES from "./src/data/wikipediaCountries";
+import TEAM_ANALYSIS from "./src/data/teamAnalysis.json";
+
+const TEAM_ANALYSIS_BY_CODE = TEAM_ANALYSIS as Record<string, string>;
 import { computeStandings, groupStandings } from "./src/standings";
 import {
   Position,
@@ -1495,6 +1498,7 @@ const buildTeamViewPayload = async (
     nextMatch,
     lastMatch,
     matchHistory,
+    teamAnalysis: TEAM_ANALYSIS_BY_CODE[normalizedTeamCode] ?? null,
     lineup,
     leaders: {
       topScorers,

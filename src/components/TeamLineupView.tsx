@@ -11,6 +11,7 @@ import { FlagIcon } from "./FlagIcon";
 import { TeamPitchBoard } from "./TeamPitchBoard";
 import { PlayerOverlayCard } from "./PlayerOverlayCard";
 import { getPositionLabel } from "../utils/playerDisplay";
+import { parseNoteSections } from "../utils/noteSections";
 import { ArrowLeft, ExternalLink } from "lucide-react";
 import MATCH_VIDEOS from "../data/matchVideos.json";
 
@@ -872,6 +873,30 @@ export const TeamLineupView: React.FC<TeamLineupViewProps> = ({ team, theme, onB
 
             {teamView.matchHistory && teamView.matchHistory.length > 0 && (
               <MatchHistoryTable theme={theme} matches={teamView.matchHistory} />
+            )}
+
+            {teamView.teamAnalysis && (
+              <section
+                className={`rounded-3xl border p-4 md:p-6 ${cardClasses}`}
+                id="team-view-analysis"
+                data-testid="team-analysis"
+              >
+                <h3 className={`font-anton text-xl uppercase tracking-wide ${headingClasses}`}>
+                  Análise da seleção
+                </h3>
+                <div className="mt-3 space-y-3">
+                  {parseNoteSections(teamView.teamAnalysis).map((section) => (
+                    <div key={section.label}>
+                      <p className={`font-mono text-[10px] uppercase tracking-wider ${mutedClasses}`}>
+                        {section.label}
+                      </p>
+                      <p className={`mt-0.5 font-archivo text-sm leading-6 ${headingClasses}`}>
+                        {section.body}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </section>
             )}
 
             <section className={`rounded-3xl border p-4 md:p-6 ${cardClasses}`} id="team-lineup-board-card">

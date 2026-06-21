@@ -154,6 +154,8 @@ async function mockTeamView(page: Page) {
             updatedAt: "2026-06-15T19:00:00.000Z",
           },
         ],
+        teamAnalysis:
+          "## Leitura\nSeleção madura e candidata ao título no jogo de teste.\n## Números\nJ1 · 1 vitória · clean sheet.",
         lineup: {
           players: [
             {
@@ -488,6 +490,20 @@ test.describe("Team view", () => {
     // Live fixture surfaces a "Vivo" badge instead of a result letter.
     await expect(history).toContainText("MAR");
     await expect(history).toContainText("Vivo");
+  });
+
+  test("shows the editorial team analysis (Análise da seleção) when one is authored", async ({ page }) => {
+    await mockTeamView(page);
+
+    await page.goto("/");
+    await page.click("#team-a-display button[aria-label^='Ver escalação']");
+
+    const analysis = page.getByTestId("team-analysis");
+    await expect(analysis).toBeVisible();
+    await expect(analysis).toContainText("Análise da seleção");
+    await expect(analysis).toContainText("Leitura");
+    await expect(analysis).toContainText("candidata ao título");
+    await expect(analysis).toContainText("Números");
   });
 
   test("shows the team's match videos (full game and highlights)", async ({ page }) => {
