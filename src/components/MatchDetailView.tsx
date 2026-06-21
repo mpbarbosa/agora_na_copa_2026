@@ -558,7 +558,7 @@ export function MatchDetailView({
   const [matchSelectionMode, setMatchSelectionMode] = useState<"auto" | "manual">(
     initialMatchId ? "manual" : "auto",
   );
-  const [activeTab, setActiveTab] = useState<"broadcast" | "lineup">(
+  const [activeTab, setActiveTab] = useState<"broadcast" | "lineup" | "pregame">(
     "broadcast",
   );
   // Custom interactive test parameters for custom mock simulations
@@ -599,6 +599,7 @@ export function MatchDetailView({
   const currentSimulatedState = simulatedMatchStates[currentMatch.id];
   const currentOverlay = matchOverlays[currentMatch.id];
   const currentLineupEntry = teamLineups[currentMatch.id];
+  const matchAnalysisText = (MATCH_ANALYSIS as Record<string, string>)[currentMatch.id];
   const visibleBroadcasters = currentMatch.broadcasters;
   const currentIncidents =
     currentSimulatedState?.incidents || currentOverlay?.matchState.incidents || [];
@@ -1603,6 +1604,23 @@ export function MatchDetailView({
           >
             Escalação
           </button>
+          {matchAnalysisText && (
+            <button
+              id="btn-tab-pregame"
+              onClick={() => setActiveTab("pregame")}
+              className={`px-3.5 py-2 min-h-11 rounded-md text-[13px] md:text-sm leading-none font-anton transition-all uppercase tracking-wide ${
+                activeTab === "pregame"
+                  ? theme === "classic-light"
+                    ? "bg-white text-slate-950 shadow-sm font-semibold"
+                    : "bg-[#171a1c] text-[#ffd84d] shadow-sm font-semibold"
+                  : theme === "classic-light"
+                    ? "text-slate-700 hover:bg-white hover:text-slate-950"
+                    : "text-slate-100 hover:bg-white/10 hover:text-white"
+              }`}
+            >
+              Pré-jogo
+            </button>
+          )}
         </div>
 
         {/* TAB 1: ONDE ASSISTIR BROADCAST GUIDE */}
@@ -1762,51 +1780,6 @@ export function MatchDetailView({
                         )}
                       </a>
                     ))}
-                  </div>
-                </div>
-              )}
-
-              {(MATCH_ANALYSIS as Record<string, string>)[currentMatch.id] && (
-                <div
-                  className={`mt-5 rounded-2xl border px-4 py-4 ${
-                    theme === "classic-light"
-                      ? "bg-slate-50 border-slate-200"
-                      : "bg-[#121414]/70 border-white/10"
-                  }`}
-                  id="match-analysis-panel"
-                  data-testid="match-analysis"
-                >
-                  <p
-                    className={`font-anton text-base uppercase tracking-wide ${
-                      theme === "classic-light" ? "text-slate-900" : "text-white"
-                    }`}
-                  >
-                    {currentMatch.status === "FINISHED" ? "Destaques da partida" : "Prévia da partida"}
-                  </p>
-                  <div className="mt-3 space-y-3">
-                    {parseNoteSections(
-                      (MATCH_ANALYSIS as Record<string, string>)[currentMatch.id],
-                      currentMatch.status === "FINISHED" ? "Destaques" : "Prévia",
-                    ).map(
-                      (section) => (
-                        <div key={section.label}>
-                          <p
-                            className={`font-mono text-[10px] uppercase tracking-wider ${
-                              theme === "classic-light" ? "text-slate-500" : "text-slate-300"
-                            }`}
-                          >
-                            {section.label}
-                          </p>
-                          <p
-                            className={`mt-1 font-archivo text-sm leading-6 ${
-                              theme === "classic-light" ? "text-slate-700" : "text-slate-200"
-                            }`}
-                          >
-                            {section.body}
-                          </p>
-                        </div>
-                      ),
-                    )}
                   </div>
                 </div>
               )}
@@ -2063,6 +2036,50 @@ export function MatchDetailView({
                   </div>
                 );
               })()}
+            </div>
+          </div>
+        )}
+
+        {/* TAB: PRE-GAME / POST-GAME EDITORIAL ANALYSIS */}
+        {activeTab === "pregame" && matchAnalysisText && (
+          <div
+            className={`rounded-2xl border px-4 py-4 ${
+              theme === "classic-light"
+                ? "bg-slate-50 border-slate-200"
+                : "bg-[#121414]/70 border-white/10"
+            }`}
+            id="match-analysis-panel"
+            data-testid="match-analysis"
+          >
+            <p
+              className={`font-anton text-base uppercase tracking-wide ${
+                theme === "classic-light" ? "text-slate-900" : "text-white"
+              }`}
+            >
+              {currentMatch.status === "FINISHED" ? "Destaques da partida" : "Prévia da partida"}
+            </p>
+            <div className="mt-3 space-y-3">
+              {parseNoteSections(
+                matchAnalysisText,
+                currentMatch.status === "FINISHED" ? "Destaques" : "Prévia",
+              ).map((section) => (
+                <div key={section.label}>
+                  <p
+                    className={`font-mono text-[10px] uppercase tracking-wider ${
+                      theme === "classic-light" ? "text-slate-500" : "text-slate-300"
+                    }`}
+                  >
+                    {section.label}
+                  </p>
+                  <p
+                    className={`mt-1 font-archivo text-sm leading-6 ${
+                      theme === "classic-light" ? "text-slate-700" : "text-slate-200"
+                    }`}
+                  >
+                    {section.body}
+                  </p>
+                </div>
+              ))}
             </div>
           </div>
         )}

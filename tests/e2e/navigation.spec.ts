@@ -138,14 +138,19 @@ test.describe("Navigation shell", () => {
 
     await page.click("#match-selector-chips-finished #btn-match-esp-cpv-2026");
 
+    // The analysis lives under its own "Pré-jogo" tab next to Escalação.
+    await page.click("#btn-tab-pregame");
     const analysis = page.getByTestId("match-analysis");
     await expect(analysis).toBeVisible();
     await expect(analysis).toContainText("Destaques da partida");
     await expect(analysis).toContainText("Cabo Verde");
     await expect(analysis).toContainText("Leitura");
 
-    // A match without an analysis entry does not render the panel.
+    // A match without an analysis entry exposes neither the tab nor the panel.
+    // Switch back to the broadcast tab first so its finished-match selector is available.
+    await page.click("#btn-tab-broadcast");
     await page.click("#match-selector-chips-finished #btn-match-bra-mar-2026");
+    await expect(page.locator("#btn-tab-pregame")).toHaveCount(0);
     await expect(page.getByTestId("match-analysis")).toHaveCount(0);
   });
 
