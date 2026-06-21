@@ -16,7 +16,7 @@ Static data layer for "Agora na Copa 26". Each file has a different owner and ed
 | `wikipediaCountries.ts` | Hand-maintained | Maps country codes to Wikipedia article titles used by `/api/country-info`. Add entries for new country codes. |
 | `matchVideos.json` | Hand-maintained | Match highlight video links. Small; edit directly. |
 | `matchAnalysis.json` | Hand-maintained | Editorial per-match analysis ("Destaques da partida"), keyed by match id. Value is a string with optional `## Section` headers (parsed by `src/utils/noteSections.ts`); rendered in `MatchDetailView`. Edit directly. |
-| `groupAnalysis.json` | Hand-maintained | Editorial per-group analysis ("Análise do grupo"), keyed by group letter (`A`–`L`). Same `## Section` string format (parsed by `src/utils/noteSections.ts`); rendered inside each group card in `StandingsView`. Edit directly. |
+| `groupAnalysis.json` | Hand-maintained | Editorial per-group analysis ("Análise do grupo"), keyed by group letter (`A`–`L`). Each value is `{ text, updatedAt }`: `text` is the `## Section` string (parsed by `src/utils/noteSections.ts`); `updatedAt` is an ISO-8601 timestamp rendered as an "Atualizado em …" line. Rendered inside each group card in `StandingsView`. Edit directly. |
 | `teamAnalysis.json` | Hand-maintained | Editorial per-team analysis ("Análise da seleção"), keyed by team code (e.g. `ARG`). Same `## Section` string format (parsed by `src/utils/noteSections.ts`); attached to the `/api/team-view/:teamCode` payload in `server.ts` and rendered in `TeamLineupView`. Edit directly. |
 
 ## Source-of-truth hierarchy

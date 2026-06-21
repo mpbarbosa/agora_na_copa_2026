@@ -192,6 +192,8 @@ test.describe("Standings view (Grupos)", () => {
     await expect(analysis).toBeVisible();
     await expect(analysis).toContainText("Análise do grupo");
     await expect(analysis).toContainText("Veredito");
+    // The analysis carries an "Atualizado em ..." timestamp.
+    await expect(page.getByTestId("group-analysis-updated-grupo-h")).toContainText("Atualizado em");
     await expect(page.getByTestId("group-analysis-grupo-a")).toHaveCount(0);
   });
 });

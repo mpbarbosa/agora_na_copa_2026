@@ -7,7 +7,31 @@ import { StandingsRulesCard } from "./StandingsRulesCard";
 import { parseNoteSections } from "../utils/noteSections";
 import GROUP_ANALYSIS from "../data/groupAnalysis.json";
 
-const GROUP_ANALYSIS_BY_LETTER = GROUP_ANALYSIS as Record<string, string>;
+interface GroupAnalysisEntry {
+  text: string;
+  updatedAt?: string;
+}
+
+const GROUP_ANALYSIS_BY_LETTER = GROUP_ANALYSIS as Record<string, GroupAnalysisEntry>;
+
+// "Atualizado em 21/06/2026, 18h50" (Brasília). Returns null for missing/invalid timestamps.
+const formatAnalysisTimestamp = (value: string | undefined): string | null => {
+  if (!value) return null;
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return null;
+  const stamp = date
+    .toLocaleString("pt-BR", {
+      timeZone: "America/Sao_Paulo",
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    })
+    .replace(",", "")
+    .replace(":", "h");
+  return `Atualizado em ${stamp}`;
+};
 
 interface StandingsViewProps {
   matches: Match[];
@@ -449,7 +473,7 @@ export function StandingsView({
                       </span>
                     </summary>
                     <div className="mt-2 space-y-2">
-                      {parseNoteSections(analysis).map((section) => (
+                      {parseNoteSections(analysis.text).map((section) => (
                         <div key={section.label}>
                           <p className={`font-mono text-[9px] uppercase tracking-wider ${mutedClasses}`}>
                             {section.label}
@@ -460,6 +484,14 @@ export function StandingsView({
                         </div>
                       ))}
                     </div>
+                    {formatAnalysisTimestamp(analysis.updatedAt) && (
+                      <p
+                        className={`mt-3 font-mono text-[9px] uppercase tracking-wider ${mutedClasses}`}
+                        data-testid={`group-analysis-updated-${groupSlug(group)}`}
+                      >
+                        {formatAnalysisTimestamp(analysis.updatedAt)}
+                      </p>
+                    )}
                   </details>
                 );
               })()}
