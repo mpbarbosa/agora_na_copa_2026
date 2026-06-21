@@ -1782,10 +1782,13 @@ export function MatchDetailView({
                       theme === "classic-light" ? "text-slate-900" : "text-white"
                     }`}
                   >
-                    Destaques da partida
+                    {currentMatch.status === "FINISHED" ? "Destaques da partida" : "Prévia da partida"}
                   </p>
                   <div className="mt-3 space-y-3">
-                    {parseNoteSections((MATCH_ANALYSIS as Record<string, string>)[currentMatch.id], "Destaques").map(
+                    {parseNoteSections(
+                      (MATCH_ANALYSIS as Record<string, string>)[currentMatch.id],
+                      currentMatch.status === "FINISHED" ? "Destaques" : "Prévia",
+                    ).map(
                       (section) => (
                         <div key={section.label}>
                           <p
