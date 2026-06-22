@@ -14,6 +14,7 @@ One-time production server provisioning scripts for the AWS host running the `ag
 | `06_redeploy.sh` | Every deploy | Syncs the latest staging payload and restarts the service. Called by `scripts/deploy.sh` on production hosts |
 | `07_add_portfolio_link.sh` | Once | Adds portfolio backlink to the `mpbarbosa.com` landing pages |
 | `08_setup_monitoring.sh` | Once | Enables timed nginx access logging (`agora_timed` log format with `rt=` and `urt=` fields); safe to run after certbot — injects surgically rather than overwriting |
+| `09_setup_swap.sh` | Once | Adds a `/swapfile` (default 2G) + sets `vm.swappiness`, so deploy-time memory spikes don't OOM-thrash the ~1.9 GiB host. Idempotent. See `devops/copa_2026/EC2_CAPACITY_DEPLOY_SAFETY_ROADMAP.md` |
 
 ## lib/
 
