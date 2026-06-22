@@ -4,7 +4,7 @@ import type { AffiliateProduct } from "./types";
  * Amazon Associates Brasil store/tracking tag. Links only earn commission when
  * this matches a real, registered Associates account — swap in your own tag.
  */
-export const AMAZON_ASSOCIATES_TAG = "agoracopa-26";
+export const AMAZON_ASSOCIATES_TAG = "agoracopa-20";
 
 /** Append the Associates tag to an Amazon URL, preserving any existing query params. */
 export function withAffiliateTag(url: string): string {
