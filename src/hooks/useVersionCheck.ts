@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 export const VERSION_POLL_INTERVAL_MS = 5 * 60 * 1000;
 
@@ -11,12 +11,20 @@ export interface VersionCheckStatus {
   lastCheckedAt: number | null;
 }
 
-export function useVersionCheck(clientVersion: string): VersionCheckStatus {
+export interface VersionCheckControls extends VersionCheckStatus {
+  /** Force a version check right now, skipping the countdown (e.g. from a button). */
+  checkNow: () => void;
+}
+
+export function useVersionCheck(clientVersion: string): VersionCheckControls {
   const [status, setStatus] = useState<VersionCheckStatus>(() => ({
     updateAvailable: false,
     nextCheckAt: Date.now() + VERSION_POLL_INTERVAL_MS,
     lastCheckedAt: null,
   }));
+
+  // Holds the latest "check now" trigger so the returned callback stays stable.
+  const triggerRef = useRef<() => void>(() => {});
 
   useEffect(() => {
     let active = true;
@@ -28,9 +36,10 @@ export function useVersionCheck(clientVersion: string): VersionCheckStatus {
       timer = setTimeout(check, VERSION_POLL_INTERVAL_MS);
     };
 
-    const check = async () => {
+    const check = async (manual = false) => {
       if (!active) return;
-      if (document.visibilityState === "hidden") {
+      // Background checks defer while hidden; a manual check always runs.
+      if (!manual && document.visibilityState === "hidden") {
         schedule();
         return;
       }
@@ -48,6 +57,11 @@ export function useVersionCheck(clientVersion: string): VersionCheckStatus {
         // network error — silent, retry next interval
       }
       schedule();
+    };
+
+    triggerRef.current = () => {
+      clearTimeout(timer);
+      void check(true);
     };
 
     // First check deferred — no banner flash on startup
@@ -68,5 +82,7 @@ export function useVersionCheck(clientVersion: string): VersionCheckStatus {
     };
   }, [clientVersion]);
 
-  return status;
+  const checkNow = useCallback(() => triggerRef.current(), []);
+
+  return { ...status, checkNow };
 }

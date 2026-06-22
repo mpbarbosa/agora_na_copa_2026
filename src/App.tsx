@@ -241,7 +241,11 @@ export default function App() {
                   26
                 </span>
               </span>
-              <VersionCheckTimer status={versionCheck} theme={theme} />
+              <VersionCheckTimer
+                status={versionCheck}
+                onForceCheck={versionCheck.checkNow}
+                theme={theme}
+              />
             </div>
 
             <div className="flex items-center gap-2">

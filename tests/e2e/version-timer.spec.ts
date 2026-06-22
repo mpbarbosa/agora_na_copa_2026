@@ -12,5 +12,13 @@ test.describe("Version-check timer (header)", () => {
     await expect(timer).toHaveText(/(\d+:\d{2}|nova versão)/);
     // It lives inside the branding cluster, beside the title.
     await expect(page.locator("#app-branding #version-check-timer")).toBeVisible();
+
+    // A discreet force-check button sits immediately to its right.
+    const forceBtn = page.locator("#btn-version-check-now");
+    await expect(forceBtn).toBeVisible();
+    // Forcing a check now re-polls and resets the countdown; UI stays intact.
+    await forceBtn.click();
+    await expect(timer).toBeVisible();
+    await expect(timer).toHaveText(/(\d+:\d{2}|nova versão)/);
   });
 });
