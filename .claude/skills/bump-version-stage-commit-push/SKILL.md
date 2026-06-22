@@ -69,18 +69,29 @@ git add -A
 
 ## Execution flow
 
-### Step 1 — Inspect repo state
+### Step 1 — Inspect repo state and detect repo role
 
 Run:
 
 ```bash
 git status --short
 git branch --show-current
-git rev-parse --abbrev-ref --symbolic-full-name '@{u}'
+git worktree list
 ```
 
-If upstream is missing, stop and report that push cannot proceed until the
-branch has an upstream.
+This project is worked through two worktrees with different publish rules.
+Detect which one you are in from the checked-out branch:
+
+| Branch | Role | Publish action (Step 8) |
+|--------|------|-------------------------|
+| `data-work` | **DATA repo** (`agora-data` worktree) | merge the commit into `main` |
+| anything else (e.g. `main`) | **CODE repo** (`agora_na_copa_2026` worktree) | push the current branch to its remote |
+
+The data worktree has **no upstream of its own** — its commits are published by
+fast-forwarding `main`, not by pushing a `data-work` branch. So a "missing
+upstream" is expected and correct for the data repo; do **not** stop on it. For
+the **code repo**, the branch must have an upstream — if it is missing, stop and
+report that push cannot proceed.
 
 ### Step 2 — Bump the version
 
@@ -145,13 +156,31 @@ user explicitly says not to:
 git commit -m "GENERATED_SUBJECT" -m "Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>"
 ```
 
-### Step 8 — Push
+### Step 8 — Publish (role-based)
 
-Push the current branch:
+Use the role detected in Step 1.
+
+**DATA repo (branch `data-work`) → merge to `main`.** `main` is checked out in
+the sibling `agora_na_copa_2026` worktree, so this worktree publishes by
+fast-forwarding `main` to the new commit, then syncing the local `main`
+worktree (best-effort):
+
+```bash
+git push origin HEAD:main
+mainwt="$(git worktree list --porcelain | awk '/^worktree /{wt=$2} $0=="branch refs/heads/main"{print wt}')"
+[ -n "$mainwt" ] && git -C "$mainwt" merge --ff-only data-work
+```
+
+**CODE repo (branch `main` or any non-`data-work` branch) → push the current
+branch to its remote:**
 
 ```bash
 git push origin "$(git branch --show-current)"
 ```
+
+Pushing to `main` updates the default branch directly. If the harness permission
+classifier blocks it, stop and ask the user to authorize the push (or to run
+`! git push origin HEAD:main` themselves) — do not work around the denial.
 
 ---
 
@@ -173,10 +202,14 @@ git push origin "$(git branch --show-current)"
 
 ```bash
 git status --short
+git branch --show-current            # detect role: data-work → DATA repo, else → CODE repo
 npm version patch --no-git-tag-version
 git add -A
 npm run lint
 git diff --cached --stat --summary
 git commit -m "GENERATED_SUBJECT" -m "Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>"
-git push origin "$(git branch --show-current)"
+
+# Publish (role-based — see Step 8):
+#   DATA repo (data-work): git push origin HEAD:main   # merge/fast-forward main
+#   CODE repo (main/etc.): git push origin "$(git branch --show-current)"
 ```

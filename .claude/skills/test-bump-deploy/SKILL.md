@@ -52,15 +52,26 @@ before retrying.
 
 ## Stage 2 — Bump, commit, push
 
-### 2a. Inspect repo state
+### 2a. Inspect repo state and detect repo role
 
 ```bash
 git status --short
 git branch --show-current
-git rev-parse --abbrev-ref --symbolic-full-name '@{u}'
+git worktree list
 ```
 
-If the upstream is missing, stop — push cannot proceed.
+This project is worked through two worktrees with different publish rules.
+Detect which one you are in from the checked-out branch:
+
+| Branch | Role | Publish action (2g) |
+|--------|------|---------------------|
+| `data-work` | **DATA repo** (`agora-data` worktree) | merge the release commit into `main` |
+| anything else (e.g. `main`) | **CODE repo** (`agora_na_copa_2026` worktree) | push the current branch to its remote |
+
+The data worktree has **no upstream of its own** — its commits are published by
+fast-forwarding `main`, not by pushing a `data-work` branch. So do **not** stop
+on a "missing upstream"; that is expected and correct for the data repo. Only
+the code repo needs an upstream, and `main` already has one.
 
 ### 2b. Bump version
 
@@ -101,15 +112,41 @@ Use a conventional-style subject from the staged diff:
 git commit -m "GENERATED_SUBJECT" -m "Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>"
 ```
 
-### 2g. Push source repo
+### 2g. Publish the source commit (role-based)
+
+Use the role detected in 2a.
+
+**DATA repo (branch `data-work`) → merge to `main`.** `main` is checked out in
+the sibling `agora_na_copa_2026` worktree, so this worktree publishes by
+fast-forwarding `main` to the new commit:
+
+```bash
+git push origin HEAD:main
+```
+
+Then keep the local `main` worktree in sync (best-effort; skip silently if it is
+dirty or absent):
+
+```bash
+mainwt="$(git worktree list --porcelain | awk '/^worktree /{wt=$2} $0=="branch refs/heads/main"{print wt}')"
+[ -n "$mainwt" ] && git -C "$mainwt" merge --ff-only data-work
+```
+
+**CODE repo (branch `main` or any non-`data-work` branch) → push to remote.**
 
 ```bash
 git push origin "$(git branch --show-current)"
 ```
 
+Pushing to `main` updates the default branch directly. If the harness permission
+classifier blocks the push, **stop and ask the user to authorize it** (or to run
+`! git push origin HEAD:main` themselves) — do not attempt to work around the
+denial.
+
 **On failure:** stop and report the push error. Do not proceed to Stage 3.
 
-**On success:** report the new version and pushed SHA, then proceed to Stage 3.
+**On success:** report the new version and the published SHA (and, for the data
+repo, that it was merged into `main`), then proceed to Stage 3.
 
 ---
 
