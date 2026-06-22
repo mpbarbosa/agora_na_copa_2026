@@ -147,3 +147,6 @@ test-results/
 playwright-report/
 blob-report/
 playwright/.cache/
+
+# Phase 0 traffic baseline output
+traffic-reports/
