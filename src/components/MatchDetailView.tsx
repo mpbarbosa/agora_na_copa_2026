@@ -1612,7 +1612,7 @@ export function MatchDetailView({
                     : "text-slate-100 hover:bg-white/10 hover:text-white"
               }`}
             >
-              Pré-jogo
+              {currentMatch.status === "FINISHED" ? "Pós-jogo" : "Pré-jogo"}
             </button>
           )}
         </div>
