@@ -16,6 +16,8 @@ import { TeamLineupView } from "./components/TeamLineupView";
 import { PartidasView } from "./components/PartidasView";
 import { BrazilCountdownBadge } from "./components/BrazilCountdownBadge";
 import { BrazilGoalFireworks } from "./components/BrazilGoalFireworks";
+import { CookieConsentBanner } from "./components/CookieConsentBanner";
+import { AdSlot } from "./components/AdSlot";
 import { useTeamLineups } from "./hooks/useTeamLineups";
 import { useVersionCheck } from "./hooks/useVersionCheck";
 import { NAV_ITEMS } from "./navigation";
@@ -330,6 +332,9 @@ export default function App() {
       <BrazilCountdownBadge matches={matches} />
       <BrazilGoalFireworks active={fireworksActive} />
 
+      {/* Responsive AdSense unit — dormant until a real publisher id + ads consent. */}
+      <AdSlot theme={theme} />
+
       {/* FOOTER METADATA DETAIL */}
       <footer
         className="mt-16 text-center max-w-5xl mx-auto px-4 text-sm font-mono leading-6"
@@ -354,9 +359,21 @@ export default function App() {
           </a>
         </p>
         <p className={`mt-2 ${theme === "classic-light" ? "text-slate-500" : "text-slate-300"}`}>
+          <a
+            href="/privacidade.html"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline underline-offset-4 hover:no-underline"
+          >
+            Política de Privacidade
+          </a>
+        </p>
+        <p className={`mt-2 ${theme === "classic-light" ? "text-slate-500" : "text-slate-300"}`}>
           Versão da página: {APP_VERSION}
         </p>
       </footer>
+
+      <CookieConsentBanner theme={theme} />
     </div>
   );
 }

@@ -54,3 +54,30 @@ export const AFFILIATE_PRODUCTS: AffiliateProduct[] = [
     searchUrl: "https://www.amazon.com.br/s?k=cooler+t%C3%A9rmico",
   },
 ];
+
+/**
+ * Google AdSense publisher id (format "ca-pub-XXXXXXXXXXXXXXXX"). Until a real id
+ * replaces the placeholder, AdSense stays DORMANT — no script loads and no ad
+ * slots render (see isAdSenseConfigured). When you get approved, set this AND the
+ * matching "pub-..." line in public/ads.txt, plus the ad-unit id below.
+ */
+export const ADSENSE_PUBLISHER_ID: string = "ca-pub-9509229216258895";
+
+/**
+ * AdSense ad-unit (slot) id. Create a "Display" ad unit in the AdSense dashboard
+ * after approval and paste its 10-digit data-ad-slot here. Placeholder = dormant.
+ */
+export const ADSENSE_AD_SLOT: string = "0000000000";
+
+/**
+ * True only once BOTH a real publisher id AND a real ad-unit (slot) id are set.
+ * Until then the AdSlot renders nothing (avoids requesting a non-existent slot).
+ */
+export function isAdSenseConfigured(): boolean {
+  return (
+    /^ca-pub-\d{16}$/.test(ADSENSE_PUBLISHER_ID) &&
+    ADSENSE_PUBLISHER_ID !== "ca-pub-0000000000000000" &&
+    /^\d{10}$/.test(ADSENSE_AD_SLOT) &&
+    ADSENSE_AD_SLOT !== "0000000000"
+  );
+}

@@ -1,0 +1,3 @@
+# Agora na Copa 26 — ads.txt
+# Google AdSense publisher (conta: ca-pub-9509229216258895).
+google.com, pub-9509229216258895, DIRECT, f08c47fec0942fa0
