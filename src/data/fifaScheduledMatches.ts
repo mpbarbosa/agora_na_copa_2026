@@ -80,7 +80,7 @@ export const FIFA_SCHEDULED_MATCHES: FifaScheduledMatchSeed[] = [
 
   // ── Grupo J ───────────────────────────────────────────────────────────────
   { teamA: "AUT", teamB: "JOR", kickoffTimestamp: "2026-06-17T01:00:00-03:00", status: "FINISHED", score: { teamA: 3, teamB: 1 }, ...v("AUT", "JOR") },
-  { teamA: "ARG", teamB: "AUT", kickoffTimestamp: "2026-06-22T14:00:00-03:00", status: "PRE_GAME", ...v("ARG", "AUT") },
+  { teamA: "ARG", teamB: "AUT", kickoffTimestamp: "2026-06-22T14:00:00-03:00", status: "FINISHED", score: { teamA: 2, teamB: 0 }, ...v("ARG", "AUT") },
   { teamA: "JOR", teamB: "ALG", kickoffTimestamp: "2026-06-23T00:00:00-03:00", status: "PRE_GAME", ...v("JOR", "ALG") },
   { teamA: "ALG", teamB: "AUT", kickoffTimestamp: "2026-06-27T23:00:00-03:00", status: "PRE_GAME", ...v("ALG", "AUT") },
   { teamA: "JOR", teamB: "ARG", kickoffTimestamp: "2026-06-27T23:00:00-03:00", status: "PRE_GAME", ...v("JOR", "ARG") },

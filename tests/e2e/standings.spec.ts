@@ -68,8 +68,8 @@ test.describe("Standings view (Grupos)", () => {
     await page.click("#btn-nav-grupos");
 
     await expect(page.locator("#standings-view")).toBeVisible();
-    await expect(page.locator("#standings-cell-arg-played")).toHaveText("1");
-    await expect(page.locator("#standings-cell-arg-points")).toHaveText("3");
+    await expect(page.locator("#standings-cell-arg-played")).toHaveText("2");
+    await expect(page.locator("#standings-cell-arg-points")).toHaveText("6");
     await expect(page.locator("#standings-cell-alg-points")).toHaveText("0");
 
     expect(consoleErrors).toEqual([]);
