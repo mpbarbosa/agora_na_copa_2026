@@ -15,6 +15,7 @@ One-time production server provisioning scripts for the AWS host running the `ag
 | `07_add_portfolio_link.sh` | Once | Adds portfolio backlink to the `mpbarbosa.com` landing pages |
 | `08_setup_monitoring.sh` | Once | Enables timed nginx access logging (`agora_timed` log format with `rt=` and `urt=` fields); safe to run after certbot — injects surgically rather than overwriting |
 | `09_setup_swap.sh` | Once | Adds a `/swapfile` (default 2G) + sets `vm.swappiness`, so deploy-time memory spikes don't OOM-thrash the ~1.9 GiB host. Idempotent. See `devops/copa_2026/EC2_CAPACITY_DEPLOY_SAFETY_ROADMAP.md` |
+| `10_go_live.sh` | Every prod go-live | **Build-free** rollout: pulls the prebuilt payload from the mpbarbosa.com checkout and runs `06_redeploy.sh` with `AGORA_STAGING_DIR` pinned to it — NO vite/esbuild on the box. Run this on prod instead of `npm run deploy` (also `npm run go-live`). Needs the mpbarbosa.com repo cloned on the host |
 
 ## lib/
 

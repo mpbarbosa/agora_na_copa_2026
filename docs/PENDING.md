@@ -24,7 +24,7 @@ land. **Last updated: 2026-06-22.**
 ## 🟡 Engineering — designed but not built
 
 - [ ] **Runtime-JSON content loading** (`docs/adr/0002`). Serve the frequently-edited content JSON at runtime so data updates skip the full rebuild (removes the deploy-OOM risk for the most common change). Phase 1 ≈ half a day.
-- [ ] **EC2 roadmap Phases 2–4** (`devops/copa_2026/EC2_CAPACITY_DEPLOY_SAFETY_ROADMAP.md`): no-build go-live, systemd memory guardrails, instance upgrade-if-needed. (Phase 1 swap ✅ done.)
+- [ ] **EC2 roadmap Phases 3–4** (`devops/copa_2026/EC2_CAPACITY_DEPLOY_SAFETY_ROADMAP.md`): systemd memory guardrails, instance upgrade-if-needed. (Phase 1 swap ✅ + Phase 2 build-free go-live ✅ done.)
 - [ ] **CloudWatch monitoring** (`devops/copa_2026/CLOUDWATCH_MONITORING_ROADMAP.md`): SNS alerts + uptime canaries + dashboard. Planned, not implemented.
 
 ## 🟢 Product / analytics follow-ups
@@ -54,3 +54,4 @@ land. **Last updated: 2026-06-22.**
 - Feature-discovery guided tour (Driver.js) shipped.
 - Share button (Web Share API + copy-link fallback, GA4 `share` event).
 - Git worktree for concurrent code/data sessions.
+- Build-free prod go-live (`shell_scripts/10_go_live.sh` / `npm run go-live`) — EC2 Phase 2.
