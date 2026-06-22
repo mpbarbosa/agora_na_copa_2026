@@ -358,6 +358,7 @@ export function JogadoresView({ theme, onSelectTeamLineup }: JogadoresViewProps)
   const [expandedPlayer, setExpandedPlayer] = useState<Player | null>(null);
   const [filterTeamCode, setFilterTeamCode] = useState<string | null>(null);
   const [filterPlayerName, setFilterPlayerName] = useState("");
+  const [filterStarsOnly, setFilterStarsOnly] = useState(false);
   const selectedStats = usePlayerStats(selected?.team.code, selected?.player.name);
 
   const allGroupedTeams = useMemo(() => {
@@ -373,13 +374,18 @@ export function JogadoresView({ theme, onSelectTeamLineup }: JogadoresViewProps)
     const nameQuery = filterPlayerName.trim().toLowerCase();
     const teamSource = filterTeamCode ? teams.filter((t) => t.code === filterTeamCode) : teams;
     const filtered = teamSource.flatMap((team) => {
-      const players = nameQuery
-        ? team.players.filter(
-            (p) =>
-              p.name.toLowerCase().includes(nameQuery) ||
-              (p.fullName ?? "").toLowerCase().includes(nameQuery),
+      const players = team.players.filter((p) => {
+        if (filterStarsOnly && !p.worldCupNote) return false;
+        if (
+          nameQuery &&
+          !(
+            p.name.toLowerCase().includes(nameQuery) ||
+            (p.fullName ?? "").toLowerCase().includes(nameQuery)
           )
-        : team.players;
+        )
+          return false;
+        return true;
+      });
       return players.length > 0 ? [{ ...team, players }] : [];
     });
     const map = new Map<string, TeamEntry[]>();
@@ -388,7 +394,7 @@ export function JogadoresView({ theme, onSelectTeamLineup }: JogadoresViewProps)
       map.get(team.group)!.push(team);
     }
     return Array.from(map.entries());
-  }, [teams, filterTeamCode, filterPlayerName]);
+  }, [teams, filterTeamCode, filterPlayerName, filterStarsOnly]);
 
   const headingColor = theme === "classic-light" ? "text-slate-900" : "text-white";
   const mutedColor = theme === "classic-light" ? "text-slate-500" : "text-slate-400";
@@ -400,7 +406,7 @@ export function JogadoresView({ theme, onSelectTeamLineup }: JogadoresViewProps)
     (n, [, groupTeams]) => n + groupTeams.reduce((m, t) => m + t.players.length, 0),
     0,
   );
-  const hasActiveFilter = Boolean(filterTeamCode || filterPlayerName.trim());
+  const hasActiveFilter = Boolean(filterTeamCode || filterPlayerName.trim() || filterStarsOnly);
   const subtitleText = hasActiveFilter
     ? `${totalDisplayed} atleta${totalDisplayed !== 1 ? "s" : ""} encontrado${totalDisplayed !== 1 ? "s" : ""}`
     : `${teams.length} seleções · ${teams.reduce((n, t) => n + t.players.length, 0)} atletas`;
@@ -474,11 +480,30 @@ export function JogadoresView({ theme, onSelectTeamLineup }: JogadoresViewProps)
             ))}
           </select>
 
+          {/* Stars (Craques da Copa) filter */}
+          <button
+            type="button"
+            id="btn-filter-stars"
+            aria-pressed={filterStarsOnly}
+            onClick={() => setFilterStarsOnly((v) => !v)}
+            className={`font-mono text-xs uppercase px-3 py-1.5 border-2 border-black transition-colors ${
+              filterStarsOnly
+                ? "bg-[#ffd84d] text-black"
+                : theme === "classic-light"
+                  ? "bg-white text-black hover:bg-slate-100"
+                  : "bg-[#0f1112] text-white hover:bg-white/10"
+            }`}
+            style={{ boxShadow: "2px 2px 0 #000" }}
+            title="Mostrar só os craques da Copa"
+          >
+            ★ Craques da Copa
+          </button>
+
           {/* Clear all filters */}
           {hasActiveFilter && (
             <button
               type="button"
-              onClick={() => { setFilterTeamCode(null); setFilterPlayerName(""); }}
+              onClick={() => { setFilterTeamCode(null); setFilterPlayerName(""); setFilterStarsOnly(false); }}
               className="font-mono text-xs uppercase px-3 py-1.5 border-2 border-black bg-white text-black hover:bg-slate-100 transition-colors"
               style={{ boxShadow: "2px 2px 0 #000" }}
             >

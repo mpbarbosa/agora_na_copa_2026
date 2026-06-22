@@ -145,4 +145,29 @@ test.describe("Jogadores view — player overlay stats", () => {
       instagramPostUrl,
     );
   });
+
+  test("'Craques da Copa' filter narrows the list to star players and clears", async ({ page }) => {
+    await page.goto("/");
+    await page.click("#btn-nav-jogadores");
+    const view = page.locator("#jogadores-view");
+    await expect(view).toBeVisible();
+
+    const cards = page.locator('[id^="jogador-card-"]');
+    const toggle = page.locator("#btn-filter-stars");
+    await expect(toggle).toHaveAttribute("aria-pressed", "false");
+    const fullCount = await cards.count();
+
+    await toggle.click();
+    await expect(toggle).toHaveAttribute("aria-pressed", "true");
+    await expect(view).toContainText(/atletas? encontrados?/i);
+
+    const starCount = await cards.count();
+    expect(starCount).toBeGreaterThan(0);
+    expect(starCount).toBeLessThan(fullCount);
+
+    // "Ver todas" clears the filter and restores the full list.
+    await page.getByText("Ver todas", { exact: false }).click();
+    await expect(toggle).toHaveAttribute("aria-pressed", "false");
+    expect(await cards.count()).toBe(fullCount);
+  });
 });
