@@ -1,0 +1,9 @@
+# Agora na Copa 26 — https://copa2026.mpbarbosa.com
+User-agent: *
+Allow: /
+
+# API and build assets are not useful to index.
+Disallow: /api/
+Disallow: /assets/
+
+Sitemap: https://copa2026.mpbarbosa.com/sitemap.xml

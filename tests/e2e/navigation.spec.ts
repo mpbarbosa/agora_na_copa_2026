@@ -183,8 +183,16 @@ test.describe("Navigation shell", () => {
     // beyond the 30s default.
     test.setTimeout(90_000);
     const consoleErrors: string[] = [];
+    // The "Redes Sociais" tab embeds Instagram's widget (embed.js), which logs
+    // its own errors to the console when it can't reach instagram.com — e.g. in
+    // the sandboxed Docker e2e environment. That noise is third-party and not an
+    // app bug, so filter it out while still gating on our own console errors.
+    const THIRD_PARTY_NOISE = /instagram\.com|fburl\.com|connect\.facebook|ErrorUtils caught/;
     page.on("console", (msg) => {
-      if (msg.type() === "error") consoleErrors.push(msg.text());
+      if (msg.type() !== "error") return;
+      const text = msg.text();
+      if (THIRD_PARTY_NOISE.test(text)) return;
+      consoleErrors.push(text);
     });
 
     await page.goto("/");
