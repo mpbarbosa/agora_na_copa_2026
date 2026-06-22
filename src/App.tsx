@@ -178,7 +178,7 @@ export default function App() {
 
   return (
     <div
-      className={`min-h-screen transition-colors duration-500 pb-12 ${
+      className={`min-h-screen transition-colors duration-500 pb-64 md:pb-12 ${
         theme === "classic-light"
           ? "bg-[#f4f7f6] text-slate-800"
           : "bg-[#0a0c0c] text-slate-100"
