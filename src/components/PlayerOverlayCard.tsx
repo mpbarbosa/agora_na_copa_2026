@@ -406,6 +406,31 @@ export function PlayerOverlayCard({
                 numberBadgeStyle={{ background: accent }}
               />
             </div>
+
+            {/* Social links — directly below the player's picture */}
+            {socials.length > 0 && (
+              <div className="mt-3" id={id ? `${id}-social-links` : undefined}>
+                <p className={`font-mono text-[10px] uppercase tracking-wider ${mutedClasses}`}>
+                  Redes oficiais
+                </p>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {socials.map(([platform, url]) => (
+                    <a
+                      key={platform}
+                      id={id ? `${id}-social-link-${platform}` : undefined}
+                      href={getSocialUrl(platform, url)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={`inline-flex items-center justify-center rounded border px-3 py-1.5 font-mono text-[10px] font-bold uppercase tracking-wider transition ${closeClasses}`}
+                      style={{ borderColor: `${accent}40` }}
+                    >
+                      {renderSocialPlatformLabel(platform)}
+                    </a>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {player.pictureUrl && onOpenPicture && (
               <button
                 type="button"
@@ -489,30 +514,6 @@ export function PlayerOverlayCard({
                 mutedClasses={mutedClasses}
                 id={id ? `${id}-leitura` : undefined}
               />
-            )}
-
-            {/* Social links */}
-            {socials.length > 0 && (
-              <div className="mt-5" id={id ? `${id}-social-links` : undefined}>
-                <p className={`font-mono text-[10px] uppercase tracking-wider ${mutedClasses}`}>
-                  Redes oficiais
-                </p>
-                <div className="mt-2 flex flex-wrap gap-2">
-                  {socials.map(([platform, url]) => (
-                    <a
-                      key={platform}
-                      id={id ? `${id}-social-link-${platform}` : undefined}
-                      href={getSocialUrl(platform, url)}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className={`inline-flex items-center justify-center rounded border px-3 py-1.5 font-mono text-[10px] font-bold uppercase tracking-wider transition ${closeClasses}`}
-                      style={{ borderColor: `${accent}40` }}
-                    >
-                      {renderSocialPlatformLabel(platform)}
-                    </a>
-                  ))}
-                </div>
-              </div>
             )}
 
             {/* Destaque no Instagram */}
