@@ -81,3 +81,16 @@ export function isAdSenseConfigured(): boolean {
     ADSENSE_AD_SLOT !== "0000000000"
   );
 }
+
+/**
+ * Google Analytics 4 measurement id (format "G-XXXXXXXXXX"). Until a real id
+ * replaces the placeholder, analytics stays DORMANT — no gtag.js loads and no
+ * events fire (see isAnalyticsConfigured). Create a GA4 property → Web data
+ * stream to get the id.
+ */
+export const GA4_MEASUREMENT_ID: string = "G-XXXXXXXXXX";
+
+/** True only once a real (non-placeholder) GA4 measurement id is configured. */
+export function isAnalyticsConfigured(): boolean {
+  return /^G-[A-Z0-9]{6,}$/.test(GA4_MEASUREMENT_ID) && GA4_MEASUREMENT_ID !== "G-XXXXXXXXXX";
+}

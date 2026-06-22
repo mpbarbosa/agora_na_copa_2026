@@ -20,6 +20,7 @@ import { CookieConsentBanner } from "./components/CookieConsentBanner";
 import { AdSlot } from "./components/AdSlot";
 import { useTeamLineups } from "./hooks/useTeamLineups";
 import { useVersionCheck } from "./hooks/useVersionCheck";
+import { useAnalytics } from "./hooks/useAnalytics";
 import { NAV_ITEMS } from "./navigation";
 import { Sun, Moon } from "lucide-react";
 
@@ -109,6 +110,8 @@ export default function App() {
 
   const activeNavItem =
     NAV_ITEMS.find((item) => item.id === activeNavId) || NAV_ITEMS[0];
+
+  useAnalytics(`/${activeNavItem.id}`, activeNavItem.label);
 
   const renderActiveView = () => {
     switch (activeNavItem.id) {
