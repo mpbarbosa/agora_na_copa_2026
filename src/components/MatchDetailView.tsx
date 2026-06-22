@@ -26,6 +26,7 @@ import { PlayerOverlayCard, PlayerPictureOverlay, buildTournamentStatCells, getP
 import { usePlayerStats } from "../hooks/usePlayerStats";
 import { getPositionLabel } from "../utils/playerDisplay";
 import { PitchLineup } from "./PitchLineup";
+import { AffiliateProducts } from "./AffiliateProducts";
 import { useClockTick } from "../hooks/useClockTick";
 import {
   MapPin,
@@ -2039,6 +2040,9 @@ export function MatchDetailView({
             </div>
           </div>
         )}
+
+        {/* AFFILIATE: "Equipe para assistir" — Amazon Associates gear strip, paired with Onde Assistir */}
+        {activeTab === "broadcast" && <AffiliateProducts theme={theme} />}
 
         {/* TAB: PRE-GAME / POST-GAME EDITORIAL ANALYSIS */}
         {activeTab === "pregame" && matchAnalysisText && (

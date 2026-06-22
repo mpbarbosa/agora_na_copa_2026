@@ -16,6 +16,20 @@ export interface PlayerSocials {
   wikipedia?: string;
 }
 
+/** A curated Amazon Associates product shown in the "Equipe para assistir" strip. */
+export interface AffiliateProduct {
+  /** Stable id; also used as the GA4 click-tracking label (Step 4). */
+  id: string;
+  /** Product/category name, pt-BR. */
+  title: string;
+  /** Short pt-BR blurb in broadcast voice. */
+  blurb: string;
+  /** lucide-react icon key (resolved via the ICONS map in AffiliateProducts). */
+  icon: string;
+  /** Amazon Brasil URL WITHOUT the affiliate tag (the tag is appended at render). */
+  searchUrl: string;
+}
+
 export interface Player {
   id: string;
   name: string;

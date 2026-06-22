@@ -19,6 +19,7 @@ Playwright end-to-end specs for "Agora na Copa 26". The suite boots the dev serv
 | `fanzone.spec.ts` | Fan Zone quiz, answer interaction | 1.5 KB |
 | `social-medias.spec.ts` | Social Medias feed ("Redes Sociais" tab): Google Trends card, category/hashtag filters, likes, nested comments | 4.0 KB |
 | `polish.spec.ts` | Visual/UX polish checks (no broken images, no empty text nodes, etc.) | 2.0 KB |
+| `affiliate-products.spec.ts` | Amazon affiliate gear strip on Ao Vivo (broadcast tab): renders, link compliance (tag/rel/target), tab gating | 1.2 KB |
 
 ## Fixtures
 
