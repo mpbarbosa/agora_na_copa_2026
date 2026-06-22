@@ -1,0 +1,30 @@
+Agora na Copa 26 — traffic baseline (Phase 0)
+Generated: 2026-06-22T03:33:31+00:00
+Source:    /var/log/nginx/agora-na-copa.access.log* (31328 log lines)
+
+== Totals ==
+Requests:       31328
+Unique IPs:     714
+Date range:     22/Jun/2026:00:00:05  ->  19/Jun/2026:23:59:27
+
+== Top 20 requested paths ==
+   4983 /api/match-overlays
+   3879 /api/team-lineups
+   2251 /api/health
+   1773 /
+    889 /api/match-states
+    126 /assets/index-DO_iSrhe.css
+    111 /assets/index-Bekafaau.js
+     97 /assets/index-DIHZFXQ3.css
+     88 /assets/index-BaO2PLKF.js
+     81 /robots.txt
+     64 /favicon.ico
+     59 /assets/index-LElgXv8h.css
+     55 /assets/index-ad1yLHev.css
+     53 /assets/index-B9HOiEIM.js
+     52 /sitemap.xml
+     52 /assets/index-DBTYABX1.css
+     38 /assets/index-CfV5vf_0.js
+     38 /assets/index-BHbd9rpc.css
+     37 /api/tournament-leaders
+     32 /assets/index-CH1kmUkA.css
