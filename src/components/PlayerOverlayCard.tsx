@@ -4,7 +4,7 @@ import { InstagramBrandIcon } from "./InstagramBrandIcon";
 import { FlagIcon } from "./FlagIcon";
 import { useEscapeKey } from "../hooks/useEscapeKey";
 import { getPlayerSocialEntries } from "../utils/playerDisplay";
-import { parseNoteSections } from "../utils/noteSections";
+import { WorldCupNoteCarousel } from "./WorldCupNoteCarousel";
 
 declare global {
   interface Window {
@@ -481,22 +481,14 @@ export function PlayerOverlayCard({
               </div>
             )}
 
-            {/* Editorial World Cup note — one or more labeled sections */}
+            {/* Editorial World Cup note — swipeable section carousel */}
             {player.worldCupNote && (
-              <div
-                className={`mt-5 rounded-xl border p-3 ${isLight ? "border-slate-200 bg-slate-50" : "border-white/10 bg-white/5"}`}
+              <WorldCupNoteCarousel
+                note={player.worldCupNote}
+                isLight={isLight}
+                mutedClasses={mutedClasses}
                 id={id ? `${id}-leitura` : undefined}
-                data-testid="player-leitura"
-              >
-                {parseNoteSections(player.worldCupNote).map((section, i) => (
-                  <div key={section.label} className={i > 0 ? "mt-3" : ""}>
-                    <p className={`font-mono text-[10px] uppercase tracking-wider ${mutedClasses}`}>
-                      {section.label}
-                    </p>
-                    <p className="mt-1.5 font-archivo text-sm leading-6">{section.body}</p>
-                  </div>
-                ))}
-              </div>
+              />
             )}
 
             {/* Social links */}

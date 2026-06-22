@@ -3,7 +3,7 @@
 A single place to track open items so nothing gets forgotten. Tick boxes as they
 land. **Last updated: 2026-06-22.**
 
-**Version state at last update:** repo/`origin/main` = `0.0.308` · **production live = `0.0.290`** (prod is behind — see Ops #1).
+**Version state at last update:** repo/`origin/main` = `0.0.308` · **production live = `0.0.308`** ✅ in sync (the queued Leitura-carousel + broadcaster-rails code release will bump to `0.0.309`, reopening the go-live step).
 
 ---
 
@@ -16,8 +16,8 @@ land. **Last updated: 2026-06-22.**
 
 ## 🟠 Ops / deploy
 
-- [ ] **Redeploy production (build-free).** Live = `0.0.290`, deploy repo = `0.0.308`. On the prod host: `cd ~/Documents/GitHub/agora_na_copa_2026 && git pull && npm run go-live` (build-free — Phase 2; **not** `npm run deploy`, which rebuilds on the box). Catches up the stars filter, share button, feature tour, GA4, readability/badge fixes, and the data-work videos/analyses/skills. One-time prereq: mpbarbosa.com cloned on the host.
-- [ ] **Verify `0.0.308` live + GA4 after redeploy.** Confirm `/api/health` → `0.0.308`; open site → *Aceitar* cookies → click tabs + an affiliate link → GA4 *Reports → Realtime* should show `page_view` + `select_affiliate` within ~30s.
+- [x] **Redeploy production.** Prod caught up to `0.0.308` (2026-06-22). **Standing reminder:** every code release needs a prod go-live — prefer the build-free `cd ~/Documents/GitHub/agora_na_copa_2026 && git pull && npm run go-live` (**not** `npm run deploy`, which rebuilds on the box).
+- [x] **Verify `0.0.308` live + GA4.** `/api/health` → `0.0.308` ✅ and the live JS bundle carries `G-53CP8JNP5R` ✅. Remaining: eyeball **GA4 Reports → Realtime** after accepting cookies on the live site to confirm `page_view` + `select_affiliate` flow.
 - [ ] **Concurrent-session push race.** The code session (`main`) and data session (`data-work` worktree) both push to `main`, causing version-collision rebases. The data-work skills are being hardened for this; until settled, reconcile when shipping code, or pause the data session during a code release. See [[project_concurrent_code_data_worktree]].
 - [ ] **Prune leftover agent worktree** under `.claude/worktrees/agent-…` (`git worktree prune`). The `../agora-data` worktree is intentional — keep it.
 
