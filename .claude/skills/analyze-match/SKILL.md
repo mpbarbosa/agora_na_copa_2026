@@ -62,6 +62,28 @@ For group/standings context, either compute locally
 
 ---
 
+## Stage 2b — Reconcile the seed BEFORE trusting local data (mandatory)
+
+**Never trust the local seed for a match's status/score — production is authoritative.**
+The `--list` from Stage 1 gives the production-true status and score. If the local seed
+disagrees with production, fix it first; otherwise the match page will show the wrong
+status (e.g. a finished match still rendering as `PRE_GAME`, no score, wrong tab title),
+and any local `computeStandings()` context you write will be stale.
+
+```bash
+# Compare: production status/score (Stage 1 --list) vs the local seed line.
+grep -nE "<CODEA>.*<CODEB>|<CODEB>.*<CODEA>" src/data/fifaScheduledMatches.ts
+```
+
+If production shows the match `FINISHED` (or with a score) but the seed has it
+`PRE_GAME`/`LIVE`, edit that line in `src/data/fifaScheduledMatches.ts`: set
+`status: "FINISHED"` and the real `score: { teamA, teamB }` (teamA = the seed's home
+team). Then re-run `computeStandings()` for the group so the "Situação no grupo" section
+is accurate. (Matches curated in `src/matches.json` are already authoritative and need
+no seed edit.) This is the same safeguard as `/update-group-analysis` — apply it here too.
+
+---
+
 ## Stage 3 — Draft and write the analysis
 
 Add (or overwrite) the entry in `src/data/matchAnalysis.json`, keyed by match id.
