@@ -20,6 +20,7 @@ import { CookieConsentBanner } from "./components/CookieConsentBanner";
 import { AdSlot } from "./components/AdSlot";
 import { useTeamLineups } from "./hooks/useTeamLineups";
 import { useVersionCheck } from "./hooks/useVersionCheck";
+import { VersionCheckTimer } from "./components/VersionCheckTimer";
 import { useAnalytics } from "./hooks/useAnalytics";
 import { useFeatureTour } from "./hooks/useFeatureTour";
 import { useMessiTour } from "./hooks/useMessiTour";
@@ -43,7 +44,8 @@ export default function App() {
   const isAoVivoViewActive = activeNavId === "ao-vivo" && lineupTeam === null;
   const teamLineups = useTeamLineups(isAoVivoViewActive);
   const hasLiveMatch = matches.some((match) => match.status === "LIVE");
-  const newVersionAvailable = useVersionCheck(APP_VERSION);
+  const versionCheck = useVersionCheck(APP_VERSION);
+  const newVersionAvailable = versionCheck.updateAvailable;
 
   // Fireworks when Brazil scores during a live match
   const [fireworksActive, setFireworksActive] = useState(false);
@@ -222,7 +224,7 @@ export default function App() {
           {/* Row 1: Branding + Theme Toggle */}
           <div className="py-3 flex items-center justify-between gap-4">
             {/* Branding */}
-            <div className="flex items-center" id="app-branding">
+            <div className="flex items-center gap-2" id="app-branding">
               <span
                 className={`font-anton text-lg uppercase tracking-wider ${
                   theme === "classic-light" ? "text-slate-900" : "text-white"
@@ -239,6 +241,7 @@ export default function App() {
                   26
                 </span>
               </span>
+              <VersionCheckTimer status={versionCheck} theme={theme} />
             </div>
 
             <div className="flex items-center gap-2">

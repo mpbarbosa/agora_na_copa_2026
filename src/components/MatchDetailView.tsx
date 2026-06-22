@@ -80,9 +80,10 @@ interface SimulatedMatchState {
   updatedAt: string;
 }
 
-// Live match takes priority; otherwise the soonest match that hasn't kicked off yet
+// A live (or suspended) match takes priority; otherwise the soonest match that
+// hasn't kicked off yet
 function getInitialMatchId(matches: Match[]): string {
-  const liveMatch = matches.find((m) => m.status === "LIVE");
+  const liveMatch = matches.find((m) => m.status === "LIVE" || m.status === "SUSPENDED");
   if (liveMatch) return liveMatch.id;
 
   const upcoming = matches
@@ -641,7 +642,12 @@ export function MatchDetailView({
     status,
     label,
     matches: matches
-      .filter((match) => match.status === status)
+      // Suspended matches are still "current", so list them under the LIVE group.
+      .filter(
+        (match) =>
+          match.status === status ||
+          (status === "LIVE" && match.status === "SUSPENDED"),
+      )
       .sort(
         (a, b) =>
           new Date(a.kickoffTimestamp).getTime() -
@@ -1381,27 +1387,33 @@ export function MatchDetailView({
                   className={`w-2 h-2 rounded-full ${
                     currentMatch.status === "LIVE"
                       ? "bg-red-500 animate-pulse"
-                      : currentMatch.status === "FINISHED"
-                        ? "bg-slate-400"
-                        : "bg-[#00e476] animate-pulse"
+                      : currentMatch.status === "SUSPENDED"
+                        ? "bg-amber-500 animate-pulse"
+                        : currentMatch.status === "FINISHED"
+                          ? "bg-slate-400"
+                          : "bg-[#00e476] animate-pulse"
                   }`}
                 ></span>
                 <span
                   className={`font-mono text-xs font-bold tracking-widest uppercase ${
-                    currentMatch.status === "FINISHED"
-                      ? "text-slate-500 dark:text-slate-300"
-                      : theme === "classic-light"
-                        ? "text-slate-600"
-                        : "text-[#a7e6bf]"
+                    currentMatch.status === "SUSPENDED"
+                      ? "text-amber-600 dark:text-amber-400"
+                      : currentMatch.status === "FINISHED"
+                        ? "text-slate-500 dark:text-slate-300"
+                        : theme === "classic-light"
+                          ? "text-slate-600"
+                          : "text-[#a7e6bf]"
                   }`}
                 >
                   {currentMatch.status === "LIVE"
                     ? currentMatch.matchTime
                       ? `AO VIVO • ${currentMatch.matchTime}`
                       : "AO VIVO"
-                    : currentMatch.status === "FINISHED"
-                      ? "ENCERRADO"
-                      : "PRÉ-JOGO"}
+                    : currentMatch.status === "SUSPENDED"
+                      ? "PARALISADO"
+                      : currentMatch.status === "FINISHED"
+                        ? "ENCERRADO"
+                        : "PRÉ-JOGO"}
                 </span>
               </div>
               <div
@@ -1454,8 +1466,9 @@ export function MatchDetailView({
                 </button>
               )}
 
-              {/* Live venue weather, only while the match is in progress */}
-              {currentMatch.status === "LIVE" && (
+              {/* Venue weather while the match is in progress or paused
+                  (a stoppage is often weather-related) */}
+              {(currentMatch.status === "LIVE" || currentMatch.status === "SUSPENDED") && (
                 <MatchWeatherChip match={currentMatch} theme={theme} />
               )}
 

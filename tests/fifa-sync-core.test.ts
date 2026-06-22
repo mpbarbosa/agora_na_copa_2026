@@ -91,6 +91,32 @@ test("getMatchStatusFromFifa maps FIFA status codes into local match statuses", 
     }),
     "FINISHED",
   );
+
+  // Line-ups published (12) is still pre-match, not live.
+  assert.equal(
+    getMatchStatusFromFifa(localMatch, {
+      IdMatch: "1",
+      Date: "2026-06-14T17:00:00Z",
+      MatchStatus: 12,
+    }),
+    "PRE_GAME",
+  );
+
+  // Interrupted matches: suspended (99), abandoned (4), postponed (7),
+  // cancelled (8) all collapse to SUSPENDED.
+  for (const code of [99, 4, 7, 8]) {
+    assert.equal(
+      getMatchStatusFromFifa(localMatch, {
+        IdMatch: "1",
+        Date: "2026-06-14T17:00:00Z",
+        MatchStatus: code,
+        HomeTeamScore: 1,
+        AwayTeamScore: 0,
+      }),
+      "SUSPENDED",
+      `MatchStatus ${code} should map to SUSPENDED`,
+    );
+  }
 });
 
 test("findCalendarMatch falls back to localized names when abbreviations are unavailable", () => {

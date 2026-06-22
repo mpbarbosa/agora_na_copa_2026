@@ -12,10 +12,16 @@ description: >
 Three-stage pipeline, each stage gates the next:
 
 1. **Test** — Docker isolated run of lint + unit + e2e (`scripts/docker-test.sh`)
-2. **Bump + commit + push** — patch version bump, stage all, typecheck, commit, push source repo
+2. **Bump + commit + push** — patch version bump (CODE repo only), stage all, typecheck, commit, push source repo
 3. **Deploy** — preflight build, rsync to sibling `mpbarbosa.com` repo, commit + push deploy repo
 
 Abort immediately if any stage fails; do not proceed to the next.
+
+**Repo role matters (see 2a).** Only the **CODE repo** (`main`) bumps the version
+and deploys. The **DATA repo** (`data-work`) runs Stage 1, then in Stage 2
+commits (no bump) and merges to `main` — and **stops there**. Data changes ride
+the next CODE-side release, which ships them with a version bump. So for the DATA
+repo, **skip Stage 3 entirely**.
 
 ---
 
@@ -73,7 +79,14 @@ fast-forwarding `main`, not by pushing a `data-work` branch. So do **not** stop
 on a "missing upstream"; that is expected and correct for the data repo. Only
 the code repo needs an upstream, and `main` already has one.
 
-### 2b. Bump version
+### 2b. Bump version (CODE repo only)
+
+**Only the CODE repo (`main`) may bump the app version.** If 2a detected the
+**DATA repo** (branch `data-work`), **skip this step** — data commits must not
+touch the `package.json`/`package-lock.json` version. The version represents
+code/app releases; data edits ride the next CODE-side release. Go to 2c.
+
+For the **CODE repo**:
 
 ```bash
 npm version patch --no-git-tag-version
@@ -105,6 +118,9 @@ Use a conventional-style subject from the staged diff:
 - `chore: bump version to X.Y.Z` — version bump only
 - `chore: bump version to X.Y.Z and update dev guides` — bump + docs
 - `chore: bump version to X.Y.Z; <short summary of other changes>` — bump + other
+
+**DATA repo** (no bump) — the subject describes the content change instead, e.g.
+`data: refresh Group I analysis post FRA×IRQ`. Do not mention a version.
 
 ### 2f. Commit
 
@@ -145,16 +161,25 @@ denial.
 
 **If the push is REJECTED as non-fast-forward** (`Updates were rejected because a
 pushed branch tip is behind its remote counterpart` / `[rejected] ... (fetch
-first)`), the other worktree shipped while you were working — and it likely bumped
-to the **same version**, the exact collision in [[project_concurrent_code_data_worktree]].
-Do **not** force-push. Rebase onto the new tip, re-bump to the next free patch, and
-retry (this is the one safe-to-amend case — the commit is local and was never
-accepted by the remote):
+first)`), the other worktree shipped while you were working. Do **not** force-push —
+rebase onto the new tip and retry. Recovery depends on role:
+
+**DATA repo** (no bump → no version collision) — rebase and re-push, no re-bump:
 
 ```bash
 git fetch origin
-git rebase origin/main                       # 3-way-merges the identical version bumps; integrates their files
-# After rebase your commit carries a version that now duplicates theirs — take the next free patch:
+git rebase origin/main                       # data commit doesn't touch the version line — integrates cleanly
+git push origin HEAD:main                     # now a fast-forward
+```
+
+**CODE repo** — since only the CODE repo bumps, a same-version collision only
+arises if two code releases race (rare with one code session). Rebase, re-bump to
+the next free patch, and retry (the one safe-to-amend case — the commit is local
+and was never accepted by the remote):
+
+```bash
+git fetch origin
+git rebase origin/main                       # 3-way-merges the version bumps; integrates their files
 npm version patch --no-git-tag-version       # e.g. 0.0.294 (dup) -> 0.0.295
 git add -A
 npx tsc --noEmit
@@ -172,7 +197,13 @@ repo, that it was merged into `main`), then proceed to Stage 3.
 
 ---
 
-## Stage 3 — Deploy
+## Stage 3 — Deploy (CODE repo only)
+
+**DATA repo (branch `data-work`): STOP after Stage 2.** Do not deploy. The data
+is now on `main` and ships with the next CODE-side release. Report that the data
+was merged to `main` and is queued for the next code release, then end.
+
+**CODE repo:**
 
 ```bash
 bash scripts/deploy.sh
@@ -197,10 +228,20 @@ stopped, diagnose the issue, and report it. Do not retry silently.
 
 ## What to report when the pipeline finishes
 
+**CODE repo:**
+
 ```
 ✓ Tests passed (lint + unit + e2e)
 ✓ Version bumped to X.Y.Z, pushed to origin/main (SHA: <short>)
 ✓ Deployed 0.0.X (SHA) → mpbarbosa.com/agora_na_copa_2026
+```
+
+**DATA repo** (no bump, no deploy):
+
+```
+✓ Tests passed (lint + unit + e2e)
+✓ Data committed and merged to origin/main (SHA: <short>) — no version bump
+↪ Ships with the next code release (rides its version bump + deploy)
 ```
 
 If Stage 3 skips the live redeploy (no production install on this host), that
@@ -210,7 +251,8 @@ is normal — note it rather than treating it as a failure.
 
 ## Safety rules
 
-- Stop at the first failure; never skip stages.
+- Stop at the first failure; never skip a stage's gate on the way to deploy.
+  (The DATA repo legitimately ends after Stage 2 — that is its role, not a skip.)
 - Do not amend commits or use destructive git operations.
 - Do not retry a failing deploy step silently — always report what failed.
 - `scripts/deploy.sh` requires both repos to have clean worktrees. If Stage 2's

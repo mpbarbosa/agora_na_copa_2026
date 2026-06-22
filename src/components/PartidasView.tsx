@@ -47,6 +47,12 @@ const STATUS_COPY: Record<
     stripLight: "bg-[#009c3b]/10 text-[#0b7a34]",
     stripDark: "bg-[#00e476]/10 text-[#8dffc3]",
   },
+  SUSPENDED: {
+    compactLabel: "Paralisado",
+    accessibleLabel: "Jogo paralisado",
+    stripLight: "bg-amber-500/10 text-amber-700",
+    stripDark: "bg-amber-400/10 text-amber-200",
+  },
   FINISHED: {
     compactLabel: "FT",
     accessibleLabel: "Encerrada",
@@ -118,7 +124,12 @@ const getMatchCenterDisplay = (match: Match) => {
 
   return {
     top: `${match.score?.teamA ?? 0} x ${match.score?.teamB ?? 0}`,
-    bottom: match.status === "LIVE" ? match.matchTime || "Em jogo" : "Final",
+    bottom:
+      match.status === "LIVE"
+        ? match.matchTime || "Em jogo"
+        : match.status === "SUSPENDED"
+          ? "Paralisado"
+          : "Final",
   };
 };
 
@@ -138,17 +149,22 @@ export function PartidasView({ matches, theme, onSelectTeamLineup, onSelectMatch
       : "border-white/10 bg-[#15181a] hover:border-white/20";
   const stripBaseClasses = theme === "classic-light" ? "border-slate-200" : "border-white/10";
 
+  // Suspended matches are in-progress (just stopped), so they live under the
+  // "Ao vivo" tab alongside LIVE.
+  const isInFilterBucket = (match: Match, filter: MatchStatus) =>
+    match.status === filter || (filter === "LIVE" && match.status === "SUSPENDED");
+
   const counts = useMemo(
     () => ({
-      PRE_GAME: matches.filter((match) => match.status === "PRE_GAME").length,
-      LIVE: matches.filter((match) => match.status === "LIVE").length,
-      FINISHED: matches.filter((match) => match.status === "FINISHED").length,
+      PRE_GAME: matches.filter((match) => isInFilterBucket(match, "PRE_GAME")).length,
+      LIVE: matches.filter((match) => isInFilterBucket(match, "LIVE")).length,
+      FINISHED: matches.filter((match) => isInFilterBucket(match, "FINISHED")).length,
     }),
     [matches],
   );
 
   const activeMatches = useMemo(
-    () => matches.filter((match) => match.status === activeFilter),
+    () => matches.filter((match) => isInFilterBucket(match, activeFilter)),
     [activeFilter, matches],
   );
 
@@ -256,13 +272,17 @@ export function PartidasView({ matches, theme, onSelectTeamLineup, onSelectMatch
                                   ? theme === "classic-light"
                                     ? "bg-[#009c3b]"
                                     : "bg-[#00e476]"
-                                  : match.status === "PRE_GAME"
+                                  : match.status === "SUSPENDED"
                                     ? theme === "classic-light"
-                                      ? "bg-sky-600"
-                                      : "bg-sky-300"
-                                    : theme === "classic-light"
-                                      ? "bg-slate-500"
-                                      : "bg-slate-300"
+                                      ? "bg-amber-500"
+                                      : "bg-amber-300"
+                                    : match.status === "PRE_GAME"
+                                      ? theme === "classic-light"
+                                        ? "bg-sky-600"
+                                        : "bg-sky-300"
+                                      : theme === "classic-light"
+                                        ? "bg-slate-500"
+                                        : "bg-slate-300"
                               }`}
                               id={match.status === "LIVE" ? "partidas-live-indicator" : undefined}
                             />

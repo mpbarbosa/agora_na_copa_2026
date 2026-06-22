@@ -111,7 +111,10 @@ export interface MatchOverlayEntry {
   matchState: MatchStateEntry;
 }
 
-export type MatchStatus = "PRE_GAME" | "LIVE" | "FINISHED";
+// SUSPENDED = match interrupted and not proceeding normally (FIFA suspended,
+// abandoned, postponed, or cancelled). Distinct from LIVE so the UI doesn't
+// show a stopped game as still in progress.
+export type MatchStatus = "PRE_GAME" | "LIVE" | "SUSPENDED" | "FINISHED";
 
 export interface Match {
   id: string;

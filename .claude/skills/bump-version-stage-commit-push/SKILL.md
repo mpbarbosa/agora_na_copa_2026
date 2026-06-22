@@ -93,9 +93,16 @@ upstream" is expected and correct for the data repo; do **not** stop on it. For
 the **code repo**, the branch must have an upstream — if it is missing, stop and
 report that push cannot proceed.
 
-### Step 2 — Bump the version
+### Step 2 — Bump the version (CODE repo only)
 
-Default to a patch bump unless the user specifies otherwise:
+**Only the CODE repo (`main`) may bump the app version.** If Step 1 detected the
+**DATA repo** (branch `data-work`), **skip this step entirely** — data commits
+must not touch the `package.json`/`package-lock.json` version. Data changes ride
+the next CODE-side release; the version represents code/app releases, not
+content edits. Go straight to Step 3.
+
+For the **CODE repo**, default to a patch bump unless the user specifies
+otherwise:
 
 ```bash
 npm version patch --no-git-tag-version
@@ -146,6 +153,9 @@ Heuristics:
 - Use `feat:` for user-facing behavior or new shipped functionality.
 - Use `fix:` for bug fixes.
 - Use `docs:` for documentation-only changes.
+- **DATA repo** commits do not bump the version, so their subject must describe
+  the content change (e.g. `data: refresh Group I analysis post FRA×IRQ`), **not**
+  "bump version".
 
 ### Step 7 — Commit
 
@@ -184,24 +194,34 @@ classifier blocks it, stop and ask the user to authorize the push (or to run
 
 **If the push is REJECTED as non-fast-forward** (`Updates were rejected because a
 pushed branch tip is behind its remote counterpart` / `[rejected] ... (fetch
-first)`), the other worktree shipped while you were working — and it likely bumped
-to the **same version**, the collision noted in
-[[project_concurrent_code_data_worktree]]. Do **not** force-push. Rebase onto the
-new tip, re-bump to the next free patch, and retry (this is the one safe-to-amend
-case — the commit is local and was never accepted by the remote):
+first)`), the other worktree shipped while you were working. Do **not** force-push —
+rebase onto the new tip and retry. Recovery depends on role:
+
+**DATA repo** (no bump, so no version collision) — just rebase and re-push:
 
 ```bash
 git fetch origin
-git rebase origin/main                       # 3-way-merges the identical version bumps; integrates their files
-npm version patch --no-git-tag-version       # bump past the now-duplicate version, e.g. 0.0.294 -> 0.0.295
+git rebase origin/main                        # data commit doesn't touch the version line — integrates cleanly
+git push origin HEAD:main                     # now a fast-forward
+```
+
+**CODE repo** — since only the CODE repo bumps, a true same-version collision
+only arises if two code releases race (rare with a single code session). Rebase,
+re-bump to the next free patch, and retry (the one safe-to-amend case — the
+commit is local and was never accepted by the remote):
+
+```bash
+git fetch origin
+git rebase origin/main                        # 3-way-merges the version bumps; integrates their files
+npm version patch --no-git-tag-version        # bump past the now-duplicate version, e.g. 0.0.294 -> 0.0.295
 git add -A
 npx tsc --noEmit
 git commit --amend -m "chore: bump version to <NEW> ; <same summary>" -m "Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>"
 git push origin HEAD:main                     # now a fast-forward
 ```
 
-If `git rebase` reports a **real conflict** (same content edited on both sides,
-not just the version line), stop, resolve or report it, and do not retry blindly.
+If `git rebase` reports a **real conflict** (same content edited on both sides),
+stop, resolve or report it, and do not retry blindly.
 
 ---
 
@@ -227,13 +247,13 @@ not just the version line), stop, resolve or report it, and do not retry blindly
 ```bash
 git status --short
 git branch --show-current            # detect role: data-work → DATA repo, else → CODE repo
-npm version patch --no-git-tag-version
+npm version patch --no-git-tag-version   # CODE repo ONLY — skip entirely in the DATA repo (data-work)
 git add -A
 npm run lint
 git diff --cached --stat --summary
 git commit -m "GENERATED_SUBJECT" -m "Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>"
 
 # Publish (role-based — see Step 8):
-#   DATA repo (data-work): git push origin HEAD:main   # merge/fast-forward main
+#   DATA repo (data-work): git push origin HEAD:main   # merge/fast-forward main (no bump)
 #   CODE repo (main/etc.): git push origin "$(git branch --show-current)"
 ```

@@ -273,16 +273,37 @@ export const findCalendarMatch = (
   });
 };
 
+// FIFA api.fifa.com `MatchStatus` integer codes (see the JantaoDev/FifaApi
+// Match model). Anything not listed here that is still numeric is treated as
+// an unknown in-progress state and mapped to LIVE.
+export const FIFA_MATCH_STATUS = {
+  PLAYED: 0, // full time
+  FUTURE: 1, // not started
+  LIVE: 3,
+  ABANDONED: 4,
+  POSTPONED: 7,
+  CANCELLED: 8,
+  LINE_UPS: 12, // line-ups published (still pre-match)
+  SUSPENDED: 99, // stopped mid-match (e.g. weather), may resume
+} as const;
+
 export const getMatchStatusFromFifa = (
   localMatch: Match,
   fifaMatch: FifaCalendarMatch,
 ): MatchStatus => {
-  if (fifaMatch.MatchStatus === 0) {
-    return "FINISHED";
-  }
-
-  if (fifaMatch.MatchStatus === 1) {
-    return "PRE_GAME";
+  switch (fifaMatch.MatchStatus) {
+    case FIFA_MATCH_STATUS.PLAYED:
+      return "FINISHED";
+    case FIFA_MATCH_STATUS.FUTURE:
+    case FIFA_MATCH_STATUS.LINE_UPS:
+      return "PRE_GAME";
+    case FIFA_MATCH_STATUS.LIVE:
+      return "LIVE";
+    case FIFA_MATCH_STATUS.ABANDONED:
+    case FIFA_MATCH_STATUS.POSTPONED:
+    case FIFA_MATCH_STATUS.CANCELLED:
+    case FIFA_MATCH_STATUS.SUSPENDED:
+      return "SUSPENDED";
   }
 
   if (typeof fifaMatch.MatchStatus === "number") {
@@ -768,11 +789,14 @@ export const buildMatchStateEntry = (
       status === "LIVE" && fifaLiveMatch?.MatchTime ? fifaLiveMatch.MatchTime : undefined,
     incidents: incidents && incidents.length > 0 ? incidents : undefined,
     source: "fifa",
-    note: fifaLiveMatch
-      ? incidents && incidents.length > 0
-        ? "Placar, status e lances oficiais da FIFA com atualização ao vivo."
-        : "Placar e status oficiais da FIFA com atualização ao vivo."
-      : "Placar e status oficiais da FIFA.",
+    note:
+      status === "SUSPENDED"
+        ? "Jogo paralisado — placar e situação oficiais da FIFA."
+        : fifaLiveMatch
+          ? incidents && incidents.length > 0
+            ? "Placar, status e lances oficiais da FIFA com atualização ao vivo."
+            : "Placar e status oficiais da FIFA com atualização ao vivo."
+          : "Placar e status oficiais da FIFA.",
     fifaMatchId: fifaMatch.IdMatch,
     updatedAt: new Date().toISOString(),
   };
