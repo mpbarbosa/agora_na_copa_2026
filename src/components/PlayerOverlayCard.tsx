@@ -407,7 +407,18 @@ export function PlayerOverlayCard({
               />
             </div>
 
-            {/* Social links — directly below the player's picture */}
+            {player.pictureUrl && onOpenPicture && (
+              <button
+                type="button"
+                id={openPictureButtonId}
+                onClick={onOpenPicture}
+                className={`mt-3 inline-flex rounded border px-3 py-1.5 font-mono text-[10px] font-bold uppercase tracking-wider transition ${closeClasses}`}
+              >
+                Abrir foto em tamanho real
+              </button>
+            )}
+
+            {/* Social links — below the picture */}
             {socials.length > 0 && (
               <div className="mt-3" id={id ? `${id}-social-links` : undefined}>
                 <p className={`font-mono text-[10px] uppercase tracking-wider ${mutedClasses}`}>
@@ -429,17 +440,6 @@ export function PlayerOverlayCard({
                   ))}
                 </div>
               </div>
-            )}
-
-            {player.pictureUrl && onOpenPicture && (
-              <button
-                type="button"
-                id={openPictureButtonId}
-                onClick={onOpenPicture}
-                className={`mt-3 inline-flex rounded border px-3 py-1.5 font-mono text-[10px] font-bold uppercase tracking-wider transition ${closeClasses}`}
-              >
-                Abrir foto em tamanho real
-              </button>
             )}
           </div>
 

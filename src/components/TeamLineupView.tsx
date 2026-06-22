@@ -301,11 +301,13 @@ function MatchVideosList({
   const subtleClasses = theme === "classic-light" ? "text-slate-500" : "text-slate-400";
   const dividerClasses = theme === "classic-light" ? "border-slate-200" : "border-white/10";
 
-  const withVideos = matches
+  const entries = matches
     .map((match) => ({ match, videos: MATCH_VIDEOS_BY_ID[match.matchId] ?? [] }))
-    .filter((entry) => entry.videos.length > 0);
+    // Any match with videos, plus FINISHED matches still missing them (so we can
+    // report that the upload is pending).
+    .filter((entry) => entry.videos.length > 0 || entry.match.status === "FINISHED");
 
-  if (withVideos.length === 0) return null;
+  if (entries.length === 0) return null;
 
   return (
     <div className={`mt-5 border-t pt-4 ${dividerClasses}`} id="team-view-match-videos">
@@ -314,7 +316,7 @@ function MatchVideosList({
       </p>
 
       <div className="mt-3 space-y-5">
-        {withVideos.map(({ match, videos }) => (
+        {entries.map(({ match, videos }) => (
           <div key={match.matchId}>
             <div className="flex items-center gap-2">
               <FlagIcon flag={match.opponent.flagSvg} className="h-4 w-6 shrink-0 rounded-[2px]" />
@@ -326,7 +328,8 @@ function MatchVideosList({
               </span>
             </div>
 
-            <div className="mt-2 flex items-center gap-3 overflow-x-auto">
+            {videos.length > 0 ? (
+              <div className="mt-2 flex items-center gap-3 overflow-x-auto">
               {videos.map((video, idx) => {
                 const videoId = getYoutubeId(video.embedUrl);
                 const watchUrl = `https://www.youtube.com/watch?v=${videoId}`;
@@ -360,7 +363,12 @@ function MatchVideosList({
                   </a>
                 );
               })}
-            </div>
+              </div>
+            ) : (
+              <p className={`mt-2 text-xs ${subtleClasses}`}>
+                Aguardando a Cazé TV fazer o upload dos vídeos no YouTube.
+              </p>
+            )}
           </div>
         ))}
       </div>

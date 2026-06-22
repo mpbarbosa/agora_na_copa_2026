@@ -522,6 +522,8 @@ test.describe("Team view", () => {
       "href",
       /youtube\.com\/watch/,
     );
+    // bra-rsa-2026 is FINISHED but has no videos yet → "waiting for Cazé TV" note.
+    await expect(videos).toContainText("Aguardando a Cazé TV");
   });
 
   test("opens the full team page from the standings table", async ({ page }) => {
