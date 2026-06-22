@@ -147,9 +147,11 @@ test.describe("Navigation shell", () => {
     await expect(analysis).toContainText("Leitura");
 
     // A match without an analysis entry exposes neither the tab nor the panel.
-    // Switch back to the broadcast tab first so its finished-match selector is available.
+    // Every FINISHED match now carries a recap, so the negative case uses an
+    // upcoming match with no analysis entry (a later-round group game) from the
+    // always-visible header "Próximos jogos" selector.
     await page.click("#btn-tab-broadcast");
-    await page.click("#match-selector-chips-finished #btn-match-bra-mar-2026");
+    await page.click("#match-selector-chips-PRE_GAME #btn-match-cze-mex-2026");
     await expect(page.locator("#btn-tab-pregame")).toHaveCount(0);
     await expect(page.getByTestId("match-analysis")).toHaveCount(0);
   });
