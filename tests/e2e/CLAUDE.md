@@ -23,6 +23,7 @@ Playwright end-to-end specs for "Agora na Copa 26". The suite boots the dev serv
 | `consent-privacy.spec.ts` | LGPD cookie-consent banner (show/accept/persist), dormant AdSlot + GA4, footer privacy link, privacidade.html + ads.txt served | 2.1 KB |
 | `feature-tour.spec.ts` | Feature-discovery guided tour (Driver.js): "?" button starts it, advances, and closes | 1.0 KB |
 | `share-button.spec.ts` | Header share button: Web Share API with copy-link fallback + "Link copiado!" confirmation | 0.9 KB |
+| `messi-tour.spec.ts` | Messi card walkthrough (Driver.js): dormant on session 1, auto-runs on session 2+ and walks Jogadores → Messi → open card | 1.3 KB |
 
 ## Fixtures
 

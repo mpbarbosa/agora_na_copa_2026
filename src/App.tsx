@@ -22,6 +22,7 @@ import { useTeamLineups } from "./hooks/useTeamLineups";
 import { useVersionCheck } from "./hooks/useVersionCheck";
 import { useAnalytics } from "./hooks/useAnalytics";
 import { useFeatureTour } from "./hooks/useFeatureTour";
+import { useMessiTour } from "./hooks/useMessiTour";
 import { ShareButton } from "./components/ShareButton";
 import { NAV_ITEMS } from "./navigation";
 import { Sun, Moon, HelpCircle } from "lucide-react";
@@ -115,6 +116,7 @@ export default function App() {
 
   useAnalytics(`/${activeNavItem.id}`, activeNavItem.label);
   const { startTour } = useFeatureTour(theme);
+  useMessiTour(theme);
 
   const renderActiveView = () => {
     switch (activeNavItem.id) {
