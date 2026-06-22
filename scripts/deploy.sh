@@ -110,7 +110,7 @@ ENVIRONMENT:
 
 PROCESS:
     1. Verify this repo worktree is clean
-    2. Sync match results from FIFA calendar API (auto-commits if changed)
+    2. Sync match results from the production site API (auto-commits if changed)
     3. Verify mpbarbosa.com worktree is clean + git pull --ff-only
     4. deploy-preflight.sh — build + validate dist/
     5. stage payload       — dist/ + package manifests + env example
@@ -206,26 +206,30 @@ prepare_deploy_metadata() {
 }
 
 sync_match_results() {
-    echo "==> [2/8] Syncing match results from FIFA calendar..."
+    echo "==> [2/8] Syncing match results from the production site API..."
 
     if ! command -v python3 >/dev/null 2>&1; then
         echo "==> python3 not found — skipping match sync."
         return 0
     fi
 
+    # Pull status/score from the production API (copa2026.mpbarbosa.com), which
+    # already proxies and normalizes the FIFA feed and is keyed by our own match
+    # ids. This is reachable from the deploy host (api.fifa.com usually is not)
+    # and maps one-to-one onto matches.json.
     local sync_out
-    if sync_out="$(cd "$PROJECT_ROOT" && timeout 20 python3 scripts/sync-match-results.py 2>&1)"; then
+    if sync_out="$(cd "$PROJECT_ROOT" && timeout 25 python3 scripts/sync-match-results.py --source production 2>&1)"; then
         if git -C "$PROJECT_ROOT" diff --quiet src/matches.json; then
             echo "==> Match results already in sync."
         else
             echo "$sync_out"
             git -C "$PROJECT_ROOT" add src/matches.json
-            git -C "$PROJECT_ROOT" commit -m "chore: sync match results from FIFA calendar [auto]"
+            git -C "$PROJECT_ROOT" commit -m "chore: sync match results from production API [auto]"
             echo "==> Match results updated and committed."
         fi
     else
-        # FIFA API unreachable or returned an error — not fatal, deploy continues
-        echo "==> Match sync skipped (FIFA API unreachable): proceeding with existing data."
+        # Production API unreachable or returned an error — not fatal, deploy continues
+        echo "==> Match sync skipped (production API unreachable): proceeding with existing data."
     fi
 }
 
