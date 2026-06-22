@@ -3,6 +3,12 @@ import { test, expect } from "@playwright/test";
 // Each test gets a fresh browser context (empty localStorage), so the consent
 // banner appears on first load.
 test.describe("LGPD consent + privacy policy", () => {
+  test.beforeEach(async ({ page }) => {
+    // These tests accept consent, which would trigger the feature-tour auto-start;
+    // mark it seen so the tour never overlays the assertions here.
+    await page.addInitScript(() => localStorage.setItem("feature-tour-seen", "1"));
+  });
+
   test("consent banner shows, Accept dismisses it, and the choice persists", async ({ page }) => {
     await page.goto("/");
     const banner = page.locator("#cookie-consent-banner");

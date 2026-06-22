@@ -59,6 +59,29 @@
   display: none;
 }
 
+/* Feature-discovery tour (Driver.js) — brand + theme the popover */
+.driver-popover.agora-tour { font-family: var(--font-sans); max-width: 320px; }
+.driver-popover.agora-tour .driver-popover-title {
+  font-family: var(--font-anton); font-weight: 400; text-transform: uppercase;
+  letter-spacing: 0.02em; font-size: 17px;
+}
+.driver-popover.agora-tour .driver-popover-progress-text {
+  font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.08em;
+}
+.driver-popover.agora-tour .driver-popover-next-btn,
+.driver-popover.agora-tour .driver-popover-prev-btn { text-shadow: none; border-radius: 8px; font-weight: 600; }
+.driver-popover.agora-tour .driver-popover-next-btn { background: #009c3b; color: #fff; border: 1px solid #009c3b; }
+.driver-popover.agora-tour-dark { background: #121414; color: #e2e8f0; }
+.driver-popover.agora-tour-dark .driver-popover-title { color: #fff; }
+.driver-popover.agora-tour-dark .driver-popover-description { color: #cbd5e1; }
+.driver-popover.agora-tour-dark .driver-popover-close-btn { color: #94a3b8; }
+.driver-popover.agora-tour-dark .driver-popover-next-btn { background: #00e476; color: #06281a; border-color: #00e476; }
+.driver-popover.agora-tour-dark .driver-popover-prev-btn { background: transparent; color: #cbd5e1; border: 1px solid rgba(255, 255, 255, 0.2); }
+.driver-popover.agora-tour-dark .driver-popover-arrow-side-top.driver-popover-arrow { border-top-color: #121414; }
+.driver-popover.agora-tour-dark .driver-popover-arrow-side-bottom.driver-popover-arrow { border-bottom-color: #121414; }
+.driver-popover.agora-tour-dark .driver-popover-arrow-side-left.driver-popover-arrow { border-left-color: #121414; }
+.driver-popover.agora-tour-dark .driver-popover-arrow-side-right.driver-popover-arrow { border-right-color: #121414; }
+
 .venue-map-surface .leaflet-container {
   font-family: var(--font-mono);
 }

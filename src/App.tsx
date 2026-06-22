@@ -21,8 +21,9 @@ import { AdSlot } from "./components/AdSlot";
 import { useTeamLineups } from "./hooks/useTeamLineups";
 import { useVersionCheck } from "./hooks/useVersionCheck";
 import { useAnalytics } from "./hooks/useAnalytics";
+import { useFeatureTour } from "./hooks/useFeatureTour";
 import { NAV_ITEMS } from "./navigation";
-import { Sun, Moon } from "lucide-react";
+import { Sun, Moon, HelpCircle } from "lucide-react";
 
 const APP_VERSION = packageInfo.version;
 
@@ -112,6 +113,7 @@ export default function App() {
     NAV_ITEMS.find((item) => item.id === activeNavId) || NAV_ITEMS[0];
 
   useAnalytics(`/${activeNavItem.id}`, activeNavItem.label);
+  const { startTour } = useFeatureTour(theme);
 
   const renderActiveView = () => {
     switch (activeNavItem.id) {
@@ -236,6 +238,21 @@ export default function App() {
               </span>
             </div>
 
+            <div className="flex items-center gap-2">
+            {/* Feature-discovery tour replay */}
+            <button
+              id="btn-feature-tour"
+              onClick={startTour}
+              title="Como usar o app"
+              aria-label="Como usar o app"
+              className="p-2 rounded-lg bg-[#1e2020]/5 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/10 transition"
+            >
+              <HelpCircle
+                size={14}
+                className={theme === "classic-light" ? "text-[#009c3b]" : "text-[#00e476]"}
+              />
+            </button>
+
             {/* Theme Toggle */}
             <button
               id="btn-toggle-theme"
@@ -254,6 +271,7 @@ export default function App() {
                 <Sun size={14} className="text-amber-400" />
               )}
             </button>
+            </div>
           </div>
 
           {/* Row 2: Scrollable Nav */}

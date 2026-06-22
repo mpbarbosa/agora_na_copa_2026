@@ -1,7 +1,7 @@
 {
   "name": "agora-na-copa-2026",
   "private": true,
-  "version": "0.0.293",
+  "version": "0.0.294",
   "type": "module",
   "scripts": {
     "dev": "tsx server.ts",
@@ -20,6 +20,7 @@
     "@tailwindcss/vite": "^4.1.14",
     "@vitejs/plugin-react": "^5.0.4",
     "dotenv": "^17.2.3",
+    "driver.js": "^1.4.0",
     "express": "^4.21.2",
     "leaflet": "^1.9.4",
     "lucide-react": "^0.546.0",
