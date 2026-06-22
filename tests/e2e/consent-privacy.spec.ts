@@ -37,11 +37,13 @@ test.describe("LGPD consent + privacy policy", () => {
     await expect(page.locator("#adsense-slot")).toHaveCount(0);
   });
 
-  test("analytics (GA4) stays dormant with the placeholder id, even after consent", async ({ page }) => {
+  test("GA4 loads only after consent (consent-gated)", async ({ page }) => {
     await page.goto("/");
-    await page.click("#btn-consent-accept");
-    // No real G- measurement id → gtag.js is never injected.
+    // Before a choice: GA must NOT be loaded.
     await expect(page.locator('script[data-ga4="1"]')).toHaveCount(0);
+    // After accepting: gtag.js is injected.
+    await page.click("#btn-consent-accept");
+    await expect(page.locator('script[data-ga4="1"]')).toHaveCount(1);
   });
 
   test("footer links to the privacy policy, which serves as a real page", async ({ page }) => {

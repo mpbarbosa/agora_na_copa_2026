@@ -88,7 +88,7 @@ export function isAdSenseConfigured(): boolean {
  * events fire (see isAnalyticsConfigured). Create a GA4 property → Web data
  * stream to get the id.
  */
-export const GA4_MEASUREMENT_ID: string = "G-XXXXXXXXXX";
+export const GA4_MEASUREMENT_ID: string = "G-53CP8JNP5R";
 
 /** True only once a real (non-placeholder) GA4 measurement id is configured. */
 export function isAnalyticsConfigured(): boolean {
