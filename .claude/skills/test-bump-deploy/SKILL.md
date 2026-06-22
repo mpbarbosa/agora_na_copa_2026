@@ -143,7 +143,29 @@ classifier blocks the push, **stop and ask the user to authorize it** (or to run
 `! git push origin HEAD:main` themselves) — do not attempt to work around the
 denial.
 
-**On failure:** stop and report the push error. Do not proceed to Stage 3.
+**If the push is REJECTED as non-fast-forward** (`Updates were rejected because a
+pushed branch tip is behind its remote counterpart` / `[rejected] ... (fetch
+first)`), the other worktree shipped while you were working — and it likely bumped
+to the **same version**, the exact collision in [[project_concurrent_code_data_worktree]].
+Do **not** force-push. Rebase onto the new tip, re-bump to the next free patch, and
+retry (this is the one safe-to-amend case — the commit is local and was never
+accepted by the remote):
+
+```bash
+git fetch origin
+git rebase origin/main                       # 3-way-merges the identical version bumps; integrates their files
+# After rebase your commit carries a version that now duplicates theirs — take the next free patch:
+npm version patch --no-git-tag-version       # e.g. 0.0.294 (dup) -> 0.0.295
+git add -A
+npx tsc --noEmit
+git commit --amend -m "chore: bump version to <NEW> ; <same summary>" -m "Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>"
+git push origin HEAD:main                     # now a fast-forward
+```
+
+If `git rebase` reports a **real conflict** (same content edited on both sides,
+not just the version line), stop, resolve or report it, and do not retry blindly.
+
+**On any other failure:** stop and report the push error. Do not proceed to Stage 3.
 
 **On success:** report the new version and the published SHA (and, for the data
 repo, that it was merged into `main`), then proceed to Stage 3.

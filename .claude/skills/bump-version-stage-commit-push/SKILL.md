@@ -182,11 +182,35 @@ Pushing to `main` updates the default branch directly. If the harness permission
 classifier blocks it, stop and ask the user to authorize the push (or to run
 `! git push origin HEAD:main` themselves) — do not work around the denial.
 
+**If the push is REJECTED as non-fast-forward** (`Updates were rejected because a
+pushed branch tip is behind its remote counterpart` / `[rejected] ... (fetch
+first)`), the other worktree shipped while you were working — and it likely bumped
+to the **same version**, the collision noted in
+[[project_concurrent_code_data_worktree]]. Do **not** force-push. Rebase onto the
+new tip, re-bump to the next free patch, and retry (this is the one safe-to-amend
+case — the commit is local and was never accepted by the remote):
+
+```bash
+git fetch origin
+git rebase origin/main                       # 3-way-merges the identical version bumps; integrates their files
+npm version patch --no-git-tag-version       # bump past the now-duplicate version, e.g. 0.0.294 -> 0.0.295
+git add -A
+npx tsc --noEmit
+git commit --amend -m "chore: bump version to <NEW> ; <same summary>" -m "Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>"
+git push origin HEAD:main                     # now a fast-forward
+```
+
+If `git rebase` reports a **real conflict** (same content edited on both sides,
+not just the version line), stop, resolve or report it, and do not retry blindly.
+
 ---
 
 ## Safety rules
 
-- Do **not** amend previous commits unless the user explicitly asks.
+- Do **not** amend previous commits unless the user explicitly asks — **except**
+  the rejected-push recovery in Step 8, where amending the local, never-accepted
+  commit to take the next free version is expected.
+- Do **not** force-push or use destructive git commands like `reset --hard`.
 - Do **not** use destructive git commands like `reset --hard`.
 - Do **not** invent a version string manually when npm can update it safely.
 - Do **not** claim success before push completes.
