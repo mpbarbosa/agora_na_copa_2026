@@ -94,3 +94,6 @@ export const GA4_MEASUREMENT_ID: string = "G-53CP8JNP5R";
 export function isAnalyticsConfigured(): boolean {
   return /^G-[A-Z0-9]{6,}$/.test(GA4_MEASUREMENT_ID) && GA4_MEASUREMENT_ID !== "G-XXXXXXXXXX";
 }
+
+/** Canonical public URL, used for share links (matches the OG canonical). */
+export const SITE_URL = "https://copa2026.mpbarbosa.com";

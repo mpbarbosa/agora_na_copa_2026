@@ -22,6 +22,7 @@ import { useTeamLineups } from "./hooks/useTeamLineups";
 import { useVersionCheck } from "./hooks/useVersionCheck";
 import { useAnalytics } from "./hooks/useAnalytics";
 import { useFeatureTour } from "./hooks/useFeatureTour";
+import { ShareButton } from "./components/ShareButton";
 import { NAV_ITEMS } from "./navigation";
 import { Sun, Moon, HelpCircle } from "lucide-react";
 
@@ -239,6 +240,9 @@ export default function App() {
             </div>
 
             <div className="flex items-center gap-2">
+            {/* Share the app */}
+            <ShareButton theme={theme} />
+
             {/* Feature-discovery tour replay */}
             <button
               id="btn-feature-tour"

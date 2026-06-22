@@ -22,6 +22,7 @@ Playwright end-to-end specs for "Agora na Copa 26". The suite boots the dev serv
 | `affiliate-products.spec.ts` | Amazon affiliate gear strip on Ao Vivo (broadcast tab): renders, link compliance (tag/rel/target), tab gating | 1.2 KB |
 | `consent-privacy.spec.ts` | LGPD cookie-consent banner (show/accept/persist), dormant AdSlot + GA4, footer privacy link, privacidade.html + ads.txt served | 2.1 KB |
 | `feature-tour.spec.ts` | Feature-discovery guided tour (Driver.js): "?" button starts it, advances, and closes | 1.0 KB |
+| `share-button.spec.ts` | Header share button: Web Share API with copy-link fallback + "Link copiado!" confirmation | 0.9 KB |
 
 ## Fixtures
 
