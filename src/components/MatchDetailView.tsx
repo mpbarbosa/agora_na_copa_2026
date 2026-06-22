@@ -2062,7 +2062,7 @@ export function MatchDetailView({
             >
               {currentMatch.status === "FINISHED" ? "Destaques da partida" : "Prévia da partida"}
             </p>
-            <div className="mt-3 space-y-3">
+            <div className="mt-3 space-y-3 max-w-prose">
               {parseNoteSections(
                 matchAnalysisText,
                 currentMatch.status === "FINISHED" ? "Destaques" : "Prévia",
@@ -2076,7 +2076,7 @@ export function MatchDetailView({
                     {section.label}
                   </p>
                   <p
-                    className={`mt-1 font-archivo text-sm leading-6 ${
+                    className={`mt-1 font-sans text-[15px] leading-6 ${
                       theme === "classic-light" ? "text-slate-700" : "text-slate-200"
                     }`}
                   >
