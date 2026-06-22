@@ -441,3 +441,30 @@ export interface GoogleTrendsResponse {
   updatedAt: string;
   topics: GoogleTrendTopic[];
 }
+
+/** Current weather reading at a match venue (from Open-Meteo). */
+export interface WeatherSnapshot {
+  /** Air temperature, °C (rounded). */
+  temperatureC: number;
+  /** "Feels like" apparent temperature, °C (rounded). */
+  apparentC: number;
+  /** WMO weather interpretation code (Open-Meteo `weather_code`). */
+  weatherCode: number;
+  /** pt-BR description of the conditions, e.g. "Parcialmente nublado". */
+  description: string;
+  /** Emoji glyph for the conditions (day/night aware). */
+  emoji: string;
+  /** Wind speed, km/h (rounded). */
+  windKmh: number;
+  /** Relative humidity, % (rounded). */
+  humidity: number;
+  /** Whether it is daytime at the venue. */
+  isDay: boolean;
+}
+
+export interface WeatherResponse {
+  source: "open-meteo" | "fallback";
+  note: string;
+  updatedAt: string;
+  weather: WeatherSnapshot | null;
+}

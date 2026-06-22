@@ -27,6 +27,8 @@ import { usePlayerStats } from "../hooks/usePlayerStats";
 import { getPositionLabel } from "../utils/playerDisplay";
 import { PitchLineup } from "./PitchLineup";
 import { AffiliateProducts } from "./AffiliateProducts";
+import { renderAnalysisWithMentions } from "./PlayerMention";
+import { MatchWeatherChip } from "./MatchWeatherChip";
 import { useClockTick } from "../hooks/useClockTick";
 import {
   MapPin,
@@ -1452,6 +1454,11 @@ export function MatchDetailView({
                 </button>
               )}
 
+              {/* Live venue weather, only while the match is in progress */}
+              {currentMatch.status === "LIVE" && (
+                <MatchWeatherChip match={currentMatch} theme={theme} />
+              )}
+
               {/* Countdown Ticking section (Ex: "Faltam: 15:02:03") */}
               <div
                 className="flex flex-col items-center"
@@ -2073,7 +2080,7 @@ export function MatchDetailView({
                       theme === "classic-light" ? "text-slate-700" : "text-slate-200"
                     }`}
                   >
-                    {section.body}
+                    {renderAnalysisWithMentions(section.body, theme)}
                   </p>
                 </div>
               ))}

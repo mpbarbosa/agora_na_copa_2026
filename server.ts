@@ -19,6 +19,7 @@ import type {
   FifaWatchSource,
 } from "./fifa-sync-core";
 import { GOOGLE_TRENDS_BATCH_URL, buildGoogleTrendsRequestBody, parseGoogleTrendsBatch } from "./trends-core";
+import { buildOpenMeteoUrl, parseOpenMeteoCurrent } from "./weather-core";
 import { APP_MATCHES } from "./src/appMatches";
 import { resolvePlayerEntry } from "./src/data/playerRegistry";
 import { triviaQuestions } from "./src/data/questions";
@@ -49,6 +50,7 @@ import {
   type CountryInfoResponse,
   type PlayerStatsResponse,
   type GoogleTrendsResponse,
+  type WeatherResponse,
 } from "./src/types";
 
 dotenv.config();
@@ -88,6 +90,8 @@ const WIKIDATA_API_BASE = "https://www.wikidata.org/w/api.php";
 const COUNTRY_INFO_CACHE_TTL_MS = 24 * 60 * 60 * 1000; // Wikipedia data changes rarely
 const WIKIPEDIA_USER_AGENT = "agora-na-copa-2026 (https://github.com/mpbarbosa/agora_na_copa_2026)";
 const GOOGLE_TRENDS_CACHE_TTL_MS = 20 * 60 * 1000; // Trends RSS refreshes a few times per hour
+const WEATHER_CACHE_TTL_MS = 15 * 60 * 1000; // Open-Meteo current weather updates ~every 15 min
+const WEATHER_FETCH_TIMEOUT_MS = 6000;
 const APP_MATCHES_BY_ID = new Map(APP_MATCHES.map((match) => [match.id, match]));
 const GOAL_INCIDENT_SUFFIX = " marcou.";
 const YELLOW_CARD_INCIDENT_SUFFIX = " recebeu amarelo.";
@@ -2111,6 +2115,91 @@ app.get("/api/google-trends", (_req, res) => {
 
 // Warm the cache at startup so the first visitor gets real data when possible.
 void refreshGoogleTrendsCache();
+
+// Current weather at a match venue, used by the live scoreboard. Keyed by
+// rounded coordinates so nearby requests share a cache entry. Free, key-less
+// Open-Meteo source — follows the resilience shape and degrades gracefully.
+const weatherCache = new Map<string, { payload: WeatherResponse; expiresAt: number }>();
+
+const parseCoordinate = (value: unknown, max: number): number | null => {
+  if (typeof value !== "string") return null;
+  const n = Number(value);
+  if (!Number.isFinite(n) || Math.abs(n) > max) return null;
+  return n;
+};
+
+const fetchVenueWeather = async (lat: number, lng: number): Promise<WeatherResponse> => {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), WEATHER_FETCH_TIMEOUT_MS);
+
+  let response: Response;
+  try {
+    response = await fetch(buildOpenMeteoUrl(lat, lng), { signal: controller.signal });
+  } finally {
+    clearTimeout(timeout);
+  }
+
+  if (!response.ok) {
+    throw new Error(`Open-Meteo request failed (${response.status})`);
+  }
+
+  const snapshot = parseOpenMeteoCurrent(await response.json());
+  if (!snapshot) {
+    throw new Error("Open-Meteo returned no current weather");
+  }
+
+  return {
+    source: "open-meteo",
+    note: "Condições no estádio • Open-Meteo",
+    updatedAt: new Date().toISOString(),
+    weather: snapshot,
+  };
+};
+
+app.get("/api/match-weather", async (req, res) => {
+  const lat = parseCoordinate(req.query.lat, 90);
+  const lng = parseCoordinate(req.query.lng, 180);
+
+  if (lat === null || lng === null) {
+    res.status(400).json({
+      source: "fallback",
+      note: "Coordenadas do estádio inválidas.",
+      updatedAt: new Date().toISOString(),
+      weather: null,
+    } satisfies WeatherResponse);
+    return;
+  }
+
+  const key = `${lat.toFixed(2)},${lng.toFixed(2)}`;
+  const cached = weatherCache.get(key);
+  if (cached && cached.expiresAt > Date.now()) {
+    res.set("Cache-Control", "public, max-age=300");
+    res.json(cached.payload);
+    return;
+  }
+
+  try {
+    const payload = await fetchVenueWeather(lat, lng);
+    weatherCache.set(key, { payload, expiresAt: Date.now() + WEATHER_CACHE_TTL_MS });
+    res.set("Cache-Control", "public, max-age=300");
+    res.json(payload);
+  } catch (error) {
+    console.error("Weather fetch failed:", error);
+    // Serve a stale snapshot if we have one; otherwise an empty fallback.
+    if (cached) {
+      res.set("Cache-Control", "public, max-age=60");
+      res.json({ ...cached.payload, source: "fallback", note: "Atualizando o clima…" } satisfies WeatherResponse);
+      return;
+    }
+    res.set("Cache-Control", "public, max-age=60");
+    res.json({
+      source: "fallback",
+      note: "Clima indisponível no momento.",
+      updatedAt: new Date().toISOString(),
+      weather: null,
+    } satisfies WeatherResponse);
+  }
+});
 
 app.get("/api/fifa-sync-status", (_req, res) => {
   const now = Date.now();
