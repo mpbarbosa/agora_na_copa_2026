@@ -91,6 +91,8 @@ export interface MatchStateEntry {
     teamB: number;
   };
   matchTime?: string;
+  /** Official FIFA status/period label in pt-BR (e.g. "2º tempo", "Intervalo", "Encerrado"). */
+  officialStatus?: string;
   incidents?: CommentaryEvent[];
   source: "fifa" | "fallback";
   note: string;

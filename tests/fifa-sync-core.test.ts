@@ -6,6 +6,7 @@ import {
   buildMatchStateEntry,
   findCalendarMatch,
   getMatchStatusFromFifa,
+  getOfficialFifaStatusLabel,
   normalizeBroadcasters,
   SPORTV_URL,
   type FifaCalendarMatch,
@@ -117,6 +118,25 @@ test("getMatchStatusFromFifa maps FIFA status codes into local match statuses", 
       `MatchStatus ${code} should map to SUSPENDED`,
     );
   }
+});
+
+test("getOfficialFifaStatusLabel prefers the live period, then the status", () => {
+  // Live periods.
+  assert.equal(getOfficialFifaStatusLabel(3, 3), "1º tempo");
+  assert.equal(getOfficialFifaStatusLabel(3, 4), "Intervalo");
+  assert.equal(getOfficialFifaStatusLabel(3, 5), "2º tempo");
+  assert.equal(getOfficialFifaStatusLabel(3, 11), "Pênaltis");
+
+  // Terminal/abnormal status wins over any period code.
+  assert.equal(getOfficialFifaStatusLabel(0, 10), "Encerrado");
+  assert.equal(getOfficialFifaStatusLabel(99, 5), "Paralisado");
+  assert.equal(getOfficialFifaStatusLabel(4, 5), "Abandonado");
+  assert.equal(getOfficialFifaStatusLabel(7, 1), "Adiado");
+
+  // Status-only fallbacks and the unknown case.
+  assert.equal(getOfficialFifaStatusLabel(12, 0), "Escalações divulgadas");
+  assert.equal(getOfficialFifaStatusLabel(3, 0), "Em andamento"); // live, period unknown
+  assert.equal(getOfficialFifaStatusLabel(undefined, undefined), undefined);
 });
 
 test("findCalendarMatch falls back to localized names when abbreviations are unavailable", () => {

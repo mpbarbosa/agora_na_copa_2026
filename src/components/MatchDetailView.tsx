@@ -38,6 +38,7 @@ import {
   CircleDot,
   ChevronLeft,
   ChevronRight,
+  Zap,
 } from "lucide-react";
 
 // Header match-selector groups, split by match status
@@ -637,6 +638,12 @@ export function MatchDetailView({
           currentOverlay?.matchState.source === "fifa"
       ? "FIFA oficial"
       : "Fallback local";
+  // Official FIFA status/period label (e.g. "2º tempo", "Intervalo", "Encerrado"),
+  // only when the live state is genuinely FIFA-sourced (not a local simulation).
+  const currentOfficialFifaStatus =
+    !currentSimulatedState && currentOverlay?.matchState.source === "fifa"
+      ? currentOverlay.matchState.officialStatus
+      : undefined;
   const currentMatchGroupLabel = getMatchGroupLabel(currentMatch);
   const headerMatchGroups = HEADER_MATCH_STATUS_GROUPS.map(({ status, label }) => ({
     status,
@@ -656,6 +663,12 @@ export function MatchDetailView({
   })).filter(({ matches: statusMatches }) => statusMatches.length > 0);
   const hasLiveHeaderGroup = headerMatchGroups.some(({ status }) => status === "LIVE");
   const hasUpcomingHeaderGroup = headerMatchGroups.some(({ status }) => status === "PRE_GAME");
+  // Matches in progress right now (live or paused). When two or more overlap we
+  // alert the viewer and surface quick-switch chips so none is missed.
+  const liveMatches = matches.filter(
+    (match) => match.status === "LIVE" || match.status === "SUSPENDED",
+  );
+  const hasSimultaneousLive = liveMatches.length >= 2;
   const currentLineupPlayers = useMemo(
     () =>
       currentLineupEntry
@@ -1051,6 +1064,66 @@ export function MatchDetailView({
 
   return (
     <div id="match-detail-view">
+      {/* SIMULTANEOUS LIVE-MATCH ALERT — only when 2+ matches overlap */}
+      {hasSimultaneousLive && (
+        <div
+          id="simultaneous-live-alert"
+          role="status"
+          aria-live="polite"
+          className={`border-b ${
+            theme === "classic-light"
+              ? "border-amber-200 bg-[#fff7e6]"
+              : "border-amber-400/20 bg-amber-400/10"
+          }`}
+        >
+          <div className="max-w-7xl mx-auto flex flex-wrap items-center gap-x-3 gap-y-2 px-4 py-2.5">
+            <span
+              className={`inline-flex items-center gap-1.5 font-mono text-[11px] font-bold uppercase tracking-wider ${
+                theme === "classic-light" ? "text-amber-700" : "text-amber-300"
+              }`}
+            >
+              <Zap size={13} className="animate-pulse" aria-hidden="true" />
+              {liveMatches.length} jogos ao vivo agora
+            </span>
+            <span
+              className={`text-[11px] ${
+                theme === "classic-light" ? "text-amber-700/80" : "text-amber-200/80"
+              }`}
+            >
+              Partidas simultâneas — toque para alternar:
+            </span>
+            <div className="flex flex-wrap items-center gap-1.5">
+              {liveMatches.map((m) => (
+                <button
+                  key={m.id}
+                  type="button"
+                  id={`btn-simultaneous-${m.id}`}
+                  onClick={() => handleSelectMatch(m.id)}
+                  aria-label={`Ver ${formatCountryNameForTooltip(m.teamA.name)} x ${formatCountryNameForTooltip(m.teamB.name)}`}
+                  aria-pressed={selectedMatchId === m.id}
+                  className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-1 font-anton text-xs uppercase tracking-wide transition ${
+                    selectedMatchId === m.id
+                      ? "border-amber-400 bg-amber-400 text-amber-950"
+                      : theme === "classic-light"
+                        ? "border-amber-200 bg-white text-amber-800 hover:border-amber-300"
+                        : "border-amber-400/30 bg-white/5 text-amber-100 hover:border-amber-400/60"
+                  }`}
+                >
+                  <span>{m.teamA.code}</span>
+                  <span className="opacity-60">x</span>
+                  <span>{m.teamB.code}</span>
+                  {m.score && (
+                    <span className="ml-1 font-mono font-bold">
+                      {m.score.teamA}-{m.score.teamB}
+                    </span>
+                  )}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* MATCH SELECTOR BAR */}
       <div
         className={`border-b ${
@@ -1416,6 +1489,26 @@ export function MatchDetailView({
                         : "PRÉ-JOGO"}
                 </span>
               </div>
+
+              {/* Official FIFA match status / period (only when FIFA-sourced) */}
+              {currentOfficialFifaStatus && (
+                <div
+                  id="fifa-official-status"
+                  className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-wider ${
+                    theme === "classic-light"
+                      ? "border-slate-200 bg-slate-100 text-slate-600"
+                      : "border-white/10 bg-white/5 text-slate-300"
+                  }`}
+                  title="Status oficial da partida segundo a FIFA"
+                >
+                  <span className={theme === "classic-light" ? "text-[#009c3b]" : "text-[#00e476]"}>
+                    FIFA
+                  </span>
+                  <span aria-hidden="true">·</span>
+                  <span>{currentOfficialFifaStatus}</span>
+                </div>
+              )}
+
               <div
                 className={`font-mono text-[11px] uppercase tracking-wider ${
                   theme === "classic-light"

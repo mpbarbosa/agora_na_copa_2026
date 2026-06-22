@@ -325,6 +325,85 @@ export const getMatchStatusFromFifa = (
   return localMatch.status;
 };
 
+// FIFA api.fifa.com `Period` integer codes (see the JantaoDev/FifaApi Match
+// model) — the phase of play, richer than the coarse MatchStatus.
+export const FIFA_PERIOD = {
+  UNKNOWN: 0,
+  SCHEDULED: 1,
+  PRE_MATCH: 2,
+  FIRST_HALF: 3,
+  HALF_TIME: 4,
+  SECOND_HALF: 5,
+  EXTRA_TIME: 6,
+  EXTRA_FIRST_HALF: 7,
+  EXTRA_HALF_TIME: 8,
+  EXTRA_SECOND_HALF: 9,
+  FULL_TIME: 10,
+  PENALTY_SHOOTOUT: 11,
+  POST_MATCH: 12,
+  ABANDONED: 13,
+} as const;
+
+const FIFA_PERIOD_LABELS: Record<number, string> = {
+  [FIFA_PERIOD.SCHEDULED]: "Agendado",
+  [FIFA_PERIOD.PRE_MATCH]: "Pré-jogo",
+  [FIFA_PERIOD.FIRST_HALF]: "1º tempo",
+  [FIFA_PERIOD.HALF_TIME]: "Intervalo",
+  [FIFA_PERIOD.SECOND_HALF]: "2º tempo",
+  [FIFA_PERIOD.EXTRA_TIME]: "Prorrogação",
+  [FIFA_PERIOD.EXTRA_FIRST_HALF]: "Prorrogação · 1º tempo",
+  [FIFA_PERIOD.EXTRA_HALF_TIME]: "Intervalo da prorrogação",
+  [FIFA_PERIOD.EXTRA_SECOND_HALF]: "Prorrogação · 2º tempo",
+  [FIFA_PERIOD.FULL_TIME]: "Fim de jogo",
+  [FIFA_PERIOD.PENALTY_SHOOTOUT]: "Pênaltis",
+  [FIFA_PERIOD.POST_MATCH]: "Pós-jogo",
+  [FIFA_PERIOD.ABANDONED]: "Abandonado",
+};
+
+const FIFA_STATUS_LABELS: Record<number, string> = {
+  [FIFA_MATCH_STATUS.PLAYED]: "Encerrado",
+  [FIFA_MATCH_STATUS.FUTURE]: "Agendado",
+  [FIFA_MATCH_STATUS.LINE_UPS]: "Escalações divulgadas",
+  [FIFA_MATCH_STATUS.ABANDONED]: "Abandonado",
+  [FIFA_MATCH_STATUS.POSTPONED]: "Adiado",
+  [FIFA_MATCH_STATUS.CANCELLED]: "Cancelado",
+  [FIFA_MATCH_STATUS.SUSPENDED]: "Paralisado",
+};
+
+// Terminal/abnormal statuses describe the match better than the period code.
+const TERMINAL_OR_ABNORMAL_STATUS = new Set<number>([
+  FIFA_MATCH_STATUS.PLAYED,
+  FIFA_MATCH_STATUS.SUSPENDED,
+  FIFA_MATCH_STATUS.ABANDONED,
+  FIFA_MATCH_STATUS.POSTPONED,
+  FIFA_MATCH_STATUS.CANCELLED,
+]);
+
+/**
+ * Human-readable official FIFA match status in pt-BR. Prefers the live `Period`
+ * (1º tempo, Intervalo, 2º tempo, Pênaltis…) while a match is in play; for a
+ * terminal/abnormal state (Encerrado, Paralisado, Adiado…) the status wins.
+ * Returns undefined when nothing is known.
+ */
+export const getOfficialFifaStatusLabel = (
+  matchStatus?: number | null,
+  period?: number | null,
+): string | undefined => {
+  if (typeof matchStatus === "number" && TERMINAL_OR_ABNORMAL_STATUS.has(matchStatus)) {
+    return FIFA_STATUS_LABELS[matchStatus];
+  }
+  if (typeof period === "number" && FIFA_PERIOD_LABELS[period]) {
+    return FIFA_PERIOD_LABELS[period];
+  }
+  if (typeof matchStatus === "number" && FIFA_STATUS_LABELS[matchStatus]) {
+    return FIFA_STATUS_LABELS[matchStatus];
+  }
+  if (matchStatus === FIFA_MATCH_STATUS.LIVE) {
+    return "Em andamento";
+  }
+  return undefined;
+};
+
 export const getScoreFromFifa = (fifaMatch: FifaCalendarMatch) => {
   if (
     typeof fifaMatch.HomeTeamScore === "number" &&
@@ -782,11 +861,17 @@ export const buildMatchStateEntry = (
       })
     : getMatchStatusFromFifa(localMatch, fifaMatch);
 
+  const officialStatus = getOfficialFifaStatusLabel(
+    fifaLiveMatch?.MatchStatus ?? fifaMatch.MatchStatus,
+    fifaLiveMatch?.Period,
+  );
+
   return {
     status,
     score: liveScore || fifaScore || (status === "PRE_GAME" ? undefined : localMatch.score),
     matchTime:
       status === "LIVE" && fifaLiveMatch?.MatchTime ? fifaLiveMatch.MatchTime : undefined,
+    officialStatus,
     incidents: incidents && incidents.length > 0 ? incidents : undefined,
     source: "fifa",
     note:
