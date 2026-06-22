@@ -381,14 +381,28 @@
   ],
   "bel-irn-2026": [
     {
+      "embedUrl": "https://www.youtube.com/embed/X3QQGOE2RA4",
+      "title": "Bélgica x Irã — Copa do Mundo 2026"
+    },
+    {
       "embedUrl": "https://www.youtube.com/embed/Vt0unn5w22A",
       "title": "Melhores Momentos: Bélgica x Irã — Copa do Mundo 2026"
     }
   ],
   "nzl-egy-2026": [
     {
+      "embedUrl": "https://www.youtube.com/embed/nLFPUeA-Naw",
+      "title": "Nova Zelândia x Egito — Copa do Mundo 2026"
+    },
+    {
       "embedUrl": "https://www.youtube.com/embed/0eXERByejAI",
       "title": "Melhores Momentos: Nova Zelândia x Egito — Copa do Mundo 2026"
+    }
+  ],
+  "arg-aut-2026": [
+    {
+      "embedUrl": "https://www.youtube.com/embed/BlSDq1MDQ4Q",
+      "title": "Melhores Momentos: Argentina x Áustria — Copa do Mundo 2026"
     }
   ]
 }
