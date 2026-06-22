@@ -24,6 +24,8 @@ Playwright end-to-end specs for "Agora na Copa 26". The suite boots the dev serv
 | `feature-tour.spec.ts` | Feature-discovery guided tour (Driver.js): "?" button starts it, advances, and closes | 1.0 KB |
 | `share-button.spec.ts` | Header share button: Web Share API with copy-link fallback + "Link copiado!" confirmation | 0.9 KB |
 | `messi-tour.spec.ts` | Messi card walkthrough (Driver.js): dormant on session 1, auto-runs on session 2+ and walks Jogadores → Messi → open card | 1.3 KB |
+| `player-mention.spec.ts` | "Messi" in a match analysis links to a hover/tap compact player-card preview (portaled card shows club + ★ Craque) | 0.9 KB |
+| `match-weather.spec.ts` | `/api/match-weather` endpoint contract: resilience shape for valid coords, 400 + fallback for invalid (offline-safe) | 0.9 KB |
 
 ## Fixtures
 

@@ -33,8 +33,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **`server.ts`** — single Express server. Owns the API routes, loads `APP_MATCHES`, proxies Vite in dev, serves `dist/` statically in production.
 - **`fifa-sync-core.ts`** — pure FIFA API integration logic (match-finding, broadcaster normalization, lineup building, match-state building). Extracted from `server.ts` so it can be unit-tested independently. Imported by both `server.ts` and `tests/fifa-sync-core.test.ts`.
 - **`trends-core.ts`** — pure parser for the Google Trends RSS feed (XML → topics). Extracted from `server.ts` for independent unit testing. Imported by `server.ts` and `tests/trends-core.test.ts`.
-- API endpoints: `/api/broadcast-guide`, `/api/match-states`, `/api/match-overlays`, `/api/team-lineups`, `/api/tournament-leaders`, `/api/player-stats/:teamCode/:playerName`, `/api/player-incidents/:teamCode/:playerName`, `/api/team-view/:teamCode`, `/api/country-info/:code`, `/api/google-trends`, `/api/questions`, `/api/fifa-sync-status`, `/api/health`.
+- **`weather-core.ts`** — pure Open-Meteo integration (request-URL building, response parsing, WMO weather-code → pt-BR description/emoji mapping). Extracted from `server.ts` for independent unit testing. Imported by `server.ts` and `tests/weather-core.test.ts`.
+- API endpoints: `/api/broadcast-guide`, `/api/match-states`, `/api/match-overlays`, `/api/team-lineups`, `/api/tournament-leaders`, `/api/player-stats/:teamCode/:playerName`, `/api/player-incidents/:teamCode/:playerName`, `/api/team-view/:teamCode`, `/api/country-info/:code`, `/api/google-trends`, `/api/match-weather`, `/api/questions`, `/api/fifa-sync-status`, `/api/health`.
 - **`/api/google-trends`** proxies the public Google Trends "Daily Search Trends" RSS feed (geo=BR), parsed by `trends-core.ts`. Not FIFA-sourced, but follows the resilience shape (`source: "google-trends" | "fallback"`, `note`, `updatedAt`, `topics`) with a 20-min cache and graceful fallback. Consumed by the Social Medias view (`SocialMediasView`, "Redes Sociais" tab).
+- **`/api/match-weather?lat&lng`** returns the current weather at a match venue (free, key-less Open-Meteo), parsed by `weather-core.ts`. Not FIFA-sourced, but follows the resilience shape (`source: "open-meteo" | "fallback"`, `note`, `updatedAt`, `weather`) with a 15-min per-coordinate cache and graceful fallback. Consumed by `MatchWeatherChip` in the "Ao Vivo" scoreboard, shown only while a match is `LIVE`.
 - **`/api/health`** returns `{ status, version, uptime, load, memory, system }` — real-time server vitals for external uptime monitors (no cache). Not a FIFA-sourced endpoint; does not carry the resilience shape.
 - Every FIFA-sourced response carries `source: "fifa" | "fallback"`, a human-readable `note`, and `updatedAt`. Any new endpoint must follow this resilience shape and fall back gracefully when the FIFA API is unreachable.
 
@@ -63,6 +65,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Deployment
 
 Single production instance running as a `systemd` service (`agora-na-copa-2026`) behind nginx on an AWS host. `npm run deploy` rsyncs `dist/`, `package.json`, `package-lock.json` to the host and restarts the service (no blue/green — brief downtime, in-memory caches reset). The production `.env` is preserved across deploys (not overwritten by rsync).
+
+### Going live on the prod host
+
+Do **not** run `npm run deploy` on the prod box — building there OOM-thrashes the ~1.9 GiB host. Instead use the build-free path: `git pull` then `npm run go-live` (`shell_scripts/10_go_live.sh`). Go-live is **version-guarded**: after pulling the prebuilt payload it compares the payload's version against the running service's `/api/health` version and **rolls out only when the live site is behind the payload** — otherwise it skips (no needless restart/cache reset). Fail-open if either version can't be read; force a same-version redeploy with `AGORA_FORCE_GO_LIVE=1`. Note: publishing from dev (`npm run deploy`) only stages the payload into the `mpbarbosa.com` repo — the live site updates only when a deploy/go-live runs on the prod host.
 
 ## Design and quality guides
 
