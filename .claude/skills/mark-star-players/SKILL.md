@@ -18,8 +18,12 @@ entry — there is no separate flag. That note IS the player performance analysi
 `## Section` blocks (parsed by `src/utils/noteSections.ts`), exactly like Messi's.
 
 `squads.json` is keyed by **fifaId**. **Factual fields are generated — do NOT
-hand-edit them** (see `src/data/CLAUDE.md`). `worldCupNote` is the one
-hand-maintained editorial field; this skill only ever writes that field.
+hand-edit them** (see `src/data/CLAUDE.md`). The two hand-maintained editorial
+fields are `worldCupNote` and its companion `worldCupNoteUpdatedAt` (ISO-8601) —
+this skill writes **both** and nothing else. `worldCupNoteUpdatedAt` drives the
+**Atualizada/Desatualizada** freshness badge on the player card
+(`PlayerNoteFreshness`, via `isAnalysisUpToDate` against the team's last finished
+match); a note written without it would render Desatualizada immediately.
 
 Four stages:
 
@@ -115,26 +119,44 @@ safeguard as [[analyze-match]].
 Mirror the established star-note voice (see Messi `229397`, CR7 `201200`): three
 sections — `## Leitura` (why he is the star / what is at stake), `## Desempenho`
 (what he actually did, match by match, with real goals/cards/minutes), `## Números`
-(Jn · goals · cards · team position). Keyed by fifaId. Write via Node to avoid
-JSON-escaping pitfalls (repeat the assignment for each player, or set several keys
-in one script before writing):
+(Jn · goals · cards · team position). Keyed by fifaId. Write via `tsx` (not `node`)
+so the same script can stamp `worldCupNoteUpdatedAt` to the kickoff of the team's
+most recent finished match — the one the note covers (repeat the block per player,
+or set several keys before writing). Production states give the authoritative last
+finished match (the seed lags):
 
 ```bash
-node -e '
-const fs=require("fs"); const p="src/data/squads.json";
-const a=JSON.parse(fs.readFileSync(p,"utf8"));
-a["<FIFAID>"].worldCupNote=[
-  "## Leitura","<parágrafo>",
-  "## Desempenho","<parágrafo>",
-  "## Números","<parágrafo>"
+curl -sk --max-time 30 https://copa2026.mpbarbosa.com/api/match-states -o /tmp/prod-match-states.json
+
+npx tsx -e '
+import { APP_MATCHES } from "./src/appMatches";
+import * as fs from "fs";
+const prod = JSON.parse(fs.readFileSync("/tmp/prod-match-states.json","utf8")).states ?? {};
+const FIFAID = "<FIFAID>", TEAM = "<TEAMCODE>";
+const ko = (m: any) => new Date(m.kickoffTimestamp).getTime();
+const finished = APP_MATCHES
+  .filter((m: any) => (m.teamA.code === TEAM || m.teamB.code === TEAM) && prod[m.id]?.status === "FINISHED")
+  .sort((a: any, b: any) => ko(a) - ko(b));
+const stamp = finished.length ? new Date(ko(finished[finished.length - 1])).toISOString() : null;
+
+const p = "src/data/squads.json";
+const a = JSON.parse(fs.readFileSync(p, "utf8"));
+a[FIFAID].worldCupNote = [
+  "## Leitura", "<parágrafo>",
+  "## Desempenho", "<parágrafo>",
+  "## Números", "J<n> · <gols> · <cartões> · <posição do time no grupo>"
 ].join("\n");
-fs.writeFileSync(p, JSON.stringify(a,null,2)+"\n");
-JSON.parse(fs.readFileSync(p,"utf8")); console.log("JSON valid ✓");
+a[FIFAID].worldCupNoteUpdatedAt = stamp;   // stamp so the freshness badge reads Atualizada
+fs.writeFileSync(p, JSON.stringify(a, null, 2) + "\n");
+JSON.parse(fs.readFileSync(p, "utf8")); console.log("JSON valid ✓ — stamped", stamp);
 '
 ```
 
-> Only set `worldCupNote`. Never touch factual fields (`name`, `club`,
-> `dateOfBirth`, `height`, `pictureUrl`, `socials`) — they are script-generated.
+> Set **both** `worldCupNote` and `worldCupNoteUpdatedAt`; never touch factual
+> fields (`name`, `club`, `dateOfBirth`, `height`, `pictureUrl`, `socials`) — they
+> are script-generated. A note with no finished match to ground it has `stamp =
+> null` — but Stage 1 already skips players with no finished match, so this should
+> not arise.
 
 Then type-check:
 
@@ -171,4 +193,8 @@ Example: `feat(data): mark GER Undav, CAN David, JPN Ueda as star players with w
 - The worldCupNote also surfaces in the Jogadores view and match-incident player
   overlays, so a starred player lights up across the app automatically.
 - Re-marking a player who already has a note means refreshing it (overwrite) after
-  newer matches — same write, newer facts.
+  newer matches — same write, newer facts. Bringing already-marked players current
+  after new rounds is what [[refresh-stale-star-notes]] is for.
+- `worldCupNoteUpdatedAt` and the `J<n>` in `## Números` must stay in lockstep:
+  both describe the latest match the note covers, one for the freshness badge and
+  one for the staleness check. Set them together on every write.

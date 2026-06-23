@@ -16,10 +16,15 @@ the same field [[mark-star-players]] writes and `PlayerOverlayCard` renders. Not
 go stale as their team plays on. This skill finds the behind-the-times ones and
 brings them current.
 
-Unlike `teamAnalysis` ([[update-stale-team-analyses]]), a `worldCupNote` has **no
-`updatedAt`** — it is a plain string. So staleness is detected from the note's own
-`## Números` line: every star note states the team's game count as `J<n>`. A note
-is **behind** when its `J<n>` is lower than the team's actual finished-match count.
+Each `worldCupNote` is paired with a `worldCupNoteUpdatedAt` (ISO-8601) timestamp
+that drives the **Atualizada/Desatualizada** freshness badge on the player card
+(`PlayerNoteFreshness`, via `isAnalysisUpToDate` against the team's last finished
+match). Staleness is still *identified* from the note's own `## Números` line —
+every star note states the team's game count as `J<n>`, and a note is **behind**
+when its `J<n>` is lower than the team's actual finished-match count — because the
+`J<n>` reflects the note's editorial coverage. When you refresh a note you **must
+restamp `worldCupNoteUpdatedAt`** (Stage 2) so the badge agrees with the new text;
+leaving it stale would keep the card flagged Desatualizada.
 
 Three stages:
 
@@ -102,24 +107,40 @@ console.log(me?.group, "pos"+pos, "J"+me?.played, me?.points+"pts", "SG"+me?.goa
 Reconcile any stale seed result first (set `status: "FINISHED"` + real `score` in
 `fifaScheduledMatches.ts`) — same safeguard as [[analyze-match]]. Then overwrite the
 note (keep the same `## Leitura / ## Desempenho / ## Números` voice; carry forward
-the still-true earlier story, append the new match, and bump the `J<n>` and table):
+the still-true earlier story, append the new match, and bump the `J<n>` and table)
+**and restamp `worldCupNoteUpdatedAt`** to the kickoff of the team's most recent
+finished match — the one the refreshed note now covers. Use `tsx` (not `node`) so
+it can read `APP_MATCHES` + the production states fetched in Stage 1:
 
 ```bash
-node -e '
-const fs=require("fs"); const p="src/data/squads.json";
-const a=JSON.parse(fs.readFileSync(p,"utf8"));
-a["<FIFAID>"].worldCupNote=[
-  "## Leitura","<parágrafo>",
-  "## Desempenho","<parágrafo, incluindo o jogo mais recente com gols/minutos reais>",
-  "## Números","J<n> · <gols> · <cartões> · <posição do time no grupo>"
+npx tsx -e '
+import { APP_MATCHES } from "./src/appMatches";
+import * as fs from "fs";
+const prod = JSON.parse(fs.readFileSync("/tmp/prod-match-states.json","utf8")).states ?? {};
+const FIFAID = "<FIFAID>", TEAM = "<TEAMCODE>";
+const ko = (m: any) => new Date(m.kickoffTimestamp).getTime();
+const finished = APP_MATCHES
+  .filter((m: any) => (m.teamA.code === TEAM || m.teamB.code === TEAM) && prod[m.id]?.status === "FINISHED")
+  .sort((a: any, b: any) => ko(a) - ko(b));
+const stamp = finished.length ? new Date(ko(finished[finished.length - 1])).toISOString() : null;
+
+const p = "src/data/squads.json";
+const a = JSON.parse(fs.readFileSync(p, "utf8"));
+a[FIFAID].worldCupNote = [
+  "## Leitura", "<parágrafo>",
+  "## Desempenho", "<parágrafo, incluindo o jogo mais recente com gols/minutos reais>",
+  "## Números", "J<n> · <gols> · <cartões> · <posição do time no grupo>"
 ].join("\n");
-fs.writeFileSync(p, JSON.stringify(a,null,2)+"\n");
-JSON.parse(fs.readFileSync(p,"utf8")); console.log("JSON valid ✓");
+a[FIFAID].worldCupNoteUpdatedAt = stamp;   // restamp so the freshness badge agrees
+fs.writeFileSync(p, JSON.stringify(a, null, 2) + "\n");
+JSON.parse(fs.readFileSync(p, "utf8")); console.log("JSON valid ✓ — stamped", stamp);
 '
 ```
 
-> Only set `worldCupNote`. Never touch factual fields — they are script-generated.
-> Always include an updated `J<n>` in `## Números` so the next staleness check works.
+> Set **both** `worldCupNote` and `worldCupNoteUpdatedAt`; never touch factual
+> fields — they are script-generated. Always include an updated `J<n>` in
+> `## Números` (the staleness check) **and** restamp `worldCupNoteUpdatedAt` (the
+> freshness badge) — the two must stay in lockstep.
 
 Then type-check:
 
@@ -154,5 +175,9 @@ Example: `feat(data): refresh stale star notes for ESP Yamal, BRA Casemiro`
 - One deploy for the whole batch — never deploy between players.
 - The `J<n>` convention in `## Números` is what makes notes self-describing for
   staleness — preserve it in every refresh (and in new notes via [[mark-star-players]]).
+- `worldCupNoteUpdatedAt` is the machine-readable counterpart that powers the
+  freshness badge — restamp it on every refresh so it never drifts from `J<n>`.
+  ([[mark-star-players]] should set it when creating a note; if a note ever lacks
+  it, the badge treats the note as outdated until stamped.)
 - To CREATE notes for newly-emerged stars (not yet marked), use [[mark-star-players]];
   this skill only refreshes players who already have a note.

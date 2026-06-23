@@ -647,7 +647,7 @@ export function MatchDetailView({
       ? "Simulação local"
       : currentOverlay?.broadcastGuide.source === "fifa" &&
           currentOverlay?.matchState.source === "fifa"
-      ? "FIFA oficial"
+      ? "Oficial"
       : "Fallback local";
   // Official FIFA status/period label (e.g. "2º tempo", "Intervalo", "Encerrado"),
   // only when the live state is genuinely FIFA-sourced (not a local simulation).
@@ -824,17 +824,13 @@ export function MatchDetailView({
           }`}
           title="Status oficial da partida segundo a FIFA"
         >
-          <span className={theme === "classic-light" ? "text-[#009c3b]" : "text-[#00e476]"}>
-            FIFA
-          </span>
-          <span aria-hidden="true">·</span>
           <span>{currentOfficialFifaStatus}</span>
         </div>
       )}
     </div>
   );
 
-  // The overlay source/updated line ("FIFA Oficial • Atualizado em …").
+  // The overlay source/updated line ("Oficial • Atualizado em …").
   // Shown in the center column on desktop; on mobile it is relocated above the
   // team-A flag (directly above it, below the status line).
   const renderOverlaySourceLine = () => (
@@ -1619,22 +1615,6 @@ export function MatchDetailView({
                     </span>
                   </div>
                 )}
-
-                {/* HORÁRIO DE BRASÍLIA Badge with live clock */}
-                {currentMatch.status !== "FINISHED" && (
-                  <span
-                    className={`mt-2 flex items-center gap-2 px-3 py-1.5 text-xs font-mono tracking-widest font-black uppercase ${
-                      theme === "classic-light"
-                        ? "text-slate-800"
-                        : "text-white"
-                    }`}
-                  >
-                    <span className={theme === "classic-light" ? "text-slate-800" : "text-white"}>HORÁRIO DE BRASÍLIA</span>
-                    <span className="tabular-nums" id="brasilia-clock">
-                      {formatBrasiliaTime(currentTime)}
-                    </span>
-                  </span>
-                )}
               </div>
             </div>
 
@@ -1650,6 +1630,21 @@ export function MatchDetailView({
                   onClick={() => onSelectTeamLineup(currentMatch.teamB)}
                 />
               </div>
+
+              {/* HORÁRIO DE BRASÍLIA badge — directly below the team-B flag */}
+              {currentMatch.status !== "FINISHED" && (
+                <span
+                  className={`flex items-center gap-2 text-xs font-mono tracking-widest font-black uppercase ${
+                    theme === "classic-light" ? "text-slate-800" : "text-white"
+                  }`}
+                >
+                  <span className={theme === "classic-light" ? "text-slate-800" : "text-white"}>HORÁRIO DE BRASÍLIA</span>
+                  <span className="tabular-nums" id="brasilia-clock">
+                    {formatBrasiliaTime(currentTime)}
+                  </span>
+                </span>
+              )}
+
               <h2
                 className={`font-anton text-lg tracking-wider uppercase ${
                   theme === "classic-light" ? "text-slate-800" : "text-white"
