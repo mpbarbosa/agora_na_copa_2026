@@ -5,7 +5,7 @@
 // only needs network access to jsDelivr.
 
 const CATAS_SPEECH_URL =
-  "https://cdn.jsdelivr.net/gh/mpbarbosa/catas_altas_speech@0.1.0/dist/esm/index.js";
+  "https://cdn.jsdelivr.net/gh/mpbarbosa/catas_altas_speech@0.1.2/dist/esm/index.js";
 
 /** The slice of the catas_altas_speech SpeechSynthesisManager we use. */
 export interface CatasSpeech {
