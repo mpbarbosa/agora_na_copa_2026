@@ -767,6 +767,73 @@ export function MatchDetailView({
   const currentTime = useClockTick();
   // Local time at the current match's stadium (its own time zone).
   const currentStadiumTimeZone = resolveVenueTimeZone(currentMatch);
+
+  // The live/pré-jogo status line: game-state badge + official FIFA status.
+  // Shown in the center column on desktop; on mobile it is relocated above the
+  // team-A flag. Only the canonical (desktop) copy carries the element ids, so
+  // they stay unique across the two render positions.
+  const renderMatchStatusLine = (withIds: boolean) => (
+    <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1">
+      {/* Game state indicator, driven by the current match's status */}
+      <div
+        className="flex items-center space-x-1.5"
+        {...(withIds ? { id: "game-state-badge" } : {})}
+      >
+        <span
+          className={`w-2 h-2 rounded-full ${
+            currentMatch.status === "LIVE"
+              ? "bg-red-500 animate-pulse"
+              : currentMatch.status === "SUSPENDED"
+                ? "bg-amber-500 animate-pulse"
+                : currentMatch.status === "FINISHED"
+                  ? "bg-slate-400"
+                  : "bg-[#00e476] animate-pulse"
+          }`}
+        ></span>
+        <span
+          className={`font-mono text-xs font-bold tracking-widest uppercase ${
+            currentMatch.status === "SUSPENDED"
+              ? "text-amber-600 dark:text-amber-400"
+              : currentMatch.status === "FINISHED"
+                ? "text-slate-500 dark:text-slate-300"
+                : theme === "classic-light"
+                  ? "text-slate-600"
+                  : "text-[#a7e6bf]"
+          }`}
+        >
+          {currentMatch.status === "LIVE"
+            ? currentMatch.matchTime
+              ? `AO VIVO • ${currentMatch.matchTime}`
+              : "AO VIVO"
+            : currentMatch.status === "SUSPENDED"
+              ? "PARALISADO"
+              : currentMatch.status === "FINISHED"
+                ? "ENCERRADO"
+                : "PRÉ-JOGO"}
+        </span>
+      </div>
+
+      {/* Official FIFA match status / period (only when FIFA-sourced) */}
+      {currentOfficialFifaStatus && (
+        <div
+          {...(withIds ? { id: "fifa-official-status" } : {})}
+          className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-wider ${
+            theme === "classic-light"
+              ? "border-slate-200 bg-slate-100 text-slate-600"
+              : "border-white/10 bg-white/5 text-slate-300"
+          }`}
+          title="Status oficial da partida segundo a FIFA"
+        >
+          <span className={theme === "classic-light" ? "text-[#009c3b]" : "text-[#00e476]"}>
+            FIFA
+          </span>
+          <span aria-hidden="true">·</span>
+          <span>{currentOfficialFifaStatus}</span>
+        </div>
+      )}
+    </div>
+  );
+
   const secondsRemaining = getMatchCountdownSeconds(
     currentMatch,
     currentTime,
@@ -1438,6 +1505,10 @@ export function MatchDetailView({
             className="flex flex-col items-center justify-between space-y-6 md:space-y-0 md:flex-row md:space-x-8"
             id="scoreboard-grid"
           >
+            {/* MOBILE ONLY: the pré-jogo/live status line sits above the
+                team-A flag. Desktop keeps it in the center column. */}
+            <div className="w-full md:hidden">{renderMatchStatusLine(false)}</div>
+
             {/* LEFT TEAM */}
             <div
               className="flex flex-col items-center space-y-3 flex-1"
@@ -1464,66 +1535,10 @@ export function MatchDetailView({
               className="flex flex-col items-center text-center space-y-2 flex-1 min-w-[200px]"
               id="clock-center-display"
             >
-              {/* Live status + official FIFA status share a single line */}
-              <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1">
-              {/* Game state indicator, driven by the current match's status */}
-              <div
-                className="flex items-center space-x-1.5"
-                id="game-state-badge"
-              >
-                <span
-                  className={`w-2 h-2 rounded-full ${
-                    currentMatch.status === "LIVE"
-                      ? "bg-red-500 animate-pulse"
-                      : currentMatch.status === "SUSPENDED"
-                        ? "bg-amber-500 animate-pulse"
-                        : currentMatch.status === "FINISHED"
-                          ? "bg-slate-400"
-                          : "bg-[#00e476] animate-pulse"
-                  }`}
-                ></span>
-                <span
-                  className={`font-mono text-xs font-bold tracking-widest uppercase ${
-                    currentMatch.status === "SUSPENDED"
-                      ? "text-amber-600 dark:text-amber-400"
-                      : currentMatch.status === "FINISHED"
-                        ? "text-slate-500 dark:text-slate-300"
-                        : theme === "classic-light"
-                          ? "text-slate-600"
-                          : "text-[#a7e6bf]"
-                  }`}
-                >
-                  {currentMatch.status === "LIVE"
-                    ? currentMatch.matchTime
-                      ? `AO VIVO • ${currentMatch.matchTime}`
-                      : "AO VIVO"
-                    : currentMatch.status === "SUSPENDED"
-                      ? "PARALISADO"
-                      : currentMatch.status === "FINISHED"
-                        ? "ENCERRADO"
-                        : "PRÉ-JOGO"}
-                </span>
-              </div>
-
-              {/* Official FIFA match status / period (only when FIFA-sourced) */}
-              {currentOfficialFifaStatus && (
-                <div
-                  id="fifa-official-status"
-                  className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-wider ${
-                    theme === "classic-light"
-                      ? "border-slate-200 bg-slate-100 text-slate-600"
-                      : "border-white/10 bg-white/5 text-slate-300"
-                  }`}
-                  title="Status oficial da partida segundo a FIFA"
-                >
-                  <span className={theme === "classic-light" ? "text-[#009c3b]" : "text-[#00e476]"}>
-                    FIFA
-                  </span>
-                  <span aria-hidden="true">·</span>
-                  <span>{currentOfficialFifaStatus}</span>
-                </div>
-              )}
-              </div>
+              {/* Live status + official FIFA status share a single line.
+                  On mobile this line is relocated above the team-A flag (see
+                  the scoreboard grid), so it is shown here only from md up. */}
+              <div className="hidden md:block w-full">{renderMatchStatusLine(true)}</div>
 
               <div
                 className={`font-mono text-[11px] uppercase tracking-wider ${
