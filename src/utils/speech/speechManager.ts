@@ -102,12 +102,14 @@ export class SpeechManager {
     const voices = this.synth.getVoices();
     if (voices.length > 0) {
       this.voice = selectPtBrVoice(voices);
+      this.processQueue(); // flush anything that was waiting for a voice
       return;
     }
     // Voices not ready yet — react to the event and also poll a few times.
     this.synth.onvoiceschanged = () => {
       if (this.disposed || !this.synth) return;
       this.voice = selectPtBrVoice(this.synth.getVoices());
+      this.processQueue();
     };
     if (retriesLeft > 0) {
       window.setTimeout(() => this.loadVoice(retriesLeft - 1, retryMs), retryMs);
@@ -133,13 +135,25 @@ export class SpeechManager {
 
   private processQueue(): void {
     if (!this.synth || this.disposed || this.speaking) return;
+    if (this.queue.length === 0) return;
+    // Android Chrome silently drops utterances spoken before the voice list has
+    // loaded. If no voice is ready yet, hold the queue — loadVoice()'s
+    // voiceschanged handler calls processQueue() again once voices arrive.
+    if (!this.voice && this.synth.getVoices().length === 0) return;
+
     const item = this.queue.shift();
     if (!item) return;
 
     this.speaking = true;
     const utterance = new SpeechSynthesisUtterance(item.text);
     utterance.lang = "pt-BR";
-    if (this.voice) utterance.voice = this.voice;
+    if (this.voice) {
+      try {
+        utterance.voice = this.voice;
+      } catch {
+        // Some engines reject assigning a voice object; the lang default speaks.
+      }
+    }
     utterance.rate = item.rate ?? this.rate;
     utterance.pitch = item.pitch ?? this.pitch;
     utterance.volume = this.volume;

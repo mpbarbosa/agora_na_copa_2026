@@ -15,7 +15,10 @@ async function stubSpeech(page: import("@playwright/test").Page) {
       cancel: () => {},
       pause: () => {},
       resume: () => {},
-      getVoices: () => [],
+      // A pt-BR voice so the manager's "wait for voices" guard lets speech through.
+      getVoices: () => [
+        { name: "Google português do Brasil", lang: "pt-BR", localService: false, default: true, voiceURI: "ptbr" },
+      ],
       onvoiceschanged: null,
     };
     Object.defineProperty(window, "speechSynthesis", { configurable: true, get: () => synth });

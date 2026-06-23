@@ -73,19 +73,17 @@ export function useMatchSpeech({
     return managerRef.current;
   }, [supported]);
 
-  // Create the manager whenever narration is on (covers the persisted-restore
-  // case where it starts enabled without a click).
+  // Create the manager eagerly on mount (when supported) so the TTS engine warms
+  // up and voices load BEFORE the first tap. Lazy creation left the engine cold
+  // at the exact moment we try to confirm, and Android Chrome silently drops an
+  // utterance spoken before its voices are ready. Released on unmount.
   useEffect(() => {
-    if (enabled) ensureManager();
-  }, [enabled, ensureManager]);
-
-  // Release on unmount.
-  useEffect(() => {
+    if (supported) ensureManager();
     return () => {
       managerRef.current?.dispose();
       managerRef.current = null;
     };
-  }, []);
+  }, [supported, ensureManager]);
 
   // Re-seed silently when the selected match changes — never narrate across a
   // match switch.
