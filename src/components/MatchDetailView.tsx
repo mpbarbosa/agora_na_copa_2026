@@ -1559,12 +1559,6 @@ export function MatchDetailView({
                 </button>
               )}
 
-              {/* Venue weather while the match is in progress or paused
-                  (a stoppage is often weather-related) */}
-              {(currentMatch.status === "LIVE" || currentMatch.status === "SUSPENDED") && (
-                <MatchWeatherChip match={currentMatch} theme={theme} />
-              )}
-
               {/* Countdown Ticking section (Ex: "Faltam: 15:02:03") */}
               <div
                 className="flex flex-col items-center"
@@ -1650,6 +1644,14 @@ export function MatchDetailView({
                   {currentMatch.stadiumName} • {currentMatch.stageName}
                 </a>
               </div>
+
+              {/* Venue weather, right below the stadium location, while the
+                  match is in progress or paused (a stoppage is often weather-related) */}
+              {(currentMatch.status === "LIVE" || currentMatch.status === "SUSPENDED") && (
+                <div className="mt-3">
+                  <MatchWeatherChip match={currentMatch} theme={theme} />
+                </div>
+              )}
 
               {currentMatch.officialMatchUrl && (
                 <a
