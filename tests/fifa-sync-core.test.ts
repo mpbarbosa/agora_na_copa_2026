@@ -7,6 +7,7 @@ import {
   findCalendarMatch,
   getMatchStatusFromFifa,
   getOfficialFifaStatusLabel,
+  getRefereeFromFifa,
   normalizeBroadcasters,
   SPORTV_URL,
   type FifaCalendarMatch,
@@ -369,6 +370,73 @@ test("buildMatchStateEntry falls back to local match state when FIFA data is una
   assert.deepEqual(entry.score, { teamA: 0, teamB: 1 });
   assert.equal(entry.source, "fallback");
   assert.match(entry.note, /estado local/i);
+});
+
+test("getRefereeFromFifa extracts the main referee from the Officials list", () => {
+  const calendarMatch: FifaCalendarMatch = {
+    IdMatch: "400021492",
+    Date: "2026-06-22T18:00:00Z",
+    Officials: [
+      {
+        OfficialId: "372930",
+        IdCountry: "CAN",
+        OfficialType: 1,
+        Name: [{ Locale: "en-GB", Description: "Drew Fischer" }],
+      },
+      {
+        OfficialId: "999001",
+        IdCountry: "USA",
+        OfficialType: 2,
+        Name: [{ Locale: "en-GB", Description: "Some Assistant" }],
+      },
+    ],
+  };
+
+  assert.deepEqual(getRefereeFromFifa(calendarMatch), {
+    name: "Drew Fischer",
+    country: "CAN",
+    fifaOfficialId: "372930",
+  });
+});
+
+test("getRefereeFromFifa returns undefined when no referee has been assigned", () => {
+  assert.equal(getRefereeFromFifa(undefined), undefined);
+  assert.equal(getRefereeFromFifa({ IdMatch: "1", Date: "2026-06-22T18:00:00Z" }), undefined);
+  assert.equal(
+    getRefereeFromFifa({
+      IdMatch: "1",
+      Date: "2026-06-22T18:00:00Z",
+      Officials: [{ OfficialId: "x", IdCountry: "USA", OfficialType: 4 }],
+    }),
+    undefined,
+  );
+});
+
+test("buildMatchStateEntry surfaces the FIFA referee on the match state", () => {
+  const localMatch = createMatch({ status: "FINISHED" });
+  const calendarMatch: FifaCalendarMatch = {
+    IdMatch: "400021492",
+    Date: "2026-06-22T18:00:00Z",
+    MatchStatus: 0,
+    HomeTeamScore: 3,
+    AwayTeamScore: 0,
+    Officials: [
+      {
+        OfficialId: "372930",
+        IdCountry: "CAN",
+        OfficialType: 1,
+        Name: [{ Locale: "en-GB", Description: "Drew Fischer" }],
+      },
+    ],
+  };
+
+  const entry = buildMatchStateEntry(localMatch, calendarMatch);
+
+  assert.deepEqual(entry.referee, {
+    name: "Drew Fischer",
+    country: "CAN",
+    fifaOfficialId: "372930",
+  });
 });
 
 test("normalizeBroadcasters normalizes sportv URLs and deduplicates repeated channels", () => {

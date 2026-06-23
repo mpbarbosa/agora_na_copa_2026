@@ -86,6 +86,16 @@ export interface BroadcastGuideEntry {
   updatedAt: string;
 }
 
+/** The match referee, as published by FIFA in the match `Officials` list. */
+export interface MatchReferee {
+  /** Referee full name (e.g. "Drew Fischer"). */
+  name: string;
+  /** FIFA 3-letter country code of the referee's nationality (e.g. "CAN"). */
+  country?: string;
+  /** FIFA official id, stable across matches for the same referee. */
+  fifaOfficialId?: string;
+}
+
 export interface MatchStateEntry {
   status: MatchStatus;
   score?: {
@@ -95,6 +105,8 @@ export interface MatchStateEntry {
   matchTime?: string;
   /** Official FIFA status/period label in pt-BR (e.g. "2º tempo", "Intervalo", "Encerrado"). */
   officialStatus?: string;
+  /** Main referee, when FIFA has assigned and published one for the match. */
+  referee?: MatchReferee;
   incidents?: CommentaryEvent[];
   source: "fifa" | "fallback";
   note: string;

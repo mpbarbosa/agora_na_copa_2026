@@ -4,6 +4,7 @@ import type {
   CommentaryEvent,
   LineupEntry,
   Match,
+  MatchReferee,
   MatchStateEntry,
   MatchStatus,
   Player,
@@ -20,6 +21,15 @@ export interface FifaCalendarTeam {
   Abbreviation?: string;
 }
 
+export interface FifaMatchOfficial {
+  OfficialId?: string;
+  IdCountry?: string;
+  /** 1 = Referee, 2/3 = Assistants, 4 = Fourth official, 5+ = VAR/AVAR. */
+  OfficialType?: number | null;
+  Name?: FifaLocalizedText[];
+  NameShort?: FifaLocalizedText[];
+}
+
 export interface FifaCalendarMatch {
   IdMatch: string;
   Date: string;
@@ -28,6 +38,7 @@ export interface FifaCalendarMatch {
   AwayTeamScore?: number | null;
   Home?: FifaCalendarTeam;
   Away?: FifaCalendarTeam;
+  Officials?: FifaMatchOfficial[];
 }
 
 export interface FifaWatchSource {
@@ -831,6 +842,39 @@ export const getIncidentsFromLiveFifa = (
     .map(({ period: _period, ...incident }) => incident);
 };
 
+// FIFA `OfficialType` integer codes within a match's `Officials` list.
+const FIFA_OFFICIAL_TYPE = {
+  REFEREE: 1,
+  ASSISTANT_1: 2,
+  ASSISTANT_2: 3,
+  FOURTH_OFFICIAL: 4,
+} as const;
+
+// Extracts the main referee from a FIFA calendar match's `Officials` list.
+// FIFA assigns referees only a day or two before kickoff and reliably populates
+// just the main referee (assistants/VAR are sparse), so we surface that one.
+// Returns undefined when no referee has been assigned/published yet.
+export const getRefereeFromFifa = (
+  fifaMatch: FifaCalendarMatch | undefined,
+  language = "pt",
+): MatchReferee | undefined => {
+  const referee = fifaMatch?.Officials?.find(
+    (official) => official.OfficialType === FIFA_OFFICIAL_TYPE.REFEREE,
+  );
+  if (!referee) return undefined;
+
+  const name =
+    getLocalizedDescription(referee.Name, language) ||
+    getLocalizedDescription(referee.NameShort, language);
+  if (!name) return undefined;
+
+  return {
+    name,
+    country: referee.IdCountry || undefined,
+    fifaOfficialId: referee.OfficialId || undefined,
+  };
+};
+
 export const buildMatchStateEntry = (
   localMatch: Match,
   fifaMatch: FifaCalendarMatch | undefined,
@@ -872,6 +916,7 @@ export const buildMatchStateEntry = (
     matchTime:
       status === "LIVE" && fifaLiveMatch?.MatchTime ? fifaLiveMatch.MatchTime : undefined,
     officialStatus,
+    referee: getRefereeFromFifa(fifaMatch),
     incidents: incidents && incidents.length > 0 ? incidents : undefined,
     source: "fifa",
     note:

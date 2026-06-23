@@ -30,6 +30,7 @@ import { PitchLineup } from "./PitchLineup";
 import { AffiliateProducts } from "./AffiliateProducts";
 import { renderAnalysisWithMentions } from "./PlayerMention";
 import { MatchWeatherChip } from "./MatchWeatherChip";
+import { RefereeChip } from "./RefereeChip";
 import { MatchSpeechToggle } from "./MatchSpeechToggle";
 import { useMatchSpeech } from "../hooks/useMatchSpeech";
 import { useClockTick } from "../hooks/useClockTick";
@@ -671,6 +672,11 @@ export function MatchDetailView({
   const currentOfficialFifaStatus =
     !currentSimulatedState && currentOverlay?.matchState.source === "fifa"
       ? currentOverlay.matchState.officialStatus
+      : undefined;
+  // FIFA-assigned main referee, only when the state is genuinely FIFA-sourced.
+  const currentMatchReferee =
+    !currentSimulatedState && currentOverlay?.matchState.source === "fifa"
+      ? currentOverlay.matchState.referee
       : undefined;
   const currentMatchGroupLabel = getMatchGroupLabel(currentMatch);
   const headerMatchGroups = HEADER_MATCH_STATUS_GROUPS.map(({ status, label }) => ({
@@ -1733,6 +1739,14 @@ export function MatchDetailView({
               {(currentMatch.status === "LIVE" || currentMatch.status === "SUSPENDED") && (
                 <div className="mt-3">
                   <MatchWeatherChip match={currentMatch} theme={theme} />
+                </div>
+              )}
+
+              {/* FIFA-assigned referee, whenever one has been published for the
+                  match (assigned a day or two before kickoff). */}
+              {currentMatchReferee && (
+                <div className="mt-3">
+                  <RefereeChip referee={currentMatchReferee} theme={theme} />
                 </div>
               )}
 
