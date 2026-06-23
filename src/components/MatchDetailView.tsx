@@ -1451,6 +1451,8 @@ export function MatchDetailView({
               className="flex flex-col items-center text-center space-y-2 flex-1 min-w-[200px]"
               id="clock-center-display"
             >
+              {/* Live status + official FIFA status share a single line */}
+              <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1">
               {/* Game state indicator, driven by the current match's status */}
               <div
                 className="flex items-center space-x-1.5"
@@ -1508,6 +1510,7 @@ export function MatchDetailView({
                   <span>{currentOfficialFifaStatus}</span>
                 </div>
               )}
+              </div>
 
               <div
                 className={`font-mono text-[11px] uppercase tracking-wider ${
