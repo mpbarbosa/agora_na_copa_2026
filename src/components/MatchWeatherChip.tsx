@@ -50,16 +50,25 @@ export function MatchWeatherChip({ match, theme }: { match: Match; theme: Theme 
   if (!weather) return null;
 
   const isLight = theme === "classic-light";
+  // Link the chip to the full forecast for this venue on Open-Meteo (our data
+  // source), so tapping the current-weather text opens the weather page.
+  const coords = resolveVenueCoordinates(match);
+  const weatherPageUrl = coords
+    ? `https://open-meteo.com/en/docs?latitude=${coords.lat}&longitude=${coords.lng}`
+    : undefined;
   return (
-    <div
+    <a
       id="match-weather-chip"
-      className={`flex items-center gap-2 rounded-full border px-3 py-1 ${
+      href={weatherPageUrl}
+      target="_blank"
+      rel="noopener noreferrer"
+      className={`flex items-center gap-2 rounded-full border px-3 py-1 transition hover:brightness-110 ${
         isLight
-          ? "border-slate-200 bg-slate-100 text-slate-700"
-          : "border-white/10 bg-white/5 text-slate-100"
+          ? "border-slate-200 bg-slate-100 text-slate-700 hover:bg-slate-200"
+          : "border-white/10 bg-white/5 text-slate-100 hover:bg-white/10"
       }`}
-      title={`Sensação ${weather.apparentC}° • Umidade ${weather.humidity}% • Vento ${weather.windKmh} km/h`}
-      aria-label={`Clima no estádio: ${weather.description}, ${weather.temperatureC} graus`}
+      title={`Ver previsão do tempo do estádio • Sensação ${weather.apparentC}° • Umidade ${weather.humidity}% • Vento ${weather.windKmh} km/h`}
+      aria-label={`Clima no estádio: ${weather.description}, ${weather.temperatureC} graus. Abrir a previsão do tempo.`}
     >
       <span className="text-base leading-none" aria-hidden="true">
         {weather.emoji}
@@ -72,6 +81,9 @@ export function MatchWeatherChip({ match, theme }: { match: Match; theme: Theme 
       >
         {weather.description}
       </span>
-    </div>
+      <span className="text-[10px] leading-none opacity-70" aria-hidden="true">
+        ↗
+      </span>
+    </a>
   );
 }

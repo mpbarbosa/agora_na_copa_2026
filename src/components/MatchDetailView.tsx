@@ -1631,7 +1631,15 @@ export function MatchDetailView({
                 />
               </div>
 
-              {/* HORÁRIO DE BRASÍLIA badge — directly below the team-B flag */}
+              <h2
+                className={`font-anton text-lg tracking-wider uppercase ${
+                  theme === "classic-light" ? "text-slate-800" : "text-white"
+                }`}
+              >
+                {currentMatch.teamB.name}
+              </h2>
+
+              {/* HORÁRIO DE BRASÍLIA badge — directly below the team-B name */}
               {currentMatch.status !== "FINISHED" && (
                 <span
                   className={`flex items-center gap-2 text-xs font-mono tracking-widest font-black uppercase ${
@@ -1644,14 +1652,6 @@ export function MatchDetailView({
                   </span>
                 </span>
               )}
-
-              <h2
-                className={`font-anton text-lg tracking-wider uppercase ${
-                  theme === "classic-light" ? "text-slate-800" : "text-white"
-                }`}
-              >
-                {currentMatch.teamB.name}
-              </h2>
             </div>
           </div>
 
