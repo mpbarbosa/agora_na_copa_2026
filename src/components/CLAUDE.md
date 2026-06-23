@@ -28,6 +28,7 @@ Each maps to one `NAV_ITEMS` entry in `src/navigation.ts` and is mounted by `src
 | `TeamPitchBoard.tsx` | Team-focused pitch board used by `TeamLineupView` |
 | `TeamLineupView.tsx` | Full team lineup panel (690 lines — standalone modal/panel) |
 | `PlayerOverlayCard.tsx` | Overlay card for individual player detail (443 lines) |
+| `PlayerVideoRail.tsx` | Horizontal YouTube video carousel in the player card, keyed by FIFA id from `src/data/playerVideos.json` |
 | `FlagIcon.tsx` | Renders hand-drawn SVG flags from `src/components/flags/` |
 | `InstagramBrandIcon.tsx` | Instagram brand icon SVG |
 

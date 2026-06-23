@@ -5,6 +5,7 @@ import { FlagIcon } from "./FlagIcon";
 import { useEscapeKey } from "../hooks/useEscapeKey";
 import { getPlayerSocialEntries } from "../utils/playerDisplay";
 import { WorldCupNoteCarousel } from "./WorldCupNoteCarousel";
+import { PlayerVideoRail } from "./PlayerVideoRail";
 
 declare global {
   interface Window {
@@ -216,6 +217,7 @@ interface PlayerOverlayCardProps {
     number?: number;
     position?: Position;
     club?: string;
+    fifaId?: string;
     pictureUrl?: string;
     socials?: PlayerSocials;
     instagramPostUrl?: string;
@@ -568,6 +570,16 @@ export function PlayerOverlayCard({
             )}
           </div>
         </div>
+
+        {/* Player video carousel — full-width rail below the two-column body */}
+        <PlayerVideoRail
+          fifaId={player.fifaId}
+          playerName={player.name}
+          isLight={isLight}
+          accent={accent}
+          mutedClasses={mutedClasses}
+          id={id ? `${id}-videos` : undefined}
+        />
       </div>
     </div>
   );
