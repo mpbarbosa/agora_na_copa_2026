@@ -839,7 +839,7 @@ export function MatchDetailView({
   // team-A flag (directly above it, below the status line).
   const renderOverlaySourceLine = () => (
     <div
-      className={`font-mono text-[11px] uppercase tracking-wider ${
+      className={`text-center font-mono text-[11px] uppercase tracking-wider ${
         theme === "classic-light" ? "text-slate-500" : "text-slate-300"
       }`}
     >

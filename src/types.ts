@@ -63,6 +63,8 @@ export interface SquadPlayer {
   instagramPostUrl?: string;
   /** Editorial World Cup performance note ("Leitura") shown on the player card. */
   worldCupNote?: string;
+  /** ISO-8601 timestamp the worldCupNote was last authored/refreshed (the match it covers). Null/absent when none. */
+  worldCupNoteUpdatedAt?: string | null;
   dateOfBirth?: string; // ISO 8601
   height?: number; // cm
 }

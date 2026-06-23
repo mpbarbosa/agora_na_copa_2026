@@ -6,6 +6,8 @@ import { FlagIcon } from "./FlagIcon";
 import { StandingsRulesCard } from "./StandingsRulesCard";
 import { parseNoteSections } from "../utils/noteSections";
 import { formatAnalysisTimestamp } from "../utils/dateFormat";
+import { isAnalysisUpToDate, lastFinishedKickoff } from "../utils/analysisFreshness";
+import { AnalysisFreshnessBadge } from "./AnalysisFreshnessBadge";
 import GROUP_ANALYSIS from "../data/groupAnalysis.json";
 
 interface GroupAnalysisEntry {
@@ -437,6 +439,14 @@ export function StandingsView({
                 const letter = group.match(/Grupo ([A-L])/)?.[1];
                 const analysis = letter ? GROUP_ANALYSIS_BY_LETTER[letter] : undefined;
                 if (!analysis) return null;
+                // Up to date when the analysis was authored at/after the group's
+                // most recent finished match (live-polled statuses).
+                const groupLastFinished = lastFinishedKickoff(
+                  liveMatches.filter(
+                    (m) => groupCodes.has(m.teamA.code) && groupCodes.has(m.teamB.code),
+                  ),
+                );
+                const groupUpToDate = isAnalysisUpToDate(analysis.updatedAt, groupLastFinished);
                 return (
                   <details
                     className={`group mt-4 border-t pt-3 ${rowBorderClasses}`}
@@ -444,9 +454,16 @@ export function StandingsView({
                     data-testid={`group-analysis-${groupSlug(group)}`}
                   >
                     <summary
-                      className={`flex cursor-pointer list-none items-center justify-between font-anton text-sm uppercase tracking-wide ${headingClasses} [&::-webkit-details-marker]:hidden`}
+                      className={`flex cursor-pointer list-none items-center justify-between gap-2 font-anton text-sm uppercase tracking-wide ${headingClasses} [&::-webkit-details-marker]:hidden`}
                     >
-                      <span>Análise do grupo</span>
+                      <span className="flex items-center gap-2">
+                        Análise do grupo
+                        <AnalysisFreshnessBadge
+                          upToDate={groupUpToDate}
+                          theme={theme}
+                          testId={`group-analysis-freshness-${groupSlug(group)}`}
+                        />
+                      </span>
                       <span
                         aria-hidden="true"
                         className={`font-mono text-[10px] transition-transform group-open:rotate-180 ${mutedClasses}`}

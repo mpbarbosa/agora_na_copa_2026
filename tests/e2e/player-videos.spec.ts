@@ -33,6 +33,32 @@ test.describe("Player video carousel (Player Card)", () => {
     await expect(first).toHaveAttribute("rel", /noopener/);
   });
 
+  test("shows note freshness (badge + timestamp) in a star player's card", async ({ page }) => {
+    await page.route("**/api/player-stats/**", async (route) => {
+      await route.fulfill({
+        contentType: "application/json",
+        body: JSON.stringify({ goals: 0, yellowCards: 0, redCards: 0 }),
+      });
+    });
+
+    await page.goto("/");
+    await page.click("#btn-nav-jogadores");
+    await expect(page.locator("#jogadores-view")).toBeVisible();
+
+    // Leo Messi (229397) carries a worldCupNote stamped with worldCupNoteUpdatedAt.
+    await page.click("#jogador-card-229397");
+    const overlay = page.locator("#jogadores-player-overlay");
+    await expect(overlay).toBeVisible();
+
+    const badge = page.getByTestId("jogadores-player-overlay-note-freshness-badge");
+    await expect(badge).toBeVisible();
+    await expect(badge).toHaveAttribute("data-fresh", /^(true|false)$/);
+
+    await expect(
+      page.getByTestId("jogadores-player-overlay-note-freshness-updated"),
+    ).toContainText("Atualizado em");
+  });
+
   test("hides the video rail for a player with no curated videos", async ({ page }) => {
     await page.route("**/api/player-stats/**", async (route) => {
       await route.fulfill({

@@ -6,6 +6,7 @@ import { useEscapeKey } from "../hooks/useEscapeKey";
 import { getPlayerSocialEntries } from "../utils/playerDisplay";
 import { WorldCupNoteCarousel } from "./WorldCupNoteCarousel";
 import { PlayerVideoRail } from "./PlayerVideoRail";
+import { PlayerNoteFreshness } from "./PlayerNoteFreshness";
 
 declare global {
   interface Window {
@@ -510,12 +511,20 @@ export function PlayerOverlayCard({
 
             {/* Editorial World Cup note — swipeable section carousel */}
             {player.worldCupNote && (
-              <WorldCupNoteCarousel
-                note={player.worldCupNote}
-                isLight={isLight}
-                mutedClasses={mutedClasses}
-                id={id ? `${id}-leitura` : undefined}
-              />
+              <>
+                <WorldCupNoteCarousel
+                  note={player.worldCupNote}
+                  isLight={isLight}
+                  mutedClasses={mutedClasses}
+                  id={id ? `${id}-leitura` : undefined}
+                />
+                <PlayerNoteFreshness
+                  fifaId={player.fifaId}
+                  theme={theme}
+                  mutedClasses={mutedClasses}
+                  id={id ? `${id}-note-freshness` : undefined}
+                />
+              </>
             )}
 
             {/* Destaque no Instagram */}

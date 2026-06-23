@@ -29,6 +29,8 @@ Each maps to one `NAV_ITEMS` entry in `src/navigation.ts` and is mounted by `src
 | `TeamLineupView.tsx` | Full team lineup panel (690 lines — standalone modal/panel) |
 | `PlayerOverlayCard.tsx` | Overlay card for individual player detail (443 lines) |
 | `PlayerVideoRail.tsx` | Horizontal YouTube video carousel in the player card, keyed by FIFA id from `src/data/playerVideos.json` |
+| `PlayerNoteFreshness.tsx` | Atualizada/Desatualizada badge + "Atualizado em …" line for a player's `worldCupNote`, vs the team's last finished match (live `/api/match-states` overlay) |
+| `AnalysisFreshnessBadge.tsx` | Shared Atualizada/Desatualizada pill used by the group (StandingsView), team (TeamLineupView) and player analyses |
 | `FlagIcon.tsx` | Renders hand-drawn SVG flags from `src/components/flags/` |
 | `InstagramBrandIcon.tsx` | Instagram brand icon SVG |
 

@@ -28,3 +28,30 @@ export function isAnalysisUpToDate(
 
   return stampTime >= eventTime;
 }
+
+/** The minimal match shape `lastFinishedKickoff` needs. */
+export interface FinishableMatch {
+  status: string;
+  kickoffTimestamp: string;
+}
+
+/**
+ * Returns the kickoff timestamp (ISO-8601) of the most recent FINISHED match in
+ * `matches`, or null when none are finished. Callers pre-filter to the relevant
+ * scope (a single team's fixtures, or one group's). Used as the reference event
+ * for isAnalysisUpToDate on the group and player surfaces.
+ */
+export function lastFinishedKickoff(matches: readonly FinishableMatch[]): string | null {
+  let latest: string | null = null;
+  let latestTime = -Infinity;
+  for (const m of matches) {
+    if (m.status !== "FINISHED") continue;
+    const t = new Date(m.kickoffTimestamp).getTime();
+    if (Number.isNaN(t)) continue;
+    if (t > latestTime) {
+      latestTime = t;
+      latest = m.kickoffTimestamp;
+    }
+  }
+  return latest;
+}

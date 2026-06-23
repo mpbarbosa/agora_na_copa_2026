@@ -197,6 +197,10 @@ test.describe("Standings view (Grupos)", () => {
     await expect(analysis).toContainText("Veredito");
     // The analysis carries an "Atualizado em ..." timestamp.
     await expect(page.getByTestId("group-analysis-updated-grupo-h")).toContainText("Atualizado em");
+    // …and a freshness badge (Atualizada / Desatualizada) relative to the group's last match.
+    const badge = page.getByTestId("group-analysis-freshness-grupo-h");
+    await expect(badge).toBeVisible();
+    await expect(badge).toHaveAttribute("data-fresh", /^(true|false)$/);
     // All 12 groups now carry an editorial analysis.
     await expect(page.locator('[data-testid^="group-analysis-grupo-"]')).toHaveCount(12);
   });
