@@ -1,38 +1,10 @@
 import { useEffect, useState } from "react";
 import type { Match, WeatherSnapshot } from "../types";
-import { stadiums } from "../data/tournament";
+import { resolveVenueCoordinates } from "../utils/venueCoordinates";
 
 type Theme = "classic-light" | "stadium-dark";
 
 const WEATHER_REFRESH_INTERVAL_MS = 10 * 60 * 1000;
-
-/** Uppercases, strips accents and trims, so "FILADÉLFIA" matches "filadelfia". */
-function normalize(value: string): string {
-  return value
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .trim()
-    .toUpperCase();
-}
-
-// A handful of curated match cities don't map 1:1 onto a stadium city.
-const CITY_ALIASES: Record<string, string> = {
-  "AREA DA BAIA DE SAO FRANCISCO": "SANTA CLARA",
-};
-
-/** Resolves a match's venue to stadium coordinates, by city then stadium name. */
-function resolveVenueCoordinates(match: Match): { lat: number; lng: number } | null {
-  const city = normalize(match.city);
-  const aliased = CITY_ALIASES[city] ?? city;
-  const byCity = stadiums.find((s) => normalize(s.city) === aliased);
-  if (byCity) return byCity.coordinates;
-
-  const stadiumName = normalize(match.stadiumName);
-  const byName = stadiums.find(
-    (s) => normalize(s.name) === stadiumName || normalize(s.city) === stadiumName,
-  );
-  return byName ? byName.coordinates : null;
-}
 
 /**
  * Live-match weather chip for the "Ao Vivo" scoreboard: shows the current
