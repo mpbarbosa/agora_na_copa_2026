@@ -1,12 +1,15 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { SpeechManager, isSpeechSupported } from "../utils/speech/speechManager";
 import {
   diffMatchStateToCues,
   phraseCue,
-  cueProsody,
   type MatchSnapshot,
   type TeamNames,
 } from "../utils/matchSpeech";
+import {
+  isSpeechSupported,
+  loadSpeechEngine,
+  type CatasSpeech,
+} from "../utils/speech/catasSpeech";
 
 const STORAGE_KEY = "agora:narracao";
 
@@ -41,14 +44,16 @@ export interface MatchSpeechControls {
 }
 
 /**
- * Narrates the selected live match aloud. Owns the SpeechManager, the persisted
- * on/off preference, and the "seen" baseline so enabling mid-match never replays
- * the backlog. Each time the snapshot's narratable fields change it diffs against
- * the previous snapshot and speaks the resulting cues (goal > period > card/score).
+ * Narrates the selected live match aloud using the catas_altas_speech engine,
+ * loaded from the CDN at runtime (see ../utils/speech/catasSpeech). Owns the
+ * engine instance, the persisted on/off preference, and the "seen" baseline so
+ * enabling mid-match never replays the backlog. Each time the snapshot's
+ * narratable fields change it diffs against the previous snapshot and speaks the
+ * resulting cues (goal > period > card/score).
  *
- * `toggle()` is meant to be called from a click handler: enabling there both
- * primes the audio within the user gesture (required by some browsers) and seeds
- * the baseline.
+ * The engine is preloaded on mount so it (and its pt-BR voices) are warm before
+ * the first tap, and so `toggle()` can speak the confirmation inside the click
+ * gesture — required to unlock audio on mobile browsers.
  */
 export function useMatchSpeech({
   matchId,
@@ -58,7 +63,7 @@ export function useMatchSpeech({
   const supported = isSpeechSupported();
   const [enabled, setEnabled] = useState(() => supported && readPersisted());
 
-  const managerRef = useRef<SpeechManager | null>(null);
+  const managerRef = useRef<CatasSpeech | null>(null);
   const prevRef = useRef<MatchSnapshot | null>(null);
   const snapshotRef = useRef(snapshot);
   const namesRef = useRef(teamNames);
@@ -67,23 +72,28 @@ export function useMatchSpeech({
   namesRef.current = teamNames;
   enabledRef.current = enabled;
 
-  const ensureManager = useCallback((): SpeechManager | null => {
-    if (!supported) return null;
-    if (!managerRef.current) managerRef.current = new SpeechManager();
-    return managerRef.current;
-  }, [supported]);
-
-  // Create the manager eagerly on mount (when supported) so the TTS engine warms
-  // up and voices load BEFORE the first tap. Lazy creation left the engine cold
-  // at the exact moment we try to confirm, and Android Chrome silently drops an
-  // utterance spoken before its voices are ready. Released on unmount.
+  // Preload the engine from the CDN on mount so it's warm before the first tap.
   useEffect(() => {
-    if (supported) ensureManager();
+    if (!supported) return;
+    let active = true;
+    void loadSpeechEngine().then((Ctor) => {
+      if (!active || !Ctor || managerRef.current) return;
+      try {
+        managerRef.current = new Ctor(false);
+      } catch {
+        // engine construction failed — narration silently no-ops
+      }
+    });
     return () => {
-      managerRef.current?.dispose();
+      active = false;
+      try {
+        managerRef.current?.destroy?.();
+      } catch {
+        /* ignore */
+      }
       managerRef.current = null;
     };
-  }, [supported, ensureManager]);
+  }, [supported]);
 
   // Re-seed silently when the selected match changes — never narrate across a
   // match switch.
@@ -109,26 +119,39 @@ export function useMatchSpeech({
     prevRef.current = next;
     if (!prev) return; // baseline seeded — don't replay it
     for (const cue of diffMatchStateToCues(prev, next)) {
-      manager.speak(phraseCue(cue, namesRef.current), cue.priority, cueProsody(cue));
+      manager.speak(phraseCue(cue, namesRef.current), cue.priority);
     }
   }, [signature, enabled, matchId]);
 
   const toggle = useCallback(() => {
     const next = !enabledRef.current;
     persist(next);
-    // Run the side effects SYNCHRONOUSLY inside the click handler. Mobile
-    // browsers (iOS Safari, Android Chrome) only unlock speech when speak() is
-    // called within the user-gesture call stack — doing it inside a deferred
-    // setState updater leaves audio muted on mobile.
     if (next) {
-      const manager = ensureManager();
       prevRef.current = snapshotRef.current; // seed baseline, no backlog replay
-      manager?.speak("Narração ativada.", 0); // confirm + unlock audio in-gesture
+      const manager = managerRef.current;
+      if (manager) {
+        // Speak synchronously inside the gesture to unlock audio on mobile.
+        manager.speak("Narração ativada.", 1);
+      } else {
+        // Engine still loading — load, create, speak (best effort; may miss the
+        // in-gesture unlock the very first time on a cold network).
+        void loadSpeechEngine().then((Ctor) => {
+          if (!Ctor) return;
+          if (!managerRef.current) {
+            try {
+              managerRef.current = new Ctor(false);
+            } catch {
+              return;
+            }
+          }
+          managerRef.current?.speak("Narração ativada.", 1);
+        });
+      }
     } else {
       managerRef.current?.stop();
     }
     setEnabled(next);
-  }, [ensureManager]);
+  }, []);
 
   return { enabled, supported, toggle };
 }

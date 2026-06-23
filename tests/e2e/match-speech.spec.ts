@@ -1,31 +1,34 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
 
-// Records every utterance text into window.__utterances and fires onend so the
-// speech manager's queue drains. Installed before app scripts run.
-async function stubSpeech(page: import("@playwright/test").Page) {
+// A tiny ESM module standing in for the CDN-loaded catas_altas_speech engine.
+// Its SpeechSynthesisManager records spoken text into window.__utterances.
+const CATAS_STUB = `
+  window.__utterances = window.__utterances || [];
+  export class SpeechSynthesisManager {
+    speak(text){ window.__utterances.push(String(text)); }
+    stop(){}
+    destroy(){}
+  }
+  export default SpeechSynthesisManager;
+  export const SPEECH_PRIORITY = { PERIODIC:0, LOGRADOURO:1, BAIRRO:2, FIRST_ADDRESS:2.5, MUNICIPIO:3 };
+`;
+
+async function mockSpeechEngine(page: Page) {
   await page.addInitScript(() => {
     (window as unknown as { __utterances: string[] }).__utterances = [];
-    const synth = {
-      speak: (u: SpeechSynthesisUtterance) => {
-        (window as unknown as { __utterances: string[] }).__utterances.push(String(u.text));
-        if (typeof u.onend === "function") {
-          window.setTimeout(() => (u.onend as () => void)(), 0);
-        }
-      },
-      cancel: () => {},
-      pause: () => {},
-      resume: () => {},
-      // A pt-BR voice so the manager's "wait for voices" guard lets speech through.
-      getVoices: () => [
-        { name: "Google português do Brasil", lang: "pt-BR", localService: false, default: true, voiceURI: "ptbr" },
-      ],
-      onvoiceschanged: null,
-    };
-    Object.defineProperty(window, "speechSynthesis", { configurable: true, get: () => synth });
   });
+  // Intercept the runtime dynamic import of the engine from jsDelivr.
+  await page.route(/catas_altas_speech/, (route) =>
+    route.fulfill({
+      status: 200,
+      headers: { "Access-Control-Allow-Origin": "*" },
+      contentType: "text/javascript",
+      body: CATAS_STUB,
+    }),
+  );
 }
 
-async function stubLiveApis(page: import("@playwright/test").Page) {
+async function stubLiveApis(page: Page) {
   await page.route("**/api/match-overlays", (route) =>
     route.fulfill({
       contentType: "application/json",
@@ -40,12 +43,12 @@ async function stubLiveApis(page: import("@playwright/test").Page) {
   );
 }
 
-const utterances = (page: import("@playwright/test").Page) =>
+const utterances = (page: Page) =>
   page.evaluate(() => (window as unknown as { __utterances: string[] }).__utterances);
 
 test.describe("Live-match speech narration (Ao Vivo)", () => {
   test("narrates a simulated goal when 'Narração' is enabled", async ({ page }) => {
-    await stubSpeech(page);
+    await mockSpeechEngine(page);
     await stubLiveApis(page);
 
     await page.goto("/");
@@ -55,7 +58,7 @@ test.describe("Live-match speech narration (Ao Vivo)", () => {
     const toggle = page.locator("#btn-toggle-narration");
     await expect(toggle).toBeVisible();
     await expect(toggle).toHaveAttribute("aria-pressed", "false");
-    await toggle.click(); // enabling speaks a confirmation within the click gesture
+    await toggle.click(); // enabling speaks a confirmation
     await expect(toggle).toHaveAttribute("aria-pressed", "true");
     await expect.poll(() => utterances(page)).toContain("Narração ativada.");
 
@@ -73,7 +76,7 @@ test.describe("Live-match speech narration (Ao Vivo)", () => {
   });
 
   test("stays silent when 'Narração' is off (default)", async ({ page }) => {
-    await stubSpeech(page);
+    await mockSpeechEngine(page);
     await stubLiveApis(page);
 
     await page.goto("/");
