@@ -149,6 +149,9 @@ export class SpeechManager {
     };
     utterance.onend = done;
     utterance.onerror = done;
+    // Mobile synths can sit in a paused state after backgrounding; resume() is a
+    // no-op when already running, so it's safe to call defensively before speak.
+    this.synth.resume();
     this.synth.speak(utterance);
   }
 

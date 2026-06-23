@@ -62,8 +62,10 @@ export function useMatchSpeech({
   const prevRef = useRef<MatchSnapshot | null>(null);
   const snapshotRef = useRef(snapshot);
   const namesRef = useRef(teamNames);
+  const enabledRef = useRef(enabled);
   snapshotRef.current = snapshot;
   namesRef.current = teamNames;
+  enabledRef.current = enabled;
 
   const ensureManager = useCallback((): SpeechManager | null => {
     if (!supported) return null;
@@ -114,18 +116,20 @@ export function useMatchSpeech({
   }, [signature, enabled, matchId]);
 
   const toggle = useCallback(() => {
-    setEnabled((on) => {
-      const next = !on;
-      persist(next);
-      if (next) {
-        const manager = ensureManager();
-        prevRef.current = snapshotRef.current; // seed at the gesture, no replay
-        manager?.speak("Narração ativada.", 0); // confirm + unlock audio in-gesture
-      } else {
-        managerRef.current?.stop();
-      }
-      return next;
-    });
+    const next = !enabledRef.current;
+    persist(next);
+    // Run the side effects SYNCHRONOUSLY inside the click handler. Mobile
+    // browsers (iOS Safari, Android Chrome) only unlock speech when speak() is
+    // called within the user-gesture call stack — doing it inside a deferred
+    // setState updater leaves audio muted on mobile.
+    if (next) {
+      const manager = ensureManager();
+      prevRef.current = snapshotRef.current; // seed baseline, no backlog replay
+      manager?.speak("Narração ativada.", 0); // confirm + unlock audio in-gesture
+    } else {
+      managerRef.current?.stop();
+    }
+    setEnabled(next);
   }, [ensureManager]);
 
   return { enabled, supported, toggle };
