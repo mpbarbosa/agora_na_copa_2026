@@ -834,6 +834,19 @@ export function MatchDetailView({
     </div>
   );
 
+  // The overlay source/updated line ("FIFA Oficial • Atualizado em …").
+  // Shown in the center column on desktop; on mobile it is relocated above the
+  // team-A flag (directly above it, below the status line).
+  const renderOverlaySourceLine = () => (
+    <div
+      className={`font-mono text-[11px] uppercase tracking-wider ${
+        theme === "classic-light" ? "text-slate-500" : "text-slate-300"
+      }`}
+    >
+      {currentOverlaySourceLabel} • {formatOverlayUpdatedAt(currentOverlayUpdatedAt)}
+    </div>
+  );
+
   const secondsRemaining = getMatchCountdownSeconds(
     currentMatch,
     currentTime,
@@ -1505,9 +1518,11 @@ export function MatchDetailView({
             className="flex flex-col items-center justify-between space-y-6 md:space-y-0 md:flex-row md:space-x-8"
             id="scoreboard-grid"
           >
-            {/* MOBILE ONLY: the pré-jogo/live status line sits above the
-                team-A flag. Desktop keeps it in the center column. */}
+            {/* MOBILE ONLY: the pré-jogo/live status line and the
+                source/updated line sit above the team-A flag. Desktop keeps
+                both in the center column. */}
             <div className="w-full md:hidden">{renderMatchStatusLine(false)}</div>
+            <div className="w-full md:hidden">{renderOverlaySourceLine()}</div>
 
             {/* LEFT TEAM */}
             <div
@@ -1540,15 +1555,10 @@ export function MatchDetailView({
                   the scoreboard grid), so it is shown here only from md up. */}
               <div className="hidden md:block w-full">{renderMatchStatusLine(true)}</div>
 
-              <div
-                className={`font-mono text-[11px] uppercase tracking-wider ${
-                  theme === "classic-light"
-                    ? "text-slate-500"
-                    : "text-slate-300"
-                }`}
-              >
-                {currentOverlaySourceLabel} • {formatOverlayUpdatedAt(currentOverlayUpdatedAt)}
-              </div>
+              {/* Source/updated line. On mobile it is relocated above the
+                  team-A flag (see the scoreboard grid), so it shows here only
+                  from md up. */}
+              <div className="hidden md:block w-full">{renderOverlaySourceLine()}</div>
 
               {/* Main Scoreboard clock time or score line */}
               <div
