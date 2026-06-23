@@ -20,6 +20,7 @@ import { APP_MATCHES } from "../appMatches";
 import MATCH_VIDEOS from "../data/matchVideos.json";
 import MATCH_ANALYSIS from "../data/matchAnalysis.json";
 import { parseNoteSections } from "../utils/noteSections";
+import { resolveVenueTimeZone } from "../utils/venueCoordinates";
 import type { TeamLineupsMap } from "../utils/teamLineup";
 import { FlagIcon } from "./FlagIcon";
 import { PlayerOverlayCard, PlayerPictureOverlay, buildTournamentStatCells, getPlayerAge, formatBirthDate } from "./PlayerOverlayCard";
@@ -39,6 +40,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Zap,
+  Clock,
 } from "lucide-react";
 
 // Header match-selector groups, split by match status
@@ -404,6 +406,15 @@ function formatBrasiliaTime(date: Date) {
   });
 }
 
+function formatTimeInZone(date: Date, timeZone: string) {
+  return date.toLocaleTimeString("pt-BR", {
+    timeZone,
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  });
+}
+
 function formatOverlayUpdatedAt(value: string | undefined) {
   if (!value) {
     return "Atualização pendente";
@@ -754,6 +765,8 @@ export function MatchDetailView({
   );
 
   const currentTime = useClockTick();
+  // Local time at the current match's stadium (its own time zone).
+  const currentStadiumTimeZone = resolveVenueTimeZone(currentMatch);
   const secondsRemaining = getMatchCountdownSeconds(
     currentMatch,
     currentTime,
@@ -1628,6 +1641,24 @@ export function MatchDetailView({
             id="stadium-footer-display"
           >
             <div className="flex flex-col items-center text-sm">
+              {/* Current local time at the stadium, above its location */}
+              {(currentMatch.status === "LIVE" || currentMatch.status === "SUSPENDED") &&
+                currentStadiumTimeZone && (
+                  <div
+                    id="stadium-local-time"
+                    className={`mb-2 flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-wider ${
+                      theme === "classic-light" ? "text-slate-500" : "text-slate-400"
+                    }`}
+                    title="Hora local no estádio"
+                  >
+                    <Clock size={12} aria-hidden="true" />
+                    <span>Horário local</span>
+                    <span className="font-bold tabular-nums text-amber-500">
+                      {formatTimeInZone(currentTime, currentStadiumTimeZone)}
+                    </span>
+                  </div>
+                )}
+
               <div className="flex flex-col sm:flex-row items-center sm:space-x-3">
                 <div className="flex items-center space-x-1 text-amber-500 mb-1 sm:mb-0">
                   <MapPin size={16} className="text-amber-500 animate-bounce" />
