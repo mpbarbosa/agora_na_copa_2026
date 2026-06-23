@@ -1675,20 +1675,6 @@ export function MatchDetailView({
               >
                 {currentMatch.teamB.name}
               </h2>
-
-              {/* HORÁRIO DE BRASÍLIA badge — directly below the team-B name */}
-              {currentMatch.status !== "FINISHED" && (
-                <span
-                  className={`flex items-center gap-2 text-xs font-mono tracking-widest font-black uppercase ${
-                    theme === "classic-light" ? "text-slate-800" : "text-white"
-                  }`}
-                >
-                  <span className={theme === "classic-light" ? "text-slate-800" : "text-white"}>HORÁRIO DE BRASÍLIA</span>
-                  <span className="tabular-nums" id="brasilia-clock">
-                    {formatBrasiliaTime(currentTime)}
-                  </span>
-                </span>
-              )}
             </div>
           </div>
 
@@ -1715,6 +1701,20 @@ export function MatchDetailView({
                     </span>
                   </div>
                 )}
+
+              {/* HORÁRIO DE BRASÍLIA — immediately above the stadium name and location */}
+              {currentMatch.status !== "FINISHED" && (
+                <span
+                  className={`mb-2 flex items-center gap-2 text-xs font-mono tracking-widest font-black uppercase ${
+                    theme === "classic-light" ? "text-slate-800" : "text-white"
+                  }`}
+                >
+                  <span className={theme === "classic-light" ? "text-slate-800" : "text-white"}>HORÁRIO DE BRASÍLIA</span>
+                  <span className="tabular-nums" id="brasilia-clock">
+                    {formatBrasiliaTime(currentTime)}
+                  </span>
+                </span>
+              )}
 
               <div className="flex flex-col sm:flex-row items-center sm:space-x-3">
                 <div className="flex items-center space-x-1 text-amber-500 mb-1 sm:mb-0">
