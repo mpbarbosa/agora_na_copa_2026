@@ -25,8 +25,12 @@ import { resolvePlayerEntry } from "./src/data/playerRegistry";
 import { triviaQuestions } from "./src/data/questions";
 import WIKIPEDIA_COUNTRIES from "./src/data/wikipediaCountries";
 import TEAM_ANALYSIS from "./src/data/teamAnalysis.json";
+import { isAnalysisUpToDate } from "./src/utils/analysisFreshness";
 
-const TEAM_ANALYSIS_BY_CODE = TEAM_ANALYSIS as Record<string, string>;
+const TEAM_ANALYSIS_BY_CODE = TEAM_ANALYSIS as Record<
+  string,
+  { text: string; updatedAt: string | null }
+>;
 import { computeStandings, groupStandings } from "./src/standings";
 import {
   Position,
@@ -1470,6 +1474,15 @@ const buildTeamViewPayload = async (
     aggregatedLeaders.teamLeaders.find((leader) => leader.teamCode === normalizedTeamCode) ??
     null;
 
+  // Editorial team analysis + its freshness relative to the team's last match.
+  // "Up to date" means the analysis was authored at/after the kickoff of the
+  // most recent FINISHED match this team played (see isAnalysisUpToDate).
+  const teamAnalysisEntry = TEAM_ANALYSIS_BY_CODE[normalizedTeamCode] ?? null;
+  const teamAnalysisUpdatedAt = teamAnalysisEntry?.updatedAt ?? null;
+  const teamAnalysisUpToDate = teamAnalysisEntry
+    ? isAnalysisUpToDate(teamAnalysisUpdatedAt, lastMatch?.kickoffTimestamp ?? null)
+    : null;
+
   const updatedAtCandidates = [
     lineup?.updatedAt,
     currentMatch?.updatedAt,
@@ -1502,7 +1515,9 @@ const buildTeamViewPayload = async (
     nextMatch,
     lastMatch,
     matchHistory,
-    teamAnalysis: TEAM_ANALYSIS_BY_CODE[normalizedTeamCode] ?? null,
+    teamAnalysis: teamAnalysisEntry?.text ?? null,
+    teamAnalysisUpdatedAt,
+    teamAnalysisUpToDate,
     lineup,
     leaders: {
       topScorers,

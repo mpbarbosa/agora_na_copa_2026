@@ -156,6 +156,8 @@ async function mockTeamView(page: Page) {
         ],
         teamAnalysis:
           "## Leitura\nSeleção madura e candidata ao título no jogo de teste.\n## Números\nJ1 · 1 vitória · clean sheet.",
+        teamAnalysisUpdatedAt: "2026-06-15T19:00:00.000Z",
+        teamAnalysisUpToDate: true,
         lineup: {
           players: [
             {
@@ -504,6 +506,24 @@ test.describe("Team view", () => {
     await expect(analysis).toContainText("Leitura");
     await expect(analysis).toContainText("candidata ao título");
     await expect(analysis).toContainText("Números");
+  });
+
+  test("flags whether the team analysis is up to date with the last match", async ({ page }) => {
+    await mockTeamView(page);
+
+    await page.goto("/");
+    await page.click("#team-a-display button[aria-label^='Ver escalação']");
+
+    const analysis = page.getByTestId("team-analysis");
+    await expect(analysis).toBeVisible();
+
+    // The mock marks the analysis current → "Atualizada" badge + "Atualizado em …" line.
+    const badge = analysis.getByTestId(/^team-analysis-freshness-/);
+    await expect(badge).toBeVisible();
+    await expect(badge).toHaveAttribute("data-fresh", "true");
+    await expect(badge).toContainText("Atualizada");
+
+    await expect(analysis.getByTestId(/^team-analysis-updated-/)).toContainText("Atualizado em");
   });
 
   test("shows the team's match videos (full game and highlights)", async ({ page }) => {

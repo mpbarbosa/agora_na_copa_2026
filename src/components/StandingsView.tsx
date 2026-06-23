@@ -5,6 +5,7 @@ import { computeStandings, groupStandings, computeQualificationNote, computeCont
 import { FlagIcon } from "./FlagIcon";
 import { StandingsRulesCard } from "./StandingsRulesCard";
 import { parseNoteSections } from "../utils/noteSections";
+import { formatAnalysisTimestamp } from "../utils/dateFormat";
 import GROUP_ANALYSIS from "../data/groupAnalysis.json";
 
 interface GroupAnalysisEntry {
@@ -13,25 +14,6 @@ interface GroupAnalysisEntry {
 }
 
 const GROUP_ANALYSIS_BY_LETTER = GROUP_ANALYSIS as Record<string, GroupAnalysisEntry>;
-
-// "Atualizado em 21/06/2026, 18h50" (Brasília). Returns null for missing/invalid timestamps.
-const formatAnalysisTimestamp = (value: string | undefined): string | null => {
-  if (!value) return null;
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return null;
-  const stamp = date
-    .toLocaleString("pt-BR", {
-      timeZone: "America/Sao_Paulo",
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    })
-    .replace(",", "")
-    .replace(":", "h");
-  return `Atualizado em ${stamp}`;
-};
 
 interface StandingsViewProps {
   matches: Match[];

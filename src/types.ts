@@ -415,6 +415,10 @@ export interface TeamViewResponse {
   matchHistory: TeamViewMatchSummary[];
   /** Editorial team-level analysis ("Análise da seleção"), `## Section` format. Null when none authored. */
   teamAnalysis: string | null;
+  /** ISO-8601 timestamp the analysis was last authored/refreshed. Null when none. */
+  teamAnalysisUpdatedAt: string | null;
+  /** True when the analysis is current with the team's last finished match, false when behind it. Null when no analysis is authored. */
+  teamAnalysisUpToDate: boolean | null;
   lineup: LineupEntry | null;
   leaders: {
     topScorers: TournamentPlayerLeader[];

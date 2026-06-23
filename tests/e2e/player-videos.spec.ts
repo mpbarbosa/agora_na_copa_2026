@@ -45,8 +45,8 @@ test.describe("Player video carousel (Player Card)", () => {
     await page.click("#btn-nav-jogadores");
     await expect(page.locator("#jogadores-view")).toBeVisible();
 
-    // Vinicius Jr (405742) has no entry in playerVideos.json → no rail.
-    await page.click("#jogador-card-405742");
+    // Vozinha (CPV GK, 364752) has no entry in playerVideos.json → no rail.
+    await page.click("#jogador-card-364752");
     await expect(page.locator("#jogadores-player-overlay")).toBeVisible();
     await expect(page.locator("#jogadores-player-overlay-videos")).toHaveCount(0);
   });

@@ -12,6 +12,7 @@ import { TeamPitchBoard } from "./TeamPitchBoard";
 import { PlayerOverlayCard } from "./PlayerOverlayCard";
 import { getPositionLabel } from "../utils/playerDisplay";
 import { parseNoteSections } from "../utils/noteSections";
+import { formatAnalysisTimestamp } from "../utils/dateFormat";
 import { ArrowLeft, ExternalLink } from "lucide-react";
 import MATCH_VIDEOS from "../data/matchVideos.json";
 
@@ -889,9 +890,39 @@ export const TeamLineupView: React.FC<TeamLineupViewProps> = ({ team, theme, onB
                 id="team-view-analysis"
                 data-testid="team-analysis"
               >
-                <h3 className={`font-anton text-xl uppercase tracking-wide ${headingClasses}`}>
-                  Análise da seleção
-                </h3>
+                <div className="flex flex-wrap items-center gap-2">
+                  <h3 className={`font-anton text-xl uppercase tracking-wide ${headingClasses}`}>
+                    Análise da seleção
+                  </h3>
+                  {teamView.teamAnalysisUpToDate !== null &&
+                    (teamView.teamAnalysisUpToDate ? (
+                      <span
+                        data-testid={`team-analysis-freshness-${teamView.team.code.toLowerCase()}`}
+                        data-fresh="true"
+                        className={`rounded-full border px-2 py-0.5 font-mono text-[9px] font-bold uppercase tracking-wider ${
+                          theme === "classic-light"
+                            ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+                            : "border-emerald-400/30 bg-emerald-400/10 text-emerald-300"
+                        }`}
+                        title="A análise reflete o último jogo da seleção"
+                      >
+                        ● Atualizada
+                      </span>
+                    ) : (
+                      <span
+                        data-testid={`team-analysis-freshness-${teamView.team.code.toLowerCase()}`}
+                        data-fresh="false"
+                        className={`rounded-full border px-2 py-0.5 font-mono text-[9px] font-bold uppercase tracking-wider ${
+                          theme === "classic-light"
+                            ? "border-amber-200 bg-amber-50 text-amber-700"
+                            : "border-amber-400/30 bg-amber-400/10 text-amber-300"
+                        }`}
+                        title="A análise está atrás do último jogo da seleção"
+                      >
+                        ● Desatualizada
+                      </span>
+                    ))}
+                </div>
                 <div className="mt-3 space-y-3">
                   {parseNoteSections(teamView.teamAnalysis).map((section) => (
                     <div key={section.label}>
@@ -904,6 +935,14 @@ export const TeamLineupView: React.FC<TeamLineupViewProps> = ({ team, theme, onB
                     </div>
                   ))}
                 </div>
+                {formatAnalysisTimestamp(teamView.teamAnalysisUpdatedAt) && (
+                  <p
+                    className={`mt-3 font-mono text-[9px] uppercase tracking-wider ${mutedClasses}`}
+                    data-testid={`team-analysis-updated-${teamView.team.code.toLowerCase()}`}
+                  >
+                    {formatAnalysisTimestamp(teamView.teamAnalysisUpdatedAt)}
+                  </p>
+                )}
               </section>
             )}
 
