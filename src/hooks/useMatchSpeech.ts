@@ -3,6 +3,7 @@ import { SpeechManager, isSpeechSupported } from "../utils/speech/speechManager"
 import {
   diffMatchStateToCues,
   phraseCue,
+  cueProsody,
   type MatchSnapshot,
   type TeamNames,
 } from "../utils/matchSpeech";
@@ -108,7 +109,7 @@ export function useMatchSpeech({
     prevRef.current = next;
     if (!prev) return; // baseline seeded — don't replay it
     for (const cue of diffMatchStateToCues(prev, next)) {
-      manager.speak(phraseCue(cue, namesRef.current), cue.priority);
+      manager.speak(phraseCue(cue, namesRef.current), cue.priority, cueProsody(cue));
     }
   }, [signature, enabled, matchId]);
 

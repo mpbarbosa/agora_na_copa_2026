@@ -154,6 +154,14 @@ const minutePhrase = (minute?: string) => {
 const scoreline = (score: { a: number; b: number } | undefined, names: TeamNames) =>
   score ? `${names.a} ${score.a} a ${score.b} ${names.b}` : "";
 
+/**
+ * Per-cue prosody for sports narration: a goal gets a small rate+pitch lift for
+ * energy; everything else uses the manager's lively-but-neutral baseline.
+ */
+export function cueProsody(cue: MatchSpeechCue): { rate?: number; pitch?: number } | undefined {
+  return cue.kind === "goal" ? { rate: 1.1, pitch: 1.15 } : undefined;
+}
+
 /** Render a cue into a pt-BR broadcast-voice phrase. */
 export function phraseCue(cue: MatchSpeechCue, names: TeamNames): string {
   switch (cue.kind) {
@@ -173,7 +181,7 @@ export function phraseCue(cue: MatchSpeechCue, names: TeamNames): string {
       return "";
     case "goal": {
       const side = teamName(cue.team, names);
-      const parts = [side ? `Gol do ${side}!` : "Gol!"];
+      const parts = [side ? `Gol! Gol do ${side}!` : "Gol! Gol!"];
       const tail = [cue.scorer, minutePhrase(cue.minute)].filter(Boolean).join(", ");
       if (tail) parts.push(`${tail}.`);
       if (cue.score) parts.push(`${scoreline(cue.score, names)}.`);

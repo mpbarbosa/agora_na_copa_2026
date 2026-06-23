@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import {
   diffMatchStateToCues,
   phraseCue,
+  cueProsody,
   CUE_PRIORITY,
   type MatchSnapshot,
 } from "../src/utils/matchSpeech";
@@ -136,7 +137,7 @@ test("phraseCue renders pt-BR broadcast phrases", () => {
   );
   assert.equal(
     phraseCue({ kind: "goal", team: "A", scorer: "Vinicius", minute: "23'", score: { a: 1, b: 0 }, priority: 3 }, NAMES),
-    "Gol do Brasil! Vinicius, aos 23 minutos. Brasil 1 a 0 Argentina.",
+    "Gol! Gol do Brasil! Vinicius, aos 23 minutos. Brasil 1 a 0 Argentina.",
   );
   assert.equal(
     phraseCue({ kind: "card", card: "RED", team: "B", player: "Romero", minute: "40'", priority: 1 }, NAMES),
@@ -146,4 +147,14 @@ test("phraseCue renders pt-BR broadcast phrases", () => {
     phraseCue({ kind: "score", score: { a: 0, b: 1 }, priority: 1 }, NAMES),
     "Placar atualizado: Brasil 0 a 1 Argentina.",
   );
+});
+
+test("cueProsody lifts rate/pitch for goals only", () => {
+  assert.deepEqual(cueProsody({ kind: "goal", team: "A", score: { a: 1, b: 0 }, priority: 3 }), {
+    rate: 1.1,
+    pitch: 1.15,
+  });
+  assert.equal(cueProsody({ kind: "card", card: "YELLOW", priority: 1 }), undefined);
+  assert.equal(cueProsody({ kind: "period", token: "HALFTIME", priority: 2 }), undefined);
+  assert.equal(cueProsody({ kind: "score", score: { a: 1, b: 1 }, priority: 1 }), undefined);
 });
