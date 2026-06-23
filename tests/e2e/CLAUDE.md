@@ -12,6 +12,7 @@ Playwright end-to-end specs for "Agora na Copa 26". The suite boots the dev serv
 | `leaders.spec.ts` | Tournament leaders (top scorers, yellow/red cards, team stats) | 9.1 KB |
 | `jogadores.spec.ts` | Player list, search filter, player overlay card | 4.0 KB |
 | `player-videos.spec.ts` | Player-card video carousel (`PlayerVideoRail`): renders a YouTube rail for a player with curated videos (Messi), hidden when none | 1.6 KB |
+| `match-speech.spec.ts` | Live-match speech narration ("Narração"): stubs `window.speechSynthesis`, enables the toggle in the clock drawer, drives a simulated goal, asserts a "Gol" utterance; silent when off | 2.6 KB |
 | `teams.spec.ts` | Seleções tab, team cards, flag rendering | 2.6 KB |
 | `player-metadata.spec.ts` | Player dateOfBirth, height display in overlay | 3.1 KB |
 | `venues.spec.ts` | Venue map, stadium cards | 2.5 KB |

@@ -30,6 +30,8 @@ import { PitchLineup } from "./PitchLineup";
 import { AffiliateProducts } from "./AffiliateProducts";
 import { renderAnalysisWithMentions } from "./PlayerMention";
 import { MatchWeatherChip } from "./MatchWeatherChip";
+import { MatchSpeechToggle } from "./MatchSpeechToggle";
+import { useMatchSpeech } from "../hooks/useMatchSpeech";
 import { useClockTick } from "../hooks/useClockTick";
 import {
   MapPin,
@@ -626,6 +628,21 @@ export function MatchDetailView({
   const currentIncidents =
     currentSimulatedState?.incidents || currentOverlay?.matchState.incidents || [];
   const visibleIncidents = [...currentIncidents].reverse();
+
+  // Live-match speech narration (goals, cards, period whistles, score) for the
+  // selected match. Snapshot is in chronological incident order (the diff dedups
+  // by id); the toggle lives in the clock-setup drawer below.
+  const matchSpeech = useMatchSpeech({
+    matchId: currentMatch.id,
+    snapshot: {
+      status: currentMatch.status,
+      officialStatus: currentOverlay?.matchState.officialStatus,
+      score:
+        currentSimulatedState?.score ?? currentOverlay?.matchState.score ?? currentMatch.score,
+      incidents: currentIncidents,
+    },
+    teamNames: { a: currentMatch.teamA.name, b: currentMatch.teamB.name },
+  });
   const shouldScrollIncidents = visibleIncidents.length > 6;
   const hasCurrentMatchScore = Boolean(currentMatch.score);
   const currentMatchScoreText = currentMatch.score
@@ -1372,6 +1389,26 @@ export function MatchDetailView({
               Fechar [X]
             </button>
           </div>
+
+          {/* Live-match speech narration toggle */}
+          {matchSpeech.supported && (
+            <div className="mb-4 flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 dark:border-white/5 pb-3">
+              <div>
+                <p className="font-mono text-xs uppercase tracking-wider text-slate-600 dark:text-slate-300">
+                  Narração dos lances
+                </p>
+                <p className="font-mono text-[10px] text-slate-400">
+                  Fala gols, cartões, início/fim de tempo e placar do jogo ao vivo.
+                </p>
+              </div>
+              <MatchSpeechToggle
+                enabled={matchSpeech.enabled}
+                onToggle={matchSpeech.toggle}
+                theme={theme}
+              />
+            </div>
+          )}
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-mono mb-1 text-slate-600 dark:text-slate-300">
