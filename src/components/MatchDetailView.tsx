@@ -1390,25 +1390,6 @@ export function MatchDetailView({
             </button>
           </div>
 
-          {/* Live-match speech narration toggle */}
-          {matchSpeech.supported && (
-            <div className="mb-4 flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 dark:border-white/5 pb-3">
-              <div>
-                <p className="font-mono text-xs uppercase tracking-wider text-slate-600 dark:text-slate-300">
-                  Narração dos lances
-                </p>
-                <p className="font-mono text-[10px] text-slate-400">
-                  Fala gols, cartões, início/fim de tempo e placar do jogo ao vivo.
-                </p>
-              </div>
-              <MatchSpeechToggle
-                enabled={matchSpeech.enabled}
-                onToggle={matchSpeech.toggle}
-                theme={theme}
-              />
-            </div>
-          )}
-
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-mono mb-1 text-slate-600 dark:text-slate-300">
@@ -1547,6 +1528,17 @@ export function MatchDetailView({
           }`}
           id="live-jumbo-card"
         >
+          {/* Narração — live-match speech toggle, surfaced on the scoreboard */}
+          {matchSpeech.supported && (
+            <div className="mb-4 flex justify-end">
+              <MatchSpeechToggle
+                enabled={matchSpeech.enabled}
+                onToggle={matchSpeech.toggle}
+                theme={theme}
+              />
+            </div>
+          )}
+
           <div
             className="flex flex-col items-center justify-between space-y-6 md:space-y-0 md:flex-row md:space-x-8"
             id="scoreboard-grid"

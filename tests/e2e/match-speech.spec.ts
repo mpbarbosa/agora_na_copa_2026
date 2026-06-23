@@ -47,17 +47,17 @@ test.describe("Live-match speech narration (Ao Vivo)", () => {
 
     await page.goto("/");
     await page.click("#match-selector-chips-finished #btn-match-bra-mar-2026");
-    await page.click("#btn-edit-match");
 
-    // Enabling speaks a confirmation within the click gesture.
+    // The narration toggle lives on the scoreboard (no drawer needed to enable).
     const toggle = page.locator("#btn-toggle-narration");
     await expect(toggle).toBeVisible();
     await expect(toggle).toHaveAttribute("aria-pressed", "false");
-    await toggle.click();
+    await toggle.click(); // enabling speaks a confirmation within the click gesture
     await expect(toggle).toHaveAttribute("aria-pressed", "true");
     await expect.poll(() => utterances(page)).toContain("Narração ativada.");
 
-    // Drive a live goal through the manual simulator.
+    // Drive a live goal through the manual simulator (in the clock drawer).
+    await page.click("#btn-edit-match");
     await page.fill("#input-kickoff-time", "21:00");
     await page.fill("#input-countdown-seconds", "600");
     await page.click("#btn-apply-match-config");

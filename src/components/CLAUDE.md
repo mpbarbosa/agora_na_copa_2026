@@ -31,7 +31,7 @@ Each maps to one `NAV_ITEMS` entry in `src/navigation.ts` and is mounted by `src
 | `PlayerVideoRail.tsx` | Horizontal YouTube video carousel in the player card, keyed by FIFA id from `src/data/playerVideos.json` |
 | `PlayerNoteFreshness.tsx` | Atualizada/Desatualizada badge + "Atualizado em …" line for a player's `worldCupNote`, vs the team's last finished match (live `/api/match-states` overlay) |
 | `AnalysisFreshnessBadge.tsx` | Shared Atualizada/Desatualizada pill used by the group (StandingsView), team (TeamLineupView) and player analyses |
-| `MatchSpeechToggle.tsx` | "Narração" mute/unmute control (in the clock-setup drawer) for live-match speech; driven by the `useMatchSpeech` hook (`src/hooks/`) over `src/utils/matchSpeech.ts` + `src/utils/speech/speechManager.ts` |
+| `MatchSpeechToggle.tsx` | "Narração" mute/unmute control (top of the scoreboard card) for live-match speech; driven by the `useMatchSpeech` hook (`src/hooks/`) over `src/utils/matchSpeech.ts` + `src/utils/speech/speechManager.ts` |
 | `FlagIcon.tsx` | Renders hand-drawn SVG flags from `src/components/flags/` |
 | `InstagramBrandIcon.tsx` | Instagram brand icon SVG |
 
