@@ -33,6 +33,7 @@ import { MatchWeatherChip } from "./MatchWeatherChip";
 import { RefereeChip } from "./RefereeChip";
 import { MatchSpeechToggle } from "./MatchSpeechToggle";
 import { useMatchSpeech } from "../hooks/useMatchSpeech";
+import { runDirectSpeechTest } from "../utils/speech/catasSpeech";
 import { useClockTick } from "../hooks/useClockTick";
 import {
   MapPin,
@@ -589,6 +590,7 @@ export function MatchDetailView({
   );
   // Custom interactive test parameters for custom mock simulations
   const [showConfig, setShowConfig] = useState(false);
+  const [speechTestStatus, setSpeechTestStatus] = useState<string | null>(null);
   // "Mudar Relógio" now lives in the global header; it toggles this match
   // clock-config drawer via a window event (no-op on non-match tabs).
   useEffect(() => {
@@ -1438,19 +1440,30 @@ export function MatchDetailView({
             </dl>
 
             {matchSpeech.supported && (
-              <button
-                type="button"
-                id="btn-test-narration"
-                data-testid="btn-test-narration"
-                onClick={() =>
-                  matchSpeech.speak("Testando a narração. Um, dois, três. Gol do Brasil!")
-                }
-                className="mt-3 inline-flex items-center gap-2 rounded-lg border px-3 py-2 font-mono text-xs font-bold uppercase tracking-wider transition border-[#009c3b]/40 bg-[#009c3b]/10 text-[#007a2f] hover:bg-[#009c3b]/20 dark:border-[#00e476]/30 dark:bg-[#00e476]/10 dark:text-[#00e476] dark:hover:bg-[#00e476]/20"
-                title="Falar uma frase de teste agora"
-              >
-                <Mic size={14} aria-hidden="true" />
-                Testar voz
-              </button>
+              <>
+                <button
+                  type="button"
+                  id="btn-test-narration"
+                  data-testid="btn-test-narration"
+                  onClick={() => {
+                    setSpeechTestStatus("iniciando…");
+                    runDirectSpeechTest(setSpeechTestStatus);
+                  }}
+                  className="mt-3 inline-flex items-center gap-2 rounded-lg border px-3 py-2 font-mono text-xs font-bold uppercase tracking-wider transition border-[#009c3b]/40 bg-[#009c3b]/10 text-[#007a2f] hover:bg-[#009c3b]/20 dark:border-[#00e476]/30 dark:bg-[#00e476]/10 dark:text-[#00e476] dark:hover:bg-[#00e476]/20"
+                  title="Falar uma frase de teste agora (teste direto do dispositivo)"
+                >
+                  <Mic size={14} aria-hidden="true" />
+                  Testar voz
+                </button>
+                {speechTestStatus && (
+                  <p
+                    data-testid="speech-test-result"
+                    className="mt-2 font-mono text-[11px] text-slate-600 dark:text-slate-300"
+                  >
+                    {speechTestStatus}
+                  </p>
+                )}
+              </>
             )}
           </div>
 

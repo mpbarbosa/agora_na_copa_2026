@@ -111,10 +111,34 @@ test.describe("Live-match speech narration (Ao Vivo)", () => {
     await expect(info).toContainText("Status da narração");
     await expect(info).toContainText("Disponível");
     await expect(info).toContainText("Carregado"); // engine loaded from the (mocked) CDN
+  });
 
-    // "Testar voz" speaks a test phrase on demand.
+  test("'Testar voz' runs a direct device speech test and reports the outcome", async ({ page }) => {
+    // Stub the Web Speech API the direct test calls (fires onstart then onend).
+    await page.addInitScript(() => {
+      const synth = {
+        cancel() {},
+        resume() {},
+        pause() {},
+        getVoices: () => [],
+        speak(u: SpeechSynthesisUtterance) {
+          if (typeof u.onstart === "function") window.setTimeout(() => (u.onstart as () => void)(), 0);
+          if (typeof u.onend === "function") window.setTimeout(() => (u.onend as () => void)(), 5);
+        },
+        onvoiceschanged: null,
+      };
+      Object.defineProperty(window, "speechSynthesis", { configurable: true, get: () => synth });
+    });
+    await mockSpeechEngine(page);
+    await stubLiveApis(page);
+
+    await page.goto("/");
+    await page.click("#match-selector-chips-finished #btn-match-bra-mar-2026");
+    await page.click("#btn-edit-match");
+
     await page.getByTestId("btn-test-narration").click();
-    await expect.poll(() => utterances(page).then((l) => l.length)).toBeGreaterThan(0);
+    // Direct test reports its result on screen (here: completed via the stub).
+    await expect(page.getByTestId("speech-test-result")).toContainText("concluído");
   });
 
   test("stays silent when 'Narração' is off (default)", async ({ page }) => {

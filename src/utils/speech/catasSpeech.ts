@@ -31,6 +31,76 @@ export function isSpeechSupported(): boolean {
   );
 }
 
+/**
+ * A direct, instrumented Web Speech test that BYPASSES the catas engine and its
+ * queue. Speaks a fixed phrase with `lang="pt-BR"` and NO forced voice (lets the
+ * device pick its own default — the most reliable path, and it isolates whether
+ * a silent narration is the auto-selected voice vs. the device itself). Reports
+ * each outcome via `onStatus` so the result shows on screen.
+ *
+ * Must be called from a user gesture (a click) to satisfy mobile audio unlock.
+ */
+export function runDirectSpeechTest(onStatus: (status: string) => void): void {
+  if (!isSpeechSupported()) {
+    onStatus("Web Speech indisponível neste navegador.");
+    return;
+  }
+  const synth = window.speechSynthesis;
+  try {
+    synth.cancel();
+  } catch {
+    /* clear any stuck utterance */
+  }
+  try {
+    synth.resume();
+  } catch {
+    /* recover from a paused state (mobile backgrounding) */
+  }
+
+  const utterance = new SpeechSynthesisUtterance(
+    "Testando a narração. Um, dois, três. Gol do Brasil!",
+  );
+  utterance.lang = "pt-BR";
+  utterance.volume = 1;
+  utterance.rate = 1;
+  utterance.pitch = 1;
+
+  let started = false;
+  let finished = false;
+  utterance.onstart = () => {
+    started = true;
+    onStatus("🔊 falando…");
+  };
+  utterance.onend = () => {
+    finished = true;
+    onStatus(
+      started
+        ? "✓ concluído — áudio enviado pelo dispositivo."
+        : "terminou sem áudio — verifique o volume de mídia.",
+    );
+  };
+  utterance.onerror = (event) => {
+    finished = true;
+    onStatus(`erro do dispositivo: ${event.error || "desconhecido"}`);
+  };
+
+  onStatus("enviado ao dispositivo…");
+  try {
+    synth.speak(utterance);
+  } catch (err) {
+    onStatus(`falha ao iniciar: ${String(err)}`);
+    return;
+  }
+
+  window.setTimeout(() => {
+    if (!started && !finished) {
+      onStatus(
+        "sem áudio em 2s — provável volume de mídia baixo ou voz pt-BR não instalada (TTS do Android).",
+      );
+    }
+  }, 2000);
+}
+
 let cached: Promise<CatasSpeechCtor | null> | null = null;
 
 /**
