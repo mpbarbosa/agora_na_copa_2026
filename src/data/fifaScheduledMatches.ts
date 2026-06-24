@@ -89,7 +89,7 @@ export const FIFA_SCHEDULED_MATCHES: FifaScheduledMatchSeed[] = [
   { teamA: "POR", teamB: "COD", kickoffTimestamp: "2026-06-17T14:00:00-03:00", status: "FINISHED", score: { teamA: 1, teamB: 1 }, ...v("POR", "COD") },
   { teamA: "UZB", teamB: "COL", kickoffTimestamp: "2026-06-17T23:00:00-03:00", status: "FINISHED", score: { teamA: 1, teamB: 3 }, ...v("UZB", "COL") },
   { teamA: "POR", teamB: "UZB", kickoffTimestamp: "2026-06-23T14:00:00-03:00", status: "FINISHED", score: { teamA: 5, teamB: 0 }, ...v("POR", "UZB") },
-  { teamA: "COL", teamB: "COD", kickoffTimestamp: "2026-06-23T23:00:00-03:00", status: "PRE_GAME", ...v("COL", "COD") },
+  { teamA: "COL", teamB: "COD", kickoffTimestamp: "2026-06-23T23:00:00-03:00", status: "FINISHED", score: { teamA: 1, teamB: 0 }, ...v("COL", "COD") },
   { teamA: "COL", teamB: "POR", kickoffTimestamp: "2026-06-27T20:30:00-03:00", status: "PRE_GAME", ...v("COL", "POR") },
   { teamA: "COD", teamB: "UZB", kickoffTimestamp: "2026-06-27T20:30:00-03:00", status: "PRE_GAME", ...v("COD", "UZB") },
 
@@ -97,7 +97,7 @@ export const FIFA_SCHEDULED_MATCHES: FifaScheduledMatchSeed[] = [
   { teamA: "ENG", teamB: "CRO", kickoffTimestamp: "2026-06-17T17:00:00-03:00", status: "FINISHED", score: { teamA: 4, teamB: 2 }, ...v("ENG", "CRO") },
   { teamA: "GHA", teamB: "PAN", kickoffTimestamp: "2026-06-17T20:00:00-03:00", status: "FINISHED", score: { teamA: 1, teamB: 0 }, ...v("GHA", "PAN") },
   { teamA: "ENG", teamB: "GHA", kickoffTimestamp: "2026-06-23T17:00:00-03:00", status: "FINISHED", score: { teamA: 0, teamB: 0 }, ...v("ENG", "GHA") },
-  { teamA: "PAN", teamB: "CRO", kickoffTimestamp: "2026-06-23T20:00:00-03:00", status: "PRE_GAME", ...v("PAN", "CRO") },
+  { teamA: "PAN", teamB: "CRO", kickoffTimestamp: "2026-06-23T20:00:00-03:00", status: "FINISHED", score: { teamA: 0, teamB: 1 }, ...v("PAN", "CRO") },
   { teamA: "CRO", teamB: "GHA", kickoffTimestamp: "2026-06-27T18:00:00-03:00", status: "PRE_GAME", ...v("CRO", "GHA") },
   { teamA: "PAN", teamB: "ENG", kickoffTimestamp: "2026-06-27T18:00:00-03:00", status: "PRE_GAME", ...v("PAN", "ENG") },
 ];
