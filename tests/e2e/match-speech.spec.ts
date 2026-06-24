@@ -75,6 +75,29 @@ test.describe("Live-match speech narration (Ao Vivo)", () => {
       .toBe(true);
   });
 
+  test("the per-incident microphone speaks that incident on demand", async ({ page }) => {
+    await mockSpeechEngine(page);
+    await stubLiveApis(page);
+
+    await page.goto("/");
+    await page.click("#match-selector-chips-finished #btn-match-bra-mar-2026");
+
+    // Produce an incident via the simulator (Narração toggle stays OFF).
+    await page.click("#btn-edit-match");
+    await page.fill("#input-kickoff-time", "21:00");
+    await page.fill("#input-countdown-seconds", "600");
+    await page.click("#btn-apply-match-config");
+    await page.click("#btn-sim-start-live");
+    await page.click("#btn-sim-goal-a");
+
+    // Nothing spoken yet (toggle off), then the incident's mic speaks on click.
+    expect(await utterances(page)).toHaveLength(0);
+    const mic = page.getByTestId("incident-speak").first();
+    await expect(mic).toBeVisible();
+    await mic.click();
+    await expect.poll(() => utterances(page).then((l) => l.length)).toBeGreaterThan(0);
+  });
+
   test("stays silent when 'Narração' is off (default)", async ({ page }) => {
     await mockSpeechEngine(page);
     await stubLiveApis(page);

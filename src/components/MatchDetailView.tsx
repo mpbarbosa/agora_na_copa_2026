@@ -44,6 +44,7 @@ import {
   ChevronRight,
   Zap,
   Clock,
+  Mic,
 } from "lucide-react";
 
 // Header match-selector groups, split by match status
@@ -125,6 +126,13 @@ function formatCountryNameForTooltip(name: string) {
       return word.charAt(0).toLocaleUpperCase("pt-BR") + word.slice(1);
     })
     .join(" ");
+}
+
+// pt-BR phrase spoken when the per-incident microphone is tapped, e.g.
+// "Aos 23 minutos. Vinicius marcou." (the incident text is already pt-BR).
+function buildIncidentSpeech(incident: CommentaryEvent): string {
+  const minute = (incident.time || "").replace(/\D/g, "");
+  return `${minute ? `Aos ${minute} minutos. ` : ""}${incident.text}`;
 }
 
 function getIncidentLabel(type: CommentaryEvent["type"]) {
@@ -1631,26 +1639,6 @@ export function MatchDetailView({
                 </button>
               )}
 
-              {/* Countdown Ticking section (Ex: "Faltam: 15:02:03") */}
-              <div
-                className="flex flex-col items-center"
-                id="countdown-sub-wrapper"
-              >
-                {currentMatch.status === "PRE_GAME" && (
-                  <div
-                    className={`font-mono text-xs md:text-sm font-semibold tracking-wider ${
-                      theme === "classic-light"
-                        ? "text-[#009c3b]"
-                        : "text-[#00e476] glowing-text-green"
-                    }`}
-                  >
-                    Faltam:{" "}
-                    <span className="font-bold">
-                      {formatCountdown(secondsRemaining)}
-                    </span>
-                  </div>
-                )}
-              </div>
             </div>
 
             {/* RIGHT TEAM */}
@@ -1699,6 +1687,24 @@ export function MatchDetailView({
                     </span>
                   </div>
                 )}
+
+              {/* Countdown ("Faltam: …") — immediately above the Brasília clock */}
+              <div className="mb-2 flex flex-col items-center" id="countdown-sub-wrapper">
+                {currentMatch.status === "PRE_GAME" && (
+                  <div
+                    className={`font-mono text-xs md:text-sm font-semibold tracking-wider ${
+                      theme === "classic-light"
+                        ? "text-[#009c3b]"
+                        : "text-[#00e476] glowing-text-green"
+                    }`}
+                  >
+                    Faltam:{" "}
+                    <span className="font-bold">
+                      {formatCountdown(secondsRemaining)}
+                    </span>
+                  </div>
+                )}
+              </div>
 
               {/* HORÁRIO DE BRASÍLIA — immediately above the stadium name and location */}
               {currentMatch.status !== "FINISHED" && (
@@ -2053,10 +2059,11 @@ export function MatchDetailView({
                       {visibleIncidents.map((incident) => (
                         <div
                           key={incident.id}
-                          className={`rounded-xl border px-3 py-3 transition ${
+                          className={`flex items-start justify-between gap-2 rounded-xl border px-3 py-3 transition ${
                             getIncidentCardClass(incident.type, theme)
                           }`}
                         >
+                          <div className="min-w-0 flex-1">
                           <div className="flex flex-wrap items-center gap-2">
                             <span
                               className={`font-mono font-black uppercase tracking-wider ${
@@ -2117,6 +2124,23 @@ export function MatchDetailView({
                               }
                             />
                           </p>
+                          </div>
+                          {matchSpeech.supported && (
+                            <button
+                              type="button"
+                              data-testid="incident-speak"
+                              onClick={() => matchSpeech.speak(buildIncidentSpeech(incident))}
+                              aria-label="Ouvir o lance"
+                              title="Ouvir o lance"
+                              className={`mt-0.5 shrink-0 rounded-full border p-2 transition ${
+                                theme === "classic-light"
+                                  ? "border-slate-200 bg-white text-slate-600 hover:bg-slate-100"
+                                  : "border-white/10 bg-white/5 text-slate-200 hover:bg-white/10"
+                              }`}
+                            >
+                              <Mic size={16} aria-hidden="true" />
+                            </button>
+                          )}
                         </div>
                       ))}
                     </div>

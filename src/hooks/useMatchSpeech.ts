@@ -41,6 +41,8 @@ export interface MatchSpeechControls {
   enabled: boolean;
   supported: boolean;
   toggle: () => void;
+  /** Speak an arbitrary phrase on demand (e.g. a tapped incident), regardless of the toggle. */
+  speak: (text: string, priority?: number) => void;
 }
 
 /**
@@ -153,5 +155,28 @@ export function useMatchSpeech({
     setEnabled(next);
   }, []);
 
-  return { enabled, supported, toggle };
+  // On-demand speech (the per-incident microphone). Works regardless of the
+  // Narração toggle; runs inside the click gesture so it unlocks mobile audio.
+  const speak = useCallback((text: string, priority = 3) => {
+    const trimmed = text?.trim();
+    if (!trimmed) return;
+    const manager = managerRef.current;
+    if (manager) {
+      manager.speak(trimmed, priority);
+      return;
+    }
+    void loadSpeechEngine().then((Ctor) => {
+      if (!Ctor) return;
+      if (!managerRef.current) {
+        try {
+          managerRef.current = new Ctor(false);
+        } catch {
+          return;
+        }
+      }
+      managerRef.current?.speak(trimmed, priority);
+    });
+  }, []);
+
+  return { enabled, supported, toggle, speak };
 }
