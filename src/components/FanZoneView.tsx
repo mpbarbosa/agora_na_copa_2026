@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import type { TriviaQuestion } from "../types";
+import { DonationPix } from "./DonationPix";
 
 interface FanZoneViewProps {
   theme: "classic-light" | "stadium-dark";
@@ -397,6 +398,10 @@ export function FanZoneView({ theme }: FanZoneViewProps) {
             )}
           </div>
         </section>
+      </div>
+
+      <div className="mt-5">
+        <DonationPix theme={theme} variant="full" />
       </div>
     </div>
   );
