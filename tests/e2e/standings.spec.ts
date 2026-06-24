@@ -228,4 +228,23 @@ test.describe("Standings view (Grupos)", () => {
       ..."1111".split("").map(() => "false"),
     ]);
   });
+
+  test("shows a compact match-history details below the group analysis", async ({ page }) => {
+    await page.goto("/");
+    await page.click("#btn-nav-grupos");
+    await expect(page.locator("#standings-view")).toBeVisible();
+
+    // Groups with played matches render a "Histórico de jogos" <details>.
+    const history = page.locator('details[data-testid^="group-history-"]').first();
+    await expect(history).toBeVisible();
+    await expect(history.locator("summary")).toContainText("Histórico de jogos");
+
+    // It is a <details> (collapsed by default) and holds at least one match row.
+    expect(await history.evaluate((el) => (el as HTMLDetailsElement).open)).toBe(false);
+    await expect(history.locator('[data-testid^="group-history-row-"]').first()).toBeAttached();
+
+    // It sits after the group analysis within the same card.
+    const card = history.locator("xpath=ancestor::*[starts-with(@id,'standings-group-grupo-')][1]");
+    await expect(card.getByTestId(/^group-analysis-grupo-/)).toBeVisible();
+  });
 });

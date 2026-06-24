@@ -5,6 +5,7 @@ import { computeStandings, groupStandings, computeQualificationNote, computeCont
 import { FlagIcon } from "./FlagIcon";
 import { StandingsRulesCard } from "./StandingsRulesCard";
 import { ThirdPlaceTable } from "./ThirdPlaceTable";
+import { GroupMatchHistory } from "./GroupMatchHistory";
 import { parseNoteSections } from "../utils/noteSections";
 import { formatAnalysisTimestamp } from "../utils/dateFormat";
 import { isAnalysisUpToDate, lastFinishedKickoff } from "../utils/analysisFreshness";
@@ -495,6 +496,15 @@ export function StandingsView({
                   </details>
                 );
               })()}
+
+              <GroupMatchHistory
+                matches={liveMatches.filter(
+                  (m) => groupCodes.has(m.teamA.code) && groupCodes.has(m.teamB.code),
+                )}
+                theme={theme}
+                slug={groupSlug(group)}
+                onSelectTeamLineup={onSelectTeamLineup}
+              />
             </div>
           );
         })}
