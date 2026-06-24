@@ -17,20 +17,20 @@ function shortDate(kickoffTimestamp: string): string {
 }
 
 /**
- * Compact, collapsible history of a group's results — the finished and live
- * matches between the group's teams, in chronological order. Rendered as a
- * `<details>` element directly below "Análise do grupo" in each group card,
- * mirroring that section's markup. Hidden entirely until at least one match has
- * been played (same as the analysis section).
+ * Compact, collapsible list of a group's matches — finished and live results
+ * (with scores) followed by the remaining scheduled fixtures (with kickoff time),
+ * all in chronological order. Rendered as a `<details>` element directly below
+ * "Análise do grupo" in each group card, mirroring that section's markup. Hidden
+ * only when the group has no matches at all.
  */
 export function GroupMatchHistory({ matches, theme, slug, onSelectTeamLineup }: GroupMatchHistoryProps) {
   const isLight = theme === "classic-light";
 
-  const played = matches
-    .filter((m) => m.status === "FINISHED" || m.status === "LIVE")
-    .sort((a, b) => a.kickoffTimestamp.localeCompare(b.kickoffTimestamp));
+  const ordered = [...matches].sort((a, b) =>
+    a.kickoffTimestamp.localeCompare(b.kickoffTimestamp),
+  );
 
-  if (played.length === 0) return null;
+  if (ordered.length === 0) return null;
 
   const headingClasses = isLight ? "text-slate-900" : "text-white";
   const mutedClasses = isLight ? "text-slate-600" : "text-slate-300";
@@ -56,10 +56,9 @@ export function GroupMatchHistory({ matches, theme, slug, onSelectTeamLineup }: 
       </summary>
 
       <ul className="mt-2 space-y-1.5">
-        {played.map((m) => {
+        {ordered.map((m) => {
           const live = m.status === "LIVE";
-          const scoreA = m.score?.teamA ?? 0;
-          const scoreB = m.score?.teamB ?? 0;
+          const hasScore = (m.status === "FINISHED" || m.status === "LIVE") && !!m.score;
           return (
             <li
               key={m.id}
@@ -79,9 +78,18 @@ export function GroupMatchHistory({ matches, theme, slug, onSelectTeamLineup }: 
                 />
               </div>
 
-              <span className={`shrink-0 font-bold tabular-nums ${live ? liveColor : headingClasses}`}>
-                {scoreA}–{scoreB}
-              </span>
+              {hasScore ? (
+                <span className={`shrink-0 font-bold tabular-nums ${live ? liveColor : headingClasses}`}>
+                  {m.score!.teamA}–{m.score!.teamB}
+                </span>
+              ) : (
+                <span
+                  className={`shrink-0 tabular-nums ${mutedClasses}`}
+                  title={`A jogar — ${m.kickoffDate}`}
+                >
+                  {m.kickoffTime}
+                </span>
+              )}
 
               <div className="flex flex-1 items-center gap-1.5 overflow-hidden">
                 <FlagIcon

@@ -234,7 +234,8 @@ test.describe("Standings view (Grupos)", () => {
     await page.click("#btn-nav-grupos");
     await expect(page.locator("#standings-view")).toBeVisible();
 
-    // Groups with played matches render a "Histórico de jogos" <details>.
+    // Every group renders a "Histórico de jogos" <details> (each has fixtures).
+    await expect(page.locator('details[data-testid^="group-history-"]')).toHaveCount(12);
     const history = page.locator('details[data-testid^="group-history-"]').first();
     await expect(history).toBeVisible();
     await expect(history.locator("summary")).toContainText("Histórico de jogos");
