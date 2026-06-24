@@ -439,18 +439,36 @@
     {
       "embedUrl": "https://www.youtube.com/embed/vTnBwT_hN5o",
       "title": "Portugal x Uzbequistão — Copa do Mundo 2026"
+    },
+    {
+      "embedUrl": "https://www.youtube.com/embed/aJva_fZEpRc",
+      "title": "Melhores Momentos: Portugal x Uzbequistão — Copa do Mundo 2026"
     }
   ],
   "eng-gha-2026": [
     {
       "embedUrl": "https://www.youtube.com/embed/f_ry63WszeQ",
       "title": "Inglaterra x Gana — Copa do Mundo 2026"
+    },
+    {
+      "embedUrl": "https://www.youtube.com/embed/wuon0XQBvM0",
+      "title": "Melhores Momentos: Inglaterra x Gana — Copa do Mundo 2026"
     }
   ],
   "col-cod-2026": [
     {
       "embedUrl": "https://www.youtube.com/embed/WUvxr2xCpjQ",
       "title": "Colômbia x RD Congo — Copa do Mundo 2026"
+    },
+    {
+      "embedUrl": "https://www.youtube.com/embed/N0EP6mSFErY",
+      "title": "Melhores Momentos: Colômbia x RD Congo — Copa do Mundo 2026"
+    }
+  ],
+  "pan-cro-2026": [
+    {
+      "embedUrl": "https://www.youtube.com/embed/8o--4qAesow",
+      "title": "Melhores Momentos: Panamá x Croácia — Copa do Mundo 2026"
     }
   ]
 }
