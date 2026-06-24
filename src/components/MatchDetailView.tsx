@@ -1441,13 +1441,37 @@ export function MatchDetailView({
 
             {matchSpeech.supported && (
               <>
+                {matchSpeech.voices.length > 0 && (
+                  <div className="mt-3">
+                    <label
+                      htmlFor="select-narration-voice"
+                      className="block font-mono text-[10px] uppercase tracking-wider text-slate-400 mb-1"
+                    >
+                      Voz (escolha uma que fale no seu aparelho)
+                    </label>
+                    <select
+                      id="select-narration-voice"
+                      data-testid="select-narration-voice"
+                      value={matchSpeech.selectedVoiceUri ?? ""}
+                      onChange={(e) => matchSpeech.selectVoice(e.target.value)}
+                      className="w-full rounded-lg border px-2 py-2 font-mono text-xs border-slate-300 bg-white text-slate-800 dark:border-white/15 dark:bg-black dark:text-white"
+                    >
+                      <option value="">Automática (recomendada)</option>
+                      {matchSpeech.voices.map((v) => (
+                        <option key={v.voiceURI} value={v.voiceURI}>
+                          {v.name} ({v.lang}){v.localService ? "" : " · rede"}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                )}
                 <button
                   type="button"
                   id="btn-test-narration"
                   data-testid="btn-test-narration"
                   onClick={() => {
                     setSpeechTestStatus("iniciando…");
-                    runDirectSpeechTest(setSpeechTestStatus);
+                    runDirectSpeechTest(setSpeechTestStatus, matchSpeech.selectedVoice);
                   }}
                   className="mt-3 inline-flex items-center gap-2 rounded-lg border px-3 py-2 font-mono text-xs font-bold uppercase tracking-wider transition border-[#009c3b]/40 bg-[#009c3b]/10 text-[#007a2f] hover:bg-[#009c3b]/20 dark:border-[#00e476]/30 dark:bg-[#00e476]/10 dark:text-[#00e476] dark:hover:bg-[#00e476]/20"
                   title="Falar uma frase de teste agora (teste direto do dispositivo)"

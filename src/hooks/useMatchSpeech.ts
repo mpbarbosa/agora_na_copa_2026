@@ -8,10 +8,12 @@ import {
 import {
   isSpeechSupported,
   loadSpeechEngine,
+  pickPtBrVoice,
   type CatasSpeech,
 } from "../utils/speech/catasSpeech";
 
 const STORAGE_KEY = "agora:narracao";
+const VOICE_KEY = "agora:narracao:voz";
 
 function readPersisted(): boolean {
   if (typeof window === "undefined") return false;
@@ -28,6 +30,25 @@ function persist(value: boolean): void {
     window.localStorage.setItem(STORAGE_KEY, value ? "1" : "0");
   } catch {
     // ignore (private mode / storage disabled)
+  }
+}
+
+function readVoicePref(): string | null {
+  if (typeof window === "undefined") return null;
+  try {
+    return window.localStorage.getItem(VOICE_KEY);
+  } catch {
+    return null;
+  }
+}
+
+function persistVoice(uri: string | null): void {
+  if (typeof window === "undefined") return;
+  try {
+    if (uri) window.localStorage.setItem(VOICE_KEY, uri);
+    else window.localStorage.removeItem(VOICE_KEY);
+  } catch {
+    /* ignore */
   }
 }
 
@@ -56,6 +77,14 @@ export interface MatchSpeechControls {
   speak: (text: string, priority?: number) => void;
   /** Live diagnostic snapshot for the speech-status readout in the setup drawer. */
   status: MatchSpeechStatus;
+  /** Voices available in the browser (pt-BR first) for the voice picker. */
+  voices: SpeechSynthesisVoice[];
+  /** voiceURI of the user-chosen voice, or null to use the automatic pick. */
+  selectedVoiceUri: string | null;
+  /** The currently chosen voice object (for the direct test), or null. */
+  selectedVoice: SpeechSynthesisVoice | null;
+  /** Choose a voice (""/null = automatic). Applies to narration and the test. */
+  selectVoice: (voiceUri: string) => void;
 }
 
 /**
@@ -78,6 +107,8 @@ export function useMatchSpeech({
   const supported = isSpeechSupported();
   const [enabled, setEnabled] = useState(() => supported && readPersisted());
   const [engineLoaded, setEngineLoaded] = useState(false);
+  const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
+  const [selectedVoiceUri, setSelectedVoiceUri] = useState<string | null>(() => readVoicePref());
 
   const managerRef = useRef<CatasSpeech | null>(null);
   const prevRef = useRef<MatchSnapshot | null>(null);
@@ -114,6 +145,35 @@ export function useMatchSpeech({
       managerRef.current = null;
     };
   }, [supported]);
+
+  // Track available voices for the picker (pt-BR first).
+  useEffect(() => {
+    if (!supported) return;
+    const synth = window.speechSynthesis;
+    const refresh = () => {
+      const list = [...synth.getVoices()];
+      const ptRank = (v: SpeechSynthesisVoice) => {
+        const lang = (v.lang || "").toLowerCase().replace("_", "-");
+        return lang.startsWith("pt-br") ? 0 : lang.startsWith("pt") ? 1 : 2;
+      };
+      list.sort((a, b) => ptRank(a) - ptRank(b) || a.name.localeCompare(b.name));
+      setVoices(list);
+    };
+    refresh();
+    synth.addEventListener?.("voiceschanged", refresh);
+    return () => synth.removeEventListener?.("voiceschanged", refresh);
+  }, [supported]);
+
+  // Apply the chosen voice to the engine once it and the voices are ready —
+  // the persisted pick, else the most reliable pt-BR voice (overriding the
+  // engine's on-device bias, which is silent on some Android phones).
+  useEffect(() => {
+    if (!engineLoaded || voices.length === 0) return;
+    const chosen = selectedVoiceUri
+      ? (voices.find((v) => v.voiceURI === selectedVoiceUri) ?? null)
+      : pickPtBrVoice(voices);
+    if (chosen) managerRef.current?.setVoice?.(chosen);
+  }, [engineLoaded, voices, selectedVoiceUri]);
 
   // Re-seed silently when the selected match changes — never narrate across a
   // match switch.
@@ -196,15 +256,39 @@ export function useMatchSpeech({
     });
   }, []);
 
+  // Choose a voice for narration + the direct test (applies via the effect above).
+  const selectVoice = useCallback((voiceUri: string) => {
+    const uri = voiceUri || null;
+    setSelectedVoiceUri(uri);
+    persistVoice(uri);
+    const all = window.speechSynthesis.getVoices();
+    const chosen = uri ? (all.find((v) => v.voiceURI === uri) ?? null) : pickPtBrVoice(all);
+    managerRef.current?.setVoice?.(chosen);
+  }, []);
+
+  const selectedVoice = selectedVoiceUri
+    ? (voices.find((v) => v.voiceURI === selectedVoiceUri) ?? null)
+    : pickPtBrVoice(voices);
+
   // Live snapshot for the setup-drawer readout. Read off the engine each render;
   // the per-second clock tick in the Ao Vivo view keeps it current as voices load.
   const currentVoice = managerRef.current?.getCurrentVoice?.() ?? null;
   const status: MatchSpeechStatus = {
     supported,
     engineLoaded,
-    voiceName: currentVoice?.name ?? null,
-    voiceLocal: currentVoice?.localService ?? null,
+    voiceName: currentVoice?.name ?? selectedVoice?.name ?? null,
+    voiceLocal: currentVoice?.localService ?? selectedVoice?.localService ?? null,
   };
 
-  return { enabled, supported, toggle, speak, status };
+  return {
+    enabled,
+    supported,
+    toggle,
+    speak,
+    status,
+    voices,
+    selectedVoiceUri,
+    selectedVoice,
+    selectVoice,
+  };
 }

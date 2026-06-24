@@ -14,6 +14,43 @@ export interface CatasSpeech {
   destroy?(): void;
   /** Resolved voice (for the speech-status readout); available once voices load. */
   getCurrentVoice?(): { name?: string; lang?: string; localService?: boolean } | null;
+  /** Override the engine's auto-selected voice (used by the voice picker). */
+  setVoice?(voice: SpeechSynthesisVoice | null): void;
+}
+
+// Voice names that signal a higher-quality neural/cloud engine.
+const NEURAL_VOICE = /google|natural|online|neural|wavenet|premium|enhanced/i;
+
+/**
+ * Picks the most reliable pt-BR voice for narration. Prefers exact pt-BR, then a
+ * neural/network voice (Google / "… Online (Natural)"), and deliberately does
+ * NOT prefer on-device (`localService`) voices — on some Android phones the
+ * on-device pt-BR voice is listed yet produces no audio, while the network
+ * "Google português do Brasil" works. Returns null for an empty list.
+ */
+export function pickPtBrVoice(
+  voices: readonly SpeechSynthesisVoice[],
+): SpeechSynthesisVoice | null {
+  if (voices.length === 0) return null;
+  const norm = (lang: string) => (lang || "").toLowerCase().replace("_", "-");
+  const score = (v: SpeechSynthesisVoice) => {
+    const lang = norm(v.lang);
+    let s = 0;
+    if (lang === "pt-br") s += 100;
+    else if (lang.startsWith("pt")) s += 50;
+    if (NEURAL_VOICE.test(v.name)) s += 20;
+    return s;
+  };
+  let best: SpeechSynthesisVoice | null = null;
+  let bestScore = -1;
+  for (const v of voices) {
+    const s = score(v);
+    if (s > bestScore) {
+      bestScore = s;
+      best = v;
+    }
+  }
+  return bestScore > 0 ? best : voices[0];
 }
 
 export type CatasSpeechCtor = new (enableLogging?: boolean) => CatasSpeech;
@@ -40,7 +77,10 @@ export function isSpeechSupported(): boolean {
  *
  * Must be called from a user gesture (a click) to satisfy mobile audio unlock.
  */
-export function runDirectSpeechTest(onStatus: (status: string) => void): void {
+export function runDirectSpeechTest(
+  onStatus: (status: string) => void,
+  preferredVoice?: SpeechSynthesisVoice | null,
+): void {
   if (!isSpeechSupported()) {
     onStatus("Web Speech indisponível neste navegador.");
     return;
@@ -62,14 +102,8 @@ export function runDirectSpeechTest(onStatus: (status: string) => void): void {
   );
   // Mirror the working guia_js engine EXACTLY: bind a concrete voice object and
   // do NOT set `lang`. On Android, a lang-only utterance with no voice bound is
-  // silent — which is why the previous version produced no audio.
-  const norm = (lang: string) => (lang || "").toLowerCase().replace("_", "-");
-  const voices = synth.getVoices();
-  const voice =
-    voices.find((v) => norm(v.lang) === "pt-br") ??
-    voices.find((v) => norm(v.lang).startsWith("pt")) ??
-    voices[0] ??
-    null;
+  // silent. Use the picker's choice when set, else the most reliable pt-BR voice.
+  const voice = preferredVoice ?? pickPtBrVoice(synth.getVoices());
   if (voice) {
     try {
       utterance.voice = voice;
