@@ -9,6 +9,8 @@ import {
   isSpeechSupported,
   loadSpeechEngine,
   pickPtBrVoice,
+  pickNetworkPtBrVoice,
+  speakDirect,
   type CatasSpeech,
 } from "../utils/speech/catasSpeech";
 
@@ -164,15 +166,20 @@ export function useMatchSpeech({
     return () => synth.removeEventListener?.("voiceschanged", refresh);
   }, [supported]);
 
-  // Apply the chosen voice to the engine once it and the voices are ready —
-  // the persisted pick, else the most reliable pt-BR voice (overriding the
-  // engine's on-device bias, which is silent on some Android phones).
+  // Apply the chosen voice to the engine once it and the voices are ready.
   useEffect(() => {
     if (!engineLoaded || voices.length === 0) return;
-    const chosen = selectedVoiceUri
-      ? (voices.find((v) => v.voiceURI === selectedVoiceUri) ?? null)
-      : pickPtBrVoice(voices);
-    if (chosen) managerRef.current?.setVoice?.(chosen);
+    if (selectedVoiceUri) {
+      const chosen = voices.find((v) => v.voiceURI === selectedVoiceUri) ?? null;
+      if (chosen) managerRef.current?.setVoice?.(chosen);
+      return;
+    }
+    // No explicit pick: only override the engine's own selection when a network/
+    // neural pt-BR voice exists (the upgrade for phones whose on-device voice is
+    // silent). Otherwise defer to the engine's on-device pt-BR pick — the same
+    // voice the proven reference (guia_js) uses successfully.
+    const upgrade = pickNetworkPtBrVoice(voices);
+    if (upgrade) managerRef.current?.setVoice?.(upgrade);
   }, [engineLoaded, voices, selectedVoiceUri]);
 
   // Re-seed silently when the selected match changes — never narrate across a
@@ -213,18 +220,19 @@ export function useMatchSpeech({
         // Speak synchronously inside the gesture to unlock audio on mobile.
         manager.speak("Narração ativada.", 1);
       } else {
-        // Engine still loading — load, create, speak (best effort; may miss the
-        // in-gesture unlock the very first time on a cold network).
+        // Engine still loading from the CDN — awaiting that import here would leave
+        // the tap gesture, and mobile only unlocks audio when speak() runs
+        // synchronously inside the gesture. Unlock + announce now with a DIRECT
+        // utterance (device default voice = most reliable), then warm the engine in
+        // the background for the match cues that follow.
+        speakDirect("Narração ativada.");
         void loadSpeechEngine().then((Ctor) => {
-          if (!Ctor) return;
-          if (!managerRef.current) {
-            try {
-              managerRef.current = new Ctor(false);
-            } catch {
-              return;
-            }
+          if (!Ctor || managerRef.current) return;
+          try {
+            managerRef.current = new Ctor(false);
+          } catch {
+            /* engine construction failed — narration silently no-ops */
           }
-          managerRef.current?.speak("Narração ativada.", 1);
         });
       }
     } else {
@@ -243,16 +251,16 @@ export function useMatchSpeech({
       manager.speak(trimmed, priority);
       return;
     }
+    // Engine not loaded yet — speak directly inside this gesture (which also
+    // unlocks mobile audio), then warm the engine for later cues.
+    speakDirect(trimmed);
     void loadSpeechEngine().then((Ctor) => {
-      if (!Ctor) return;
-      if (!managerRef.current) {
-        try {
-          managerRef.current = new Ctor(false);
-        } catch {
-          return;
-        }
+      if (!Ctor || managerRef.current) return;
+      try {
+        managerRef.current = new Ctor(false);
+      } catch {
+        /* engine construction failed — narration silently no-ops */
       }
-      managerRef.current?.speak(trimmed, priority);
     });
   }, []);
 
@@ -262,13 +270,17 @@ export function useMatchSpeech({
     setSelectedVoiceUri(uri);
     persistVoice(uri);
     const all = window.speechSynthesis.getVoices();
-    const chosen = uri ? (all.find((v) => v.voiceURI === uri) ?? null) : pickPtBrVoice(all);
+    // Clearing the picker reverts to auto: a network/neural pt-BR voice if one
+    // exists, else the best on-device pt-BR (mirroring the engine's own pick).
+    const chosen = uri
+      ? (all.find((v) => v.voiceURI === uri) ?? null)
+      : (pickNetworkPtBrVoice(all) ?? pickPtBrVoice(all));
     managerRef.current?.setVoice?.(chosen);
   }, []);
 
   const selectedVoice = selectedVoiceUri
     ? (voices.find((v) => v.voiceURI === selectedVoiceUri) ?? null)
-    : pickPtBrVoice(voices);
+    : (pickNetworkPtBrVoice(voices) ?? pickPtBrVoice(voices));
 
   // Live snapshot for the setup-drawer readout. Read off the engine each render;
   // the per-second clock tick in the Ao Vivo view keeps it current as voices load.

@@ -21,18 +21,18 @@ export interface CatasSpeech {
 // Voice names that signal a higher-quality neural/cloud engine.
 const NEURAL_VOICE = /google|natural|online|neural|wavenet|premium|enhanced/i;
 
+const norm = (lang: string) => (lang || "").toLowerCase().replace("_", "-");
+
 /**
- * Picks the most reliable pt-BR voice for narration. Prefers exact pt-BR, then a
- * neural/network voice (Google / "… Online (Natural)"), and deliberately does
- * NOT prefer on-device (`localService`) voices — on some Android phones the
- * on-device pt-BR voice is listed yet produces no audio, while the network
- * "Google português do Brasil" works. Returns null for an empty list.
+ * Picks the best pt-BR voice for display / explicit-reset: exact pt-BR over a pt
+ * variant, neural/network breaking ties. Returns null when no Portuguese voice
+ * exists (callers then fall back to the device default rather than forcing a
+ * non-pt voice). For the *automatic* engine override use pickNetworkPtBrVoice.
  */
 export function pickPtBrVoice(
   voices: readonly SpeechSynthesisVoice[],
 ): SpeechSynthesisVoice | null {
   if (voices.length === 0) return null;
-  const norm = (lang: string) => (lang || "").toLowerCase().replace("_", "-");
   const score = (v: SpeechSynthesisVoice) => {
     const lang = norm(v.lang);
     let s = 0;
@@ -50,7 +50,66 @@ export function pickPtBrVoice(
       best = v;
     }
   }
-  return bestScore > 0 ? best : voices[0];
+  return bestScore > 0 ? best : null;
+}
+
+/**
+ * A pt-BR voice worth OVERRIDING the engine's own selection with: a network
+ * (cloud) voice, or one whose name signals a neural/online engine. Returns null
+ * when the only pt-BR voices are plain on-device ones — callers then defer to the
+ * engine's own pick (the on-device pt-BR voice), which is exactly what the proven
+ * reference (guia_js) uses and which is audible on devices whose on-device voice
+ * works. This still upgrades to "Google português do Brasil" on phones where the
+ * on-device voice is listed but silent.
+ */
+export function pickNetworkPtBrVoice(
+  voices: readonly SpeechSynthesisVoice[],
+): SpeechSynthesisVoice | null {
+  let best: SpeechSynthesisVoice | null = null;
+  let bestScore = -1;
+  for (const v of voices) {
+    const lang = norm(v.lang);
+    if (!lang.startsWith("pt")) continue;
+    const isNetwork = v.localService === false; // explicitly a cloud voice
+    const isNeural = NEURAL_VOICE.test(v.name);
+    if (!isNetwork && !isNeural) continue; // plain on-device → leave it to the engine
+    let s = lang === "pt-br" ? 100 : 50;
+    if (isNetwork) s += 20;
+    if (isNeural) s += 10;
+    if (s > bestScore) {
+      bestScore = s;
+      best = v;
+    }
+  }
+  return best;
+}
+
+/**
+ * The simplest possible synchronous Web Speech call. Used to unlock mobile audio
+ * from inside a user gesture and to speak when the catas engine hasn't finished
+ * loading from the CDN yet (awaiting that import would leave the gesture and lose
+ * the unlock). Deliberately NO `cancel()`/`resume()` beforehand — that is the
+ * Android-Chrome bug that silently swallows the utterance. Binds a voice only when
+ * one is given; otherwise the device default, which is the most reliable. No-ops
+ * on unsupported browsers or empty text; never throws.
+ */
+export function speakDirect(text: string, voice?: SpeechSynthesisVoice | null): void {
+  if (!isSpeechSupported()) return;
+  const trimmed = text?.trim();
+  if (!trimmed) return;
+  const utterance = new SpeechSynthesisUtterance(trimmed);
+  if (voice) {
+    try {
+      utterance.voice = voice;
+    } catch {
+      /* some engines reject assigning a voice; carry on with the default */
+    }
+  }
+  try {
+    window.speechSynthesis.speak(utterance);
+  } catch {
+    /* ignore — narration is best-effort */
+  }
 }
 
 export type CatasSpeechCtor = new (enableLogging?: boolean) => CatasSpeech;
