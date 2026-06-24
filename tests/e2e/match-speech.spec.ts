@@ -1,31 +1,31 @@
 import { expect, test, type Page } from "@playwright/test";
 
-// A tiny ESM module standing in for the CDN-loaded catas_altas_speech engine.
-// Its SpeechSynthesisManager records spoken text into window.__utterances.
-const CATAS_STUB = `
-  window.__utterances = window.__utterances || [];
-  export class SpeechSynthesisManager {
-    speak(text){ window.__utterances.push(String(text)); }
-    stop(){}
-    destroy(){}
-  }
-  export default SpeechSynthesisManager;
-  export const SPEECH_PRIORITY = { PERIODIC:0, LOGRADOURO:1, BAIRRO:2, FIRST_ADDRESS:2.5, MUNICIPIO:3 };
-`;
-
-async function mockSpeechEngine(page: Page) {
+// The speech engine is now vendored and bundled (no CDN), so it runs for real in
+// the test. We stub window.speechSynthesis to (a) record each utterance's text into
+// window.__utterances and (b) drive the engine's queue by firing onstart/onend, so
+// queued cues advance exactly as on a real device.
+async function stubSpeechSynthesis(page: Page) {
   await page.addInitScript(() => {
     (window as unknown as { __utterances: string[] }).__utterances = [];
+    const synth = {
+      speaking: false,
+      paused: false,
+      pending: false,
+      cancel() {},
+      resume() {},
+      pause() {},
+      getVoices: () => [] as SpeechSynthesisVoice[],
+      speak(u: SpeechSynthesisUtterance) {
+        (window as unknown as { __utterances: string[] }).__utterances.push(String(u.text));
+        if (typeof u.onstart === "function")
+          window.setTimeout(() => (u.onstart as (e?: unknown) => void)(), 0);
+        if (typeof u.onend === "function")
+          window.setTimeout(() => (u.onend as (e?: unknown) => void)(), 5);
+      },
+      onvoiceschanged: null,
+    };
+    Object.defineProperty(window, "speechSynthesis", { configurable: true, get: () => synth });
   });
-  // Intercept the runtime dynamic import of the engine from jsDelivr.
-  await page.route(/catas_altas_speech/, (route) =>
-    route.fulfill({
-      status: 200,
-      headers: { "Access-Control-Allow-Origin": "*" },
-      contentType: "text/javascript",
-      body: CATAS_STUB,
-    }),
-  );
 }
 
 async function stubLiveApis(page: Page) {
@@ -48,7 +48,7 @@ const utterances = (page: Page) =>
 
 test.describe("Live-match speech narration (Ao Vivo)", () => {
   test("narrates a simulated goal when 'Narração' is enabled", async ({ page }) => {
-    await mockSpeechEngine(page);
+    await stubSpeechSynthesis(page);
     await stubLiveApis(page);
 
     await page.goto("/");
@@ -76,7 +76,7 @@ test.describe("Live-match speech narration (Ao Vivo)", () => {
   });
 
   test("the per-incident microphone speaks that incident on demand", async ({ page }) => {
-    await mockSpeechEngine(page);
+    await stubSpeechSynthesis(page);
     await stubLiveApis(page);
 
     await page.goto("/");
@@ -99,7 +99,7 @@ test.describe("Live-match speech narration (Ao Vivo)", () => {
   });
 
   test("the setup drawer shows the speech status readout", async ({ page }) => {
-    await mockSpeechEngine(page);
+    await stubSpeechSynthesis(page);
     await stubLiveApis(page);
 
     await page.goto("/");
@@ -110,26 +110,12 @@ test.describe("Live-match speech narration (Ao Vivo)", () => {
     await expect(info).toBeVisible();
     await expect(info).toContainText("Status da narração");
     await expect(info).toContainText("Disponível");
-    await expect(info).toContainText("Carregado"); // engine loaded from the (mocked) CDN
+    await expect(info).toContainText("Carregado"); // engine constructed locally (no CDN)
   });
 
   test("'Testar voz' runs a direct device speech test and reports the outcome", async ({ page }) => {
-    // Stub the Web Speech API the direct test calls (fires onstart then onend).
-    await page.addInitScript(() => {
-      const synth = {
-        cancel() {},
-        resume() {},
-        pause() {},
-        getVoices: () => [],
-        speak(u: SpeechSynthesisUtterance) {
-          if (typeof u.onstart === "function") window.setTimeout(() => (u.onstart as () => void)(), 0);
-          if (typeof u.onend === "function") window.setTimeout(() => (u.onend as () => void)(), 5);
-        },
-        onvoiceschanged: null,
-      };
-      Object.defineProperty(window, "speechSynthesis", { configurable: true, get: () => synth });
-    });
-    await mockSpeechEngine(page);
+    // The shared stub fires onstart→onend, so the direct test reports "concluído".
+    await stubSpeechSynthesis(page);
     await stubLiveApis(page);
 
     await page.goto("/");
@@ -142,7 +128,7 @@ test.describe("Live-match speech narration (Ao Vivo)", () => {
   });
 
   test("stays silent when 'Narração' is off (default)", async ({ page }) => {
-    await mockSpeechEngine(page);
+    await stubSpeechSynthesis(page);
     await stubLiveApis(page);
 
     await page.goto("/");

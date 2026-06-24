@@ -1,13 +1,11 @@
-// Loads the proven pt-BR speech engine (catas_altas_speech) from jsDelivr at
-// RUNTIME. The dynamic import is left untouched by Vite (`@vite-ignore` + a
-// non-literal URL), so nothing about the engine ships in agora's bundle or the
-// production filesystem — the browser fetches it from the CDN on demand. Prod
-// only needs network access to jsDelivr.
+// The proven pt-BR speech engine (the guia_js SpeechSynthesisManager), vendored
+// locally under ./engine and imported STATICALLY — it ships in agora's bundle with
+// ZERO runtime network dependency (no jsDelivr). Constructing it is synchronous, so
+// the manager is always ready inside the first tap gesture, which is what mobile
+// browsers require to unlock audio.
+import SpeechSynthesisManager from "./engine/speech/SpeechSynthesisManager.js";
 
-const CATAS_SPEECH_URL =
-  "https://cdn.jsdelivr.net/gh/mpbarbosa/catas_altas_speech@0.1.2/dist/esm/index.js";
-
-/** The slice of the catas_altas_speech SpeechSynthesisManager we use. */
+/** The slice of the vendored SpeechSynthesisManager we use. */
 export interface CatasSpeech {
   speak(text: string, priority?: number): void;
   stop(): void;
@@ -86,9 +84,8 @@ export function pickNetworkPtBrVoice(
 
 /**
  * The simplest possible synchronous Web Speech call. Used to unlock mobile audio
- * from inside a user gesture and to speak when the catas engine hasn't finished
- * loading from the CDN yet (awaiting that import would leave the gesture and lose
- * the unlock). Deliberately NO `cancel()`/`resume()` beforehand — that is the
+ * from inside a user gesture and as the fallback when the vendored engine is
+ * unavailable on a device. Deliberately NO `cancel()`/`resume()` beforehand — that is the
  * Android-Chrome bug that silently swallows the utterance. Binds a voice only when
  * one is given; otherwise the device default, which is the most reliable. No-ops
  * on unsupported browsers or empty text; never throws.
@@ -112,11 +109,6 @@ export function speakDirect(text: string, voice?: SpeechSynthesisVoice | null): 
   }
 }
 
-export type CatasSpeechCtor = new (enableLogging?: boolean) => CatasSpeech;
-
-interface CatasSpeechModule {
-  default: CatasSpeechCtor;
-}
 
 /** True when the browser exposes Web Speech synthesis (the engine's prerequisite). */
 export function isSpeechSupported(): boolean {
@@ -200,21 +192,18 @@ export function runDirectSpeechTest(
   }, 2000);
 }
 
-let cached: Promise<CatasSpeechCtor | null> | null = null;
-
 /**
- * Lazily import the engine constructor from the CDN. Cached across calls;
- * resolves to null (never throws) if the CDN is unreachable, so narration just
- * silently no-ops instead of breaking the page.
+ * Construct the vendored speech engine SYNCHRONOUSLY. Returns null (never throws)
+ * when Web Speech is unavailable or construction fails, so narration just silently
+ * no-ops instead of breaking the page. Because this is synchronous and local, the
+ * manager can be created on mount and is guaranteed ready inside the first tap.
  */
-export function loadSpeechEngine(): Promise<CatasSpeechCtor | null> {
-  if (cached) return cached;
-  if (typeof window === "undefined") return Promise.resolve(null);
-  cached = (import(/* @vite-ignore */ CATAS_SPEECH_URL) as Promise<CatasSpeechModule>)
-    .then((mod) => mod.default ?? null)
-    .catch((err) => {
-      console.warn("Narração: não foi possível carregar o motor de voz (CDN).", err);
-      return null;
-    });
-  return cached;
+export function createSpeechManager(enableLogging = false): CatasSpeech | null {
+  if (!isSpeechSupported()) return null;
+  try {
+    return new SpeechSynthesisManager(enableLogging) as unknown as CatasSpeech;
+  } catch (err) {
+    console.warn("Narração: não foi possível iniciar o motor de voz.", err);
+    return null;
+  }
 }

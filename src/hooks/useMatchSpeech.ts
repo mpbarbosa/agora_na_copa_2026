@@ -7,7 +7,7 @@ import {
 } from "../utils/matchSpeech";
 import {
   isSpeechSupported,
-  loadSpeechEngine,
+  createSpeechManager,
   pickPtBrVoice,
   pickNetworkPtBrVoice,
   speakDirect,
@@ -63,7 +63,7 @@ export interface UseMatchSpeechArgs {
 export interface MatchSpeechStatus {
   /** Browser exposes the Web Speech API. */
   supported: boolean;
-  /** The catas_altas_speech engine has been loaded from the CDN. */
+  /** The vendored speech engine has been constructed and is ready. */
   engineLoaded: boolean;
   /** Resolved pt-BR voice name, or null while voices are still loading. */
   voiceName: string | null;
@@ -90,9 +90,10 @@ export interface MatchSpeechControls {
 }
 
 /**
- * Narrates the selected live match aloud using the catas_altas_speech engine,
- * loaded from the CDN at runtime (see ../utils/speech/catasSpeech). Owns the
- * engine instance, the persisted on/off preference, and the "seen" baseline so
+ * Narrates the selected live match aloud using the vendored SpeechSynthesisManager
+ * engine, constructed synchronously and locally (see ../utils/speech/catasSpeech
+ * and ../utils/speech/engine). Owns the engine instance, the persisted on/off
+ * preference, and the "seen" baseline so
  * enabling mid-match never replays the backlog. Each time the snapshot's
  * narratable fields change it diffs against the previous snapshot and speaks the
  * resulting cues (goal > period > card/score).
@@ -121,30 +122,23 @@ export function useMatchSpeech({
   namesRef.current = teamNames;
   enabledRef.current = enabled;
 
-  // Preload the engine from the CDN on mount so it's warm before the first tap.
+  // Construct the engine SYNCHRONOUSLY on mount (it's vendored locally — no CDN to
+  // await). This guarantees the manager exists before the first tap, so speak()
+  // runs inside the gesture and unlocks mobile audio.
   useEffect(() => {
     if (!supported) return;
-    let active = true;
-    void loadSpeechEngine().then((Ctor) => {
-      if (!active || !Ctor) return;
-      if (!managerRef.current) {
-        try {
-          managerRef.current = new Ctor(false);
-        } catch {
-          // engine construction failed — narration silently no-ops
-          return;
-        }
-      }
-      if (active) setEngineLoaded(true);
-    });
+    if (!managerRef.current) {
+      managerRef.current = createSpeechManager(false);
+    }
+    if (managerRef.current) setEngineLoaded(true);
     return () => {
-      active = false;
       try {
         managerRef.current?.destroy?.();
       } catch {
         /* ignore */
       }
       managerRef.current = null;
+      setEngineLoaded(false);
     };
   }, [supported]);
 
@@ -215,25 +209,14 @@ export function useMatchSpeech({
     persist(next);
     if (next) {
       prevRef.current = snapshotRef.current; // seed baseline, no backlog replay
+      // The engine is created synchronously on mount, so it is normally ready here
+      // and speak() runs inside the gesture (unlocking mobile audio). The direct
+      // fallback only matters if the engine is unavailable on this device.
       const manager = managerRef.current;
       if (manager) {
-        // Speak synchronously inside the gesture to unlock audio on mobile.
         manager.speak("Narração ativada.", 1);
       } else {
-        // Engine still loading from the CDN — awaiting that import here would leave
-        // the tap gesture, and mobile only unlocks audio when speak() runs
-        // synchronously inside the gesture. Unlock + announce now with a DIRECT
-        // utterance (device default voice = most reliable), then warm the engine in
-        // the background for the match cues that follow.
         speakDirect("Narração ativada.");
-        void loadSpeechEngine().then((Ctor) => {
-          if (!Ctor || managerRef.current) return;
-          try {
-            managerRef.current = new Ctor(false);
-          } catch {
-            /* engine construction failed — narration silently no-ops */
-          }
-        });
       }
     } else {
       managerRef.current?.stop();
@@ -247,21 +230,8 @@ export function useMatchSpeech({
     const trimmed = text?.trim();
     if (!trimmed) return;
     const manager = managerRef.current;
-    if (manager) {
-      manager.speak(trimmed, priority);
-      return;
-    }
-    // Engine not loaded yet — speak directly inside this gesture (which also
-    // unlocks mobile audio), then warm the engine for later cues.
-    speakDirect(trimmed);
-    void loadSpeechEngine().then((Ctor) => {
-      if (!Ctor || managerRef.current) return;
-      try {
-        managerRef.current = new Ctor(false);
-      } catch {
-        /* engine construction failed — narration silently no-ops */
-      }
-    });
+    if (manager) manager.speak(trimmed, priority);
+    else speakDirect(trimmed); // engine unavailable on this device — direct best-effort
   }, []);
 
   // Choose a voice for narration + the direct test (applies via the effect above).
