@@ -60,7 +60,23 @@ export function runDirectSpeechTest(onStatus: (status: string) => void): void {
   const utterance = new SpeechSynthesisUtterance(
     "Testando a narração. Um, dois, três. Gol do Brasil!",
   );
-  utterance.lang = "pt-BR";
+  // Mirror the working guia_js engine EXACTLY: bind a concrete voice object and
+  // do NOT set `lang`. On Android, a lang-only utterance with no voice bound is
+  // silent — which is why the previous version produced no audio.
+  const norm = (lang: string) => (lang || "").toLowerCase().replace("_", "-");
+  const voices = synth.getVoices();
+  const voice =
+    voices.find((v) => norm(v.lang) === "pt-br") ??
+    voices.find((v) => norm(v.lang).startsWith("pt")) ??
+    voices[0] ??
+    null;
+  if (voice) {
+    try {
+      utterance.voice = voice;
+    } catch {
+      /* some engines reject assigning a voice; carry on with the default */
+    }
+  }
   utterance.volume = 1;
   utterance.rate = 1;
   utterance.pitch = 1;
@@ -84,7 +100,7 @@ export function runDirectSpeechTest(onStatus: (status: string) => void): void {
     onStatus(`erro do dispositivo: ${event.error || "desconhecido"}`);
   };
 
-  onStatus("enviado ao dispositivo…");
+  onStatus(voice ? `enviado (voz: ${voice.name})…` : "enviado (nenhuma voz disponível)…");
   try {
     synth.speak(utterance);
   } catch (err) {
