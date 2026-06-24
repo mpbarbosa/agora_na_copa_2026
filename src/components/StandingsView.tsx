@@ -245,12 +245,15 @@ export function StandingsView({
           const seedCount = rows.filter((row) => row.dataSource === "seed").length;
           const isFocusedGroup = resolvedFocusGroupSlug === groupSlug(group);
           const groupCodes = new Set(rows.map((r) => r.code));
-          const liveMatch = liveMatches.find(
+          // The final round plays both of a group's matches simultaneously, so a
+          // group can have more than one live match at once — show them all.
+          const liveGroupMatches = liveMatches.filter(
             (m) =>
               m.status === "LIVE" &&
               groupCodes.has(m.teamA.code) &&
               groupCodes.has(m.teamB.code),
           );
+          const hasLive = liveGroupMatches.length > 0;
           const liveColor = theme === "classic-light" ? "text-red-600" : "text-red-400";
 
           return (
@@ -273,7 +276,7 @@ export function StandingsView({
                 >
                   {group}
                 </h3>
-                {liveMatch && (
+                {hasLive && (
                   <span className={`inline-flex items-center gap-1 font-mono text-[9px] uppercase tracking-wider ${liveColor}`}>
                     <span className="inline-block w-1.5 h-1.5 rounded-full animate-pulse bg-current" />
                     Ao Vivo
@@ -281,11 +284,21 @@ export function StandingsView({
                 )}
               </div>
 
-              {liveMatch ? (
-                <p className={`mt-1 mb-3 font-mono text-[10px] uppercase tracking-wider ${liveColor}`}
-                   data-testid={`live-match-${group.toLowerCase().replace(/\s+/g, "-")}`}>
-                  {liveMatch.teamA.code} {liveMatch.score?.teamA ?? 0}–{liveMatch.score?.teamB ?? 0} {liveMatch.teamB.code} · em andamento
-                </p>
+              {hasLive ? (
+                <div
+                  className="mt-1 mb-3 space-y-0.5"
+                  data-testid={`live-match-${groupSlug(group)}`}
+                >
+                  {liveGroupMatches.map((m) => (
+                    <p
+                      key={m.id}
+                      className={`font-mono text-[10px] uppercase tracking-wider ${liveColor}`}
+                      data-testid={`live-match-${m.id}`}
+                    >
+                      {m.teamA.code} {m.score?.teamA ?? 0}–{m.score?.teamB ?? 0} {m.teamB.code} · em andamento
+                    </p>
+                  ))}
+                </div>
               ) : seedCount === rows.length ? (
                 <p className={`mt-1 mb-3 font-mono text-[10px] uppercase tracking-wider ${mutedClasses}`}>
                   Resultados da fase de grupos ainda não disputados

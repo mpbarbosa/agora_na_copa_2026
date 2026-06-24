@@ -58,6 +58,31 @@ test.describe("Tip tour rotation (one guided walkthrough per session)", () => {
     expect(await page.evaluate(() => localStorage.getItem("tip-tour-rotation"))).toBe("3");
   });
 
+  test("group-history tip walks Grupos and opens a group's 'Histórico de jogos'", async ({ page }) => {
+    await page.addInitScript(() => {
+      localStorage.setItem("feature-tour-seen", "1");
+      localStorage.setItem("agora-session-count", "1"); // → becomes 2 on this load
+      localStorage.setItem("tip-tour-rotation", "4"); // pin to the group-history tip
+    });
+    await page.goto("/");
+    await page.click("#btn-consent-accept").catch(() => {});
+
+    const pop = page.locator(".driver-popover");
+    await expect(pop).toBeVisible({ timeout: 6000 });
+    await expect(pop).toContainText("Todos os jogos"); // step 1 — Grupos tab
+
+    await page.click(".driver-popover-next-btn"); // navigates to Grupos, points at the history
+    await expect(page.locator("#standings-view")).toBeVisible();
+    await expect(pop).toContainText("Histórico de jogos", { timeout: 6000 });
+
+    await page.click(".driver-popover-next-btn"); // opens the history details
+    await expect(pop).toContainText("Resultados", { timeout: 6000 });
+    const opened = await page.evaluate(
+      () => (document.getElementById("standings-group-history-grupo-a") as HTMLDetailsElement | null)?.open,
+    );
+    expect(opened).toBe(true);
+  });
+
   test("stays dormant on the very first session", async ({ page }) => {
     await page.addInitScript(() => {
       localStorage.setItem("feature-tour-seen", "1"); // suppress the general tour

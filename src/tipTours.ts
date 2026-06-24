@@ -173,6 +173,51 @@ function startBracketTour(theme: Theme, onEnd?: () => void): void {
   );
 }
 
+/** "Histórico de jogos do grupo" — Grupos → open a group card's match-history details. */
+function startGroupHistoryTour(theme: Theme, onEnd?: () => void): void {
+  const HISTORY = "#standings-group-history-grupo-a";
+  runActionTour(
+    theme,
+    [
+      {
+        element: "#btn-nav-grupos",
+        title: "Todos os jogos do grupo 📅",
+        description:
+          'Resultados e próximos jogos de cada chave ficam no card do grupo. Abra a aba Grupos no "Próximo".',
+        side: "bottom",
+        align: "start",
+        act: () => document.getElementById("btn-nav-grupos")?.click(),
+        waitFor: HISTORY,
+      },
+      {
+        element: HISTORY,
+        title: "Histórico de jogos",
+        description:
+          'Cada grupo tem uma seção "Histórico de jogos". Toque em "Próximo" que eu abro para você.',
+        side: "top",
+        align: "center",
+        act: () => {
+          const details = document.getElementById("standings-group-history-grupo-a");
+          if (details instanceof HTMLDetailsElement) {
+            details.open = true;
+            details.scrollIntoView({ behavior: "smooth", block: "center" });
+          }
+        },
+        waitFor: HISTORY,
+      },
+      {
+        element: HISTORY,
+        title: "Resultados e próximos jogos ✓",
+        description:
+          "Pronto! Os jogos já disputados aparecem com o placar e os próximos com o horário — em ordem, sem sair da tabela.",
+        side: "top",
+        align: "center",
+      },
+    ],
+    onEnd,
+  );
+}
+
 // One self-contained guided walkthrough that can be played per session.
 export interface TipTour {
   id: string;
@@ -187,4 +232,5 @@ export const TIP_TOURS: TipTour[] = [
   { id: "team-lineup", start: startTeamLineupTour },
   { id: "best-thirds", start: startBestThirdsTour },
   { id: "bracket", start: startBracketTour },
+  { id: "group-history", start: startGroupHistoryTour },
 ];

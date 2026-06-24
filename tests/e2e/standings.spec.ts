@@ -229,6 +229,33 @@ test.describe("Standings view (Grupos)", () => {
     ]);
   });
 
+  test("shows both games when a group has two simultaneous live matches", async ({ page }) => {
+    // The final round plays a group's two matches at the same time.
+    await page.route("**/api/match-states", (route) =>
+      route.fulfill({
+        contentType: "application/json",
+        body: JSON.stringify({
+          refreshAfterMs: 60000,
+          states: {
+            "bih-qat-2026": { status: "LIVE", score: { teamA: 1, teamB: 0 } },
+            "sui-can-2026": { status: "LIVE", score: { teamA: 2, teamB: 1 } },
+          },
+        }),
+      }),
+    );
+
+    await page.goto("/");
+    await page.click("#btn-nav-grupos");
+    await expect(page.locator("#standings-view")).toBeVisible();
+
+    const card = page.locator("#standings-group-grupo-b");
+    await expect(card).toContainText("Ao Vivo");
+    // Both live matches render, each on its own line.
+    await expect(card.getByTestId("live-match-bih-qat-2026")).toContainText("BIH 1–0 QAT");
+    await expect(card.getByTestId("live-match-sui-can-2026")).toContainText("SUI 2–1 CAN");
+    await expect(card.getByTestId("live-match-grupo-b").locator("p")).toHaveCount(2);
+  });
+
   test("shows a compact match-history details below the group analysis", async ({ page }) => {
     await page.goto("/");
     await page.click("#btn-nav-grupos");
