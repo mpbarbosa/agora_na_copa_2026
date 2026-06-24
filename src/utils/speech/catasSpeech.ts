@@ -76,7 +76,7 @@ export function runDirectSpeechTest(onStatus: (status: string) => void): void {
     onStatus(
       started
         ? "✓ concluído — áudio enviado pelo dispositivo."
-        : "terminou sem áudio — verifique o volume de mídia.",
+        : "terminou sem áudio — o mecanismo de TTS do Android pode não estar ativo. Configurações → TTS → Ouvir um exemplo (e suba o volume de mídia).",
     );
   };
   utterance.onerror = (event) => {
