@@ -1228,10 +1228,10 @@
           "x": 85,
           "y": 70,
           "club": "Fluminense",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/c9b49c28-0494-4261-bb60-c2848b4e1120/ALEX-SANDRO_335658",
           "socials": {
             "instagram": "https://instagram.com/alxsndro12"
-          },
-          "pictureUrl": "https://digitalhub.fifa.com/transform/c9b49c28-0494-4261-bb60-c2848b4e1120/ALEX-SANDRO_335658"
+          }
         },
         {
           "id": "b6",
@@ -1254,10 +1254,10 @@
           "x": 70,
           "y": 45,
           "club": "Flamengo",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/9f0ecbc1-e1f8-4c5a-a39b-34902fd3cfe7/LEO-PEREIRA_371956",
           "socials": {
             "instagram": "https://instagram.com/leopereira4"
-          },
-          "pictureUrl": "https://digitalhub.fifa.com/transform/9f0ecbc1-e1f8-4c5a-a39b-34902fd3cfe7/LEO-PEREIRA_371956"
+          }
         },
         {
           "id": "b8",
@@ -1319,10 +1319,10 @@
           "x": 15,
           "y": 10,
           "club": "Manchester City",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/2a1d5731-391b-4644-a926-1bc899b86c81/EDERSON_395427",
           "socials": {
             "instagram": "https://instagram.com/ederson93"
-          },
-          "pictureUrl": "https://digitalhub.fifa.com/transform/2a1d5731-391b-4644-a926-1bc899b86c81/EDERSON_395427"
+          }
         },
         {
           "id": "b13",
@@ -1332,10 +1332,10 @@
           "x": 85,
           "y": 10,
           "club": "Arsenal",
+          "pictureUrl": "https://digitalhub.fifa.com/transform/4ef5dbd2-50dc-4def-8ae5-5c9f6fee72c2/GABRIEL-MARTINELLI_430597",
           "socials": {
             "instagram": "https://instagram.com/gabriel.martinelli"
-          },
-          "pictureUrl": "https://digitalhub.fifa.com/transform/4ef5dbd2-50dc-4def-8ae5-5c9f6fee72c2/GABRIEL-MARTINELLI_430597"
+          }
         },
         {
           "id": "b12",
@@ -5725,95 +5725,17 @@
       "secondaryColor": "#ffffff",
       "group": "Grupo J",
       "lineup": [
-        {
-          "id": "aut1",
-          "name": "Schlager",
-          "number": 1,
-          "position": "GK",
-          "x": 50,
-          "y": 88
-        },
-        {
-          "id": "aut16",
-          "name": "Phillip Mwene",
-          "number": 16,
-          "position": "DF",
-          "x": 15,
-          "y": 70
-        },
-        {
-          "id": "aut8",
-          "name": "Alaba",
-          "number": 8,
-          "position": "DF",
-          "x": 38,
-          "y": 75
-        },
-        {
-          "id": "aut3",
-          "name": "Kevin Danso",
-          "number": 3,
-          "position": "DF",
-          "x": 62,
-          "y": 75
-        },
-        {
-          "id": "aut5",
-          "name": "Stefan Posch",
-          "number": 5,
-          "position": "DF",
-          "x": 85,
-          "y": 70
-        },
-        {
-          "id": "aut6",
-          "name": "Nicolas Seiwald",
-          "number": 6,
-          "position": "MF",
-          "x": 35,
-          "y": 48
-        },
-        {
-          "id": "aut4",
-          "name": "Xaver Schlager",
-          "number": 4,
-          "position": "MF",
-          "x": 65,
-          "y": 48
-        },
-        {
-          "id": "aut21",
-          "name": "Patrick Wimmer",
-          "number": 21,
-          "position": "FW",
-          "x": 15,
-          "y": 26
-        },
-        {
-          "id": "aut9",
-          "name": "Sabitzer",
-          "number": 9,
-          "position": "MF",
-          "x": 50,
-          "y": 32
-        },
-        {
-          "id": "aut20",
-          "name": "Laimer",
-          "number": 20,
-          "position": "MF",
-          "x": 85,
-          "y": 26
-        },
-        {
-          "id": "aut7",
-          "name": "Arnautovic",
-          "number": 7,
-          "position": "FW",
-          "x": 50,
-          "y": 12,
-          "captain": true
-        }
+        { "id": "aut1", "name": "Schlager", "number": 1, "position": "GK", "x": 50, "y": 88 },
+        { "id": "aut16", "name": "Phillip Mwene", "number": 16, "position": "DF", "x": 15, "y": 70 },
+        { "id": "aut8", "name": "Alaba", "number": 8, "position": "DF", "x": 38, "y": 75 },
+        { "id": "aut3", "name": "Kevin Danso", "number": 3, "position": "DF", "x": 62, "y": 75 },
+        { "id": "aut5", "name": "Stefan Posch", "number": 5, "position": "DF", "x": 85, "y": 70 },
+        { "id": "aut6", "name": "Nicolas Seiwald", "number": 6, "position": "MF", "x": 35, "y": 48 },
+        { "id": "aut4", "name": "Xaver Schlager", "number": 4, "position": "MF", "x": 65, "y": 48 },
+        { "id": "aut21", "name": "Patrick Wimmer", "number": 21, "position": "FW", "x": 15, "y": 26 },
+        { "id": "aut9", "name": "Sabitzer", "number": 9, "position": "MF", "x": 50, "y": 32 },
+        { "id": "aut20", "name": "Laimer", "number": 20, "position": "MF", "x": 85, "y": 26 },
+        { "id": "aut7", "name": "Arnautovic", "number": 7, "position": "FW", "x": 50, "y": 12, "captain": true }
       ]
     },
     "teamB": {
@@ -5824,95 +5746,17 @@
       "secondaryColor": "#ce1126",
       "group": "Grupo J",
       "lineup": [
-        {
-          "id": "jor1",
-          "name": "Yazeed Abulaila",
-          "number": 1,
-          "position": "GK",
-          "x": 50,
-          "y": 88
-        },
-        {
-          "id": "jor3",
-          "name": "Abdallah Nasib",
-          "number": 3,
-          "position": "DF",
-          "x": 15,
-          "y": 70
-        },
-        {
-          "id": "jor16",
-          "name": "Mohammad Abualnadi",
-          "number": 16,
-          "position": "DF",
-          "x": 38,
-          "y": 75
-        },
-        {
-          "id": "jor5",
-          "name": "Yazan Alarab",
-          "number": 5,
-          "position": "DF",
-          "x": 62,
-          "y": 75
-        },
-        {
-          "id": "jor2",
-          "name": "Mohammad Abuhasheesh",
-          "number": 2,
-          "position": "DF",
-          "x": 85,
-          "y": 70
-        },
-        {
-          "id": "jor6",
-          "name": "Amer Jamous",
-          "number": 6,
-          "position": "MF",
-          "x": 35,
-          "y": 50
-        },
-        {
-          "id": "jor8",
-          "name": "Noor Alrawabdeh",
-          "number": 8,
-          "position": "MF",
-          "x": 50,
-          "y": 52
-        },
-        {
-          "id": "jor21",
-          "name": "Nizar Alrashdan",
-          "number": 21,
-          "position": "MF",
-          "x": 65,
-          "y": 50
-        },
-        {
-          "id": "jor10",
-          "name": "Mousa Altamari",
-          "number": 10,
-          "position": "FW",
-          "x": 85,
-          "y": 25,
-          "captain": true
-        },
-        {
-          "id": "jor7",
-          "name": "Mohammad Abuzraiq",
-          "number": 7,
-          "position": "FW",
-          "x": 15,
-          "y": 25
-        },
-        {
-          "id": "jor9",
-          "name": "Ali Olwan",
-          "number": 9,
-          "position": "FW",
-          "x": 50,
-          "y": 12
-        }
+        { "id": "jor1", "name": "Yazeed Abulaila", "number": 1, "position": "GK", "x": 50, "y": 88 },
+        { "id": "jor3", "name": "Abdallah Nasib", "number": 3, "position": "DF", "x": 15, "y": 70 },
+        { "id": "jor16", "name": "Mohammad Abualnadi", "number": 16, "position": "DF", "x": 38, "y": 75 },
+        { "id": "jor5", "name": "Yazan Alarab", "number": 5, "position": "DF", "x": 62, "y": 75 },
+        { "id": "jor2", "name": "Mohammad Abuhasheesh", "number": 2, "position": "DF", "x": 85, "y": 70 },
+        { "id": "jor6", "name": "Amer Jamous", "number": 6, "position": "MF", "x": 35, "y": 50 },
+        { "id": "jor8", "name": "Noor Alrawabdeh", "number": 8, "position": "MF", "x": 50, "y": 52 },
+        { "id": "jor21", "name": "Nizar Alrashdan", "number": 21, "position": "MF", "x": 65, "y": 50 },
+        { "id": "jor10", "name": "Mousa Altamari", "number": 10, "position": "FW", "x": 85, "y": 25, "captain": true },
+        { "id": "jor7", "name": "Mohammad Abuzraiq", "number": 7, "position": "FW", "x": 15, "y": 25 },
+        { "id": "jor9", "name": "Ali Olwan", "number": 9, "position": "FW", "x": 50, "y": 12 }
       ]
     },
     "stadiumName": "Estádio da Baía de São Francisco",
@@ -5939,95 +5783,17 @@
       "secondaryColor": "#ffffff",
       "group": "Grupo B",
       "lineup": [
-        {
-          "id": "qat22",
-          "name": "Meshaal Barsham",
-          "number": 22,
-          "position": "GK",
-          "x": 50,
-          "y": 88
-        },
-        {
-          "id": "qat14",
-          "name": "Homam Ahmed",
-          "number": 14,
-          "position": "DF",
-          "x": 15,
-          "y": 70
-        },
-        {
-          "id": "qat5",
-          "name": "Jassem Gaber",
-          "number": 5,
-          "position": "DF",
-          "x": 38,
-          "y": 75
-        },
-        {
-          "id": "qat16",
-          "name": "Boualem Khoukhi",
-          "number": 16,
-          "position": "DF",
-          "x": 62,
-          "y": 75
-        },
-        {
-          "id": "qat2",
-          "name": "Pedro Miguel",
-          "number": 2,
-          "position": "DF",
-          "x": 85,
-          "y": 70
-        },
-        {
-          "id": "qat6",
-          "name": "Abdulaziz Hatem",
-          "number": 6,
-          "position": "MF",
-          "x": 35,
-          "y": 50
-        },
-        {
-          "id": "qat23",
-          "name": "A. Madibo",
-          "number": 23,
-          "position": "MF",
-          "x": 50,
-          "y": 52
-        },
-        {
-          "id": "qat12",
-          "name": "Karim Boudiaf",
-          "number": 12,
-          "position": "MF",
-          "x": 65,
-          "y": 50
-        },
-        {
-          "id": "qat11",
-          "name": "Afif",
-          "number": 11,
-          "position": "FW",
-          "x": 85,
-          "y": 25
-        },
-        {
-          "id": "qat10",
-          "name": "Hassan Alhaydos",
-          "number": 10,
-          "position": "FW",
-          "x": 15,
-          "y": 25,
-          "captain": true
-        },
-        {
-          "id": "qat19",
-          "name": "Almoez Ali",
-          "number": 19,
-          "position": "FW",
-          "x": 50,
-          "y": 12
-        }
+        { "id": "qat22", "name": "Meshaal Barsham", "number": 22, "position": "GK", "x": 50, "y": 88 },
+        { "id": "qat14", "name": "Homam Ahmed", "number": 14, "position": "DF", "x": 15, "y": 70 },
+        { "id": "qat5", "name": "Jassem Gaber", "number": 5, "position": "DF", "x": 38, "y": 75 },
+        { "id": "qat16", "name": "Boualem Khoukhi", "number": 16, "position": "DF", "x": 62, "y": 75 },
+        { "id": "qat2", "name": "Pedro Miguel", "number": 2, "position": "DF", "x": 85, "y": 70 },
+        { "id": "qat6", "name": "Abdulaziz Hatem", "number": 6, "position": "MF", "x": 35, "y": 50 },
+        { "id": "qat23", "name": "A. Madibo", "number": 23, "position": "MF", "x": 50, "y": 52 },
+        { "id": "qat12", "name": "Karim Boudiaf", "number": 12, "position": "MF", "x": 65, "y": 50 },
+        { "id": "qat11", "name": "Afif", "number": 11, "position": "FW", "x": 85, "y": 25 },
+        { "id": "qat10", "name": "Hassan Alhaydos", "number": 10, "position": "FW", "x": 15, "y": 25, "captain": true },
+        { "id": "qat19", "name": "Almoez Ali", "number": 19, "position": "FW", "x": 50, "y": 12 }
       ]
     },
     "teamB": {
@@ -6038,95 +5804,17 @@
       "secondaryColor": "#ffffff",
       "group": "Grupo B",
       "lineup": [
-        {
-          "id": "sui1",
-          "name": "Kobel",
-          "number": 1,
-          "position": "GK",
-          "x": 50,
-          "y": 88
-        },
-        {
-          "id": "sui13",
-          "name": "Rodriguez",
-          "number": 13,
-          "position": "DF",
-          "x": 15,
-          "y": 70
-        },
-        {
-          "id": "sui4",
-          "name": "Elvedi",
-          "number": 4,
-          "position": "DF",
-          "x": 38,
-          "y": 75
-        },
-        {
-          "id": "sui5",
-          "name": "Akanji",
-          "number": 5,
-          "position": "DF",
-          "x": 62,
-          "y": 75
-        },
-        {
-          "id": "sui3",
-          "name": "Widmer",
-          "number": 3,
-          "position": "DF",
-          "x": 85,
-          "y": 70
-        },
-        {
-          "id": "sui10",
-          "name": "Xhaka",
-          "number": 10,
-          "position": "MF",
-          "x": 35,
-          "y": 48,
-          "captain": true
-        },
-        {
-          "id": "sui8",
-          "name": "Freuler",
-          "number": 8,
-          "position": "MF",
-          "x": 65,
-          "y": 48
-        },
-        {
-          "id": "sui17",
-          "name": "Vargas",
-          "number": 17,
-          "position": "FW",
-          "x": 15,
-          "y": 26
-        },
-        {
-          "id": "sui20",
-          "name": "Michel Aebischer",
-          "number": 20,
-          "position": "MF",
-          "x": 50,
-          "y": 32
-        },
-        {
-          "id": "sui11",
-          "name": "Ndoye",
-          "number": 11,
-          "position": "FW",
-          "x": 85,
-          "y": 26
-        },
-        {
-          "id": "sui7",
-          "name": "Embolo",
-          "number": 7,
-          "position": "FW",
-          "x": 50,
-          "y": 12
-        }
+        { "id": "sui1", "name": "Kobel", "number": 1, "position": "GK", "x": 50, "y": 88 },
+        { "id": "sui13", "name": "Rodriguez", "number": 13, "position": "DF", "x": 15, "y": 70 },
+        { "id": "sui4", "name": "Elvedi", "number": 4, "position": "DF", "x": 38, "y": 75 },
+        { "id": "sui5", "name": "Akanji", "number": 5, "position": "DF", "x": 62, "y": 75 },
+        { "id": "sui3", "name": "Widmer", "number": 3, "position": "DF", "x": 85, "y": 70 },
+        { "id": "sui10", "name": "Xhaka", "number": 10, "position": "MF", "x": 35, "y": 48, "captain": true },
+        { "id": "sui8", "name": "Freuler", "number": 8, "position": "MF", "x": 65, "y": 48 },
+        { "id": "sui17", "name": "Vargas", "number": 17, "position": "FW", "x": 15, "y": 26 },
+        { "id": "sui20", "name": "Michel Aebischer", "number": 20, "position": "MF", "x": 50, "y": 32 },
+        { "id": "sui11", "name": "Ndoye", "number": 11, "position": "FW", "x": 85, "y": 26 },
+        { "id": "sui7", "name": "Embolo", "number": 7, "position": "FW", "x": 50, "y": 12 }
       ]
     },
     "stadiumName": "Estádio da Baía de São Francisco",
