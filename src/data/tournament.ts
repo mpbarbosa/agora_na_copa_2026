@@ -35,6 +35,8 @@ function team(
     group,
     ...(stats ?? zero),
     dataSource: stats ? "result" : "seed",
+    // Seed rows carry no card data; real fair-play points are summed in computeStandings.
+    fairPlayPoints: 0,
   };
 }
 

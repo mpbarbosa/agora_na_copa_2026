@@ -1,0 +1,576 @@
+{
+  "arg-aut-2026": {
+    "teamA": {
+      "yellow": 2,
+      "secondYellow": 0,
+      "directRed": 0,
+      "yellowAndDirectRed": 0
+    },
+    "teamB": {
+      "yellow": 2,
+      "secondYellow": 0,
+      "directRed": 0,
+      "yellowAndDirectRed": 0
+    }
+  },
+  "aus-tur-2026": {
+    "teamA": {
+      "yellow": 0,
+      "secondYellow": 0,
+      "directRed": 0,
+      "yellowAndDirectRed": 0
+    },
+    "teamB": {
+      "yellow": 1,
+      "secondYellow": 0,
+      "directRed": 0,
+      "yellowAndDirectRed": 0
+    }
+  },
+  "aut-jor-2026": {
+    "teamA": {
+      "yellow": 1,
+      "secondYellow": 0,
+      "directRed": 0,
+      "yellowAndDirectRed": 0
+    },
+    "teamB": {
+      "yellow": 0,
+      "secondYellow": 0,
+      "directRed": 0,
+      "yellowAndDirectRed": 0
+    }
+  },
+  "bel-egy-2026": {
+    "teamA": {
+      "yellow": 2,
+      "secondYellow": 0,
+      "directRed": 0,
+      "yellowAndDirectRed": 0
+    },
+    "teamB": {
+      "yellow": 2,
+      "secondYellow": 0,
+      "directRed": 0,
+      "yellowAndDirectRed": 0
+    }
+  },
+  "bel-irn-2026": {
+    "teamA": {
+      "yellow": 1,
+      "secondYellow": 0,
+      "directRed": 1,
+      "yellowAndDirectRed": 0
+    },
+    "teamB": {
+      "yellow": 1,
+      "secondYellow": 0,
+      "directRed": 0,
+      "yellowAndDirectRed": 0
+    }
+  },
+  "bra-hai-2026": {
+    "teamA": {
+      "yellow": 1,
+      "secondYellow": 0,
+      "directRed": 0,
+      "yellowAndDirectRed": 0
+    },
+    "teamB": {
+      "yellow": 3,
+      "secondYellow": 0,
+      "directRed": 0,
+      "yellowAndDirectRed": 0
+    }
+  },
+  "bra-mar-2026": {
+    "teamA": {
+      "yellow": 2,
+      "secondYellow": 0,
+      "directRed": 0,
+      "yellowAndDirectRed": 0
+    },
+    "teamB": {
+      "yellow": 0,
+      "secondYellow": 0,
+      "directRed": 0,
+      "yellowAndDirectRed": 0
+    }
+  },
+  "can-bih-2026": {
+    "teamA": {
+      "yellow": 2,
+      "secondYellow": 0,
+      "directRed": 0,
+      "yellowAndDirectRed": 0
+    },
+    "teamB": {
+      "yellow": 3,
+      "secondYellow": 0,
+      "directRed": 0,
+      "yellowAndDirectRed": 0
+    }
+  },
+  "can-qat-2026": {
+    "teamA": {
+      "yellow": 1,
+      "secondYellow": 0,
+      "directRed": 0,
+      "yellowAndDirectRed": 0
+    },
+    "teamB": {
+      "yellow": 1,
+      "secondYellow": 0,
+      "directRed": 2,
+      "yellowAndDirectRed": 0
+    }
+  },
+  "civ-ecu-2026": {
+    "teamA": {
+      "yellow": 3,
+      "secondYellow": 0,
+      "directRed": 0,
+      "yellowAndDirectRed": 0
+    },
+    "teamB": {
+      "yellow": 1,
+      "secondYellow": 0,
+      "directRed": 0,
+      "yellowAndDirectRed": 0
+    }
+  },
+  "col-cod-2026": {
+    "teamA": {
+      "yellow": 2,
+      "secondYellow": 0,
+      "directRed": 0,
+      "yellowAndDirectRed": 0
+    },
+    "teamB": {
+      "yellow": 1,
+      "secondYellow": 0,
+      "directRed": 0,
+      "yellowAndDirectRed": 0
+    }
+  },
+  "cze-rsa-2026": {
+    "teamA": {
+      "yellow": 1,
+      "secondYellow": 0,
+      "directRed": 0,
+      "yellowAndDirectRed": 0
+    },
+    "teamB": {
+      "yellow": 2,
+      "secondYellow": 0,
+      "directRed": 0,
+      "yellowAndDirectRed": 0
+    }
+  },
+  "ecu-cuw-2026": {
+    "teamA": {
+      "yellow": 1,
+      "secondYellow": 0,
+      "directRed": 0,
+      "yellowAndDirectRed": 0
+    },
+    "teamB": {
+      "yellow": 5,
+      "secondYellow": 0,
+      "directRed": 0,
+      "yellowAndDirectRed": 0
+    }
+  },
+  "eng-gha-2026": {
+    "teamA": {
+      "yellow": 1,
+      "secondYellow": 0,
+      "directRed": 0,
+      "yellowAndDirectRed": 0
+    },
+    "teamB": {
+      "yellow": 1,
+      "secondYellow": 0,
+      "directRed": 0,
+      "yellowAndDirectRed": 0
+    }
+  },
+  "esp-cpv-2026": {
+    "teamA": {
+      "yellow": 1,
+      "secondYellow": 0,
+      "directRed": 0,
+      "yellowAndDirectRed": 0
+    },
+    "teamB": {
+      "yellow": 1,
+      "secondYellow": 0,
+      "directRed": 0,
+      "yellowAndDirectRed": 0
+    }
+  },
+  "esp-ksa-2026": {
+    "teamA": {
+      "yellow": 0,
+      "secondYellow": 0,
+      "directRed": 0,
+      "yellowAndDirectRed": 0
+    },
+    "teamB": {
+      "yellow": 2,
+      "secondYellow": 0,
+      "directRed": 0,
+      "yellowAndDirectRed": 0
+    }
+  },
+  "fra-irq-2026": {
+    "teamA": {
+      "yellow": 0,
+      "secondYellow": 0,
+      "directRed": 0,
+      "yellowAndDirectRed": 0
+    },
+    "teamB": {
+      "yellow": 1,
+      "secondYellow": 0,
+      "directRed": 0,
+      "yellowAndDirectRed": 0
+    }
+  },
+  "gha-pan-2026": {
+    "teamA": {
+      "yellow": 1,
+      "secondYellow": 0,
+      "directRed": 0,
+      "yellowAndDirectRed": 0
+    },
+    "teamB": {
+      "yellow": 2,
+      "secondYellow": 0,
+      "directRed": 0,
+      "yellowAndDirectRed": 0
+    }
+  },
+  "hai-sco-2026": {
+    "teamA": {
+      "yellow": 1,
+      "secondYellow": 0,
+      "directRed": 0,
+      "yellowAndDirectRed": 0
+    },
+    "teamB": {
+      "yellow": 3,
+      "secondYellow": 0,
+      "directRed": 0,
+      "yellowAndDirectRed": 0
+    }
+  },
+  "irn-nzl-2026": {
+    "teamA": {
+      "yellow": 1,
+      "secondYellow": 0,
+      "directRed": 0,
+      "yellowAndDirectRed": 0
+    },
+    "teamB": {
+      "yellow": 0,
+      "secondYellow": 0,
+      "directRed": 0,
+      "yellowAndDirectRed": 0
+    }
+  },
+  "irq-nor-2026": {
+    "teamA": {
+      "yellow": 1,
+      "secondYellow": 0,
+      "directRed": 0,
+      "yellowAndDirectRed": 0
+    },
+    "teamB": {
+      "yellow": 0,
+      "secondYellow": 0,
+      "directRed": 0,
+      "yellowAndDirectRed": 0
+    }
+  },
+  "jor-alg-2026": {
+    "teamA": {
+      "yellow": 1,
+      "secondYellow": 0,
+      "directRed": 0,
+      "yellowAndDirectRed": 0
+    },
+    "teamB": {
+      "yellow": 1,
+      "secondYellow": 0,
+      "directRed": 0,
+      "yellowAndDirectRed": 0
+    }
+  },
+  "kor-cze-2026": {
+    "teamA": {
+      "yellow": 1,
+      "secondYellow": 0,
+      "directRed": 0,
+      "yellowAndDirectRed": 0
+    },
+    "teamB": {
+      "yellow": 0,
+      "secondYellow": 0,
+      "directRed": 0,
+      "yellowAndDirectRed": 0
+    }
+  },
+  "ksa-uru-2026": {
+    "teamA": {
+      "yellow": 1,
+      "secondYellow": 0,
+      "directRed": 0,
+      "yellowAndDirectRed": 0
+    },
+    "teamB": {
+      "yellow": 0,
+      "secondYellow": 0,
+      "directRed": 0,
+      "yellowAndDirectRed": 0
+    }
+  },
+  "mex-kor-2026": {
+    "teamA": {
+      "yellow": 0,
+      "secondYellow": 0,
+      "directRed": 0,
+      "yellowAndDirectRed": 0
+    },
+    "teamB": {
+      "yellow": 2,
+      "secondYellow": 0,
+      "directRed": 0,
+      "yellowAndDirectRed": 0
+    }
+  },
+  "mex-rsa-2026": {
+    "teamA": {
+      "yellow": 1,
+      "secondYellow": 0,
+      "directRed": 1,
+      "yellowAndDirectRed": 0
+    },
+    "teamB": {
+      "yellow": 2,
+      "secondYellow": 0,
+      "directRed": 2,
+      "yellowAndDirectRed": 0
+    }
+  },
+  "ned-jpn-2026": {
+    "teamA": {
+      "yellow": 3,
+      "secondYellow": 0,
+      "directRed": 0,
+      "yellowAndDirectRed": 0
+    },
+    "teamB": {
+      "yellow": 0,
+      "secondYellow": 0,
+      "directRed": 0,
+      "yellowAndDirectRed": 0
+    }
+  },
+  "ned-swe-2026": {
+    "teamA": {
+      "yellow": 0,
+      "secondYellow": 0,
+      "directRed": 0,
+      "yellowAndDirectRed": 0
+    },
+    "teamB": {
+      "yellow": 3,
+      "secondYellow": 0,
+      "directRed": 0,
+      "yellowAndDirectRed": 0
+    }
+  },
+  "nzl-egy-2026": {
+    "teamA": {
+      "yellow": 2,
+      "secondYellow": 0,
+      "directRed": 0,
+      "yellowAndDirectRed": 0
+    },
+    "teamB": {
+      "yellow": 1,
+      "secondYellow": 0,
+      "directRed": 0,
+      "yellowAndDirectRed": 0
+    }
+  },
+  "pan-cro-2026": {
+    "teamA": {
+      "yellow": 1,
+      "secondYellow": 0,
+      "directRed": 0,
+      "yellowAndDirectRed": 0
+    },
+    "teamB": {
+      "yellow": 1,
+      "secondYellow": 0,
+      "directRed": 0,
+      "yellowAndDirectRed": 0
+    }
+  },
+  "por-cod-2026": {
+    "teamA": {
+      "yellow": 3,
+      "secondYellow": 0,
+      "directRed": 0,
+      "yellowAndDirectRed": 0
+    },
+    "teamB": {
+      "yellow": 1,
+      "secondYellow": 0,
+      "directRed": 0,
+      "yellowAndDirectRed": 0
+    }
+  },
+  "por-uzb-2026": {
+    "teamA": {
+      "yellow": 1,
+      "secondYellow": 0,
+      "directRed": 0,
+      "yellowAndDirectRed": 0
+    },
+    "teamB": {
+      "yellow": 1,
+      "secondYellow": 0,
+      "directRed": 0,
+      "yellowAndDirectRed": 0
+    }
+  },
+  "qat-sui-2026": {
+    "teamA": {
+      "yellow": 2,
+      "secondYellow": 0,
+      "directRed": 0,
+      "yellowAndDirectRed": 0
+    },
+    "teamB": {
+      "yellow": 1,
+      "secondYellow": 0,
+      "directRed": 0,
+      "yellowAndDirectRed": 0
+    }
+  },
+  "sco-mar-2026": {
+    "teamA": {
+      "yellow": 1,
+      "secondYellow": 0,
+      "directRed": 0,
+      "yellowAndDirectRed": 0
+    },
+    "teamB": {
+      "yellow": 1,
+      "secondYellow": 0,
+      "directRed": 0,
+      "yellowAndDirectRed": 0
+    }
+  },
+  "sui-bih-2026": {
+    "teamA": {
+      "yellow": 1,
+      "secondYellow": 0,
+      "directRed": 0,
+      "yellowAndDirectRed": 0
+    },
+    "teamB": {
+      "yellow": 2,
+      "secondYellow": 0,
+      "directRed": 1,
+      "yellowAndDirectRed": 0
+    }
+  },
+  "swe-tun-2026": {
+    "teamA": {
+      "yellow": 0,
+      "secondYellow": 0,
+      "directRed": 0,
+      "yellowAndDirectRed": 0
+    },
+    "teamB": {
+      "yellow": 1,
+      "secondYellow": 0,
+      "directRed": 0,
+      "yellowAndDirectRed": 0
+    }
+  },
+  "tur-par-2026": {
+    "teamA": {
+      "yellow": 2,
+      "secondYellow": 0,
+      "directRed": 0,
+      "yellowAndDirectRed": 0
+    },
+    "teamB": {
+      "yellow": 2,
+      "secondYellow": 0,
+      "directRed": 1,
+      "yellowAndDirectRed": 0
+    }
+  },
+  "uru-cpv-2026": {
+    "teamA": {
+      "yellow": 2,
+      "secondYellow": 0,
+      "directRed": 0,
+      "yellowAndDirectRed": 0
+    },
+    "teamB": {
+      "yellow": 2,
+      "secondYellow": 0,
+      "directRed": 0,
+      "yellowAndDirectRed": 0
+    }
+  },
+  "usa-aus-2026": {
+    "teamA": {
+      "yellow": 3,
+      "secondYellow": 0,
+      "directRed": 0,
+      "yellowAndDirectRed": 0
+    },
+    "teamB": {
+      "yellow": 4,
+      "secondYellow": 0,
+      "directRed": 0,
+      "yellowAndDirectRed": 0
+    }
+  },
+  "usa-par-2026": {
+    "teamA": {
+      "yellow": 1,
+      "secondYellow": 0,
+      "directRed": 0,
+      "yellowAndDirectRed": 0
+    },
+    "teamB": {
+      "yellow": 5,
+      "secondYellow": 0,
+      "directRed": 0,
+      "yellowAndDirectRed": 0
+    }
+  },
+  "uzb-col-2026": {
+    "teamA": {
+      "yellow": 1,
+      "secondYellow": 0,
+      "directRed": 0,
+      "yellowAndDirectRed": 0
+    },
+    "teamB": {
+      "yellow": 1,
+      "secondYellow": 0,
+      "directRed": 0,
+      "yellowAndDirectRed": 0
+    }
+  }
+}

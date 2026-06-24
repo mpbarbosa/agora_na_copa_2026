@@ -1,6 +1,7 @@
 import type { Match, StandingsRow } from "./types";
 import { standings as seedStandings } from "./data/tournament";
 import { APP_MATCHES } from "./appMatches";
+import { fairPlayPointsForSide } from "./disciplinary";
 
 const POINTS_FOR_WIN = 3;
 const POINTS_FOR_DRAW = 1;
@@ -51,6 +52,7 @@ function createSeedRowFromMatchTeam(team: Match["teamA"]): StandingsRow {
     goalsAgainst: 0,
     goalDifference: 0,
     dataSource: "seed",
+    fairPlayPoints: 0,
   };
 }
 
@@ -100,6 +102,8 @@ export function computeStandings(matches: Match[] = APP_MATCHES): StandingsRow[]
     canonicalSeedStandings.map((row) => [row.code, row.group]),
   );
   const tallies = new Map<string, MatchTally>();
+  // Fair-play points (Art. 13.2f) accumulated per team across the same counted matches.
+  const fairPlay = new Map<string, number>();
 
   for (const match of matches) {
     if (!countsForStandings(match, groupByCode)) continue;
@@ -110,6 +114,15 @@ export function computeStandings(matches: Match[] = APP_MATCHES): StandingsRow[]
     addResult(tallyB, match.score.teamB, match.score.teamA);
     tallies.set(match.teamA.code, tallyA);
     tallies.set(match.teamB.code, tallyB);
+
+    fairPlay.set(
+      match.teamA.code,
+      (fairPlay.get(match.teamA.code) ?? 0) + fairPlayPointsForSide(match.id, "teamA"),
+    );
+    fairPlay.set(
+      match.teamB.code,
+      (fairPlay.get(match.teamB.code) ?? 0) + fairPlayPointsForSide(match.id, "teamB"),
+    );
   }
 
   return canonicalSeedStandings.map((row) => {
@@ -121,6 +134,7 @@ export function computeStandings(matches: Match[] = APP_MATCHES): StandingsRow[]
       ...tally,
       goalDifference: tally.goalsFor - tally.goalsAgainst,
       points: tally.won * POINTS_FOR_WIN + tally.drawn * POINTS_FOR_DRAW,
+      fairPlayPoints: fairPlay.get(row.code) ?? 0,
       dataSource: "result",
     };
   });
@@ -331,11 +345,26 @@ function cmpH2H(a: H2HTally, b: H2HTally): number {
   return b.points - a.points || b.gd - a.gd || b.gf - a.gf;
 }
 
-// Art. 13 Step 2d-e: overall GD → overall GF.
-// Fair play (2f) and FIFA ranking (Step 3) are omitted — no card/ranking data available.
+// Art. 13 Step 2d-f: overall GD → overall GF → fair play (fewer disciplinary points).
+// FIFA ranking (Step 3) remains omitted — no ranking data available.
 function sortByOverall(rows: StandingsRow[]): StandingsRow[] {
   return [...rows].sort(
-    (a, b) => b.goalDifference - a.goalDifference || b.goalsFor - a.goalsFor,
+    (a, b) =>
+      b.goalDifference - a.goalDifference ||
+      b.goalsFor - a.goalsFor ||
+      b.fairPlayPoints - a.fairPlayPoints,
+  );
+}
+
+// Ranks teams that share no head-to-head context (e.g. the best third-placed teams
+// across different groups), by Art. 13 overall criteria: points → GD → GF → fair play.
+// FIFA ranking (the final official tiebreaker) is omitted — no ranking data available.
+export function compareThirdPlaceRanking(a: StandingsRow, b: StandingsRow): number {
+  return (
+    b.points - a.points ||
+    b.goalDifference - a.goalDifference ||
+    b.goalsFor - a.goalsFor ||
+    b.fairPlayPoints - a.fairPlayPoints
   );
 }
 

@@ -254,6 +254,10 @@ export interface Team {
 // pre-tournament seed values ("seed") because the team hasn't played yet.
 export interface StandingsRow extends Team {
   dataSource: "result" | "seed";
+  // FIFA Art. 13.2f fair-play points: 0 or negative (−1 yellow, −3 second yellow,
+  // −4 direct red, −5 yellow + direct red), summed over the team's counted group
+  // matches. Less negative = better discipline. A group-stage tiebreaker after GD/GF.
+  fairPlayPoints: number;
 }
 
 export interface Stadium {

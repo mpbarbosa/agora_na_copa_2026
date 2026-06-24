@@ -3,7 +3,7 @@ import { Trophy, RotateCcw } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { bracket as baseBracket } from "../data/tournament";
 import type { BracketNode, Match, StandingsRow } from "../types";
-import { computeStandings, groupStandings } from "../standings";
+import { compareThirdPlaceRanking, computeStandings, groupStandings } from "../standings";
 import type { QualificationStatus } from "../standings";
 import { FlagIcon } from "./FlagIcon";
 
@@ -122,17 +122,12 @@ function buildGroupSlotMap(matches: Match[]): Map<string, ProvisionalSlot> {
     if (third) thirdPlaced.push(third);
   }
 
-  // Rank the (up to) 12 third-placed teams the same way group tables break ties
-  // on overall stats (points → goal difference → goals for) and take the best
-  // eight. Their best-third spot is never mathematically secured pre-allocation,
+  // Rank the (up to) 12 third-placed teams by the same overall Art. 13 criteria the
+  // group tables use (points → goal difference → goals for → fair play) and take the
+  // best eight. Their best-third spot is never mathematically secured pre-allocation,
   // so they are always shown as provisional.
   thirdPlaced
-    .sort(
-      (a, b) =>
-        b.points - a.points ||
-        b.goalDifference - a.goalDifference ||
-        b.goalsFor - a.goalsFor,
-    )
+    .sort(compareThirdPlaceRanking)
     .slice(0, 8)
     .forEach((row, idx) => {
       map.set(`Melhor 3º colocado #${idx + 1}`, {
