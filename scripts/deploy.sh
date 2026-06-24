@@ -141,7 +141,9 @@ resolve_paths() {
 }
 
 validate_prerequisites() {
-    if [ ! -d "$PROJECT_ROOT/.git" ]; then
+    # Accept both a primary checkout (.git directory) and a linked worktree
+    # (.git file). Deploys run from the dedicated agora-deploy worktree.
+    if ! git -C "$PROJECT_ROOT" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
         die "'$PROJECT_ROOT' is not a git repository."
     fi
 
