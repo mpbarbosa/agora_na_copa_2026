@@ -97,3 +97,27 @@ export function isAnalyticsConfigured(): boolean {
 
 /** Canonical public URL, used for share links (matches the OG canonical). */
 export const SITE_URL = "https://copa2026.mpbarbosa.com";
+
+/**
+ * Pix donation details, rendered by the "Doe via Pix" block (footer + Fan Zone).
+ *
+ * `key` is a Pix *chave aleatória* (random EVP) on purpose — never a CPF/CNPJ, so
+ * no personal document is exposed in this public repo. `merchantName`/`merchantCity`
+ * feed the BR Code (EMV) "Pix Copia e Cola" payload: ASCII only, ≤25 and ≤15 chars
+ * (longer values are truncated by buildPixBrCode). The city is informational (it
+ * does not affect routing); update it to the recipient's real city when known.
+ */
+export const PIX_DONATION = {
+  key: "4a1248a0-93de-4f65-8e17-cf5ac4a147a9",
+  keyTypeLabel: "Chave aleatória",
+  merchantName: "MARCELO PEREIRA BARBOSA",
+  merchantCity: "SAO PAULO",
+  /** Short call-to-action shown above the key. */
+  label: "Apoie o Agora na Copa 26",
+} as const;
+
+/** True only when a real (non-placeholder) Pix key is configured. */
+export function isPixDonationConfigured(): boolean {
+  const key = PIX_DONATION.key.trim();
+  return key.length > 0 && key !== "00000000-0000-0000-0000-000000000000";
+}

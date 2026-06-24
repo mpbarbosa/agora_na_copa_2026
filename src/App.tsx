@@ -24,6 +24,7 @@ import { VersionCheckTimer } from "./components/VersionCheckTimer";
 import { useAnalytics } from "./hooks/useAnalytics";
 import { useFeatureTour } from "./hooks/useFeatureTour";
 import { useTipTour } from "./hooks/useTipTour";
+import { DonationPix } from "./components/DonationPix";
 import { ShareButton } from "./components/ShareButton";
 import { NAV_ITEMS } from "./navigation";
 import { Sun, Moon, HelpCircle, Settings } from "lucide-react";
@@ -414,7 +415,8 @@ export default function App() {
             Política de Privacidade
           </a>
         </p>
-        <p className={`mt-2 ${theme === "classic-light" ? "text-slate-500" : "text-slate-300"}`}>
+        <DonationPix theme={theme} variant="compact" />
+        <p className={`mt-3 ${theme === "classic-light" ? "text-slate-500" : "text-slate-300"}`}>
           Versão da página: {APP_VERSION}
         </p>
       </footer>
