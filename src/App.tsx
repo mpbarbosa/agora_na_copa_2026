@@ -23,7 +23,7 @@ import { useVersionCheck } from "./hooks/useVersionCheck";
 import { VersionCheckTimer } from "./components/VersionCheckTimer";
 import { useAnalytics } from "./hooks/useAnalytics";
 import { useFeatureTour } from "./hooks/useFeatureTour";
-import { useMessiTour } from "./hooks/useMessiTour";
+import { useTipTour } from "./hooks/useTipTour";
 import { ShareButton } from "./components/ShareButton";
 import { NAV_ITEMS } from "./navigation";
 import { Sun, Moon, HelpCircle, Settings } from "lucide-react";
@@ -118,7 +118,7 @@ export default function App() {
 
   useAnalytics(`/${activeNavItem.id}`, activeNavItem.label);
   const { startTour } = useFeatureTour(theme);
-  useMessiTour(theme);
+  useTipTour(theme);
 
   const renderActiveView = () => {
     switch (activeNavItem.id) {
