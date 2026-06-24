@@ -32,8 +32,8 @@ export const FIFA_SCHEDULED_MATCHES: FifaScheduledMatchSeed[] = [
   { teamA: "QAT", teamB: "SUI", kickoffTimestamp: "2026-06-13T16:00:00-03:00", status: "FINISHED", score: { teamA: 1, teamB: 1 }, ...v("QAT", "SUI") },
   { teamA: "SUI", teamB: "BIH", kickoffTimestamp: "2026-06-18T16:00:00-03:00", status: "FINISHED", score: { teamA: 4, teamB: 1 }, ...v("SUI", "BIH") },
   { teamA: "CAN", teamB: "QAT", kickoffTimestamp: "2026-06-18T19:00:00-03:00", status: "FINISHED", score: { teamA: 6, teamB: 0 }, ...v("CAN", "QAT") },
-  { teamA: "BIH", teamB: "QAT", kickoffTimestamp: "2026-06-24T16:00:00-03:00", status: "PRE_GAME", ...v("BIH", "QAT") },
-  { teamA: "SUI", teamB: "CAN", kickoffTimestamp: "2026-06-24T16:00:00-03:00", status: "PRE_GAME", ...v("SUI", "CAN") },
+  { teamA: "BIH", teamB: "QAT", kickoffTimestamp: "2026-06-24T16:00:00-03:00", status: "FINISHED", score: { teamA: 3, teamB: 1 }, ...v("BIH", "QAT") },
+  { teamA: "SUI", teamB: "CAN", kickoffTimestamp: "2026-06-24T16:00:00-03:00", status: "FINISHED", score: { teamA: 2, teamB: 1 }, ...v("SUI", "CAN") },
 
   // ── Grupo C ───────────────────────────────────────────────────────────────
   { teamA: "SCO", teamB: "MAR", kickoffTimestamp: "2026-06-19T19:00:00-03:00", status: "FINISHED", score: { teamA: 0, teamB: 1 }, ...v("SCO", "MAR") },
