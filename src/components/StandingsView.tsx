@@ -4,6 +4,7 @@ import type { Match, TeamRef } from "../types";
 import { computeStandings, groupStandings, computeQualificationNote, computeContentionNote, computeEliminationNote } from "../standings";
 import { FlagIcon } from "./FlagIcon";
 import { StandingsRulesCard } from "./StandingsRulesCard";
+import { ThirdPlaceTable } from "./ThirdPlaceTable";
 import { parseNoteSections } from "../utils/noteSections";
 import { formatAnalysisTimestamp } from "../utils/dateFormat";
 import { isAnalysisUpToDate, lastFinishedKickoff } from "../utils/analysisFreshness";
@@ -498,6 +499,12 @@ export function StandingsView({
           );
         })}
       </div>
+
+      <ThirdPlaceTable
+        groups={groups}
+        theme={theme}
+        onSelectTeamLineup={onSelectTeamLineup}
+      />
 
       {openTooltip && (
         <div

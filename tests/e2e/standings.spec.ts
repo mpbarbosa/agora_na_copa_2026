@@ -204,4 +204,28 @@ test.describe("Standings view (Grupos)", () => {
     // All 12 groups now carry an editorial analysis.
     await expect(page.locator('[data-testid^="group-analysis-grupo-"]')).toHaveCount(12);
   });
+
+  test("ranks the 12 third-placed teams with a cut line after the best 8", async ({ page }) => {
+    await page.goto("/");
+    await page.click("#btn-nav-grupos");
+    await expect(page.locator("#standings-view")).toBeVisible();
+
+    const table = page.getByTestId("third-place-ranking");
+    await expect(table).toBeVisible();
+    await expect(table.locator("h3")).toHaveText("Melhores 3º colocados");
+
+    // One ranked row per group (12), with exactly the best 8 flagged as qualifying.
+    await expect(table.locator("tbody tr")).toHaveCount(12);
+    await expect(table.locator('tbody tr[data-qualifies="true"]')).toHaveCount(8);
+
+    // The top 8 are a contiguous block at the head of the table (the cut line is
+    // after row 8), so the first non-qualifying row is the 9th.
+    const qualifyFlags = await table
+      .locator("tbody tr")
+      .evaluateAll((rows) => rows.map((r) => r.getAttribute("data-qualifies")));
+    expect(qualifyFlags).toEqual([
+      ..."11111111".split("").map(() => "true"),
+      ..."1111".split("").map(() => "false"),
+    ]);
+  });
 });

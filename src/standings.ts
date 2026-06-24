@@ -638,6 +638,32 @@ export function computeEliminationNote(
   );
 }
 
+// One third-placed team in the cross-group "best thirds" ranking.
+export interface RankedThird {
+  row: StandingsRow;
+  groupLetter: string; // "A".."L"
+  // True for the 8 best-ranked thirds (the provisional knockout qualifiers).
+  // Always provisional pre-allocation — third-place spots are never mathematically
+  // secured until the group stage ends and FIFA fixes the group→slot table.
+  qualifies: boolean;
+}
+
+// Ranks the third-placed team of every group by the Art. 13 overall criteria
+// (points → GD → GF → fair play; see compareThirdPlaceRanking) and flags the best
+// eight. Accepts the output of groupStandings so callers reuse one computation.
+export function rankBestThirds(
+  groups: { group: string; rows: StandingsRow[] }[],
+): RankedThird[] {
+  const thirds: { row: StandingsRow; groupLetter: string }[] = [];
+  for (const { group, rows } of groups) {
+    const letter = group.match(/Grupo ([A-L])/)?.[1];
+    const third = rows[2];
+    if (letter && third) thirds.push({ row: third, groupLetter: letter });
+  }
+  thirds.sort((a, b) => compareThirdPlaceRanking(a.row, b.row));
+  return thirds.map((t, i) => ({ ...t, qualifies: i < 8 }));
+}
+
 // Groups standings rows by their "Grupo X" label, sorted A-L, with each
 // group's rows sorted per Art. 13 (Pts → H2H → overall GD → overall GF).
 // Pass the same `matches` array used by computeStandings for correct H2H data.

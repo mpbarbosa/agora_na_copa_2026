@@ -2,8 +2,8 @@ import { useMemo, useState } from "react";
 import { Trophy, RotateCcw } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { bracket as baseBracket } from "../data/tournament";
-import type { BracketNode, Match, StandingsRow } from "../types";
-import { compareThirdPlaceRanking, computeStandings, groupStandings } from "../standings";
+import type { BracketNode, Match } from "../types";
+import { computeStandings, groupStandings, rankBestThirds } from "../standings";
 import type { QualificationStatus } from "../standings";
 import { FlagIcon } from "./FlagIcon";
 
@@ -100,8 +100,6 @@ function buildGroupSlotMap(matches: Match[]): Map<string, ProvisionalSlot> {
   const groups = groupStandings(rows, matches);
   const map = new Map<string, ProvisionalSlot>();
 
-  const thirdPlaced: StandingsRow[] = [];
-
   for (const { group, rows: groupRows, qualification } of groups) {
     const letterMatch = group.match(/Grupo ([A-L])/);
     if (!letterMatch) continue;
@@ -115,21 +113,14 @@ function buildGroupSlotMap(matches: Match[]): Map<string, ProvisionalSlot> {
         status,
       });
     });
-
-    // The team currently sitting third in this group — a candidate for one of
-    // the eight best-third knockout slots.
-    const third = groupRows[2];
-    if (third) thirdPlaced.push(third);
   }
 
-  // Rank the (up to) 12 third-placed teams by the same overall Art. 13 criteria the
-  // group tables use (points → goal difference → goals for → fair play) and take the
-  // best eight. Their best-third spot is never mathematically secured pre-allocation,
-  // so they are always shown as provisional.
-  thirdPlaced
-    .sort(compareThirdPlaceRanking)
-    .slice(0, 8)
-    .forEach((row, idx) => {
+  // The 8 best-ranked third-placed teams (shared ranking with the Grupos table).
+  // Their best-third spot is never mathematically secured pre-allocation, so they
+  // are always shown as provisional ("contention").
+  rankBestThirds(groups)
+    .filter((t) => t.qualifies)
+    .forEach(({ row }, idx) => {
       map.set(`Melhor 3º colocado #${idx + 1}`, {
         team: { name: row.name, code: row.code, flagSvg: row.flagSvg },
         status: "contention",
