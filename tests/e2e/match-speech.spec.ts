@@ -98,6 +98,21 @@ test.describe("Live-match speech narration (Ao Vivo)", () => {
     await expect.poll(() => utterances(page).then((l) => l.length)).toBeGreaterThan(0);
   });
 
+  test("the setup drawer shows the speech status readout", async ({ page }) => {
+    await mockSpeechEngine(page);
+    await stubLiveApis(page);
+
+    await page.goto("/");
+    await page.click("#match-selector-chips-finished #btn-match-bra-mar-2026");
+    await page.click("#btn-edit-match");
+
+    const info = page.getByTestId("speech-status-info");
+    await expect(info).toBeVisible();
+    await expect(info).toContainText("Status da narração");
+    await expect(info).toContainText("Disponível");
+    await expect(info).toContainText("Carregado"); // engine loaded from the (mocked) CDN
+  });
+
   test("stays silent when 'Narração' is off (default)", async ({ page }) => {
     await mockSpeechEngine(page);
     await stubLiveApis(page);

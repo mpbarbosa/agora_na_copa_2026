@@ -37,12 +37,23 @@ export interface UseMatchSpeechArgs {
   teamNames: TeamNames;
 }
 
+export interface MatchSpeechStatus {
+  /** Browser exposes the Web Speech API. */
+  supported: boolean;
+  /** The catas_altas_speech engine has been loaded from the CDN. */
+  engineLoaded: boolean;
+  /** Resolved pt-BR voice name, or null while voices are still loading. */
+  voiceName: string | null;
+}
+
 export interface MatchSpeechControls {
   enabled: boolean;
   supported: boolean;
   toggle: () => void;
   /** Speak an arbitrary phrase on demand (e.g. a tapped incident), regardless of the toggle. */
   speak: (text: string, priority?: number) => void;
+  /** Live diagnostic snapshot for the speech-status readout in the setup drawer. */
+  status: MatchSpeechStatus;
 }
 
 /**
@@ -64,6 +75,7 @@ export function useMatchSpeech({
 }: UseMatchSpeechArgs): MatchSpeechControls {
   const supported = isSpeechSupported();
   const [enabled, setEnabled] = useState(() => supported && readPersisted());
+  const [engineLoaded, setEngineLoaded] = useState(false);
 
   const managerRef = useRef<CatasSpeech | null>(null);
   const prevRef = useRef<MatchSnapshot | null>(null);
@@ -79,12 +91,16 @@ export function useMatchSpeech({
     if (!supported) return;
     let active = true;
     void loadSpeechEngine().then((Ctor) => {
-      if (!active || !Ctor || managerRef.current) return;
-      try {
-        managerRef.current = new Ctor(false);
-      } catch {
-        // engine construction failed — narration silently no-ops
+      if (!active || !Ctor) return;
+      if (!managerRef.current) {
+        try {
+          managerRef.current = new Ctor(false);
+        } catch {
+          // engine construction failed — narration silently no-ops
+          return;
+        }
       }
+      if (active) setEngineLoaded(true);
     });
     return () => {
       active = false;
@@ -178,5 +194,13 @@ export function useMatchSpeech({
     });
   }, []);
 
-  return { enabled, supported, toggle, speak };
+  // Live snapshot for the setup-drawer readout. Read off the engine each render;
+  // the per-second clock tick in the Ao Vivo view keeps it current as voices load.
+  const status: MatchSpeechStatus = {
+    supported,
+    engineLoaded,
+    voiceName: managerRef.current?.getCurrentVoice?.()?.name ?? null,
+  };
+
+  return { enabled, supported, toggle, speak, status };
 }

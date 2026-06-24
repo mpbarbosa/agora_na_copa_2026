@@ -12,6 +12,8 @@ export interface CatasSpeech {
   speak(text: string, priority?: number): void;
   stop(): void;
   destroy?(): void;
+  /** Resolved voice (for the speech-status readout); available once voices load. */
+  getCurrentVoice?(): { name?: string; lang?: string } | null;
 }
 
 export type CatasSpeechCtor = new (enableLogging?: boolean) => CatasSpeech;

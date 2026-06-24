@@ -1404,6 +1404,35 @@ export function MatchDetailView({
             </button>
           </div>
 
+          {/* Speech (Narração) status — diagnostic readout */}
+          <div
+            id="speech-status-info"
+            data-testid="speech-status-info"
+            className="mb-4 rounded-lg border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-black/20 p-3"
+          >
+            <p className="font-mono text-xs uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-2">
+              Status da narração
+            </p>
+            <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 font-mono text-[11px]">
+              <dt className="text-slate-400">Suporte do navegador</dt>
+              <dd className={matchSpeech.status.supported ? "text-emerald-600 dark:text-emerald-400" : "text-amber-600 dark:text-amber-400"}>
+                {matchSpeech.status.supported ? "Disponível" : "Indisponível"}
+              </dd>
+              <dt className="text-slate-400">Motor de voz (CDN)</dt>
+              <dd className={matchSpeech.status.engineLoaded ? "text-emerald-600 dark:text-emerald-400" : "text-slate-500 dark:text-slate-400"}>
+                {matchSpeech.status.engineLoaded ? "Carregado" : matchSpeech.status.supported ? "Carregando…" : "—"}
+              </dd>
+              <dt className="text-slate-400">Voz selecionada</dt>
+              <dd className="text-slate-700 dark:text-slate-200 truncate">
+                {matchSpeech.status.voiceName ?? (matchSpeech.status.engineLoaded ? "carregando voz…" : "—")}
+              </dd>
+              <dt className="text-slate-400">Narração</dt>
+              <dd className={matchSpeech.enabled ? "text-emerald-600 dark:text-emerald-400" : "text-slate-500 dark:text-slate-400"}>
+                {matchSpeech.enabled ? "Ativada" : "Desativada"}
+              </dd>
+            </dl>
+          </div>
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-mono mb-1 text-slate-600 dark:text-slate-300">
