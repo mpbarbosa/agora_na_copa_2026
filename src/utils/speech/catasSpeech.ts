@@ -86,34 +86,22 @@ export function runDirectSpeechTest(
     return;
   }
   const synth = window.speechSynthesis;
-  try {
-    synth.cancel();
-  } catch {
-    /* clear any stuck utterance */
-  }
-  try {
-    synth.resume();
-  } catch {
-    /* recover from a paused state (mobile backgrounding) */
-  }
 
+  // The SIMPLEST possible Web Speech call. Deliberately NO `cancel()`/`resume()`
+  // beforehand — calling `cancel()` right before `speak()` is a known Android
+  // Chrome bug that silently swallows the utterance. No `lang`, no rate/pitch/
+  // volume (defaults are fine). Bind a voice ONLY when the user explicitly picked
+  // one in the dropdown; otherwise let the device use its own default voice.
   const utterance = new SpeechSynthesisUtterance(
     "Testando a narração. Um, dois, três. Gol do Brasil!",
   );
-  // Mirror the working guia_js engine EXACTLY: bind a concrete voice object and
-  // do NOT set `lang`. On Android, a lang-only utterance with no voice bound is
-  // silent. Use the picker's choice when set, else the most reliable pt-BR voice.
-  const voice = preferredVoice ?? pickPtBrVoice(synth.getVoices());
-  if (voice) {
+  if (preferredVoice) {
     try {
-      utterance.voice = voice;
+      utterance.voice = preferredVoice;
     } catch {
       /* some engines reject assigning a voice; carry on with the default */
     }
   }
-  utterance.volume = 1;
-  utterance.rate = 1;
-  utterance.pitch = 1;
 
   let started = false;
   let finished = false;
@@ -134,7 +122,9 @@ export function runDirectSpeechTest(
     onStatus(`erro do dispositivo: ${event.error || "desconhecido"}`);
   };
 
-  onStatus(voice ? `enviado (voz: ${voice.name})…` : "enviado (nenhuma voz disponível)…");
+  onStatus(
+    preferredVoice ? `enviado (voz: ${preferredVoice.name})…` : "enviado (voz padrão do aparelho)…",
+  );
   try {
     synth.speak(utterance);
   } catch (err) {

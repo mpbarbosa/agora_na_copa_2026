@@ -1471,7 +1471,12 @@ export function MatchDetailView({
                   data-testid="btn-test-narration"
                   onClick={() => {
                     setSpeechTestStatus("iniciando…");
-                    runDirectSpeechTest(setSpeechTestStatus, matchSpeech.selectedVoice);
+                    // Pass a voice only when the user explicitly picked one;
+                    // "Automática" → simplest call (device default voice).
+                    runDirectSpeechTest(
+                      setSpeechTestStatus,
+                      matchSpeech.selectedVoiceUri ? matchSpeech.selectedVoice : null,
+                    );
                   }}
                   className="mt-3 inline-flex items-center gap-2 rounded-lg border px-3 py-2 font-mono text-xs font-bold uppercase tracking-wider transition border-[#009c3b]/40 bg-[#009c3b]/10 text-[#007a2f] hover:bg-[#009c3b]/20 dark:border-[#00e476]/30 dark:bg-[#00e476]/10 dark:text-[#00e476] dark:hover:bg-[#00e476]/20"
                   title="Falar uma frase de teste agora (teste direto do dispositivo)"
