@@ -44,6 +44,8 @@ export interface MatchSpeechStatus {
   engineLoaded: boolean;
   /** Resolved pt-BR voice name, or null while voices are still loading. */
   voiceName: string | null;
+  /** True = on-device voice, false = network voice, null = unknown/not loaded. */
+  voiceLocal: boolean | null;
 }
 
 export interface MatchSpeechControls {
@@ -196,10 +198,12 @@ export function useMatchSpeech({
 
   // Live snapshot for the setup-drawer readout. Read off the engine each render;
   // the per-second clock tick in the Ao Vivo view keeps it current as voices load.
+  const currentVoice = managerRef.current?.getCurrentVoice?.() ?? null;
   const status: MatchSpeechStatus = {
     supported,
     engineLoaded,
-    voiceName: managerRef.current?.getCurrentVoice?.()?.name ?? null,
+    voiceName: currentVoice?.name ?? null,
+    voiceLocal: currentVoice?.localService ?? null,
   };
 
   return { enabled, supported, toggle, speak, status };

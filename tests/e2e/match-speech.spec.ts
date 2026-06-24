@@ -111,6 +111,10 @@ test.describe("Live-match speech narration (Ao Vivo)", () => {
     await expect(info).toContainText("Status da narração");
     await expect(info).toContainText("Disponível");
     await expect(info).toContainText("Carregado"); // engine loaded from the (mocked) CDN
+
+    // "Testar voz" speaks a test phrase on demand.
+    await page.getByTestId("btn-test-narration").click();
+    await expect.poll(() => utterances(page).then((l) => l.length)).toBeGreaterThan(0);
   });
 
   test("stays silent when 'Narração' is off (default)", async ({ page }) => {

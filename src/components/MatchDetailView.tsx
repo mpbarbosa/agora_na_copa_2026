@@ -1425,12 +1425,33 @@ export function MatchDetailView({
               <dt className="text-slate-400">Voz selecionada</dt>
               <dd className="text-slate-700 dark:text-slate-200 truncate">
                 {matchSpeech.status.voiceName ?? (matchSpeech.status.engineLoaded ? "carregando voz…" : "—")}
+                {matchSpeech.status.voiceLocal !== null && (
+                  <span className="text-slate-400">
+                    {matchSpeech.status.voiceLocal ? " · no aparelho" : " · da rede"}
+                  </span>
+                )}
               </dd>
               <dt className="text-slate-400">Narração</dt>
               <dd className={matchSpeech.enabled ? "text-emerald-600 dark:text-emerald-400" : "text-slate-500 dark:text-slate-400"}>
                 {matchSpeech.enabled ? "Ativada" : "Desativada"}
               </dd>
             </dl>
+
+            {matchSpeech.supported && (
+              <button
+                type="button"
+                id="btn-test-narration"
+                data-testid="btn-test-narration"
+                onClick={() =>
+                  matchSpeech.speak("Testando a narração. Um, dois, três. Gol do Brasil!")
+                }
+                className="mt-3 inline-flex items-center gap-2 rounded-lg border px-3 py-2 font-mono text-xs font-bold uppercase tracking-wider transition border-[#009c3b]/40 bg-[#009c3b]/10 text-[#007a2f] hover:bg-[#009c3b]/20 dark:border-[#00e476]/30 dark:bg-[#00e476]/10 dark:text-[#00e476] dark:hover:bg-[#00e476]/20"
+                title="Falar uma frase de teste agora"
+              >
+                <Mic size={14} aria-hidden="true" />
+                Testar voz
+              </button>
+            )}
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

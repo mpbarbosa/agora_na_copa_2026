@@ -13,7 +13,7 @@ export interface CatasSpeech {
   stop(): void;
   destroy?(): void;
   /** Resolved voice (for the speech-status readout); available once voices load. */
-  getCurrentVoice?(): { name?: string; lang?: string } | null;
+  getCurrentVoice?(): { name?: string; lang?: string; localService?: boolean } | null;
 }
 
 export type CatasSpeechCtor = new (enableLogging?: boolean) => CatasSpeech;
