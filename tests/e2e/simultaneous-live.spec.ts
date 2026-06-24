@@ -43,6 +43,16 @@ test.describe("Simultaneous live matches (Ao Vivo)", () => {
       await expect(page.locator(`#btn-simultaneous-${id}`)).toBeVisible();
     }
 
+    // Each live match renders a FULL card (scoreboard + score + lineup), stacked —
+    // not just one match with a switcher.
+    await expect(page.getByTestId("simultaneous-live-matches")).toBeVisible();
+    for (const id of LIVE_IDS) {
+      const card = page.getByTestId(`live-match-card-${id}`);
+      await expect(card).toBeVisible();
+      await expect(card).toContainText("1–0"); // the mocked live score
+      await expect(card.locator("#pitch-container")).toBeVisible(); // the lineup pitch
+    }
+
     // Switching chips selects that match (chip becomes pressed).
     const second = page.locator(`#btn-simultaneous-${LIVE_IDS[1]}`);
     await second.click();

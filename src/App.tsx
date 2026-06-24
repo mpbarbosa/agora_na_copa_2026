@@ -26,6 +26,7 @@ import { useFeatureTour } from "./hooks/useFeatureTour";
 import { useTipTour } from "./hooks/useTipTour";
 import { DonationPix } from "./components/DonationPix";
 import { ShareButton } from "./components/ShareButton";
+import { OnlineCountBadge } from "./components/OnlineCountBadge";
 import { NAV_ITEMS } from "./navigation";
 import { Sun, Moon, HelpCircle, Settings } from "lucide-react";
 
@@ -74,8 +75,9 @@ export default function App() {
     if (sameMatch && prev !== null && braScore > prev.score) {
       setFireworksActive(true);
       clearTimeout(fireworksTimerRef.current);
-      // 6s matches shader duration: last burst starts at 2.45s and fades by ~5.95s
-      fireworksTimerRef.current = setTimeout(() => setFireworksActive(false), 6000);
+      // 11s matches the shader duration: 12 bursts, the last starting at 6.05s and
+      // fading out by ~10.65s.
+      fireworksTimerRef.current = setTimeout(() => setFireworksActive(false), 11000);
     }
 
     brazilMatchRef.current = { matchId: braMatch.id, score: braScore };
@@ -247,6 +249,7 @@ export default function App() {
                 onForceCheck={versionCheck.checkNow}
                 theme={theme}
               />
+              <OnlineCountBadge theme={theme} />
             </div>
 
             <div className="flex items-center gap-2">

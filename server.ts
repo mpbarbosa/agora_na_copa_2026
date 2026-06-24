@@ -20,6 +20,7 @@ import type {
 } from "./fifa-sync-core";
 import { GOOGLE_TRENDS_BATCH_URL, buildGoogleTrendsRequestBody, parseGoogleTrendsBatch } from "./trends-core";
 import { buildOpenMeteoUrl, parseOpenMeteoCurrent } from "./weather-core";
+import { type PresenceStore, recordHeartbeat, countOnline } from "./presence-core";
 import { APP_MATCHES } from "./src/appMatches";
 import { resolvePlayerEntry } from "./src/data/playerRegistry";
 import { triviaQuestions } from "./src/data/questions";
@@ -105,6 +106,45 @@ const RED_CARD_INCIDENT_SUFFIX = " foi expulso.";
 app.set("trust proxy", 1);
 
 app.use(express.json());
+
+// Test/dev fallback: serve the FIFA-derived endpoints from a remote API (e.g. the
+// production server, http://copa2026.mpbarbosa.com) instead of computing them from a
+// direct FIFA fetch. Lets the e2e suite use real, complete data without the local
+// server hitting the volatile live FIFA API. Registered before the real handlers so
+// it intercepts; on any remote error it falls through to local handling. Unset in
+// production → no proxying at all.
+const FIFA_FALLBACK_API_BASE = process.env.FIFA_FALLBACK_API_BASE?.replace(/\/+$/, "");
+if (FIFA_FALLBACK_API_BASE) {
+  const isFifaDerivedPath = (p: string): boolean =>
+    p === "/api/match-overlays" ||
+    p === "/api/match-states" ||
+    p === "/api/broadcast-guide" ||
+    p === "/api/team-lineups" ||
+    p === "/api/tournament-leaders" ||
+    p.startsWith("/api/team-view/") ||
+    p.startsWith("/api/player-stats/") ||
+    p.startsWith("/api/player-incidents/");
+
+  app.get(/^\/api\//, async (req, res, next) => {
+    if (!isFifaDerivedPath(req.path)) {
+      next();
+      return;
+    }
+    try {
+      const upstream = await fetch(`${FIFA_FALLBACK_API_BASE}${req.originalUrl}`, {
+        headers: { Accept: "application/json", "User-Agent": "agora-na-copa-2026/1.0" },
+      });
+      const body = await upstream.text();
+      res
+        .status(upstream.status)
+        .set("Content-Type", upstream.headers.get("content-type") ?? "application/json")
+        .set("Cache-Control", "no-store")
+        .send(body);
+    } catch {
+      next(); // remote fallback unreachable → use local (static) handling
+    }
+  });
+}
 
 // Per-request access log → journald (journalctl -u agora-na-copa-2026)
 // Skips /assets/ to avoid noise from static file serving in production.
@@ -857,7 +897,16 @@ const recordFailureState = (
   }
 };
 
+// When DISABLE_FIFA_SYNC=true, every FIFA fetch short-circuits to the normal
+// failure/fallback path so the app serves only its static seed data. Used by the
+// e2e suite (see playwright.config webServer) to make tests deterministic during
+// live matches; unset in production, so real FIFA sync runs as usual.
+const FIFA_SYNC_DISABLED = process.env.DISABLE_FIFA_SYNC === "true";
+
 const fetchJson = async <T,>(url: string): Promise<T> => {
+  if (FIFA_SYNC_DISABLED) {
+    throw new Error("FIFA sync disabled (DISABLE_FIFA_SYNC) — serving fallback data");
+  }
   const response = await fetch(url, {
     headers: {
       "User-Agent": "agora-na-copa-2026/1.0",
@@ -2293,6 +2342,25 @@ app.get("/api/fifa-sync-status", (_req, res) => {
 app.get("/api/questions", (_req, res) => {
   res.set("Cache-Control", "no-store");
   res.json(TRIVIA_QUESTIONS);
+});
+
+// In-memory "online users" presence. Single-instance only (resets on restart), no
+// PII — just a count. Each client POSTs a heartbeat with a random session id; a
+// session is "online" while its last heartbeat is within the window. Not a
+// FIFA-sourced endpoint, so (like /api/health) it carries no resilience shape.
+const PRESENCE_WINDOW_MS = 45 * 1000;
+const presenceStore: PresenceStore = new Map();
+
+app.post("/api/presence", (req, res) => {
+  const now = Date.now();
+  const rawId = (req.body as { id?: unknown } | undefined)?.id;
+  const id = typeof rawId === "string" ? rawId.slice(0, 64) : "";
+  recordHeartbeat(presenceStore, id, now);
+  res.set("Cache-Control", "no-store");
+  res.json({
+    online: countOnline(presenceStore, now, PRESENCE_WINDOW_MS),
+    updatedAt: new Date(now).toISOString(),
+  });
 });
 
 app.get("/api/health", (_req, res) => {

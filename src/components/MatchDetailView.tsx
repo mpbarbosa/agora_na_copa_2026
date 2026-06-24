@@ -31,6 +31,7 @@ import { AffiliateProducts } from "./AffiliateProducts";
 import { renderAnalysisWithMentions } from "./PlayerMention";
 import { MatchWeatherChip } from "./MatchWeatherChip";
 import { RefereeChip } from "./RefereeChip";
+import { SimultaneousLiveMatches } from "./SimultaneousLiveMatches";
 import { MatchSpeechToggle } from "./MatchSpeechToggle";
 import { useMatchSpeech } from "../hooks/useMatchSpeech";
 import { runDirectSpeechTest } from "../utils/speech/catasSpeech";
@@ -713,6 +714,15 @@ export function MatchDetailView({
     (match) => match.status === "LIVE" || match.status === "SUSPENDED",
   );
   const hasSimultaneousLive = liveMatches.length >= 2;
+  // Replace the single-match detail with stacked full cards (one per live match)
+  // when 2+ are live — but only on the live/default view ("auto") or while looking
+  // at a live match. If the viewer manually opened a finished/upcoming match, keep
+  // that single match's detail instead of hijacking it with the live cards.
+  const showSimultaneousLive =
+    hasSimultaneousLive &&
+    (matchSelectionMode === "auto" ||
+      currentMatch.status === "LIVE" ||
+      currentMatch.status === "SUSPENDED");
   const currentLineupPlayers = useMemo(
     () =>
       currentLineupEntry
@@ -1620,6 +1630,18 @@ export function MatchDetailView({
         </div>
       )}
 
+      {/* When two or more matches are live at once (final group round), show a full
+          card for each instead of the single-match detail below. */}
+      {showSimultaneousLive ? (
+        <SimultaneousLiveMatches
+          matches={liveMatches}
+          overlays={matchOverlays}
+          theme={theme}
+          onSelectTeamLineup={onSelectTeamLineup}
+          onOpenStandingsGroup={onOpenStandingsGroup}
+        />
+      ) : (
+        <>
       {/* CORE HERO SECTION */}
       <section
         className="max-w-5xl mx-auto px-4 mt-8"
@@ -2445,6 +2467,8 @@ export function MatchDetailView({
           </div>
         )}
       </div>
+        </>
+      )}
 
       {selectedIncidentPlayer && (
         <PlayerOverlayCard

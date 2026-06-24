@@ -23,6 +23,12 @@ export default defineConfig({
       ...process.env,
       PORT: String(port),
       STRICT_PORT: "true",
+      // Don't hit the volatile live FIFA API from the test server. Background FIFA
+      // sync is disabled, and the FIFA-derived endpoints are served from the
+      // production API instead, so e2e gets real, complete data without flakiness.
+      // Tests that need a specific live state stub the endpoint themselves.
+      DISABLE_FIFA_SYNC: "true",
+      FIFA_FALLBACK_API_BASE: "http://copa2026.mpbarbosa.com",
     },
   },
 });

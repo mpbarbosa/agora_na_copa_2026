@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { QRCodeSVG } from "qrcode.react";
-import { Check, Copy, Heart } from "lucide-react";
+import { Check, Coffee, Copy } from "lucide-react";
 import { PIX_DONATION, isPixDonationConfigured } from "../config";
 import { buildPixBrCode } from "../utils/pixBrCode";
 
@@ -59,7 +59,7 @@ export function DonationPix({ theme, variant }: DonationPixProps) {
         data-testid="donation-pix-compact"
       >
         <span className={`inline-flex items-center gap-1 font-bold ${accent}`}>
-          <Heart size={12} aria-hidden="true" /> {PIX_DONATION.label}
+          <Coffee size={12} aria-hidden="true" /> {PIX_DONATION.label}
         </span>
         <span className={mutedClasses}>·</span>
         <span className={mutedClasses}>Pix:</span>
@@ -94,7 +94,7 @@ export function DonationPix({ theme, variant }: DonationPixProps) {
     >
       <h3 className={`font-anton text-lg uppercase tracking-wide ${headingClasses}`}>
         <span className="inline-flex items-center gap-2">
-          <Heart size={18} className={accent} aria-hidden="true" />
+          <Coffee size={18} className={accent} aria-hidden="true" />
           {PIX_DONATION.label}
         </span>
       </h3>
