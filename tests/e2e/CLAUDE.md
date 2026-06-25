@@ -33,6 +33,7 @@ Playwright end-to-end specs for "Agora na Copa 26". The suite boots the dev serv
 | `match-chat.spec.ts` | Live-match chat ("Resenha ao vivo") on Ao Vivo: route-mocks `/api/chat/:matchId` to assert the closed-state panel (compose hidden, "opens at kickoff" note) and the live happy path (seeded message renders, posting an anonymous apelido appends + clears input + sends id/nickname/text); plus a real-server 404 for an unknown match id | 1.6 KB |
 | `donation-pix.spec.ts` | "Doe via Pix" block: Fan Zone full card (QR + "Pix Copia e Cola" copies a valid EMV payload) and the footer compact line (copies the Pix key); grants clipboard permission | 1.6 KB |
 | `version-timer.spec.ts` | Discreet version-update-check countdown beside the header title (`#version-check-timer`): renders m:ss or "nova versão" | 0.7 KB |
+| `partidas.spec.ts` | Partidas "Agendadas" list phase separators: a phase header (`partidas-phase-header`, e.g. `#partidas-phase-pre_game-16-avos-de-final`) splits group-stage from knockout fixtures | 0.9 KB |
 
 ## Fixtures
 

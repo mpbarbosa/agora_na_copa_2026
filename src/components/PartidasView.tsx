@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { Fragment, useMemo, useState } from "react";
 import type { Match, MatchStatus, TeamRef } from "../types";
 import { FlagIcon } from "./FlagIcon";
 
@@ -25,6 +25,13 @@ const FILTER_OPTIONS: MatchFilterOption[] = [
   { id: "LIVE", label: "Ao vivo", shortLabel: "Ao vivo" },
   { id: "FINISHED", label: "Encerradas", shortLabel: "Resultados" },
 ];
+
+// All group-stage matches share one phase; each knockout fixture's stageName
+// ("16 Avos de Final", "Oitavas de Final", … "Final") is its own phase. Used to
+// print a phase header in the list so the rounds are visually separated.
+const GROUP_STAGE_PHASE = "Fase de Grupos";
+const matchPhaseLabel = (match: Match): string =>
+  match.stageName === "Group Stage" ? GROUP_STAGE_PHASE : match.stageName;
 
 const STATUS_COPY: Record<
   MatchStatus,
@@ -148,6 +155,8 @@ export function PartidasView({ matches, theme, onSelectTeamLineup, onSelectMatch
       ? "border-slate-200 bg-white hover:border-slate-300"
       : "border-white/10 bg-[#15181a] hover:border-white/20";
   const stripBaseClasses = theme === "classic-light" ? "border-slate-200" : "border-white/10";
+  const phaseAccentClasses = theme === "classic-light" ? "text-[#065f2c]" : "text-[#ffd84d]";
+  const phaseDividerClasses = theme === "classic-light" ? "bg-slate-200" : "bg-white/10";
 
   // Suspended matches are in-progress (just stopped), so they live under the
   // "Ao vivo" tab alongside LIVE.
@@ -171,6 +180,13 @@ export function PartidasView({ matches, theme, onSelectTeamLineup, onSelectMatch
   const groupedMatches = useMemo(
     () => buildMatchGroups(activeFilter, activeMatches),
     [activeFilter, activeMatches],
+  );
+
+  // Only separate by phase when this filter actually spans more than one (e.g. the
+  // "Agendadas" tab now mixes group-stage and knockout fixtures).
+  const hasMultiplePhases = useMemo(
+    () => new Set(groupedMatches.map((group) => matchPhaseLabel(group.matches[0]))).size > 1,
+    [groupedMatches],
   );
 
   return (
@@ -233,9 +249,27 @@ export function PartidasView({ matches, theme, onSelectTeamLineup, onSelectMatch
               </p>
             </div>
           ) : (
-            groupedMatches.map((group) => (
+            groupedMatches.map((group, groupIndex) => {
+              const phase = matchPhaseLabel(group.matches[0]);
+              const previousPhase =
+                groupIndex > 0 ? matchPhaseLabel(groupedMatches[groupIndex - 1].matches[0]) : null;
+              const showPhaseHeader = hasMultiplePhases && phase !== previousPhase;
+
+              return (
+              <Fragment key={`${activeFilter}-${group.title}`}>
+                {showPhaseHeader && (
+                  <div
+                    id={`partidas-phase-${activeFilter.toLowerCase()}-${phase.replace(/\s+/g, "-").toLowerCase()}`}
+                    className="flex items-center gap-3 pt-2 first:pt-0"
+                    data-testid="partidas-phase-header"
+                  >
+                    <span className={`shrink-0 font-anton text-base uppercase tracking-[0.18em] ${phaseAccentClasses}`}>
+                      {phase}
+                    </span>
+                    <span className={`h-px flex-1 ${phaseDividerClasses}`} aria-hidden="true" />
+                  </div>
+                )}
               <section
-                key={`${activeFilter}-${group.title}`}
                 id={`partidas-group-${activeFilter.toLowerCase()}-${group.title.replace(/\s+/g, "-").toLowerCase()}`}
               >
                 <div className="mb-3 flex items-center justify-between gap-3">
@@ -422,7 +456,9 @@ export function PartidasView({ matches, theme, onSelectTeamLineup, onSelectMatch
                   })}
                 </div>
               </section>
-            ))
+              </Fragment>
+              );
+            })
           )}
         </div>
       </div>
