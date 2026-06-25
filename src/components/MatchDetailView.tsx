@@ -725,6 +725,20 @@ export function MatchDetailView({
     (matchSelectionMode === "auto" ||
       currentMatch.status === "LIVE" ||
       currentMatch.status === "SUSPENDED");
+  // Other matches kicking off at the exact same time as the current pre-game match
+  // (the final group round plays both of a group's games simultaneously). We surface
+  // them in the scoreboard so a simultaneous slot is as clear BEFORE kickoff as it is
+  // once the games go live (see SimultaneousLiveMatches for the live case).
+  const currentKickoffMs = new Date(currentMatch.kickoffTimestamp).getTime();
+  const simultaneousUpcomingMatches =
+    currentMatch.status === "PRE_GAME" && !Number.isNaN(currentKickoffMs)
+      ? matches.filter(
+          (match) =>
+            match.id !== currentMatch.id &&
+            match.status === "PRE_GAME" &&
+            new Date(match.kickoffTimestamp).getTime() === currentKickoffMs,
+        )
+      : [];
   const currentLineupPlayers = useMemo(
     () =>
       currentLineupEntry
@@ -1755,6 +1769,58 @@ export function MatchDetailView({
                 >
                   {currentMatchGroupLabel}
                 </button>
+              )}
+
+              {/* Simultaneous pré-jogo matches: another game kicks off at the very
+                  same time (final group round). Make it explicit and let the viewer
+                  jump to the sibling game, mirroring the live simultaneous treatment. */}
+              {simultaneousUpcomingMatches.length > 0 && (
+                <div
+                  className="flex flex-col items-center gap-1.5 pt-1"
+                  id="simultaneous-upcoming-matches"
+                  data-testid="simultaneous-upcoming-matches"
+                >
+                  <span
+                    className={`flex items-center gap-1.5 font-mono text-[10px] font-bold uppercase tracking-[0.18em] ${
+                      theme === "classic-light" ? "text-[#007a2f]" : "text-[#a7e6bf]"
+                    }`}
+                  >
+                    <span
+                      className="h-1.5 w-1.5 rounded-full bg-current animate-pulse"
+                      aria-hidden="true"
+                    />
+                    {simultaneousUpcomingMatches.length === 1
+                      ? "Jogo simultâneo"
+                      : "Jogos simultâneos"}
+                  </span>
+                  <div className="flex flex-wrap items-center justify-center gap-1.5">
+                    {simultaneousUpcomingMatches.map((m) => (
+                      <button
+                        key={m.id}
+                        type="button"
+                        id={`btn-simultaneous-${m.id}`}
+                        onClick={() => handleSelectMatch(m.id)}
+                        title={`${formatCountryNameForTooltip(m.teamA.name)} x ${formatCountryNameForTooltip(m.teamB.name)} — começa no mesmo horário`}
+                        aria-label={`Ver ${formatCountryNameForTooltip(m.teamA.name)} contra ${formatCountryNameForTooltip(m.teamB.name)}, que começa no mesmo horário`}
+                        className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 font-anton text-[11px] uppercase tracking-wide transition ${
+                          theme === "classic-light"
+                            ? "border-slate-200 bg-slate-100 text-slate-700 hover:border-[#009c3b]/40 hover:bg-[#009c3b]/10 hover:text-[#007a2f]"
+                            : "border-white/10 bg-white/5 text-slate-100 hover:border-[#00e476]/30 hover:bg-[#00e476]/10 hover:text-[#a7e6bf]"
+                        }`}
+                      >
+                        <FlagIcon
+                          flag={m.teamA.flagSvg}
+                          className="h-3.5 w-5 shrink-0 rounded-[2px] object-cover"
+                        />
+                        <span>{m.teamA.code} x {m.teamB.code}</span>
+                        <FlagIcon
+                          flag={m.teamB.flagSvg}
+                          className="h-3.5 w-5 shrink-0 rounded-[2px] object-cover"
+                        />
+                      </button>
+                    ))}
+                  </div>
+                </div>
               )}
 
             </div>
