@@ -1685,6 +1685,60 @@ export function MatchDetailView({
             </div>
           )}
 
+          {/* Simultaneous pré-jogo alert: another game kicks off at the very same
+              time (final group round). A bold, full-width banner at the TOP of the
+              card so the simultaneous slot is impossible to miss — and each sibling
+              chip jumps to that match. Mirrors the live SimultaneousLiveMatches case. */}
+          {simultaneousUpcomingMatches.length > 0 && (
+            <div
+              id="simultaneous-upcoming-matches"
+              data-testid="simultaneous-upcoming-matches"
+              className={`mb-5 flex flex-col items-center justify-center gap-2.5 rounded-2xl border-2 border-dashed px-4 py-3 text-center sm:flex-row sm:gap-3 ${
+                theme === "classic-light"
+                  ? "border-amber-300 bg-amber-50"
+                  : "border-amber-400/40 bg-amber-400/10"
+              }`}
+            >
+              <span
+                className={`flex items-center gap-2 font-anton text-sm uppercase tracking-wide ${
+                  theme === "classic-light" ? "text-amber-700" : "text-amber-300"
+                }`}
+              >
+                <Zap size={18} className="shrink-0 animate-pulse" aria-hidden="true" />
+                {simultaneousUpcomingMatches.length === 1
+                  ? "Atenção: outro jogo no mesmo horário"
+                  : "Atenção: outros jogos no mesmo horário"}
+              </span>
+              <div className="flex flex-wrap items-center justify-center gap-2">
+                {simultaneousUpcomingMatches.map((m) => (
+                  <button
+                    key={m.id}
+                    type="button"
+                    id={`btn-simultaneous-${m.id}`}
+                    onClick={() => handleSelectMatch(m.id)}
+                    title={`${formatCountryNameForTooltip(m.teamA.name)} x ${formatCountryNameForTooltip(m.teamB.name)} — começa no mesmo horário`}
+                    aria-label={`Ver ${formatCountryNameForTooltip(m.teamA.name)} contra ${formatCountryNameForTooltip(m.teamB.name)}, que começa no mesmo horário`}
+                    className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 font-anton text-sm uppercase tracking-wide transition ${
+                      theme === "classic-light"
+                        ? "border-amber-300 bg-white text-slate-800 hover:border-amber-400 hover:bg-amber-100"
+                        : "border-amber-400/30 bg-[#1a1c14] text-amber-50 hover:border-amber-300/60 hover:bg-amber-400/15"
+                    }`}
+                  >
+                    <FlagIcon
+                      flag={m.teamA.flagSvg}
+                      className="h-4 w-6 shrink-0 rounded-[2px] object-cover"
+                    />
+                    <span>{m.teamA.code} x {m.teamB.code}</span>
+                    <FlagIcon
+                      flag={m.teamB.flagSvg}
+                      className="h-4 w-6 shrink-0 rounded-[2px] object-cover"
+                    />
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
           <div
             className="flex flex-col items-center justify-between space-y-6 md:space-y-0 md:flex-row md:space-x-8"
             id="scoreboard-grid"
@@ -1769,58 +1823,6 @@ export function MatchDetailView({
                 >
                   {currentMatchGroupLabel}
                 </button>
-              )}
-
-              {/* Simultaneous pré-jogo matches: another game kicks off at the very
-                  same time (final group round). Make it explicit and let the viewer
-                  jump to the sibling game, mirroring the live simultaneous treatment. */}
-              {simultaneousUpcomingMatches.length > 0 && (
-                <div
-                  className="flex flex-col items-center gap-1.5 pt-1"
-                  id="simultaneous-upcoming-matches"
-                  data-testid="simultaneous-upcoming-matches"
-                >
-                  <span
-                    className={`flex items-center gap-1.5 font-mono text-[10px] font-bold uppercase tracking-[0.18em] ${
-                      theme === "classic-light" ? "text-[#007a2f]" : "text-[#a7e6bf]"
-                    }`}
-                  >
-                    <span
-                      className="h-1.5 w-1.5 rounded-full bg-current animate-pulse"
-                      aria-hidden="true"
-                    />
-                    {simultaneousUpcomingMatches.length === 1
-                      ? "Jogo simultâneo"
-                      : "Jogos simultâneos"}
-                  </span>
-                  <div className="flex flex-wrap items-center justify-center gap-1.5">
-                    {simultaneousUpcomingMatches.map((m) => (
-                      <button
-                        key={m.id}
-                        type="button"
-                        id={`btn-simultaneous-${m.id}`}
-                        onClick={() => handleSelectMatch(m.id)}
-                        title={`${formatCountryNameForTooltip(m.teamA.name)} x ${formatCountryNameForTooltip(m.teamB.name)} — começa no mesmo horário`}
-                        aria-label={`Ver ${formatCountryNameForTooltip(m.teamA.name)} contra ${formatCountryNameForTooltip(m.teamB.name)}, que começa no mesmo horário`}
-                        className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 font-anton text-[11px] uppercase tracking-wide transition ${
-                          theme === "classic-light"
-                            ? "border-slate-200 bg-slate-100 text-slate-700 hover:border-[#009c3b]/40 hover:bg-[#009c3b]/10 hover:text-[#007a2f]"
-                            : "border-white/10 bg-white/5 text-slate-100 hover:border-[#00e476]/30 hover:bg-[#00e476]/10 hover:text-[#a7e6bf]"
-                        }`}
-                      >
-                        <FlagIcon
-                          flag={m.teamA.flagSvg}
-                          className="h-3.5 w-5 shrink-0 rounded-[2px] object-cover"
-                        />
-                        <span>{m.teamA.code} x {m.teamB.code}</span>
-                        <FlagIcon
-                          flag={m.teamB.flagSvg}
-                          className="h-3.5 w-5 shrink-0 rounded-[2px] object-cover"
-                        />
-                      </button>
-                    ))}
-                  </div>
-                </div>
               )}
 
             </div>
