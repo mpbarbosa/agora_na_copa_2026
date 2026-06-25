@@ -285,6 +285,32 @@ export interface BracketNode {
   placeholderB?: string;
 }
 
+/** One side of a knockout fixture once the team is known (else the slot is a label). */
+export interface KnockoutTeamRef {
+  code: string;
+  name: string;
+}
+
+/**
+ * One official FIFA knockout fixture, as generated into `src/data/knockoutBracket.json`
+ * by `scripts/build-knockout-bracket.py` from the FIFA calendar API. `slotA`/`slotB`
+ * are official placeholder labels — group positions for R32 (`"2A"`, `"1L"`,
+ * `"3EHIJK"`) and winner/loser refs for later rounds (`"W74"`, `"RU101"`). `teamA`/
+ * `teamB` are filled once a team is confirmed (e.g. hosts), otherwise `null`. The
+ * `stage` set spans R32 → R16 → QF → SF → TP (3rd-place play-off) → F.
+ */
+export interface KnockoutMatch {
+  matchNumber: number; // 73 (first R32) … 104 (final)
+  stage: "R32" | "R16" | "QF" | "SF" | "TP" | "F";
+  dateUtc: string; // ISO 8601, e.g. "2026-06-28T19:00:00Z"
+  stadium: string;
+  city: string;
+  slotA: string;
+  slotB: string;
+  teamA: KnockoutTeamRef | null;
+  teamB: KnockoutTeamRef | null;
+}
+
 export interface NewsArticle {
   id: string;
   title: string;

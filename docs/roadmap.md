@@ -325,6 +325,19 @@ dependency** on Phase 1 for the auto-seed stretch goal only.
 
 ### Follow-up (2026-06-24): rebuild BracketView from `knockoutBracket.json`
 
+> **Status: ✅ Done (2026-06-25).** `BracketView` now renders read-only from
+> `src/data/knockoutBracket.json` (via `src/data/knockoutBracket.ts` + the new
+> `KnockoutMatch` type): six official stages (16 avos → final **+ 3º lugar**, the
+> #103 play-off that was missing), grouped by `stage`/`matchNumber`, with localized
+> Brasília dates, real stadium/city, and official slot labels humanized to pt-BR
+> (`Vencedor #74`, `Perdedor #101`, `3º E/H/I/J/K`). R32 group slots (`1A`/`2B`)
+> resolve provisionally from current standings (kept the `prov.`/`✓` seeding);
+> best-third combos and winner/loser refs render verbatim — no invented pairings.
+> The manual click-to-advance "pick your bracket" was **dropped** for v1 (it
+> conflicts with the official-slot model). `bracket.spec.ts` rewritten;
+> `polish.spec.ts` bracket-grid column count updated 5 → 6. A follow-up could layer
+> interactive picking on top once the structure is proven in prod.
+
 `BracketView` shipped, but its knockout pairings/dates/venues came from the
 hand-seeded `tournament.ts` skeleton and proved **wrong** vs. the official FIFA
 schedule (e.g. Brazil's R32 slot was mis-paired). The corrected source of truth

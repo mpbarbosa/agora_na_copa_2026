@@ -1,8 +1,18 @@
 import { test, expect } from "@playwright/test";
 import { collectAppConsoleErrors } from "./fixtures/consoleErrors";
 
+// The Chaveamento view renders the OFFICIAL FIFA knockout bracket from
+// src/data/knockoutBracket.json — read-only. R32 group slots ("2A") resolve
+// provisionally from current standings; later-round slots show official winner/
+// loser refs ("Vencedor #74", "Perdedor #101"). These assertions target the
+// deterministic official labels, dates and venues, not the volatile provisional
+// team resolution.
 test.describe("Bracket view (Chaveamento)", () => {
-  test("advances one full path to a champion and resets", async ({ page }) => {
+  test.beforeEach(async ({ page }) => {
+    await page.addInitScript(() => localStorage.setItem("feature-tour-seen", "1"));
+  });
+
+  test("renders the official bracket: six stages, all 32 fixtures, 3rd-place match", async ({ page }) => {
     const consoleErrors = collectAppConsoleErrors(page);
 
     await page.goto("/");
@@ -10,37 +20,51 @@ test.describe("Bracket view (Chaveamento)", () => {
 
     await expect(page.locator("#bracket-view")).toBeVisible();
 
-    await page.click("#bracket-pick-R32-1-a");
-    await page.click("#bracket-pick-R16-1-a");
-    await page.click("#bracket-pick-QF-1-a");
-    await page.click("#bracket-pick-SF-1-a");
-    await page.click("#bracket-pick-F-1-a");
+    // All six official stages, including the 3rd-place play-off (TP).
+    for (const stage of ["r32", "r16", "qf", "sf", "tp", "f"]) {
+      await expect(page.locator(`#bracket-stage-${stage}`)).toBeVisible();
+    }
 
-    await expect(page.locator("#bracket-champion-callout")).toBeVisible();
-    await expect(page.locator("#bracket-champion-name")).toHaveText("MÉXICO");
-
-    await page.click("#bracket-reset-button");
-
-    await expect(page.locator("#bracket-champion-callout")).toHaveCount(0);
-    await expect(page.locator("#bracket-pick-R16-1-a")).toContainText(
-      "Aguardando classificado",
-    );
+    // 32 knockout fixtures (matchNumber 73–104).
+    await expect(page.locator('#bracket-view [id^="bracket-match-"]')).toHaveCount(32);
 
     expect(consoleErrors).toEqual([]);
   });
 
-  test("fills the best-third knockout slots provisionally from current standings", async ({ page }) => {
+  test("shows official winner/loser slot labels, real dates and venues", async ({ page }) => {
     await page.goto("/");
+    await page.click("#btn-nav-chaveamento");
+    await expect(page.locator("#bracket-view")).toBeVisible();
+
+    // R16 #89 is fed by the winners of R32 #74 and #77 — deterministic official refs.
+    const r16 = page.locator("#bracket-match-89");
+    await expect(r16.locator("#bracket-slot-89-a")).toContainText("Vencedor #74");
+    await expect(r16.locator("#bracket-slot-89-b")).toContainText("Vencedor #77");
+
+    // The 3rd-place match (#103, TP) is fed by the two semifinal losers.
+    const thirdPlace = page.locator("#bracket-stage-tp #bracket-match-103");
+    await expect(thirdPlace).toBeVisible();
+    await expect(thirdPlace).toContainText("Perdedor #101");
+    await expect(thirdPlace).toContainText("Perdedor #102");
+    await expect(thirdPlace).toContainText("Miami");
+
+    // The final (#104) in New Jersey, with the localized Brasília kickoff (19:00Z → 16:00).
+    const final = page.locator("#bracket-stage-f #bracket-match-104");
+    await expect(final).toContainText("New Jersey");
+    await expect(final).toContainText("16:00");
+    await expect(final.locator("#bracket-slot-104-a")).toContainText("Vencedor #101");
+  });
+
+  test("renders correctly in dark theme without console errors", async ({ page }) => {
+    const consoleErrors = collectAppConsoleErrors(page);
+
+    await page.goto("/");
+    await page.click("#btn-toggle-theme").catch(() => {});
     await page.click("#btn-nav-chaveamento");
 
     await expect(page.locator("#bracket-view")).toBeVisible();
+    await expect(page.locator("#bracket-stage-tp")).toBeVisible();
 
-    // R32-13 holds the "Melhor 3º colocado #1/#2" placeholders. With group-stage
-    // results in, these slots are now seeded with the current best-third teams
-    // (shown as provisional) instead of the empty "Aguardando classificado".
-    const bestThirdPick = page.locator("#bracket-pick-R32-13-a");
-    await expect(bestThirdPick).toBeEnabled();
-    await expect(bestThirdPick).not.toContainText("Aguardando classificado");
-    await expect(bestThirdPick).toContainText("prov.");
+    expect(consoleErrors).toEqual([]);
   });
 });

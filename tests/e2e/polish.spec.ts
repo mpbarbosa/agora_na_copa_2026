@@ -49,6 +49,6 @@ test.describe("Phase 7 polish", () => {
       await page.locator("#bracket-stage-grid").evaluate((node) => {
         return window.getComputedStyle(node).gridTemplateColumns.split(" ").length;
       }),
-    ).toBe(5);
+    ).toBe(6); // six official stages: 16 avos → final + 3º lugar
   });
 });
