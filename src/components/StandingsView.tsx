@@ -23,6 +23,7 @@ interface StandingsViewProps {
   matches: Match[];
   theme: "classic-light" | "stadium-dark";
   onSelectTeamLineup: (team: TeamRef) => void;
+  onSelectMatch: (matchId: string) => void;
   focusGroupSlug?: string | null;
 }
 
@@ -56,6 +57,7 @@ export function StandingsView({
   matches,
   theme,
   onSelectTeamLineup,
+  onSelectMatch,
   focusGroupSlug = null,
 }: StandingsViewProps) {
   const [showRules, setShowRules] = useState(false);
@@ -526,6 +528,7 @@ export function StandingsView({
                 theme={theme}
                 slug={groupSlug(group)}
                 onSelectTeamLineup={onSelectTeamLineup}
+                onSelectMatch={onSelectMatch}
               />
             </div>
           );

@@ -8,6 +8,8 @@ interface GroupMatchHistoryProps {
   /** Slug used for stable element ids/testids, e.g. "grupo-a". */
   slug: string;
   onSelectTeamLineup: (team: TeamRef) => void;
+  /** Open a match's detail ("Partida") page, focused on this match. */
+  onSelectMatch: (matchId: string) => void;
 }
 
 /** "15/06" from an ISO kickoff timestamp like "2026-06-15T16:00:00-03:00". */
@@ -23,7 +25,7 @@ function shortDate(kickoffTimestamp: string): string {
  * "Análise do grupo" in each group card, mirroring that section's markup. Hidden
  * only when the group has no matches at all.
  */
-export function GroupMatchHistory({ matches, theme, slug, onSelectTeamLineup }: GroupMatchHistoryProps) {
+export function GroupMatchHistory({ matches, theme, slug, onSelectTeamLineup, onSelectMatch }: GroupMatchHistoryProps) {
   const isLight = theme === "classic-light";
 
   const ordered = [...matches].sort((a, b) =>
@@ -78,18 +80,20 @@ export function GroupMatchHistory({ matches, theme, slug, onSelectTeamLineup }: 
                 />
               </div>
 
-              {hasScore ? (
-                <span className={`shrink-0 font-bold tabular-nums ${live ? liveColor : headingClasses}`}>
-                  {m.score!.teamA}–{m.score!.teamB}
-                </span>
-              ) : (
-                <span
-                  className={`shrink-0 tabular-nums ${mutedClasses}`}
-                  title={`A jogar — ${m.kickoffDate}`}
-                >
-                  {m.kickoffTime}
-                </span>
-              )}
+              <button
+                type="button"
+                onClick={() => onSelectMatch(m.id)}
+                title={`Abrir a partida ${m.teamA.code} x ${m.teamB.code}`}
+                aria-label={`Abrir a partida ${m.teamA.name} contra ${m.teamB.name}`}
+                data-testid={`group-history-match-link-${m.id}`}
+                className={`shrink-0 rounded tabular-nums underline-offset-2 transition hover:underline ${
+                  hasScore
+                    ? `font-bold ${live ? liveColor : headingClasses}`
+                    : mutedClasses
+                } ${isLight ? "hover:text-[#007a2f]" : "hover:text-[#00e476]"}`}
+              >
+                {hasScore ? `${m.score!.teamA}–${m.score!.teamB}` : m.kickoffTime}
+              </button>
 
               <div className="flex flex-1 items-center gap-1.5 overflow-hidden">
                 <FlagIcon
