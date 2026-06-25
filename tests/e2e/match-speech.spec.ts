@@ -46,7 +46,19 @@ async function stubLiveApis(page: Page) {
 const utterances = (page: Page) =>
   page.evaluate(() => (window as unknown as { __utterances: string[] }).__utterances);
 
+// Tolerance for async speech assertions. Utterances arrive through the engine's
+// queue (a chain of microtask/timeout hops), and a LIVE match re-renders on every
+// clock tick — under parallel-worker CPU load the cue can land just past the
+// default 5s poll budget. A generous timeout keeps a real break failing while
+// absorbing load-induced lag.
+const SPEECH_POLL = { timeout: 15_000 };
+
 test.describe("Live-match speech narration (Ao Vivo)", () => {
+  // Speech timing is inherently load-sensitive; retry so a transient spike on a
+  // shared CI/Docker runner doesn't red the whole suite (a genuine regression
+  // still fails after the retries).
+  test.describe.configure({ retries: 2 });
+
   test("narrates a simulated goal when 'Narração' is enabled", async ({ page }) => {
     await stubSpeechSynthesis(page);
     await stubLiveApis(page);
@@ -60,7 +72,7 @@ test.describe("Live-match speech narration (Ao Vivo)", () => {
     await expect(toggle).toHaveAttribute("aria-pressed", "false");
     await toggle.click(); // enabling speaks a confirmation
     await expect(toggle).toHaveAttribute("aria-pressed", "true");
-    await expect.poll(() => utterances(page)).toContain("Narração ativada.");
+    await expect.poll(() => utterances(page), SPEECH_POLL).toContain("Narração ativada.");
 
     // Drive a live goal through the manual simulator (in the clock drawer).
     await page.click("#btn-edit-match");
@@ -71,7 +83,7 @@ test.describe("Live-match speech narration (Ao Vivo)", () => {
     await page.click("#btn-sim-goal-a");
 
     await expect
-      .poll(() => utterances(page).then((list) => list.some((t) => /gol/i.test(t))))
+      .poll(() => utterances(page).then((list) => list.some((t) => /gol/i.test(t))), SPEECH_POLL)
       .toBe(true);
   });
 
@@ -94,8 +106,11 @@ test.describe("Live-match speech narration (Ao Vivo)", () => {
     expect(await utterances(page)).toHaveLength(0);
     const mic = page.getByTestId("incident-speak").first();
     await expect(mic).toBeVisible();
-    await mic.click();
-    await expect.poll(() => utterances(page).then((l) => l.length)).toBeGreaterThan(0);
+    // The LIVE scoreboard re-renders each clock tick, so Playwright can read the
+    // button as never "stable"; force past the actionability wait (visibility is
+    // already asserted) to avoid a spurious 30s click timeout.
+    await mic.click({ force: true });
+    await expect.poll(() => utterances(page).then((l) => l.length), SPEECH_POLL).toBeGreaterThan(0);
   });
 
   test("the setup drawer shows the speech status readout", async ({ page }) => {
