@@ -1,7 +1,7 @@
 {
   "name": "agora-na-copa-2026",
   "private": true,
-  "version": "0.0.383",
+  "version": "0.0.384",
   "type": "module",
   "scripts": {
     "dev": "tsx server.ts",
