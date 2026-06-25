@@ -509,6 +509,31 @@ restores a green automated release path. Belongs in `agora-dev`.
 
 ---
 
+### Follow-up (2026-06-25): star performance notes blocked on live round-3 matches
+
+> **Status: ✅ Done (2026-06-25).** Both round-3 games finished and both notes
+> shipped, grounded in the final incidents/standings (seed reconciled first):
+> - **Nicolas Pépé (CIV, `402261`)** — fringe in the first two games, then a
+>   **decisive brace** (7' + 64', plus a 34' yellow) in CIV's 2-0 win over Curaçao
+>   that sealed **2nd place** and qualification. Note reflects the "reserva que
+>   decidiu" arc.
+> - **Leroy Sané (GER, `404353`)** — quiet first two games (hooked 60' vs CIV),
+>   scored GER's early opener (2') vs Ecuador, but GER **lost 2-1** (Angulo 9',
+>   Plata 77'); Germany still topped the group on goal difference. Note frames it
+>   honestly as a consolation goal in a modest tournament.
+> Both `worldCupNoteUpdatedAt` stamped to the round-3 kickoff. No manufactured star
+> arc — grounded in real incidents only.
+
+**Process note (kept as a standing rule):** never write match/group/player
+editorial during a LIVE match — wait for FINISHED (the seed/leaders feeds lag and
+live scores still change). This case proved it twice over: at write-time Pépé had
+1 live goal (finished with 2) and Sané's GER were drawing 1-1 (finished losing
+2-1). Same safeguard already encoded in the `update-group-analysis` skill.
+
+**Outcome**: shipped 2026-06-25 (data-side: test → commit → sync).
+
+---
+
 ## 15. Sequencing & dependency graph
 
 ```

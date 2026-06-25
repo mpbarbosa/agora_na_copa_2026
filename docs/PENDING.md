@@ -38,6 +38,7 @@ land. **Last updated: 2026-06-22.**
 
 - [ ] **Player `pictureUrl` coverage** — 46 of 374 players missing (per [[project_picture_url_coverage]]).
 - [ ] **`analyze-match` sentence length** — generate shorter sentences for readability (from the Prévia readability assessment).
+- [x] **Star notes for Pépé (CIV `402261`) & Sané (GER `404353`)** — ✅ done 2026-06-25. Both round-3 games finished; notes shipped grounded in final incidents/standings. Pépé scored a decisive brace (CIV 2-0, 2nd place); Sané scored GER's opener in a 2-1 loss (GER still topped the group). Detail in `docs/roadmap.md` (Follow-up 2026-06-25). **Rule reaffirmed:** never write match/group/player editorial during a LIVE match — wait for FINISHED.
 
 ## ⚪ Benign — no action needed (recorded so they don't get re-investigated)
 
