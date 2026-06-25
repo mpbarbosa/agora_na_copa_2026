@@ -466,6 +466,15 @@ automated checks are introduced.
 
 ### Follow-up (2026-06-25): make `navigation:134` deterministic (live-data flake)
 
+> **Status: ✅ Done (2026-06-25).** The test now stubs `**/api/match-overlays`
+> to return empty overlays, so every match keeps its curated `fifaScheduledMatches.ts`
+> seed status and the finished/upcoming rails no longer depend on the wall-clock.
+> The negative case was switched from `cze-mex-2026` (which the seed reconciled to
+> FINISHED) to `jor-arg-2026` — a matchday-3 game that is PRE_GAME in the seed with
+> no analysis entry. Full `navigation.spec.ts` is 12/12; the e2e gate is green
+> again. (Maintenance note: if `jor-arg` later gains an analysis or is reconciled to
+> FINISHED, swap it for another seed-PRE_GAME, analysis-free fixture.)
+
 `tests/e2e/navigation.spec.ts:134` ("shows the match analysis panel for a match
 that has one") fails as the tournament calendar advances. Its negative case
 (line 152) clicks `#match-selector-chips-PRE_GAME #btn-match-cze-mex-2026`,

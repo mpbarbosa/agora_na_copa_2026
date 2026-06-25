@@ -132,6 +132,16 @@ test.describe("Navigation shell", () => {
   });
 
   test("shows the match analysis panel for a match that has one", async ({ page }) => {
+    // Pin match statuses to the curated seed (no live overlays) so this test does
+    // not depend on the wall-clock date: with empty overlays every match keeps its
+    // src/data/fifaScheduledMatches.ts status, so the finished/upcoming rails stay
+    // deterministic regardless of which fixtures happen to be live when the suite runs.
+    await page.route("**/api/match-overlays", (route) =>
+      route.fulfill({
+        json: { overlays: {}, refreshAfterMs: 60000, source: "fifa", note: "", updatedAt: "2026-06-25T00:00:00.000Z" },
+      }),
+    );
+
     await page.goto("/");
 
     await page.click("#match-selector-chips-finished #btn-match-esp-cpv-2026");
@@ -145,11 +155,11 @@ test.describe("Navigation shell", () => {
     await expect(analysis).toContainText("Leitura");
 
     // A match without an analysis entry exposes neither the tab nor the panel.
-    // Every FINISHED match now carries a recap, so the negative case uses an
-    // upcoming match with no analysis entry (a later-round group game) from the
-    // always-visible header "Próximos jogos" selector.
+    // Every FINISHED match now carries a recap, so the negative case uses a
+    // matchday-3 group game that is PRE_GAME in the seed and has no analysis entry
+    // (JOR×ARG), reached from the always-visible header "Próximos jogos" selector.
     await page.click("#btn-tab-broadcast");
-    await page.click("#match-selector-chips-PRE_GAME #btn-match-cze-mex-2026");
+    await page.click("#match-selector-chips-PRE_GAME #btn-match-jor-arg-2026");
     await expect(page.locator("#btn-tab-pregame")).toHaveCount(0);
     await expect(page.getByTestId("match-analysis")).toHaveCount(0);
   });
