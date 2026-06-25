@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import { collectAppConsoleErrors } from "./fixtures/consoleErrors";
 
 test.describe("Redes Sociais view", () => {
   // Block Instagram's embed.js so the embedded FIFA reel stays as the raw,
@@ -10,19 +11,10 @@ test.describe("Redes Sociais view", () => {
   });
 
   test("filters, likes and comments work without console errors", async ({ page }) => {
-    // The FIFA card embeds an Instagram reel via Instagram's embed.js, which logs
-    // its own internal errors (ErrorUtils / fburl.com) when network is available.
-    // Those are third-party and outside our control, so ignore them and only
-    // assert on errors originating from our own code.
-    const IGNORED_CONSOLE_NOISE = [/instagram\.com/i, /ErrorUtils caught an error/i, /fburl\.com/i];
-    const consoleErrors: string[] = [];
-    page.on("console", (msg) => {
-      if (msg.type() !== "error") return;
-      const text = msg.text();
-      const url = msg.location()?.url ?? "";
-      if (IGNORED_CONSOLE_NOISE.some((re) => re.test(text) || re.test(url))) return;
-      consoleErrors.push(text);
-    });
+    // The FIFA card embeds an Instagram reel whose embed.js logs its own errors;
+    // the helper ignores that third-party noise (and transient network blips) and
+    // gates only on errors from our own code.
+    const consoleErrors = collectAppConsoleErrors(page);
 
     await page.goto("/");
     await page.click("#btn-nav-social-medias");

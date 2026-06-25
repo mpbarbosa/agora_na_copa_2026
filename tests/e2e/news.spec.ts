@@ -1,13 +1,11 @@
 import { test, expect } from "@playwright/test";
+import { collectAppConsoleErrors } from "./fixtures/consoleErrors";
 
 const FILTERS = ["sedes", "ingressos", "equipes", "geral"] as const;
 
 test.describe("News view (Notícias)", () => {
   test("category filters render at least one card per category", async ({ page }) => {
-    const consoleErrors: string[] = [];
-    page.on("console", (msg) => {
-      if (msg.type() === "error") consoleErrors.push(msg.text());
-    });
+    const consoleErrors = collectAppConsoleErrors(page);
 
     await page.goto("/");
     await page.click("#btn-nav-noticias");

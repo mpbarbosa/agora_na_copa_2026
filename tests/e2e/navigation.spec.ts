@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import { collectAppConsoleErrors } from "./fixtures/consoleErrors";
 
 import { NAV_ITEMS } from "../../src/navigation";
 
@@ -18,10 +19,7 @@ const NAV_VIEW_IDS: Record<string, string> = {
 
 test.describe("Navigation shell", () => {
   test("loads with the Ao Vivo view by default", async ({ page }) => {
-    const consoleErrors: string[] = [];
-    page.on("console", (msg) => {
-      if (msg.type() === "error") consoleErrors.push(msg.text());
-    });
+    const consoleErrors = collectAppConsoleErrors(page);
 
     await page.goto("/");
 
@@ -184,18 +182,9 @@ test.describe("Navigation shell", () => {
     // With 11 tabs it runs long under Docker load, so give it extra headroom
     // beyond the 30s default.
     test.setTimeout(90_000);
-    const consoleErrors: string[] = [];
-    // The "Redes Sociais" tab embeds Instagram's widget (embed.js), which logs
-    // its own errors to the console when it can't reach instagram.com — e.g. in
-    // the sandboxed Docker e2e environment. That noise is third-party and not an
-    // app bug, so filter it out while still gating on our own console errors.
-    const THIRD_PARTY_NOISE = /instagram\.com|fburl\.com|connect\.facebook|ErrorUtils caught/;
-    page.on("console", (msg) => {
-      if (msg.type() !== "error") return;
-      const text = msg.text();
-      if (THIRD_PARTY_NOISE.test(text)) return;
-      consoleErrors.push(text);
-    });
+    // Ignores transient transport-level network blips and third-party widget noise
+    // (e.g. the Instagram embed on "Redes Sociais") while gating on our own errors.
+    const consoleErrors = collectAppConsoleErrors(page);
 
     await page.goto("/");
 

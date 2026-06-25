@@ -1,11 +1,9 @@
 import { test, expect } from "@playwright/test";
+import { collectAppConsoleErrors } from "./fixtures/consoleErrors";
 
 test.describe("Venue map view (Estádios)", () => {
   test("clicking a pin populates the venue details panel", async ({ page }) => {
-    const consoleErrors: string[] = [];
-    page.on("console", (msg) => {
-      if (msg.type() === "error") consoleErrors.push(msg.text());
-    });
+    const consoleErrors = collectAppConsoleErrors(page);
 
     await page.goto("/");
     await page.click("#btn-nav-estadios");
@@ -27,10 +25,7 @@ test.describe("Venue map view (Estádios)", () => {
   });
 
   test("clicking a pin works in dark theme too", async ({ page }) => {
-    const consoleErrors: string[] = [];
-    page.on("console", (msg) => {
-      if (msg.type() === "error") consoleErrors.push(msg.text());
-    });
+    const consoleErrors = collectAppConsoleErrors(page);
 
     await page.goto("/");
     await page.click("#btn-toggle-theme");

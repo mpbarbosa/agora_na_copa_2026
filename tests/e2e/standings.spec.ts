@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import { collectAppConsoleErrors } from "./fixtures/consoleErrors";
 
 const GROUP_IDS = Array.from({ length: 12 }, (_, index) => {
   const letter = String.fromCharCode("a".charCodeAt(0) + index);
@@ -28,10 +29,7 @@ const GROUP_EXPECTATIONS: GroupExpectation[] = [
 
 test.describe("Standings view (Grupos)", () => {
   test("refreshes the group table after a match update", async ({ page }) => {
-    const consoleErrors: string[] = [];
-    page.on("console", (msg) => {
-      if (msg.type() === "error") consoleErrors.push(msg.text());
-    });
+    const consoleErrors = collectAppConsoleErrors(page);
 
     await page.route("**/api/match-overlays", async (route) => {
       await route.fulfill({
@@ -121,10 +119,7 @@ test.describe("Standings view (Grupos)", () => {
   });
 
   test("renders all 12 group tables with headers and rows", async ({ page }) => {
-    const consoleErrors: string[] = [];
-    page.on("console", (msg) => {
-      if (msg.type() === "error") consoleErrors.push(msg.text());
-    });
+    const consoleErrors = collectAppConsoleErrors(page);
 
     await page.goto("/");
     await page.click("#btn-nav-grupos");
@@ -170,10 +165,7 @@ test.describe("Standings view (Grupos)", () => {
   });
 
   test("renders correctly in dark theme", async ({ page }) => {
-    const consoleErrors: string[] = [];
-    page.on("console", (msg) => {
-      if (msg.type() === "error") consoleErrors.push(msg.text());
-    });
+    const consoleErrors = collectAppConsoleErrors(page);
 
     await page.goto("/");
     await page.click("#btn-nav-grupos");
