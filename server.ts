@@ -43,6 +43,7 @@ const TEAM_ANALYSIS_BY_CODE = TEAM_ANALYSIS as Record<
   { text: string; updatedAt: string | null }
 >;
 import { computeStandings, groupStandings } from "./src/standings";
+import { buildPrediction, type PredictionTeam } from "./predict-core";
 import {
   Position,
   type BroadcastGuideEntry,
@@ -2357,6 +2358,57 @@ app.get("/api/fifa-sync-status", (_req, res) => {
 app.get("/api/questions", (_req, res) => {
   res.set("Cache-Control", "no-store");
   res.json(TRIVIA_QUESTIONS);
+});
+
+// POST /api/predict — Fan Zone match predictor. Body { homeTeam, awayTeam, userNotes? }
+// where home/awayTeam are team codes (or names). Returns { text (pt-BR markdown),
+// simulated: true } built by the deterministic predict-core heuristic from each
+// team's REAL current standings. No AI dependency, no env var, no failure mode —
+// always "simulated". Not FIFA-sourced, so it carries no resilience shape.
+app.post("/api/predict", (req, res) => {
+  res.set("Cache-Control", "no-store");
+  const body = (req.body ?? {}) as { homeTeam?: unknown; awayTeam?: unknown; userNotes?: unknown };
+  const homeKey = typeof body.homeTeam === "string" ? body.homeTeam.trim() : "";
+  const awayKey = typeof body.awayTeam === "string" ? body.awayTeam.trim() : "";
+  const userNotes = typeof body.userNotes === "string" ? body.userNotes : undefined;
+
+  if (!homeKey || !awayKey) {
+    res.status(400).json({ error: "Informe as duas seleções (homeTeam e awayTeam)." });
+    return;
+  }
+  if (homeKey.toUpperCase() === awayKey.toUpperCase()) {
+    res.status(400).json({ error: "Escolha duas seleções diferentes." });
+    return;
+  }
+
+  const rows = computeStandings(APP_MATCHES);
+  const byKey = new Map<string, (typeof rows)[number]>();
+  for (const row of rows) {
+    byKey.set(row.code.toUpperCase(), row);
+    byKey.set(row.name.toUpperCase(), row);
+  }
+
+  const home = byKey.get(homeKey.toUpperCase());
+  const away = byKey.get(awayKey.toUpperCase());
+  if (!home || !away) {
+    res.status(404).json({ error: "Seleção não encontrada." });
+    return;
+  }
+
+  const toTeam = (row: (typeof rows)[number]): PredictionTeam => ({
+    name: row.name,
+    code: row.code,
+    points: row.points,
+    played: row.played,
+    won: row.won,
+    drawn: row.drawn,
+    lost: row.lost,
+    goalsFor: row.goalsFor,
+    goalsAgainst: row.goalsAgainst,
+    goalDifference: row.goalDifference,
+  });
+
+  res.json({ text: buildPrediction(toTeam(home), toTeam(away), userNotes), simulated: true });
 });
 
 // In-memory "online users" presence, counted by DISTINCT (IP + per-browser id).

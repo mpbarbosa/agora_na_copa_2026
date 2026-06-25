@@ -330,6 +330,17 @@ export interface TriviaQuestion {
   explanation: string;
 }
 
+/**
+ * Response of `POST /api/predict` — the Fan Zone match predictor. `text` is pt-BR
+ * markdown (`## Section` blocks). `simulated` is true whenever the forecast came from
+ * the deterministic heuristic rather than a real AI model (always true in this build,
+ * which ships no AI dependency).
+ */
+export interface PredictionResponse {
+  text: string;
+  simulated: boolean;
+}
+
 export interface TournamentPlayerLeader {
   id: string;
   name: string;

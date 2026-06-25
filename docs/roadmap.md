@@ -368,6 +368,17 @@ a real failure, not cosmetic. Pairings were taken verbatim from
 
 ## 12. Phase 5 — Fan Zone + Gemini AI (gated on scope confirmation)
 
+> **Status: ✅ Done — simulated-only variant (2026-06-25).** Per the scope gate,
+> the predictor shipped **without** any AI dependency: `POST /api/predict` returns
+> `{ text, simulated: true }` from `predict-core.ts` — a deterministic heuristic
+> over each team's REAL current standings (no `@google/genai`, no `GEMINI_API_KEY`,
+> no startup/cost surface, no failure mode). The Fan Zone gained the predictor panel
+> (two selectors + notes → markdown prognosis with a "Simulado" badge) alongside the
+> trivia + penalty mini-games that already existed. Covered by `predict-core.test.ts`
+> and a `fanzone.spec.ts` e2e. A future follow-up could layer a real Gemini call
+> behind the optional key, falling back to this heuristic when the key is absent —
+> the endpoint already returns `simulated` to make that swap transparent.
+
 This phase introduces a genuinely new dependency (`@google/genai`) and an
 external API cost surface. **Confirm product scope before starting.** It also
 carries the highest production-risk profile in the roadmap because it's the only

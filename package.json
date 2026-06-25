@@ -9,7 +9,7 @@
     "start": "node dist/server.cjs",
     "clean": "rm -rf dist server.js",
     "lint": "tsc --noEmit",
-    "test:unit": "node --import tsx --test tests/fifa-sync-core.test.ts tests/trends-core.test.ts tests/weather-core.test.ts tests/venue-coordinates.test.ts tests/analysis-freshness.test.ts tests/match-speech.test.ts tests/disciplinary.test.ts tests/pix-brcode.test.ts tests/presence-core.test.ts tests/chat-core.test.ts",
+    "test:unit": "node --import tsx --test tests/fifa-sync-core.test.ts tests/trends-core.test.ts tests/weather-core.test.ts tests/venue-coordinates.test.ts tests/analysis-freshness.test.ts tests/match-speech.test.ts tests/disciplinary.test.ts tests/pix-brcode.test.ts tests/presence-core.test.ts tests/chat-core.test.ts tests/predict-core.test.ts",
     "test:e2e": "playwright test",
     "test:e2e:prod": "playwright test --config=playwright.prod.config.ts",
     "sync-matches": "python3 scripts/sync-match-results.py --verbose",
