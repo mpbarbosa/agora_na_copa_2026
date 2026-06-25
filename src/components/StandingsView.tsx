@@ -245,15 +245,18 @@ export function StandingsView({
           const seedCount = rows.filter((row) => row.dataSource === "seed").length;
           const isFocusedGroup = resolvedFocusGroupSlug === groupSlug(group);
           const groupCodes = new Set(rows.map((r) => r.code));
+          const groupMatches = liveMatches.filter(
+            (m) => groupCodes.has(m.teamA.code) && groupCodes.has(m.teamB.code),
+          );
           // The final round plays both of a group's matches simultaneously, so a
           // group can have more than one live match at once — show them all.
-          const liveGroupMatches = liveMatches.filter(
-            (m) =>
-              m.status === "LIVE" &&
-              groupCodes.has(m.teamA.code) &&
-              groupCodes.has(m.teamB.code),
-          );
+          const liveGroupMatches = groupMatches.filter((m) => m.status === "LIVE");
           const hasLive = liveGroupMatches.length > 0;
+          // Group stage closed for this chave: every fixture played, none left to
+          // schedule or in progress.
+          const groupFinished =
+            groupMatches.length > 0 &&
+            groupMatches.every((m) => m.status === "FINISHED");
           const liveColor = theme === "classic-light" ? "text-red-600" : "text-red-400";
 
           return (
@@ -280,6 +283,18 @@ export function StandingsView({
                   <span className={`inline-flex items-center gap-1 font-mono text-[9px] uppercase tracking-wider ${liveColor}`}>
                     <span className="inline-block w-1.5 h-1.5 rounded-full animate-pulse bg-current" />
                     Ao Vivo
+                  </span>
+                )}
+                {groupFinished && (
+                  <span
+                    className={`ml-auto inline-flex shrink-0 items-center rounded-full border px-2 py-0.5 font-mono text-[9px] font-bold uppercase tracking-wider ${
+                      theme === "classic-light"
+                        ? "border-slate-200 bg-slate-100 text-slate-500"
+                        : "border-white/10 bg-white/5 text-slate-400"
+                    }`}
+                    data-testid={`group-finished-${groupSlug(group)}`}
+                  >
+                    Encerrado
                   </span>
                 )}
               </div>
@@ -456,11 +471,7 @@ export function StandingsView({
                 if (!analysis) return null;
                 // Up to date when the analysis was authored at/after the group's
                 // most recent finished match (live-polled statuses).
-                const groupLastFinished = lastFinishedKickoff(
-                  liveMatches.filter(
-                    (m) => groupCodes.has(m.teamA.code) && groupCodes.has(m.teamB.code),
-                  ),
-                );
+                const groupLastFinished = lastFinishedKickoff(groupMatches);
                 const groupUpToDate = isAnalysisUpToDate(analysis.updatedAt, groupLastFinished);
                 return (
                   <details
@@ -511,9 +522,7 @@ export function StandingsView({
               })()}
 
               <GroupMatchHistory
-                matches={liveMatches.filter(
-                  (m) => groupCodes.has(m.teamA.code) && groupCodes.has(m.teamB.code),
-                )}
+                matches={groupMatches}
                 theme={theme}
                 slug={groupSlug(group)}
                 onSelectTeamLineup={onSelectTeamLineup}
