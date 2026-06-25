@@ -112,10 +112,14 @@ test.describe("Standings view (Grupos)", () => {
 
     await page.click("#btn-nav-grupos");
 
-    await expect(page.locator("#standings-cell-bra-played")).toHaveText("2");
-    await expect(page.locator("#standings-cell-bra-points")).toHaveText("6");
-    await expect(page.locator("#standings-cell-bra-goalsFor")).toHaveText("4");
-    await expect(page.locator("#standings-cell-mar-points")).toHaveText("3");
+    // Group C is concluded in the seed (BRA–HAI 3–0, SCO–BRA 0–3), so BRA has two
+    // real finished games; the simulator overlays bra-mar as a BRA 1–0 win on top.
+    // BRA: 3 played, 3 wins = 9 pts, 3+3+1 = 7 goals for. MAR's simulated bra-mar
+    // loss drops it to 6 pts (two real wins, no draw).
+    await expect(page.locator("#standings-cell-bra-played")).toHaveText("3");
+    await expect(page.locator("#standings-cell-bra-points")).toHaveText("9");
+    await expect(page.locator("#standings-cell-bra-goalsFor")).toHaveText("7");
+    await expect(page.locator("#standings-cell-mar-points")).toHaveText("6");
   });
 
   test("renders all 12 group tables with headers and rows", async ({ page }) => {
