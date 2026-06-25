@@ -192,6 +192,11 @@ export function PartidasView({ matches, theme, onSelectTeamLineup, onSelectMatch
     () => new Set(groupedMatches.map((group) => matchPhaseLabel(group.matches[0]))).size > 1,
     [groupedMatches],
   );
+  // Render the per-phase collapsible headers when the filter spans multiple phases,
+  // and always on "Encerradas" — so finished results carry a phase header (e.g.
+  // "Fase de Grupos") exactly like the scheduled list, even before any knockout
+  // round has been played yet (single phase).
+  const showPhaseSections = hasMultiplePhases || activeFilter === "FINISHED";
 
   // Collapse the date-sections into one entry per phase so each phase's fixtures
   // can live inside a single collapsible <details>. Only meaningful when the
@@ -511,14 +516,20 @@ export function PartidasView({ matches, theme, onSelectTeamLineup, onSelectMatch
                 Nenhuma partida nesta faixa no momento.
               </p>
             </div>
-          ) : hasMultiplePhases ? (
-            // Multiple phases (e.g. "Agendadas" mixes group + knockout): each phase's
-            // fixtures collapse into their own <details>, headed by the phase summary.
+          ) : showPhaseSections ? (
+            // Multiple phases (e.g. "Agendadas" mixes group + knockout) or the
+            // "Encerradas" filter: each phase's fixtures collapse into their own
+            // <details>, headed by the phase summary.
             phaseSections.map((section) => {
               const phaseSlug = section.phase.replace(/\s+/g, "-").toLowerCase();
               return (
                 <details
                   key={`${activeFilter}-${section.phase}`}
+                  // Scheduled/live span many phases → collapse them so the headers can
+                  // be scanned. "Encerradas" is the results list, so open it by default
+                  // (a constant per filter keeps it uncontrolled — users can still
+                  // collapse it and a re-render won't reopen it).
+                  open={activeFilter === "FINISHED"}
                   className="group"
                   data-testid="partidas-phase"
                 >
