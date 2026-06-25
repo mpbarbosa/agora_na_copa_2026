@@ -59,6 +59,12 @@ export function ThirdPlaceTable({ groups, theme, onSelectTeamLineup }: ThirdPlac
               <th className={`py-1.5 text-left font-normal uppercase tracking-wider ${headerCellClasses}`}>
                 Equipe
               </th>
+              <th
+                className={`px-1 py-1.5 text-right font-normal uppercase tracking-wider ${headerCellClasses}`}
+                title="Jogos disputados (encerrados + em andamento)"
+              >
+                J
+              </th>
               <th className={`px-1 py-1.5 text-right font-normal uppercase tracking-wider font-bold ${headingClasses}`}>
                 PTS
               </th>
@@ -107,6 +113,9 @@ export function ThirdPlaceTable({ groups, theme, onSelectTeamLineup }: ThirdPlac
                       />
                       <span title={row.name}>{row.code}</span>
                     </div>
+                  </td>
+                  <td className={`whitespace-nowrap px-1 py-1.5 text-right ${mutedClasses}`}>
+                    {row.played}
                   </td>
                   <td className={`whitespace-nowrap px-1 py-1.5 text-right font-bold text-sm ${qualifies ? accent : headingClasses}`}>
                     {row.points}
