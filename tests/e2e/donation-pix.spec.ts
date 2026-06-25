@@ -3,6 +3,11 @@ import { test, expect } from "@playwright/test";
 const PIX_KEY = "4a1248a0-93de-4f65-8e17-cf5ac4a147a9";
 
 test.describe("Pix donation block", () => {
+  // Suppress the first-visit feature tour so its Driver.js overlay can't intercept clicks.
+  test.beforeEach(async ({ page }) => {
+    await page.addInitScript(() => localStorage.setItem("feature-tour-seen", "1"));
+  });
+
   test("Fan Zone shows the full donation card with a QR and a working Pix Copia e Cola", async ({
     page,
     context,

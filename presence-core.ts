@@ -1,19 +1,19 @@
 // Pure in-memory "online users" presence logic, extracted from server.ts so it can
-// be unit-tested independently. A presence store maps a client session id to the
-// epoch-ms timestamp of its last heartbeat; a session counts as "online" while its
-// last heartbeat is within the presence window. Single-instance only (in-memory).
+// be unit-tested independently. A presence store maps a client KEY (the request IP)
+// to the epoch-ms timestamp of its last heartbeat; a key counts as "online" while
+// its last heartbeat is within the presence window. Single-instance only (in-memory).
 
 export type PresenceStore = Map<string, number>;
 
-/** Record (or refresh) a session's heartbeat at `nowMs`. Ignores empty ids. */
-export function recordHeartbeat(store: PresenceStore, id: string, nowMs: number): void {
-  if (id) store.set(id, nowMs);
+/** Record (or refresh) a client key's heartbeat at `nowMs`. Ignores an empty key. */
+export function recordHeartbeat(store: PresenceStore, key: string, nowMs: number): void {
+  if (key) store.set(key, nowMs);
 }
 
 /**
- * Count sessions whose last heartbeat is within `windowMs` of `nowMs`, pruning any
- * older entries from the store as a side effect (keeps memory bounded). Returns the
- * live count.
+ * Count keys whose last heartbeat is within `windowMs` of `nowMs`, pruning any older
+ * entries from the store as a side effect (keeps memory bounded). Returns the live
+ * count of distinct online keys.
  */
 export function countOnline(store: PresenceStore, nowMs: number, windowMs: number): number {
   let online = 0;

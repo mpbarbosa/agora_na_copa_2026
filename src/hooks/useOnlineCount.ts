@@ -1,29 +1,34 @@
 import { useEffect, useState } from "react";
 
 const PRESENCE_POLL_MS = 25 * 1000; // < the server's 45s window, so 1 miss is tolerated
-const SESSION_KEY = "agora:presence-id";
+const CLIENT_ID_KEY = "agora:client-id";
 
-/** A stable-per-tab id used to identify this session to the presence endpoint. */
-function getSessionId(): string {
+/**
+ * A stable per-browser id (persisted in localStorage, so it survives tabs/reloads).
+ * Sent with the heartbeat so the server can count distinct browsers behind one IP —
+ * separating co-located users while deduping one browser's tabs. Empty when storage
+ * is unavailable, in which case the server falls back to counting by IP alone.
+ */
+function getClientId(): string {
   try {
-    let id = sessionStorage.getItem(SESSION_KEY);
+    let id = localStorage.getItem(CLIENT_ID_KEY);
     if (!id) {
       id = crypto.randomUUID();
-      sessionStorage.setItem(SESSION_KEY, id);
+      localStorage.setItem(CLIENT_ID_KEY, id);
     }
     return id;
   } catch {
-    // storage/crypto unavailable — a throwaway id still lets this tab be counted
-    return Math.random().toString(36).slice(2);
+    return "";
   }
 }
 
 /**
- * Reports how many fans are online right now. Sends a heartbeat to `/api/presence`
- * on mount and every ~25s, but only while the tab is visible (a hidden tab stops
- * heartbeating and drops out of the count after the server's window). Returns the
- * latest count, or null until the first response. Best-effort: network errors are
- * swallowed so the badge simply stays put.
+ * Reports how many fans are online right now. The server counts distinct (IP +
+ * per-browser id) pairs, so the heartbeat sends this browser's id. Fires on mount and
+ * every ~25s, but only while the tab is visible (a hidden tab stops heartbeating and
+ * drops out of the count after the server's window). Returns the latest count, or
+ * null until the first response. Best-effort: network errors are swallowed so the
+ * badge simply stays put.
  */
 export function useOnlineCount(): number | null {
   const [count, setCount] = useState<number | null>(null);
@@ -32,14 +37,14 @@ export function useOnlineCount(): number | null {
     if (typeof window === "undefined") return;
     let active = true;
     let timer: ReturnType<typeof setTimeout>;
-    const id = getSessionId();
+    const clientId = getClientId();
 
     const heartbeat = async () => {
       try {
         const res = await fetch("/api/presence", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ id }),
+          body: JSON.stringify({ id: clientId }),
         });
         if (res.ok && active) {
           const data: { online?: number } = await res.json();

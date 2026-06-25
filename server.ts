@@ -2344,18 +2344,23 @@ app.get("/api/questions", (_req, res) => {
   res.json(TRIVIA_QUESTIONS);
 });
 
-// In-memory "online users" presence. Single-instance only (resets on restart), no
-// PII — just a count. Each client POSTs a heartbeat with a random session id; a
-// session is "online" while its last heartbeat is within the window. Not a
-// FIFA-sourced endpoint, so (like /api/health) it carries no resilience shape.
+// In-memory "online users" presence, counted by DISTINCT (IP + per-browser id).
+// Hybrid keying: the IP grounds it to a real client, while the client-supplied
+// per-browser id separates co-located users (same IP, different browser/device) and
+// dedupes one browser's tabs/reloads. Falls back to IP alone when no id is sent.
+// Single-instance only (resets on restart); keys are held transiently in memory and
+// never stored/logged beyond the window. `req.ip` is the real client IP via
+// `trust proxy` (nginx X-Forwarded-For). Not FIFA-sourced, so no resilience shape.
 const PRESENCE_WINDOW_MS = 45 * 1000;
 const presenceStore: PresenceStore = new Map();
 
 app.post("/api/presence", (req, res) => {
   const now = Date.now();
+  const ip = req.ip ?? "";
   const rawId = (req.body as { id?: unknown } | undefined)?.id;
-  const id = typeof rawId === "string" ? rawId.slice(0, 64) : "";
-  recordHeartbeat(presenceStore, id, now);
+  const clientId = typeof rawId === "string" ? rawId.slice(0, 64) : "";
+  const key = clientId ? `${ip}|${clientId}` : ip;
+  recordHeartbeat(presenceStore, key, now);
   res.set("Cache-Control", "no-store");
   res.json({
     online: countOnline(presenceStore, now, PRESENCE_WINDOW_MS),
