@@ -26,5 +26,16 @@ test.describe("Partidas list — phase separators", () => {
     const koHeader = page.locator("#partidas-phase-pre_game-16-avos-de-final");
     await expect(koHeader).toBeVisible();
     await expect(koHeader).toContainText(/16 avos de final/i);
+
+    // Collapsed by default, with a visible hint that its matches are hidden.
+    const koDetails = koHeader.locator("xpath=ancestor::details[1]");
+    expect(await koDetails.evaluate((el) => (el as HTMLDetailsElement).open)).toBe(false);
+    const hiddenHint = koHeader.getByTestId("partidas-phase-hidden-hint");
+    await expect(hiddenHint).toBeVisible();
+    await expect(hiddenHint).toContainText(/ocultos?/i);
+    // Expanding hides the "ocultos" hint and reveals the cards.
+    await koHeader.click();
+    await expect(hiddenHint).toBeHidden();
+    await expect(koDetails.locator('[id^="partidas-card-"]').first()).toBeVisible();
   });
 });

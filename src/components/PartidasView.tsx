@@ -158,6 +158,7 @@ export function PartidasView({ matches, theme, onSelectTeamLineup, onSelectMatch
   const phasePillClasses =
     theme === "classic-light" ? "bg-[#009c3b] text-white" : "bg-[#00e476] text-slate-950";
   const phaseDividerClasses = theme === "classic-light" ? "bg-[#009c3b]/30" : "bg-[#00e476]/30";
+  const phaseHintClasses = theme === "classic-light" ? "text-[#009c3b]" : "text-[#00e476]";
 
   // Suspended matches are in-progress (just stopped), so they live under the
   // "Ao vivo" tab alongside LIVE.
@@ -480,8 +481,16 @@ export function PartidasView({ matches, theme, onSelectTeamLineup, onSelectMatch
                       {section.phase}
                     </span>
                     <span className={`h-0.5 flex-1 rounded-full ${phaseDividerClasses}`} aria-hidden="true" />
+                    {/* When collapsed, flag that the section's matches are hidden;
+                        the "ocultos" hint disappears once the phase is expanded. */}
                     <span className={`shrink-0 font-mono text-[10px] uppercase tracking-[0.22em] ${softMutedClasses}`}>
                       {section.matchCount} jogo{section.matchCount === 1 ? "" : "s"}
+                      <span
+                        data-testid="partidas-phase-hidden-hint"
+                        className={`font-bold group-open:hidden ${phaseHintClasses}`}
+                      >
+                        {section.matchCount === 1 ? " oculto" : " ocultos"}
+                      </span>
                     </span>
                     <span
                       aria-hidden="true"
