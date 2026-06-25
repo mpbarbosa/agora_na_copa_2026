@@ -69,6 +69,10 @@ export function getCanonicalSeedStandings(
   );
 
   for (const match of matches) {
+    // Only group-stage fixtures contribute teams to the group tables. Knockout
+    // fixtures (now also in APP_MATCHES) carry placeholder sides with no group
+    // ("Vencedor #74", "2º A") — adding them would spawn a spurious empty group.
+    if (match.stageName !== "Group Stage") continue;
     for (const team of [match.teamA, match.teamB]) {
       if (!canonicalRows.has(team.code)) {
         canonicalRows.set(team.code, createSeedRowFromMatchTeam(team));

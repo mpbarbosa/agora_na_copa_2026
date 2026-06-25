@@ -118,6 +118,16 @@ test.describe("Jogadores view — player overlay stats", () => {
       });
     });
 
+    // Instagram's embed.js rewrites <blockquote class="instagram-media"> into an
+    // <iframe> once it loads and resolves a *real* permalink. This reel is real,
+    // so on a network-connected host the blockquote is replaced before the
+    // assertion runs (it survives only in the isolated Docker run, where the
+    // script can't load) — a host-dependent flake. Stub embed.js to a no-op so the
+    // blockquote stays in the DOM and the assertion is deterministic everywhere.
+    await page.route(/embed\.js/, (route) =>
+      route.fulfill({ contentType: "application/javascript", body: "" }),
+    );
+
     await page.goto("/");
     await page.click("#btn-nav-jogadores");
     await expect(page.locator("#jogadores-view")).toBeVisible();

@@ -3,7 +3,9 @@ import { FIFA_MATCH_VENUES } from "./data/fifaMatchVenues";
 import { FIFA_SCHEDULED_MATCHES, type FifaScheduledMatchSeed } from "./data/fifaScheduledMatches";
 import { standings as seedStandings } from "./data/tournament";
 import { resolvePlayerEntry } from "./data/playerRegistry";
-import type { Match } from "./types";
+import { KNOCKOUT_MATCHES } from "./data/knockoutBracket";
+import { humanizeSlot, KNOCKOUT_STAGE_NAMES } from "./utils/knockoutSlots";
+import type { Match, KnockoutMatch, KnockoutTeamRef } from "./types";
 
 const PT_MONTHS = [
   "Janeiro",
@@ -113,11 +115,58 @@ const buildSupplementalMatch = (
 };
 
 
+const NEUTRAL_TEAM_STYLE = { primaryColor: "#64748b", secondaryColor: "#94a3b8" };
+
+// dateUtc ("…Z") → a Brasília (-03:00) timestamp string, so kickoffTime/kickoffDate
+// render in local time consistently with the group-stage seeds (already -03:00).
+const toBrasiliaTimestamp = (dateUtc: string): string => {
+  const utc = new Date(dateUtc);
+  const br = new Date(utc.getTime() - 3 * 60 * 60 * 1000);
+  const p = (n: number) => String(n).padStart(2, "0");
+  return `${br.getUTCFullYear()}-${p(br.getUTCMonth() + 1)}-${p(br.getUTCDate())}T${p(br.getUTCHours())}:${p(br.getUTCMinutes())}:00-03:00`;
+};
+
+// One knockout side: the real team when known (full flag/colors/lineup) — but with a
+// blanked group so the fixture never associates with a group view — otherwise a
+// neutral placeholder labelled with the official slot ("Vencedor #74", "2º A").
+const buildKnockoutTeamEntry = (ref: KnockoutTeamRef | null, slot: string): Match["teamA"] => {
+  if (ref) {
+    const known = teamByCode.get(ref.code);
+    if (known) return { ...known, group: "", lineup: lineupByTeamCode.get(ref.code) ?? [] };
+    return { name: ref.name, code: ref.code, flagSvg: "", ...NEUTRAL_TEAM_STYLE, group: "", lineup: [] };
+  }
+  return { name: humanizeSlot(slot), code: slot, flagSvg: "", ...NEUTRAL_TEAM_STYLE, group: "", lineup: [] };
+};
+
+// Official knockout fixture → a PRE_GAME Match for the scheduled list: real date,
+// venue and stage; TBD sides show the official slot label. Stable matchNumber-based
+// id so a fixture updates in place once its teams resolve. stageName is intentionally
+// NOT "Group Stage", so standings/group computations ignore these (see standings.ts).
+const buildKnockoutMatch = (km: KnockoutMatch): Match => {
+  const kickoffTimestamp = toBrasiliaTimestamp(km.dateUtc);
+  const kickoffMs = new Date(km.dateUtc).getTime();
+  return {
+    id: `ko-${km.matchNumber}-2026`,
+    teamA: buildKnockoutTeamEntry(km.teamA, km.slotA),
+    teamB: buildKnockoutTeamEntry(km.teamB, km.slotB),
+    stadiumName: km.stadium,
+    city: km.city,
+    stageName: KNOCKOUT_STAGE_NAMES[km.stage],
+    kickoffTime: formatKickoffTime(kickoffTimestamp),
+    kickoffDate: formatKickoffDate(kickoffTimestamp),
+    kickoffTimestamp,
+    status: "PRE_GAME",
+    countdownTargetSeconds: Math.max(0, Math.floor((kickoffMs - Date.now()) / 1000)),
+    broadcasters: [],
+  };
+};
+
 export const APP_MATCHES: Match[] = [
   ...BASE_MATCHES,
   ...FIFA_SCHEDULED_MATCHES.filter(
     ({ teamA, teamB }) => !existingIds.has(`${teamA.toLowerCase()}-${teamB.toLowerCase()}-2026`),
   ).map(buildSupplementalMatch),
+  ...KNOCKOUT_MATCHES.map(buildKnockoutMatch),
 ].map((match) => {
   const officialVenue = FIFA_MATCH_VENUES[match.id];
   if (!officialVenue) {

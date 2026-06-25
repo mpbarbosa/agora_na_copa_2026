@@ -81,9 +81,12 @@ from `docs/production-environment-memory.md`, `scripts/deploy*.sh`, and
   stale versions.
 - **`scripts/deploy-preflight.sh`** is the only automated gate before a deploy:
   it builds, checks `dist/index.html`, `dist/server.cjs`, `dist/assets/*.{js,css}`
-  exist, then boots the production bundle on port 9011 and curls `GET /` and the
-  first JS asset for HTTP 200. **It does not run Playwright e2e, and does not
-  exercise any `/api/*` route.**
+  exist and a JS bundle-size budget, then boots the production bundle and curls
+  `GET /` + the first JS asset for HTTP 200, smoke-tests `GET /api/questions`
+  (non-empty) and `POST /api/predict` (HTTP 200, `simulated: true`), and finally
+  runs the Playwright e2e suite (`test:e2e:prod`) against the running preview.
+  *(Updated 2026-06-25: it now runs e2e and exercises `/api/*` routes — the
+  earlier "does neither" note is obsolete.)*
 - **`tests/e2e/` does not exist yet** — `playwright.config.ts` is configured
   (port 3100, `npm run dev` as web server) but there are zero specs. `npm run
   test:e2e` currently has nothing to run.
@@ -348,29 +351,36 @@ teamB }`. Slots are official FIFA placeholder labels (`"2A"`, `"1C"`, `"2F"`,
 It is generated reproducibly by **`scripts/build-knockout-bracket.py`** from the
 FIFA calendar API (idCompetition=17, idSeason=285023).
 
-**Task**: rewrite `BracketView` to render directly from `knockoutBracket.json`
-instead of the `tournament.ts` `BracketNode` skeleton:
-- Drive the R32 → R16 → QF → SF → 3rd-place → Final tree off `matchNumber`
-  ranges (R32 73–88, R16 89–96, QF 97–100, SF 101–102, 3rd 103, Final 104) and
-  the official slot labels, so progression matches the real FIFA bracket.
-- Show each match's real `dateUtc` (localized) and `stadium`/`city`.
-- Render official placeholder labels (`2A`, `1C/2F`, `W74`, `3CEFHI`) for slots
-  whose team is not yet decided, rather than inventing pairings.
-- Add the 3rd-place match (#103), currently absent.
-- Keep the existing manual click-to-advance interaction layered on top of the
-  real seeding (or gate it behind real results — TBD).
-- Update `tests/e2e/bracket.spec.ts` to assert real slot labels/dates render.
+**Delivered** (`ed7d62f`, v0.0.370 — deployed 0.0.371): the whole original task
+landed. `BracketView` now renders directly from `knockoutBracket.json` instead of
+the `tournament.ts` `BracketNode` skeleton — the tree is driven off `matchNumber`
+ranges (R32 73–88, R16 89–96, QF 97–100, SF 101–102, 3rd 103, Final 104) with
+official slot labels, real localized (`dateUtc` → Brasília) dates and `stadium`/
+`city`, official placeholders for undecided slots (no invented pairings), and the
+previously-missing **#103 3rd-place match**. `tests/e2e/bracket.spec.ts` was
+rewritten to assert real slots/dates (and `polish.spec.ts`'s bracket-grid column
+count updated 5 → 6). The one deviation from the original plan: manual
+click-to-advance "pick your bracket" was intentionally **dropped** for v1 (it
+conflicts with the official-slot model) — a possible later add-on.
 
-**Why it matters**: data accuracy is a hard requirement — wrong knockout data is
-a real failure, not cosmetic. Do **not** re-derive pairings by hand; the JSON is
-the only trusted source.
-
-**Effort**: M (2–3 days). **Depends on**: nothing new — data + generator already
-landed. Belongs in `agora-dev`.
+**Why it mattered**: data accuracy is a hard requirement — wrong knockout data is
+a real failure, not cosmetic. Pairings were taken verbatim from
+`knockoutBracket.json` (the only trusted source), never hand-derived.
 
 ---
 
 ## 12. Phase 5 — Fan Zone + Gemini AI (gated on scope confirmation)
+
+> **Status: ✅ Done — simulated-only variant (2026-06-25).** Per the scope gate,
+> the predictor shipped **without** any AI dependency: `POST /api/predict` returns
+> `{ text, simulated: true }` from `predict-core.ts` — a deterministic heuristic
+> over each team's REAL current standings (no `@google/genai`, no `GEMINI_API_KEY`,
+> no startup/cost surface, no failure mode). The Fan Zone gained the predictor panel
+> (two selectors + notes → markdown prognosis with a "Simulado" badge) alongside the
+> trivia + penalty mini-games that already existed. Covered by `predict-core.test.ts`
+> and a `fanzone.spec.ts` e2e. A future follow-up could layer a real Gemini call
+> behind the optional key, falling back to this heuristic when the key is absent —
+> the endpoint already returns `simulated` to make that swap transparent.
 
 This phase introduces a genuinely new dependency (`@google/genai`) and an
 external API cost surface. **Confirm product scope before starting.** It also

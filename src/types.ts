@@ -330,6 +330,17 @@ export interface TriviaQuestion {
   explanation: string;
 }
 
+/**
+ * Response of `POST /api/predict` — the Fan Zone match predictor. `text` is pt-BR
+ * markdown (`## Section` blocks). `simulated` is true whenever the forecast came from
+ * the deterministic heuristic rather than a real AI model (always true in this build,
+ * which ships no AI dependency).
+ */
+export interface PredictionResponse {
+  text: string;
+  simulated: boolean;
+}
+
 export interface TournamentPlayerLeader {
   id: string;
   name: string;
@@ -520,4 +531,32 @@ export interface WeatherResponse {
   note: string;
   updatedAt: string;
   weather: WeatherSnapshot | null;
+}
+
+/**
+ * One posted message in a live match chat ("resenha"). Anonymous: the nickname is
+ * self-declared and not authenticated. Held only in memory while the match is live.
+ */
+export interface ChatMessage {
+  /** Monotonic per-match id, used as the client's incremental-poll cursor. */
+  id: number;
+  /** Self-declared display name (validated/clamped server-side). */
+  nickname: string;
+  /** Message body (validated/clamped server-side). */
+  text: string;
+  /** Epoch-ms the server accepted the message. */
+  at: number;
+}
+
+/**
+ * Response for the live match chat endpoints. Not FIFA-sourced, so — like
+ * `/api/presence` and `/api/health` — it carries `open`/`updatedAt` but not the
+ * `source`/`note` resilience shape. `open` is true only while the match is LIVE.
+ */
+export interface ChatResponse {
+  /** Whether the chat is currently accepting messages (match is LIVE). */
+  open: boolean;
+  /** Messages after the requested cursor, oldest first. */
+  messages: ChatMessage[];
+  updatedAt: string;
 }

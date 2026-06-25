@@ -210,6 +210,10 @@ test.describe("Standings view (Grupos)", () => {
     await expect(table).toBeVisible();
     await expect(table.locator("h3")).toHaveText("Melhores 3º colocados");
 
+    // The ranking carries a "J" (jogos) column = games played, finished + in progress.
+    const headerLabels = await table.locator("thead th").allInnerTexts();
+    expect(headerLabels.map((label) => label.trim())).toContain("J");
+
     // One ranked row per group (12), with exactly the best 8 flagged as qualifying.
     await expect(table.locator("tbody tr")).toHaveCount(12);
     await expect(table.locator('tbody tr[data-qualifies="true"]')).toHaveCount(8);

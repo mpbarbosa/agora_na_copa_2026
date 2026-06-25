@@ -4,6 +4,7 @@ import { KNOCKOUT_MATCHES } from "../data/knockoutBracket";
 import type { KnockoutMatch, Match } from "../types";
 import { computeStandings, groupStandings } from "../standings";
 import type { QualificationStatus } from "../standings";
+import { humanizeSlot } from "../utils/knockoutSlots";
 import { FlagIcon } from "./FlagIcon";
 
 interface BracketViewProps {
@@ -53,21 +54,6 @@ function formatKickoff(iso: string): string {
   const date = new Date(iso);
   const day = DAY_FMT.format(date).replace(" de ", " ").replace(".", "");
   return `${day} · ${TIME_FMT.format(date)}`;
-}
-
-// Humanize an official FIFA slot label into pt-BR:
-//   "1A" → "1º A", "2B" → "2º B", "3EHIJK" → "3º E/H/I/J/K",
-//   "W74" → "Vencedor #74", "RU101" → "Perdedor #101".
-function humanizeSlot(slot: string): string {
-  const groupPos = slot.match(/^([12])([A-L])$/);
-  if (groupPos) return `${groupPos[1]}º ${groupPos[2]}`;
-  const bestThird = slot.match(/^3([A-L]{2,})$/);
-  if (bestThird) return `3º ${bestThird[1].split("").join("/")}`;
-  const winner = slot.match(/^W(\d+)$/);
-  if (winner) return `Vencedor #${winner[1]}`;
-  const loser = slot.match(/^RU(\d+)$/);
-  if (loser) return `Perdedor #${loser[1]}`;
-  return slot;
 }
 
 // All 48 teams keyed by code, for resolving a confirmed knockout team's flag/name.

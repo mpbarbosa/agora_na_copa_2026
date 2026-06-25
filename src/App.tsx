@@ -152,6 +152,7 @@ export default function App() {
             matches={matches}
             theme={theme}
             onSelectTeamLineup={setLineupTeam}
+            onSelectMatch={handleSelectMatch}
             focusGroupSlug={standingsFocusGroupSlug}
           />
         );

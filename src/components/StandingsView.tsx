@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Info } from "lucide-react";
 import type { Match, TeamRef } from "../types";
-import { computeStandings, groupStandings, computeQualificationNote, computeContentionNote, computeEliminationNote } from "../standings";
+import { computeStandings, groupStandings, computeQualificationNote, computeContentionNote, computeEliminationNote, rankBestThirds } from "../standings";
 import { FlagIcon } from "./FlagIcon";
 import { StandingsRulesCard } from "./StandingsRulesCard";
 import { ThirdPlaceTable } from "./ThirdPlaceTable";
@@ -23,6 +23,7 @@ interface StandingsViewProps {
   matches: Match[];
   theme: "classic-light" | "stadium-dark";
   onSelectTeamLineup: (team: TeamRef) => void;
+  onSelectMatch: (matchId: string) => void;
   focusGroupSlug?: string | null;
 }
 
@@ -56,6 +57,7 @@ export function StandingsView({
   matches,
   theme,
   onSelectTeamLineup,
+  onSelectMatch,
   focusGroupSlug = null,
 }: StandingsViewProps) {
   const [showRules, setShowRules] = useState(false);
@@ -135,6 +137,30 @@ export function StandingsView({
   );
 
   const groups = useMemo(() => groupStandings(computeStandings(liveMatches), liveMatches), [liveMatches]);
+
+  // Cross-group ranking of every group's 3rd-placed team — the 8 best advance
+  // (Art. 12.5). Keyed by team code → its provisional 1..12 rank + whether it
+  // currently sits inside the qualifying eight.
+  const bestThirdsRank = useMemo(() => {
+    const ranked = rankBestThirds(groups);
+    return new Map(
+      ranked.map((third, index) => [third.row.code, { position: index + 1, qualifies: third.qualifies }]),
+    );
+  }, [groups]);
+  // The best-thirds cut is only DEFINED once all 12 groups have finished (all 12
+  // third-placed teams are known). Until then, each finished group's 3rd-placed
+  // side is "waiting" for that definition.
+  const allGroupsFinished = useMemo(
+    () =>
+      groups.every(({ rows }) => {
+        const codes = new Set(rows.map((r) => r.code));
+        const groupMatches = liveMatches.filter(
+          (m) => codes.has(m.teamA.code) && codes.has(m.teamB.code),
+        );
+        return groupMatches.length > 0 && groupMatches.every((m) => m.status === "FINISHED");
+      }),
+    [groups, liveMatches],
+  );
 
   const cardClasses =
     theme === "classic-light"
@@ -231,7 +257,9 @@ export function StandingsView({
           <span className={`font-bold ${theme === "classic-light" ? "text-[#009c3b]" : "text-[#00e476]"}`}>✓</span>
           {" "}(classificado),{" "}
           <span className="font-bold text-red-500">✕</span>
-          {" "}(eliminado) ou sobre o{" "}
+          {" "}(eliminado), sobre o{" "}
+          <span className={`font-bold ${theme === "classic-light" ? "text-amber-600" : "text-amber-400"}`}>3º em destaque</span>
+          {" "}(aguardando a definição dos 8 melhores terceiros) ou sobre o{" "}
           <span className={`font-bold ${theme === "classic-light" ? "text-slate-700" : "text-slate-200"}`}>nº de posição</span>
           {" "}(1º/2º ainda em disputa) para ver a análise matemática da situação de cada seleção.
         </p>
@@ -245,15 +273,18 @@ export function StandingsView({
           const seedCount = rows.filter((row) => row.dataSource === "seed").length;
           const isFocusedGroup = resolvedFocusGroupSlug === groupSlug(group);
           const groupCodes = new Set(rows.map((r) => r.code));
+          const groupMatches = liveMatches.filter(
+            (m) => groupCodes.has(m.teamA.code) && groupCodes.has(m.teamB.code),
+          );
           // The final round plays both of a group's matches simultaneously, so a
           // group can have more than one live match at once — show them all.
-          const liveGroupMatches = liveMatches.filter(
-            (m) =>
-              m.status === "LIVE" &&
-              groupCodes.has(m.teamA.code) &&
-              groupCodes.has(m.teamB.code),
-          );
+          const liveGroupMatches = groupMatches.filter((m) => m.status === "LIVE");
           const hasLive = liveGroupMatches.length > 0;
+          // Group stage closed for this chave: every fixture played, none left to
+          // schedule or in progress.
+          const groupFinished =
+            groupMatches.length > 0 &&
+            groupMatches.every((m) => m.status === "FINISHED");
           const liveColor = theme === "classic-light" ? "text-red-600" : "text-red-400";
 
           return (
@@ -280,6 +311,18 @@ export function StandingsView({
                   <span className={`inline-flex items-center gap-1 font-mono text-[9px] uppercase tracking-wider ${liveColor}`}>
                     <span className="inline-block w-1.5 h-1.5 rounded-full animate-pulse bg-current" />
                     Ao Vivo
+                  </span>
+                )}
+                {groupFinished && (
+                  <span
+                    className={`ml-auto inline-flex shrink-0 items-center rounded-full border px-2 py-0.5 font-mono text-[9px] font-bold uppercase tracking-wider ${
+                      theme === "classic-light"
+                        ? "border-slate-200 bg-slate-100 text-slate-500"
+                        : "border-white/10 bg-white/5 text-slate-400"
+                    }`}
+                    data-testid={`group-finished-${groupSlug(group)}`}
+                  >
+                    Encerrado
                   </span>
                 )}
               </div>
@@ -337,6 +380,12 @@ export function StandingsView({
                     {rows.map((row, index) => {
                       const isQualifying = index < 2;
                       const status = qualification.get(row.code) ?? "contention";
+                      // Finished 3rd in its group while the best-thirds cut is still
+                      // pending (not every group is done) → waiting to learn if it is
+                      // one of the 8 best third-placed teams that advance.
+                      const isAwaitingBestThird =
+                        index === 2 && groupFinished && !allGroupsFinished;
+                      const bestThird = bestThirdsRank.get(row.code);
                       const ptsCellColor =
                         isQualifying
                           ? theme === "classic-light" ? "text-[#009c3b]" : "text-[#00e476]"
@@ -346,6 +395,8 @@ export function StandingsView({
                           ? `border-l-2 ${theme === "classic-light" ? "border-l-[#009c3b]" : "border-l-[#00e476]"}`
                           : status === "eliminated"
                           ? "border-l-2 border-l-red-500"
+                          : isAwaitingBestThird
+                          ? `border-l-2 ${theme === "classic-light" ? "border-l-amber-400" : "border-l-amber-300"}`
                           : isQualifying
                           ? `border-l-2 ${qualifiedClasses}`
                           : "border-l-2 border-l-transparent";
@@ -354,6 +405,8 @@ export function StandingsView({
                           ? "Classificado matematicamente para o mata-mata"
                           : status === "eliminated"
                           ? "Eliminado da fase de grupos"
+                          : isAwaitingBestThird
+                          ? "Aguardando a definição dos 8 melhores terceiros colocados"
                           : undefined;
                       const note =
                         status === "qualified"
@@ -362,6 +415,14 @@ export function StandingsView({
                           ? computeEliminationNote(row.code, rows, liveMatches)
                           : index < 2 && status === "contention"
                           ? computeContentionNote(row.code, rows, liveMatches)
+                          : isAwaitingBestThird
+                          ? `Terminou em 3º no ${group}. Os 8 melhores terceiros colocados avançam ao mata-mata — a definição só sai quando todos os grupos terminarem.${
+                              bestThird
+                                ? ` Posição provisória entre os 12 terceiros: ${bestThird.position}º — ${
+                                    bestThird.qualifies ? "dentro dos 8 que avançam." : "fora dos 8, por enquanto."
+                                  }`
+                                : ""
+                            }`
                           : null;
                       const tooltipKey = `${group}-${row.code}`;
                       const isTooltipOpen = openTooltip?.key === tooltipKey;
@@ -381,6 +442,10 @@ export function StandingsView({
                               ? theme === "classic-light"
                                 ? "bg-red-50"
                                 : "bg-red-500/[0.05]"
+                              : isAwaitingBestThird
+                              ? theme === "classic-light"
+                                ? "bg-amber-50"
+                                : "bg-amber-400/[0.06]"
                               : ""
                           }`}
                         >
@@ -408,6 +473,12 @@ export function StandingsView({
                                       }`
                                     : status === "eliminated"
                                     ? "inline-flex items-center justify-center w-[14px] h-[14px] rounded-full text-[8px] font-bold cursor-help bg-red-500 text-white"
+                                    : isAwaitingBestThird
+                                    ? `inline-flex items-center justify-center w-[14px] h-[14px] rounded-full text-[8px] font-bold cursor-help ${
+                                        theme === "classic-light"
+                                          ? "bg-amber-400 text-amber-950"
+                                          : "bg-amber-300 text-amber-950"
+                                      }`
                                     : `cursor-help underline decoration-dotted underline-offset-2 ${mutedClasses}`
                                 }
                                 data-testid={`standings-note-trigger-${row.code.toLowerCase()}`}
@@ -456,11 +527,7 @@ export function StandingsView({
                 if (!analysis) return null;
                 // Up to date when the analysis was authored at/after the group's
                 // most recent finished match (live-polled statuses).
-                const groupLastFinished = lastFinishedKickoff(
-                  liveMatches.filter(
-                    (m) => groupCodes.has(m.teamA.code) && groupCodes.has(m.teamB.code),
-                  ),
-                );
+                const groupLastFinished = lastFinishedKickoff(groupMatches);
                 const groupUpToDate = isAnalysisUpToDate(analysis.updatedAt, groupLastFinished);
                 return (
                   <details
@@ -511,12 +578,11 @@ export function StandingsView({
               })()}
 
               <GroupMatchHistory
-                matches={liveMatches.filter(
-                  (m) => groupCodes.has(m.teamA.code) && groupCodes.has(m.teamB.code),
-                )}
+                matches={groupMatches}
                 theme={theme}
                 slug={groupSlug(group)}
                 onSelectTeamLineup={onSelectTeamLineup}
+                onSelectMatch={onSelectMatch}
               />
             </div>
           );

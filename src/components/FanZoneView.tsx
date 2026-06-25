@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
-import type { TriviaQuestion } from "../types";
+import type { PredictionResponse, TriviaQuestion } from "../types";
+import { standings as TOURNAMENT_TEAMS } from "../data/tournament";
+import { parseNoteSections } from "../utils/noteSections";
 import { DonationPix } from "./DonationPix";
 
 interface FanZoneViewProps {
@@ -26,6 +28,11 @@ function nextKeeperDive(round: number): ShotDirection {
   return KEEPER_SEQUENCE[round % KEEPER_SEQUENCE.length];
 }
 
+// The 48 seeded teams, by name, for the match-predictor selectors.
+const PREDICTOR_TEAMS = [...TOURNAMENT_TEAMS]
+  .map((row) => ({ code: row.code, name: row.name }))
+  .sort((a, b) => a.name.localeCompare(b.name, "pt-BR"));
+
 export function FanZoneView({ theme }: FanZoneViewProps) {
   const [questions, setQuestions] = useState<TriviaQuestion[]>([]);
   const [quizStatus, setQuizStatus] = useState<"loading" | "ready" | "error">("loading");
@@ -42,6 +49,11 @@ export function FanZoneView({ theme }: FanZoneViewProps) {
     keeper: ShotDirection;
     goal: boolean;
   } | null>(null);
+  const [homeTeam, setHomeTeam] = useState("");
+  const [awayTeam, setAwayTeam] = useState("");
+  const [predictorNotes, setPredictorNotes] = useState("");
+  const [prediction, setPrediction] = useState<PredictionResponse | null>(null);
+  const [predictorStatus, setPredictorStatus] = useState<"idle" | "loading" | "ready" | "error">("idle");
 
   useEffect(() => {
     let active = true;
@@ -148,6 +160,28 @@ export function FanZoneView({ theme }: FanZoneViewProps) {
     setLastPenaltyResult(null);
   };
 
+  const sameTeams = homeTeam !== "" && homeTeam === awayTeam;
+  const canPredict = homeTeam !== "" && awayTeam !== "" && !sameTeams && predictorStatus !== "loading";
+
+  const requestPrediction = async () => {
+    if (!canPredict) return;
+    setPredictorStatus("loading");
+    setPrediction(null);
+    try {
+      const response = await fetch("/api/predict", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ homeTeam, awayTeam, userNotes: predictorNotes }),
+      });
+      if (!response.ok) throw new Error("predict request failed");
+      const data: PredictionResponse = await response.json();
+      setPrediction(data);
+      setPredictorStatus("ready");
+    } catch {
+      setPredictorStatus("error");
+    }
+  };
+
   return (
     <div className="max-w-7xl mx-auto px-4 mt-8" id="fanzone-view">
       <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
@@ -159,7 +193,7 @@ export function FanZoneView({ theme }: FanZoneViewProps) {
             Fan Zone
           </h2>
           <p className={`mt-1 font-mono text-[11px] uppercase tracking-wider ${mutedClasses}`}>
-            Quiz da torcida e disputa de pênaltis • estreia sem preditor de IA nesta fase
+            Quiz da torcida, disputa de pênaltis e palpite simulado das partidas
           </p>
         </div>
 
@@ -171,7 +205,7 @@ export function FanZoneView({ theme }: FanZoneViewProps) {
           }`}
           id="fanzone-scope-note"
         >
-          Foco atual: interações 100% jogáveis no navegador
+          Palpite 100% simulado • sem IA externa
         </span>
       </div>
 
@@ -399,6 +433,116 @@ export function FanZoneView({ theme }: FanZoneViewProps) {
           </div>
         </section>
       </div>
+
+      <section className={`mt-5 rounded-3xl border p-5 ${shellClasses}`} id="fanzone-predictor-panel">
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <h3 className={`font-anton text-xl uppercase tracking-wide ${headingClasses}`}>
+              Palpite da partida
+            </h3>
+            <p className={`mt-1 font-archivo text-sm ${mutedClasses}`}>
+              Escolha duas seleções e gere um prognóstico a partir da campanha atual delas.
+            </p>
+          </div>
+          <span
+            className={`inline-flex shrink-0 items-center rounded-full border px-2.5 py-1 font-mono text-[10px] uppercase tracking-wider ${
+              theme === "classic-light"
+                ? "border-amber-400/60 bg-amber-50 text-amber-700"
+                : "border-[#ffd84d]/40 bg-[#ffd84d]/5 text-[#ffd84d]/80"
+            }`}
+            id="fanzone-predictor-mode"
+          >
+            Simulado
+          </span>
+        </div>
+
+        <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2">
+          {([
+            { id: "home", label: "Mandante", value: homeTeam, set: setHomeTeam },
+            { id: "away", label: "Visitante", value: awayTeam, set: setAwayTeam },
+          ] as const).map((field) => (
+            <label
+              key={field.id}
+              className={`flex flex-col gap-1 font-mono text-[11px] uppercase tracking-wider ${subtleClasses}`}
+            >
+              {field.label}
+              <select
+                id={`select-predictor-${field.id}`}
+                value={field.value}
+                onChange={(event) => field.set(event.target.value)}
+                className={`min-h-11 rounded-xl border px-3 py-2 font-archivo text-sm normal-case tracking-normal ${
+                  theme === "classic-light"
+                    ? "border-slate-200 bg-white text-slate-800"
+                    : "border-white/10 bg-[#161919] text-slate-100"
+                }`}
+              >
+                <option value="">Selecione…</option>
+                {PREDICTOR_TEAMS.map((team) => (
+                  <option key={team.code} value={team.code}>
+                    {team.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+          ))}
+        </div>
+
+        <textarea
+          id="input-predictor-notes"
+          value={predictorNotes}
+          onChange={(event) => setPredictorNotes(event.target.value)}
+          maxLength={280}
+          rows={2}
+          placeholder="Opcional: seu pitaco (lesões, clima, fator casa…)"
+          className={`mt-3 w-full rounded-xl border px-3 py-2 font-archivo text-sm ${
+            theme === "classic-light"
+              ? "border-slate-200 bg-white text-slate-800"
+              : "border-white/10 bg-[#161919] text-slate-100"
+          }`}
+        />
+
+        {sameTeams && (
+          <p className={`mt-2 font-archivo text-xs ${subtleClasses}`}>Escolha duas seleções diferentes.</p>
+        )}
+
+        <button
+          id="btn-predictor-run"
+          type="button"
+          onClick={requestPrediction}
+          disabled={!canPredict}
+          className={`mt-4 inline-flex min-h-11 items-center justify-center rounded-full border px-5 py-2 font-mono text-[11px] font-bold uppercase tracking-wider transition disabled:cursor-not-allowed disabled:opacity-50 ${idleButtonClasses}`}
+        >
+          {predictorStatus === "loading" ? "Gerando…" : "Gerar palpite"}
+        </button>
+
+        {predictorStatus === "ready" && prediction && (
+          <div id="fanzone-predictor-result" className={`mt-5 rounded-2xl border p-4 ${cardClasses}`}>
+            {prediction.simulated && (
+              <span
+                id="fanzone-predictor-simulado-badge"
+                className={`inline-flex items-center rounded-full border px-2 py-0.5 font-mono text-[9px] uppercase tracking-wider ${
+                  theme === "classic-light"
+                    ? "border-amber-400/60 text-amber-700"
+                    : "border-[#ffd84d]/40 text-[#ffd84d]/80"
+                }`}
+              >
+                Palpite simulado
+              </span>
+            )}
+            {parseNoteSections(prediction.text, "Prognóstico").map((section) => (
+              <div key={section.label} className="mt-3">
+                <p className={`font-mono text-[10px] uppercase tracking-wider ${subtleClasses}`}>{section.label}</p>
+                <p className={`mt-1 font-archivo text-sm leading-6 ${mutedClasses}`}>{section.body}</p>
+              </div>
+            ))}
+          </div>
+        )}
+        {predictorStatus === "error" && (
+          <p id="fanzone-predictor-error" className={`mt-4 font-archivo text-sm ${mutedClasses}`}>
+            Não foi possível gerar o palpite agora. Tente novamente.
+          </p>
+        )}
+      </section>
 
       <div className="mt-5">
         <DonationPix theme={theme} variant="full" />

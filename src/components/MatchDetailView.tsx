@@ -27,6 +27,7 @@ import { PlayerOverlayCard, PlayerPictureOverlay, buildTournamentStatCells, getP
 import { usePlayerStats } from "../hooks/usePlayerStats";
 import { getPositionLabel } from "../utils/playerDisplay";
 import { PitchLineup } from "./PitchLineup";
+import { MatchChatPanel } from "./MatchChatPanel";
 import { AffiliateProducts } from "./AffiliateProducts";
 import { renderAnalysisWithMentions } from "./PlayerMention";
 import { MatchWeatherChip } from "./MatchWeatherChip";
@@ -724,6 +725,20 @@ export function MatchDetailView({
     (matchSelectionMode === "auto" ||
       currentMatch.status === "LIVE" ||
       currentMatch.status === "SUSPENDED");
+  // Other matches kicking off at the exact same time as the current pre-game match
+  // (the final group round plays both of a group's games simultaneously). We surface
+  // them in the scoreboard so a simultaneous slot is as clear BEFORE kickoff as it is
+  // once the games go live (see SimultaneousLiveMatches for the live case).
+  const currentKickoffMs = new Date(currentMatch.kickoffTimestamp).getTime();
+  const simultaneousUpcomingMatches =
+    currentMatch.status === "PRE_GAME" && !Number.isNaN(currentKickoffMs)
+      ? matches.filter(
+          (match) =>
+            match.id !== currentMatch.id &&
+            match.status === "PRE_GAME" &&
+            new Date(match.kickoffTimestamp).getTime() === currentKickoffMs,
+        )
+      : [];
   const currentLineupPlayers = useMemo(
     () =>
       currentLineupEntry
@@ -1670,6 +1685,60 @@ export function MatchDetailView({
             </div>
           )}
 
+          {/* Simultaneous pré-jogo alert: another game kicks off at the very same
+              time (final group round). A bold, full-width banner at the TOP of the
+              card so the simultaneous slot is impossible to miss — and each sibling
+              chip jumps to that match. Mirrors the live SimultaneousLiveMatches case. */}
+          {simultaneousUpcomingMatches.length > 0 && (
+            <div
+              id="simultaneous-upcoming-matches"
+              data-testid="simultaneous-upcoming-matches"
+              className={`mb-5 flex flex-col items-center justify-center gap-2.5 rounded-2xl border-2 border-dashed px-4 py-3 text-center sm:flex-row sm:gap-3 ${
+                theme === "classic-light"
+                  ? "border-amber-300 bg-amber-50"
+                  : "border-amber-400/40 bg-amber-400/10"
+              }`}
+            >
+              <span
+                className={`flex items-center gap-2 font-anton text-sm uppercase tracking-wide ${
+                  theme === "classic-light" ? "text-amber-700" : "text-amber-300"
+                }`}
+              >
+                <Zap size={18} className="shrink-0 animate-pulse" aria-hidden="true" />
+                {simultaneousUpcomingMatches.length === 1
+                  ? "Atenção: outro jogo no mesmo horário"
+                  : "Atenção: outros jogos no mesmo horário"}
+              </span>
+              <div className="flex flex-wrap items-center justify-center gap-2">
+                {simultaneousUpcomingMatches.map((m) => (
+                  <button
+                    key={m.id}
+                    type="button"
+                    id={`btn-simultaneous-${m.id}`}
+                    onClick={() => handleSelectMatch(m.id)}
+                    title={`${formatCountryNameForTooltip(m.teamA.name)} x ${formatCountryNameForTooltip(m.teamB.name)} — começa no mesmo horário`}
+                    aria-label={`Ver ${formatCountryNameForTooltip(m.teamA.name)} contra ${formatCountryNameForTooltip(m.teamB.name)}, que começa no mesmo horário`}
+                    className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 font-anton text-sm uppercase tracking-wide transition ${
+                      theme === "classic-light"
+                        ? "border-amber-300 bg-white text-slate-800 hover:border-amber-400 hover:bg-amber-100"
+                        : "border-amber-400/30 bg-[#1a1c14] text-amber-50 hover:border-amber-300/60 hover:bg-amber-400/15"
+                    }`}
+                  >
+                    <FlagIcon
+                      flag={m.teamA.flagSvg}
+                      className="h-4 w-6 shrink-0 rounded-[2px] object-cover"
+                    />
+                    <span>{m.teamA.code} x {m.teamB.code}</span>
+                    <FlagIcon
+                      flag={m.teamB.flagSvg}
+                      className="h-4 w-6 shrink-0 rounded-[2px] object-cover"
+                    />
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
           <div
             className="flex flex-col items-center justify-between space-y-6 md:space-y-0 md:flex-row md:space-x-8"
             id="scoreboard-grid"
@@ -2476,6 +2545,9 @@ export function MatchDetailView({
             </div>
           </div>
         )}
+
+        {/* Anonymous live-match chat ("Resenha ao vivo") — open only while LIVE */}
+        <MatchChatPanel matchId={currentMatch.id} theme={theme} />
       </div>
 
       {selectedIncidentPlayer && (
