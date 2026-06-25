@@ -323,6 +323,38 @@ contributor/session and deployed in either order.
 the complex part). **Depends on**: Phase 0a, 0b (bracket skeleton). **Soft
 dependency** on Phase 1 for the auto-seed stretch goal only.
 
+### Follow-up (2026-06-24): rebuild BracketView from `knockoutBracket.json`
+
+`BracketView` shipped, but its knockout pairings/dates/venues came from the
+hand-seeded `tournament.ts` skeleton and proved **wrong** vs. the official FIFA
+schedule (e.g. Brazil's R32 slot was mis-paired). The corrected source of truth
+now exists: **`src/data/knockoutBracket.json`** — `{ "matches": [...] }` with 32
+entries, each `{ matchNumber, stage, dateUtc, stadium, city, slotA, slotB, teamA,
+teamB }`. Slots are official FIFA placeholder labels (`"2A"`, `"1C"`, `"2F"`,
+`W74`, `3CEFHI`, …); `teamA`/`teamB` are `{ code, name }` once known, else `null`.
+It is generated reproducibly by **`scripts/build-knockout-bracket.py`** from the
+FIFA calendar API (idCompetition=17, idSeason=285023).
+
+**Task**: rewrite `BracketView` to render directly from `knockoutBracket.json`
+instead of the `tournament.ts` `BracketNode` skeleton:
+- Drive the R32 → R16 → QF → SF → 3rd-place → Final tree off `matchNumber`
+  ranges (R32 73–88, R16 89–96, QF 97–100, SF 101–102, 3rd 103, Final 104) and
+  the official slot labels, so progression matches the real FIFA bracket.
+- Show each match's real `dateUtc` (localized) and `stadium`/`city`.
+- Render official placeholder labels (`2A`, `1C/2F`, `W74`, `3CEFHI`) for slots
+  whose team is not yet decided, rather than inventing pairings.
+- Add the 3rd-place match (#103), currently absent.
+- Keep the existing manual click-to-advance interaction layered on top of the
+  real seeding (or gate it behind real results — TBD).
+- Update `tests/e2e/bracket.spec.ts` to assert real slot labels/dates render.
+
+**Why it matters**: data accuracy is a hard requirement — wrong knockout data is
+a real failure, not cosmetic. Do **not** re-derive pairings by hand; the JSON is
+the only trusted source.
+
+**Effort**: M (2–3 days). **Depends on**: nothing new — data + generator already
+landed. Belongs in `agora-dev`.
+
 ---
 
 ## 12. Phase 5 — Fan Zone + Gemini AI (gated on scope confirmation)
