@@ -693,3 +693,55 @@ export function groupStandings(
       };
     });
 }
+
+// A group-position knockout slot resolved to the team currently holding it, with
+// its qualification status. Used by BracketView and PartidasView so both project
+// the same provisional R32 teams.
+export interface ProvisionalSlot {
+  team: {
+    name: string;
+    code: string;
+    flagSvg: string;
+    primaryColor: string;
+    secondaryColor: string;
+    group: string;
+  };
+  status: QualificationStatus;
+}
+
+// Map official R32 group-position slots ("1A","2B",…) to the team currently holding
+// that spot, from live standings. Best-third combo slots ("3EHIJK") and winner/loser
+// refs ("W74","RU101") are intentionally NOT resolved — their official allocation is
+// only fixed once results come in, so those labels render verbatim rather than
+// inventing a pairing (data accuracy is a hard requirement).
+export function buildGroupPositionMap(
+  matches: Match[] = APP_MATCHES,
+): Map<string, ProvisionalSlot> {
+  const rows = computeStandings(matches);
+  const groups = groupStandings(rows, matches);
+  const map = new Map<string, ProvisionalSlot>();
+
+  for (const { group, rows: groupRows, qualification } of groups) {
+    const letterMatch = group.match(/Grupo ([A-L])/);
+    if (!letterMatch) continue;
+    const letter = letterMatch[1];
+
+    groupRows.slice(0, 2).forEach((row, idx) => {
+      const status = qualification.get(row.code) ?? "contention";
+      if (status === "eliminated") return;
+      map.set(`${idx + 1}${letter}`, {
+        team: {
+          name: row.name,
+          code: row.code,
+          flagSvg: row.flagSvg,
+          primaryColor: row.primaryColor,
+          secondaryColor: row.secondaryColor,
+          group: row.group,
+        },
+        status,
+      });
+    });
+  }
+
+  return map;
+}

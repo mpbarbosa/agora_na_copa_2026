@@ -1,5 +1,7 @@
 import { useMemo, useState } from "react";
 import type { Match, MatchStatus, TeamRef } from "../types";
+import { buildGroupPositionMap } from "../standings";
+import type { QualificationStatus } from "../standings";
 import { FlagIcon } from "./FlagIcon";
 
 interface PartidasViewProps {
@@ -209,6 +211,50 @@ export function PartidasView({ matches, theme, onSelectTeamLineup, onSelectMatch
     return sections;
   }, [groupedMatches]);
 
+  // Knockout fixtures carry placeholder slots ("2º A", …). Project the team that
+  // currently holds each group-position slot from live standings — exactly like the
+  // Chaveamento bracket — so both views show the same provisional teams
+  // ("BRASIL prov.") instead of raw labels. Combo/winner refs stay as labels.
+  const groupPositionMap = useMemo(() => buildGroupPositionMap(matches), [matches]);
+
+  const resolveTeamDisplay = (match: Match, team: Match["teamA"]) => {
+    if (match.stageName !== "Group Stage") {
+      const slot = groupPositionMap.get(team.code);
+      if (slot) {
+        const t = slot.team;
+        const ref: TeamRef = {
+          name: t.name,
+          code: t.code,
+          flagSvg: t.flagSvg,
+          primaryColor: t.primaryColor,
+          secondaryColor: t.secondaryColor,
+          group: t.group,
+        };
+        return { name: t.name, code: t.code, flagSvg: t.flagSvg, ref, prov: slot.status };
+      }
+    }
+    const prov: QualificationStatus | null = null;
+    return { name: team.name, code: team.code, flagSvg: team.flagSvg, ref: buildTeamRef(team), prov };
+  };
+
+  const provBadge = (status: QualificationStatus | null) =>
+    status === null ? null : status === "qualified" ? (
+      <span
+        className={`shrink-0 font-mono text-[11px] font-bold ${theme === "classic-light" ? "text-[#009c3b]" : "text-[#00e476]"}`}
+        title="Classificado (provisório)"
+      >
+        ✓
+      </span>
+    ) : (
+      <span
+        className={`shrink-0 rounded border px-1 py-0.5 font-mono text-[8px] uppercase tracking-wider ${
+          theme === "classic-light" ? "border-amber-400/60 text-amber-700" : "border-[#ffd84d]/40 text-[#ffd84d]/70"
+        }`}
+      >
+        prov.
+      </span>
+    );
+
   // Render one date-section (date header + its match cards). Shared by the flat
   // (single-phase) and per-phase <details> layouts so the card markup lives once.
   const renderDateGroup = (group: MatchGroup) => (
@@ -232,6 +278,8 @@ export function PartidasView({ matches, theme, onSelectTeamLineup, onSelectMatch
               ? STATUS_COPY[match.status].stripLight
               : STATUS_COPY[match.status].stripDark;
           const centerDisplay = getMatchCenterDisplay(match);
+          const dispA = resolveTeamDisplay(match, match.teamA);
+          const dispB = resolveTeamDisplay(match, match.teamB);
 
           return (
             <article
@@ -276,17 +324,18 @@ export function PartidasView({ matches, theme, onSelectTeamLineup, onSelectMatch
               <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3 px-4 py-4">
                 <button
                   type="button"
-                  id={`btn-partidas-team-${match.id}-${match.teamA.code.toLowerCase()}`}
-                  onClick={(e) => { if (match.status === "FINISHED") e.stopPropagation(); onSelectTeamLineup(buildTeamRef(match.teamA)); }}
+                  id={`btn-partidas-team-${match.id}-${dispA.code.toLowerCase()}`}
+                  onClick={(e) => { if (match.status === "FINISHED") e.stopPropagation(); onSelectTeamLineup(dispA.ref); }}
                   className="flex min-w-0 items-center gap-3 text-left"
                 >
-                  <FlagIcon flag={match.teamA.flagSvg} className="h-8 w-10 shrink-0 rounded-sm object-contain" />
+                  <FlagIcon flag={dispA.flagSvg} className="h-8 w-10 shrink-0 rounded-sm object-contain" />
                   <div className="min-w-0">
-                    <p className={`truncate font-archivo text-sm font-semibold ${headingClasses}`}>
-                      {match.teamA.name}
+                    <p className={`flex items-center gap-1.5 font-archivo text-sm font-semibold ${headingClasses}`}>
+                      <span className="truncate">{dispA.name}</span>
+                      {provBadge(dispA.prov)}
                     </p>
                     <p className={`font-mono text-[10px] uppercase tracking-[0.22em] ${softMutedClasses}`}>
-                      {match.teamA.code}
+                      {dispA.code}
                     </p>
                     {match.status === "FINISHED" && match.score && (() => {
                       const pts = matchPoints(match.score.teamA, match.score.teamB).a;
@@ -338,16 +387,17 @@ export function PartidasView({ matches, theme, onSelectTeamLineup, onSelectMatch
 
                 <button
                   type="button"
-                  id={`btn-partidas-team-${match.id}-${match.teamB.code.toLowerCase()}`}
-                  onClick={(e) => { if (match.status === "FINISHED") e.stopPropagation(); onSelectTeamLineup(buildTeamRef(match.teamB)); }}
+                  id={`btn-partidas-team-${match.id}-${dispB.code.toLowerCase()}`}
+                  onClick={(e) => { if (match.status === "FINISHED") e.stopPropagation(); onSelectTeamLineup(dispB.ref); }}
                   className="flex min-w-0 items-center justify-end gap-3 text-right"
                 >
                   <div className="min-w-0">
-                    <p className={`truncate font-archivo text-sm font-semibold ${headingClasses}`}>
-                      {match.teamB.name}
+                    <p className={`flex items-center justify-end gap-1.5 font-archivo text-sm font-semibold ${headingClasses}`}>
+                      {provBadge(dispB.prov)}
+                      <span className="truncate">{dispB.name}</span>
                     </p>
                     <p className={`font-mono text-[10px] uppercase tracking-[0.22em] ${softMutedClasses}`}>
-                      {match.teamB.code}
+                      {dispB.code}
                     </p>
                     {match.status === "FINISHED" && match.score && (() => {
                       const pts = matchPoints(match.score.teamA, match.score.teamB).b;
@@ -364,7 +414,7 @@ export function PartidasView({ matches, theme, onSelectTeamLineup, onSelectMatch
                       );
                     })()}
                   </div>
-                  <FlagIcon flag={match.teamB.flagSvg} className="h-8 w-10 shrink-0 rounded-sm object-contain" />
+                  <FlagIcon flag={dispB.flagSvg} className="h-8 w-10 shrink-0 rounded-sm object-contain" />
                 </button>
               </div>
 

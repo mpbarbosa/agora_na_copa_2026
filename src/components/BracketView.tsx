@@ -2,8 +2,8 @@ import { useMemo } from "react";
 import { CalendarDays, MapPin } from "lucide-react";
 import { KNOCKOUT_MATCHES } from "../data/knockoutBracket";
 import type { KnockoutMatch, Match } from "../types";
-import { computeStandings, groupStandings } from "../standings";
-import type { QualificationStatus } from "../standings";
+import { computeStandings, buildGroupPositionMap } from "../standings";
+import type { QualificationStatus, ProvisionalSlot } from "../standings";
 import { humanizeSlot } from "../utils/knockoutSlots";
 import { FlagIcon } from "./FlagIcon";
 
@@ -32,11 +32,6 @@ interface TeamMeta {
   flagSvg: string;
 }
 
-interface ProvisionalSlot {
-  team: TeamMeta;
-  status: QualificationStatus;
-}
-
 // Brasília-time kickoff, e.g. "28 jun · 16:00". Module-level formatters avoid
 // re-allocating per render and never read Date.now (safe in this codebase).
 const DAY_FMT = new Intl.DateTimeFormat("pt-BR", {
@@ -62,34 +57,6 @@ function buildTeamMetaMap(matches: Match[]): Map<string, TeamMeta> {
   for (const row of computeStandings(matches)) {
     map.set(row.code, { name: row.name, code: row.code, flagSvg: row.flagSvg });
   }
-  return map;
-}
-
-// Map official R32 group-position slots ("1A","2B",…) to the team currently holding
-// that spot, from live standings. Best-third combo slots ("3EHIJK") and winner/loser
-// refs ("W74","RU101") are intentionally NOT resolved — their official allocation is
-// only fixed once results come in, so those labels render verbatim rather than
-// inventing a pairing (data accuracy is a hard requirement).
-function buildGroupPositionMap(matches: Match[]): Map<string, ProvisionalSlot> {
-  const rows = computeStandings(matches);
-  const groups = groupStandings(rows, matches);
-  const map = new Map<string, ProvisionalSlot>();
-
-  for (const { group, rows: groupRows, qualification } of groups) {
-    const letterMatch = group.match(/Grupo ([A-L])/);
-    if (!letterMatch) continue;
-    const letter = letterMatch[1];
-
-    groupRows.slice(0, 2).forEach((row, idx) => {
-      const status = qualification.get(row.code) ?? "contention";
-      if (status === "eliminated") return;
-      map.set(`${idx + 1}${letter}`, {
-        team: { name: row.name, code: row.code, flagSvg: row.flagSvg },
-        status,
-      });
-    });
-  }
-
   return map;
 }
 
