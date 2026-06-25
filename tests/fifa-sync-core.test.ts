@@ -315,6 +315,43 @@ test("buildMatchStateEntry includes sorted FIFA incidents from live data", () =>
   );
 });
 
+test("buildMatchStateEntry labels an own goal and resolves its scorer from the opponent roster", () => {
+  // FIFA credits an own goal to the team that benefits, but the scorer plays for the
+  // OPPONENT (their IdPlayer is in the opponent's roster) and the goal carries Type 3.
+  // Resolving against the scoring team's roster is what used to yield "Jogador marcou".
+  const localMatch = createMatch({ status: "LIVE" });
+  const calendarMatch: FifaCalendarMatch = {
+    IdMatch: "400021452",
+    Date: "2026-06-19T21:30:00Z",
+    MatchStatus: 3,
+    HomeTeamScore: 0,
+    AwayTeamScore: 1,
+  };
+  const liveMatch: FifaLiveMatch = {
+    IdMatch: "400021452",
+    Date: "2026-06-19T21:30:00Z",
+    MatchStatus: 3,
+    MatchTime: "30'",
+    HomeTeam: {
+      Score: 0,
+      Players: [{ IdPlayer: "10", ShortName: [{ Locale: "pt-BR", Description: "BOUNOU" }] }],
+      Goals: [],
+    },
+    AwayTeam: {
+      Score: 1,
+      Players: [{ IdPlayer: "9", ShortName: [{ Locale: "pt-BR", Description: "ISIDOR" }] }],
+      // BOUNOU (home #10) turns it into his own net — credited to the away team, Type 3.
+      Goals: [{ IdPlayer: "10", Type: 3, Minute: "10'", Period: 3 }],
+    },
+  };
+
+  const entry = buildMatchStateEntry(localMatch, calendarMatch, liveMatch);
+  const goal = entry.incidents?.find((incident) => incident.type === "GOAL");
+  assert.equal(goal?.text, "Gol contra de BOUNOU.");
+  assert.equal(goal?.team, "B"); // still credited to the team that benefits
+  assert.equal(goal?.playerMentions?.[0]?.name, "BOUNOU"); // scorer resolved from the opponent roster
+});
+
 test("buildMatchStateEntry recovers a goal scorer's shirt number from the registry when FIFA omits it", () => {
   // Regression: FIFA's live feed often publishes a substitute goal scorer with a
   // null ShirtNumber, which previously left the player card showing "Camisa 0".
