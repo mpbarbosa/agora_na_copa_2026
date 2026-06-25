@@ -41,6 +41,34 @@ Cross-check the group's match results/statuses against production (the seed lags
 python3 scripts/fetch-match-incidents.py --list | grep -iE "<code1>|<code2>|<code3>|<code4>"
 ```
 
+### Qualification status — let the code decide who is "eliminado" (NEVER eyeball it)
+
+⚠️ **The single most common factual error in these analyses is calling a 3rd-placed
+team "eliminada".** In the 48-team format the **eight best third-placed teams advance**
+(Art. 12.5), so a team finishing 3rd is **NOT** eliminated — it is `contention` until
+the other groups' results settle the best-thirds table. Only the **4th-placed team**
+(once its group is complete) is reliably out. Never derive elimination from points or
+your reading of the table — read it from the code, which already encodes the rule:
+
+```bash
+npx tsx -e '
+import { computeStandings, groupStandings, rankBestThirds } from "./src/standings";
+const groups = groupStandings(computeStandings());
+for (const g of groups.filter(g => g.group === "Grupo <X>"))
+  console.log(g.rows.map((r,i)=>`${i+1}.${r.code} ${r.points}pts SG${r.goalDifference} [${g.qualification.get(r.code)}]`).join("  "));
+console.log("Best thirds (provisional, top 8 advance):");
+for (const t of rankBestThirds(groups)) console.log(`  ${t.groupLetter} ${t.row.code} ${t.row.points}pts SG${t.row.goalDifference} -> ${t.qualifies ? "IN" : "out"}`);
+'
+```
+
+Then write the verdict to MATCH the `qualification` status, never contradict it:
+- `qualified` → "classificado(a) / avança às oitavas".
+- `eliminated` → "eliminado(a)" (this is the ONLY status that may be called out).
+- `contention` (incl. every 3rd place of a *finished* group) → frame as **still alive**:
+  "em 3º, na disputa por uma das oito vagas de melhor terceiro; depende dos outros
+  grupos". Use the `rankBestThirds` IN/out flag + saldo to color it ("provisoriamente
+  dentro" vs "em posição frágil") — but it is **never** "eliminada" while `contention`.
+
 ---
 
 ## Stage 2 — Reconcile stale results (if any)
@@ -88,7 +116,10 @@ opener and a `## Veredito` closer; in between use what fits the group, e.g.
 `## Líder isolado`, `## Briga pela vaga`, `## Em baixa`, `## O que vem`,
 `## Decisão de hoje`. Reflect the ACTUAL table and results from Stage 1 — points,
 goal difference, who leads, who is eliminated, the decisive remaining fixtures.
-Do not invent results; if a round-3 game hasn't happened, frame it as upcoming.
+Apply the qualification-status rule from Stage 1: only call a team "eliminada" when
+the code reports `eliminated`; a 3rd-placed team in a finished group is `contention`
+(alive for a best-third spot), never eliminated. Do not invent results; if a round-3
+game hasn't happened, frame it as upcoming.
 
 Then type-check:
 
