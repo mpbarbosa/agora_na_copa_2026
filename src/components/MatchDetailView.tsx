@@ -1630,9 +1630,12 @@ export function MatchDetailView({
         </div>
       )}
 
-      {/* When two or more matches are live at once (final group round), show a full
-          card for each instead of the single-match detail below. */}
-      {showSimultaneousLive ? (
+      {/* When two or more matches are live at once (final group round), surface a full
+          card for each ABOVE the single-match detail, so every live game is visible at
+          a glance while the scoreboard, match selector, tabs and team links below stay
+          reachable (don't hijack the whole view — that strands finished/upcoming
+          matches and the "Onde Assistir" strip behind the live cards). */}
+      {showSimultaneousLive && (
         <SimultaneousLiveMatches
           matches={liveMatches}
           overlays={matchOverlays}
@@ -1640,8 +1643,7 @@ export function MatchDetailView({
           onSelectTeamLineup={onSelectTeamLineup}
           onOpenStandingsGroup={onOpenStandingsGroup}
         />
-      ) : (
-        <>
+      )}
       {/* CORE HERO SECTION */}
       <section
         className="max-w-5xl mx-auto px-4 mt-8"
@@ -2467,8 +2469,6 @@ export function MatchDetailView({
           </div>
         )}
       </div>
-        </>
-      )}
 
       {selectedIncidentPlayer && (
         <PlayerOverlayCard

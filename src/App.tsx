@@ -227,9 +227,9 @@ export default function App() {
           {/* Row 1: Branding + Theme Toggle */}
           <div className="py-3 flex items-center justify-between gap-4">
             {/* Branding */}
-            <div className="flex items-center gap-2" id="app-branding">
+            <div className="flex min-w-0 items-center gap-2" id="app-branding">
               <span
-                className={`font-anton text-lg uppercase tracking-wider ${
+                className={`truncate font-anton text-lg uppercase tracking-wider ${
                   theme === "classic-light" ? "text-slate-900" : "text-white"
                 }`}
               >

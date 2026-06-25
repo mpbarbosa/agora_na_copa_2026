@@ -21,7 +21,7 @@ export function OnlineCountBadge({ theme }: OnlineCountBadgeProps) {
       id="online-count-badge"
       data-testid="online-count-badge"
       title={`${count} ${count === 1 ? "fã" : "fãs"} online agora`}
-      className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-wider ${
+      className={`inline-flex shrink-0 items-center gap-1 rounded-full border px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-wider ${
         isLight
           ? "border-[#009c3b]/30 bg-[#009c3b]/5 text-[#009c3b]"
           : "border-[#00e476]/25 bg-[#00e476]/10 text-[#00e476]"
