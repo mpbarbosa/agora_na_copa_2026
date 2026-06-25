@@ -29,6 +29,7 @@ Playwright end-to-end specs for "Agora na Copa 26". The suite boots the dev serv
 | `tip-tour.spec.ts` | Tip-tour rotation (`useTipTour`): one guided walkthrough per session, rotating through `TIP_TOURS` from a random start. Pins `tip-tour-rotation` to assert the team-lineup tip plays, the best-thirds tip walks Grupos → scroll → the "Melhores 3º colocados" table, the group-history tip opens a group card's "Histórico de jogos", the per-session guard + pointer advance, and first-session dormancy | 3.0 KB |
 | `player-mention.spec.ts` | "Messi" in a match analysis links to a hover/tap compact player-card preview (portaled card shows club + ★ Craque) | 0.9 KB |
 | `match-weather.spec.ts` | `/api/match-weather` endpoint contract: resilience shape for valid coords, 400 + fallback for invalid (offline-safe) | 0.9 KB |
+| `weather-suspension.spec.ts` | Suspension advisory: forces a match to `SUSPENDED` via an overlay stub and asserts the Ao Vivo scoreboard shows the FIFA-regulations link (`#weather-suspension-notice`, `target=_blank`, FWC2026 PDF href) | 1.6 KB |
 | `donation-pix.spec.ts` | "Doe via Pix" block: Fan Zone full card (QR + "Pix Copia e Cola" copies a valid EMV payload) and the footer compact line (copies the Pix key); grants clipboard permission | 1.6 KB |
 | `version-timer.spec.ts` | Discreet version-update-check countdown beside the header title (`#version-check-timer`): renders m:ss or "nova versão" | 0.7 KB |
 

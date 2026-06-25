@@ -2,6 +2,7 @@ import type { CommentaryEvent, Match, MatchOverlayEntry, TeamRef } from "../type
 import { FlagIcon } from "./FlagIcon";
 import { PitchLineup } from "./PitchLineup";
 import { MatchWeatherChip } from "./MatchWeatherChip";
+import { WeatherSuspensionNotice } from "./WeatherSuspensionNotice";
 
 interface SimultaneousLiveMatchesProps {
   /** The matches in progress right now (2+ — the simultaneous case). */
@@ -133,6 +134,13 @@ export function SimultaneousLiveMatches({
               )}
               {(live || suspended) && <MatchWeatherChip match={match} theme={theme} />}
             </div>
+
+            {/* Weather/lightning suspension advisory + FIFA regulations link */}
+            {suspended && (
+              <div className="mt-3 flex justify-center">
+                <WeatherSuspensionNotice theme={theme} />
+              </div>
+            )}
 
             {/* Onde assistir */}
             {broadcasters.length > 0 && (

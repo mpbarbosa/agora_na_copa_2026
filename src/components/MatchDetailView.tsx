@@ -32,6 +32,7 @@ import { renderAnalysisWithMentions } from "./PlayerMention";
 import { MatchWeatherChip } from "./MatchWeatherChip";
 import { RefereeChip } from "./RefereeChip";
 import { SimultaneousLiveMatches } from "./SimultaneousLiveMatches";
+import { WeatherSuspensionNotice } from "./WeatherSuspensionNotice";
 import { MatchSpeechToggle } from "./MatchSpeechToggle";
 import { useMatchSpeech } from "../hooks/useMatchSpeech";
 import { runDirectSpeechTest } from "../utils/speech/catasSpeech";
@@ -1779,6 +1780,13 @@ export function MatchDetailView({
               </h2>
             </div>
           </div>
+
+          {/* Weather/lightning suspension advisory + link to the FIFA regulations */}
+          {currentMatch.status === "SUSPENDED" && (
+            <div className="mt-5 flex justify-center">
+              <WeatherSuspensionNotice theme={theme} />
+            </div>
+          )}
 
           {/* Stadium, Location & Capacity details */}
           <div
