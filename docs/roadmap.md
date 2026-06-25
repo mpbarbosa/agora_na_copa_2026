@@ -451,6 +451,30 @@ automated checks are introduced.
 
 **Effort**: M (3–5 days). **Depends on**: all prior phases.
 
+### Follow-up (2026-06-25): make `navigation:134` deterministic (live-data flake)
+
+`tests/e2e/navigation.spec.ts:134` ("shows the match analysis panel for a match
+that has one") fails as the tournament calendar advances. Its negative case
+(line 152) clicks `#match-selector-chips-PRE_GAME #btn-match-cze-mex-2026`,
+assuming CZE×MEX is still upcoming — but once that fixture kicks off, the chip
+moves out of the `PRE_GAME` status group and the click times out (observed
+2026-06-25; the 0.0.367 release shipped past this as a known non-regression
+flake). Lint + unit stay green; only this e2e assertion drifts.
+
+**Task**: stub the match status so the test no longer depends on the wall-clock
+date — e.g. `page.route("**/api/match-states", …)` to pin the negative-case match
+into `PRE_GAME` (or return empty states so the curated seed status holds), or
+select a fixture guaranteed to stay upcoming (a late-round group game / knockout
+placeholder). This is the concrete instance of the deferred "make prod-preflight
+e2e deterministic (stub FIFA / disable sync)" item — apply the same stubbing
+pattern the other `standings.spec.ts` tests already use.
+
+**Why it matters**: this flake blocks `scripts/deploy-preflight.sh` during live
+matches, forcing manual `dist/`-rsync deploys that skip the e2e gate. Fixing it
+restores a green automated release path. Belongs in `agora-dev`.
+
+**Effort**: S (≈half a day). **Depends on**: nothing.
+
 ---
 
 ## 15. Sequencing & dependency graph
