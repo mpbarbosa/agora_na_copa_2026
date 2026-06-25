@@ -31,6 +31,11 @@ interface TeamEntry {
 function extractTeams(): TeamEntry[] {
   const seen = new Map<string, TeamEntry>();
   for (const match of APP_MATCHES) {
+    // Knockout fixtures carry bracket placeholder sides ("1° G", "2° A", best-third
+    // and winner/runner-up slots) that are not real squads. Every one of the 48
+    // national teams plays the group stage, so restricting extraction to it yields
+    // exactly the real teams and drops the placeholders.
+    if (match.stageName !== "Group Stage") continue;
     for (const side of [match.teamA, match.teamB]) {
       if (!seen.has(side.code)) {
         const squadEntries = getTeamSquad(side.code);
