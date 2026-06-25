@@ -155,8 +155,9 @@ export function PartidasView({ matches, theme, onSelectTeamLineup, onSelectMatch
       ? "border-slate-200 bg-white hover:border-slate-300"
       : "border-white/10 bg-[#15181a] hover:border-white/20";
   const stripBaseClasses = theme === "classic-light" ? "border-slate-200" : "border-white/10";
-  const phaseAccentClasses = theme === "classic-light" ? "text-[#065f2c]" : "text-[#ffd84d]";
-  const phaseDividerClasses = theme === "classic-light" ? "bg-slate-200" : "bg-white/10";
+  const phasePillClasses =
+    theme === "classic-light" ? "bg-[#009c3b] text-white" : "bg-[#00e476] text-slate-950";
+  const phaseDividerClasses = theme === "classic-light" ? "bg-[#009c3b]/30" : "bg-[#00e476]/30";
 
   // Suspended matches are in-progress (just stopped), so they live under the
   // "Ao vivo" tab alongside LIVE.
@@ -260,13 +261,13 @@ export function PartidasView({ matches, theme, onSelectTeamLineup, onSelectMatch
                 {showPhaseHeader && (
                   <div
                     id={`partidas-phase-${activeFilter.toLowerCase()}-${phase.replace(/\s+/g, "-").toLowerCase()}`}
-                    className="flex items-center gap-3 pt-2 first:pt-0"
+                    className="flex items-center gap-3 pt-5 first:pt-1"
                     data-testid="partidas-phase-header"
                   >
-                    <span className={`shrink-0 font-anton text-base uppercase tracking-[0.18em] ${phaseAccentClasses}`}>
+                    <span className={`inline-flex shrink-0 items-center rounded-lg px-3.5 py-2 font-anton text-lg sm:text-xl uppercase tracking-wide shadow-sm ${phasePillClasses}`}>
                       {phase}
                     </span>
-                    <span className={`h-px flex-1 ${phaseDividerClasses}`} aria-hidden="true" />
+                    <span className={`h-0.5 flex-1 rounded-full ${phaseDividerClasses}`} aria-hidden="true" />
                   </div>
                 )}
               <section
