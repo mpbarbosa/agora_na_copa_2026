@@ -1,26 +1,8 @@
 import { useEffect, useState } from "react";
 
-const PRESENCE_POLL_MS = 25 * 1000; // < the server's 45s window, so 1 miss is tolerated
-const CLIENT_ID_KEY = "agora:client-id";
+import { getClientId } from "../utils/clientId";
 
-/**
- * A stable per-browser id (persisted in localStorage, so it survives tabs/reloads).
- * Sent with the heartbeat so the server can count distinct browsers behind one IP —
- * separating co-located users while deduping one browser's tabs. Empty when storage
- * is unavailable, in which case the server falls back to counting by IP alone.
- */
-function getClientId(): string {
-  try {
-    let id = localStorage.getItem(CLIENT_ID_KEY);
-    if (!id) {
-      id = crypto.randomUUID();
-      localStorage.setItem(CLIENT_ID_KEY, id);
-    }
-    return id;
-  } catch {
-    return "";
-  }
-}
+const PRESENCE_POLL_MS = 25 * 1000; // < the server's 45s window, so 1 miss is tolerated
 
 /**
  * Reports how many fans are online right now. The server counts distinct (IP +

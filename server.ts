@@ -21,6 +21,16 @@ import type {
 import { GOOGLE_TRENDS_BATCH_URL, buildGoogleTrendsRequestBody, parseGoogleTrendsBatch } from "./trends-core";
 import { buildOpenMeteoUrl, parseOpenMeteoCurrent } from "./weather-core";
 import { type PresenceStore, recordHeartbeat, countOnline } from "./presence-core";
+import {
+  type ChatStore,
+  type ChatRateMap,
+  validateNickname,
+  validateText,
+  passesRateLimit,
+  appendMessage,
+  getMessages,
+  pruneIdleMatches,
+} from "./chat-core";
 import { APP_MATCHES } from "./src/appMatches";
 import { resolvePlayerEntry } from "./src/data/playerRegistry";
 import { triviaQuestions } from "./src/data/questions";
@@ -56,6 +66,7 @@ import {
   type PlayerStatsResponse,
   type GoogleTrendsResponse,
   type WeatherResponse,
+  type ChatResponse,
 } from "./src/types";
 
 dotenv.config();
@@ -1614,6 +1625,10 @@ const warmDefaultFifaCaches = async () => {
       payload.refreshAfterMs;
     fifaSyncDiagnostics.backgroundWarm.cycleCount += 1;
 
+    // Free chat rooms for matches that just stopped being live (the warm cycle has
+    // refreshed `activeLiveMatchIds`), keeping the in-memory buffers bounded.
+    pruneIdleMatches(chatStore, fifaSyncDiagnostics.matchStates.activeLiveMatchIds);
+
     scheduleBackgroundWarm(payload.refreshAfterMs);
   } catch (error) {
     fifaSyncDiagnostics.backgroundWarm.lastError = serializeErrorMessage(error);
@@ -2354,18 +2369,91 @@ app.get("/api/questions", (_req, res) => {
 const PRESENCE_WINDOW_MS = 45 * 1000;
 const presenceStore: PresenceStore = new Map();
 
-app.post("/api/presence", (req, res) => {
-  const now = Date.now();
+// Derive the hybrid (IP|browserId) client key shared by presence and chat: the IP
+// grounds it to a real client; the client-supplied per-browser id separates co-located
+// users and dedupes one browser's tabs. Falls back to IP alone when no id is sent.
+const deriveClientKey = (req: express.Request): string => {
   const ip = req.ip ?? "";
   const rawId = (req.body as { id?: unknown } | undefined)?.id;
   const clientId = typeof rawId === "string" ? rawId.slice(0, 64) : "";
-  const key = clientId ? `${ip}|${clientId}` : ip;
-  recordHeartbeat(presenceStore, key, now);
+  return clientId ? `${ip}|${clientId}` : ip;
+};
+
+app.post("/api/presence", (req, res) => {
+  const now = Date.now();
+  recordHeartbeat(presenceStore, deriveClientKey(req), now);
   res.set("Cache-Control", "no-store");
   res.json({
     online: countOnline(presenceStore, now, PRESENCE_WINDOW_MS),
     updatedAt: new Date(now).toISOString(),
   });
+});
+
+// In-memory live-match chat ("resenha"). A room exists only while its match is LIVE:
+// posting is gated by the FIFA match-states sync (`activeLiveMatchIds`), buffers are
+// FIFO-capped per match, and idle rooms are pruned each warm cycle. Single-instance,
+// memory-only — history resets on restart, by design. Posting is disabled under memory
+// pressure so the small, swap-less host can never be pushed to OOM by chat traffic.
+const chatStore: ChatStore = new Map();
+const chatRateMap: ChatRateMap = new Map();
+// Reject posts once RSS crosses this ceiling (the box has ~1.9 GiB and no swap).
+const CHAT_MAX_RSS_BYTES = Number(process.env.CHAT_MAX_RSS_MB ?? 1500) * 1024 * 1024;
+// Valid match ids, so room keys can never be spoofed into unbounded growth.
+const VALID_MATCH_IDS = new Set(APP_MATCHES.map((match) => match.id));
+
+const isMatchLive = (matchId: string): boolean =>
+  fifaSyncDiagnostics.matchStates.activeLiveMatchIds.includes(matchId);
+
+// GET the chat for a match: whether it's open (LIVE) plus messages after `?since=<id>`.
+app.get("/api/chat/:matchId", (req, res) => {
+  res.set("Cache-Control", "no-store");
+  const { matchId } = req.params;
+  if (!VALID_MATCH_IDS.has(matchId)) {
+    return res.status(404).json({ error: "Partida desconhecida." });
+  }
+  const rawSince = req.query.since;
+  const sinceId = typeof rawSince === "string" && rawSince !== "" ? Number(rawSince) : undefined;
+  const since = sinceId !== undefined && Number.isFinite(sinceId) ? sinceId : undefined;
+  const payload: ChatResponse = {
+    open: isMatchLive(matchId),
+    messages: getMessages(chatStore, matchId, since),
+    updatedAt: new Date().toISOString(),
+  };
+  return res.json(payload);
+});
+
+// POST a message to a match's live chat. Gated by: known match, memory headroom, match
+// is LIVE, valid nickname/text, and per-client rate limit.
+app.post("/api/chat/:matchId", (req, res) => {
+  res.set("Cache-Control", "no-store");
+  const { matchId } = req.params;
+  if (!VALID_MATCH_IDS.has(matchId)) {
+    return res.status(404).json({ error: "Partida desconhecida." });
+  }
+  if (process.memoryUsage().rss > CHAT_MAX_RSS_BYTES) {
+    return res.status(503).json({ error: "Chat temporariamente indisponível. Tente em instantes." });
+  }
+  if (!isMatchLive(matchId)) {
+    return res.status(403).json({ error: "O chat abre quando a partida começa." });
+  }
+  const body = (req.body ?? {}) as { nickname?: unknown; text?: unknown };
+  const nickname = validateNickname(body.nickname);
+  if (!nickname.ok) return res.status(400).json({ error: nickname.reason });
+  const text = validateText(body.text);
+  if (!text.ok) return res.status(400).json({ error: text.reason });
+
+  const now = Date.now();
+  if (!passesRateLimit(chatRateMap, deriveClientKey(req), now)) {
+    return res.status(429).json({ error: "Você está enviando mensagens rápido demais. Respire." });
+  }
+
+  const message = appendMessage(
+    chatStore,
+    matchId,
+    { nickname: nickname.value, text: text.value },
+    now,
+  );
+  return res.status(201).json({ message });
 });
 
 app.get("/api/health", (_req, res) => {

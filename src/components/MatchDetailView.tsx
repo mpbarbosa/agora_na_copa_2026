@@ -27,6 +27,7 @@ import { PlayerOverlayCard, PlayerPictureOverlay, buildTournamentStatCells, getP
 import { usePlayerStats } from "../hooks/usePlayerStats";
 import { getPositionLabel } from "../utils/playerDisplay";
 import { PitchLineup } from "./PitchLineup";
+import { MatchChatPanel } from "./MatchChatPanel";
 import { AffiliateProducts } from "./AffiliateProducts";
 import { renderAnalysisWithMentions } from "./PlayerMention";
 import { MatchWeatherChip } from "./MatchWeatherChip";
@@ -2476,6 +2477,9 @@ export function MatchDetailView({
             </div>
           </div>
         )}
+
+        {/* Anonymous live-match chat ("Resenha ao vivo") — open only while LIVE */}
+        <MatchChatPanel matchId={currentMatch.id} theme={theme} />
       </div>
 
       {selectedIncidentPlayer && (
