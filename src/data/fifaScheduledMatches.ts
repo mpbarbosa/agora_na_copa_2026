@@ -38,8 +38,8 @@ export const FIFA_SCHEDULED_MATCHES: FifaScheduledMatchSeed[] = [
   // ── Grupo C ───────────────────────────────────────────────────────────────
   { teamA: "SCO", teamB: "MAR", kickoffTimestamp: "2026-06-19T19:00:00-03:00", status: "FINISHED", score: { teamA: 0, teamB: 1 }, ...v("SCO", "MAR") },
   { teamA: "BRA", teamB: "HAI", kickoffTimestamp: "2026-06-19T21:30:00-03:00", status: "FINISHED", score: { teamA: 3, teamB: 0 }, ...v("BRA", "HAI") },
-  { teamA: "MAR", teamB: "HAI", kickoffTimestamp: "2026-06-24T19:00:00-03:00", status: "PRE_GAME", ...v("MAR", "HAI") },
-  { teamA: "SCO", teamB: "BRA", kickoffTimestamp: "2026-06-24T19:00:00-03:00", status: "PRE_GAME", ...v("SCO", "BRA") },
+  { teamA: "MAR", teamB: "HAI", kickoffTimestamp: "2026-06-24T19:00:00-03:00", status: "FINISHED", score: { teamA: 4, teamB: 2 }, ...v("MAR", "HAI") },
+  { teamA: "SCO", teamB: "BRA", kickoffTimestamp: "2026-06-24T19:00:00-03:00", status: "FINISHED", score: { teamA: 0, teamB: 3 }, ...v("SCO", "BRA") },
 
   // ── Grupo D ───────────────────────────────────────────────────────────────
   { teamA: "USA", teamB: "AUS", kickoffTimestamp: "2026-06-19T16:00:00-03:00", status: "FINISHED", score: { teamA: 2, teamB: 0 }, ...v("USA", "AUS") },
