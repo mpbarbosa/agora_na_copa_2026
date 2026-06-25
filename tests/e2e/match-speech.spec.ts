@@ -104,13 +104,21 @@ test.describe("Live-match speech narration (Ao Vivo)", () => {
 
     // Nothing spoken yet (toggle off), then the incident's mic speaks on click.
     expect(await utterances(page)).toHaveLength(0);
-    const mic = page.getByTestId("incident-speak").first();
-    await expect(mic).toBeVisible();
-    // The LIVE scoreboard re-renders each clock tick, so Playwright can read the
-    // button as never "stable"; force past the actionability wait (visibility is
-    // already asserted) to avoid a spurious 30s click timeout.
-    await mic.click({ force: true });
-    await expect.poll(() => utterances(page).then((l) => l.length), SPEECH_POLL).toBeGreaterThan(0);
+    await expect(page.getByTestId("incident-speak").first()).toBeVisible();
+    // The LIVE scoreboard re-mounts the incidents list on every clock tick, so a
+    // single click can race a re-render and never reach the handler (no utterance,
+    // spurious timeout). Re-resolve the locator and re-click each poll iteration —
+    // speak() is idempotent for the assertion — until one click lands and speaks.
+    await expect
+      .poll(async () => {
+        await page
+          .getByTestId("incident-speak")
+          .first()
+          .click({ force: true })
+          .catch(() => {});
+        return (await utterances(page)).length;
+      }, SPEECH_POLL)
+      .toBeGreaterThan(0);
   });
 
   test("the setup drawer shows the speech status readout", async ({ page }) => {
