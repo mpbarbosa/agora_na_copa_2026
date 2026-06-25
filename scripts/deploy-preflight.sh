@@ -17,6 +17,8 @@
 #   7. Starts the production server on port 9011 and smoke-tests:
 #        GET /                      → HTTP 200
 #        GET /assets/<first-js>     → HTTP 200
+#        GET /api/questions         → non-empty trivia array
+#        POST /api/predict          → HTTP 200, non-empty text, simulated: true
 #   8. Runs the Playwright e2e suite against the running preview server.
 #   9. Stops the preview server and prints a deployment-ready summary.
 #
@@ -163,6 +165,16 @@ if curl -fsS "http://localhost:$PREVIEW_PORT/api/questions" | node -e "const fs=
     echo "    ✅ Trivia API returns a non-empty question set"
 else
     echo "    ❌ Trivia API returned no questions"
+    echo "    See log: $PREVIEW_LOG"
+    exit 1
+fi
+
+# The match predictor must return a non-empty prognosis flagged simulated (it ships
+# with no AI key, so "simulated: true" is the expected production behavior).
+if curl -fsS -X POST -H "Content-Type: application/json" -d '{"homeTeam":"BRA","awayTeam":"ARG"}' "http://localhost:$PREVIEW_PORT/api/predict" | node -e "const fs=require('fs'); const data=JSON.parse(fs.readFileSync(0,'utf8')); if (typeof data.text !== 'string' || data.text.length === 0 || data.simulated !== true) process.exit(1);" >/dev/null; then
+    echo "    ✅ Predict API returns a simulated prognosis"
+else
+    echo "    ❌ Predict API failed or was not flagged simulated"
     echo "    See log: $PREVIEW_LOG"
     exit 1
 fi

@@ -81,9 +81,12 @@ from `docs/production-environment-memory.md`, `scripts/deploy*.sh`, and
   stale versions.
 - **`scripts/deploy-preflight.sh`** is the only automated gate before a deploy:
   it builds, checks `dist/index.html`, `dist/server.cjs`, `dist/assets/*.{js,css}`
-  exist, then boots the production bundle on port 9011 and curls `GET /` and the
-  first JS asset for HTTP 200. **It does not run Playwright e2e, and does not
-  exercise any `/api/*` route.**
+  exist and a JS bundle-size budget, then boots the production bundle and curls
+  `GET /` + the first JS asset for HTTP 200, smoke-tests `GET /api/questions`
+  (non-empty) and `POST /api/predict` (HTTP 200, `simulated: true`), and finally
+  runs the Playwright e2e suite (`test:e2e:prod`) against the running preview.
+  *(Updated 2026-06-25: it now runs e2e and exercises `/api/*` routes — the
+  earlier "does neither" note is obsolete.)*
 - **`tests/e2e/` does not exist yet** — `playwright.config.ts` is configured
   (port 3100, `npm run dev` as web server) but there are zero specs. `npm run
   test:e2e` currently has nothing to run.
