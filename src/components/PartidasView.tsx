@@ -468,7 +468,6 @@ export function PartidasView({ matches, theme, onSelectTeamLineup, onSelectMatch
               return (
                 <details
                   key={`${activeFilter}-${section.phase}`}
-                  open
                   className="group"
                   data-testid="partidas-phase"
                 >
