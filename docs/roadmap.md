@@ -323,6 +323,38 @@ contributor/session and deployed in either order.
 the complex part). **Depends on**: Phase 0a, 0b (bracket skeleton). **Soft
 dependency** on Phase 1 for the auto-seed stretch goal only.
 
+### Follow-up (2026-06-24): rebuild BracketView from `knockoutBracket.json`
+
+`BracketView` shipped, but its knockout pairings/dates/venues came from the
+hand-seeded `tournament.ts` skeleton and proved **wrong** vs. the official FIFA
+schedule (e.g. Brazil's R32 slot was mis-paired). The corrected source of truth
+now exists: **`src/data/knockoutBracket.json`** — `{ "matches": [...] }` with 32
+entries, each `{ matchNumber, stage, dateUtc, stadium, city, slotA, slotB, teamA,
+teamB }`. Slots are official FIFA placeholder labels (`"2A"`, `"1C"`, `"2F"`,
+`W74`, `3CEFHI`, …); `teamA`/`teamB` are `{ code, name }` once known, else `null`.
+It is generated reproducibly by **`scripts/build-knockout-bracket.py`** from the
+FIFA calendar API (idCompetition=17, idSeason=285023).
+
+**Task**: rewrite `BracketView` to render directly from `knockoutBracket.json`
+instead of the `tournament.ts` `BracketNode` skeleton:
+- Drive the R32 → R16 → QF → SF → 3rd-place → Final tree off `matchNumber`
+  ranges (R32 73–88, R16 89–96, QF 97–100, SF 101–102, 3rd 103, Final 104) and
+  the official slot labels, so progression matches the real FIFA bracket.
+- Show each match's real `dateUtc` (localized) and `stadium`/`city`.
+- Render official placeholder labels (`2A`, `1C/2F`, `W74`, `3CEFHI`) for slots
+  whose team is not yet decided, rather than inventing pairings.
+- Add the 3rd-place match (#103), currently absent.
+- Keep the existing manual click-to-advance interaction layered on top of the
+  real seeding (or gate it behind real results — TBD).
+- Update `tests/e2e/bracket.spec.ts` to assert real slot labels/dates render.
+
+**Why it matters**: data accuracy is a hard requirement — wrong knockout data is
+a real failure, not cosmetic. Do **not** re-derive pairings by hand; the JSON is
+the only trusted source.
+
+**Effort**: M (2–3 days). **Depends on**: nothing new — data + generator already
+landed. Belongs in `agora-dev`.
+
 ---
 
 ## 12. Phase 5 — Fan Zone + Gemini AI (gated on scope confirmation)
@@ -418,6 +450,30 @@ automated checks are introduced.
   `NAV_ITEMS` handling if every entry is now `live` (dead-code cleanup).
 
 **Effort**: M (3–5 days). **Depends on**: all prior phases.
+
+### Follow-up (2026-06-25): make `navigation:134` deterministic (live-data flake)
+
+`tests/e2e/navigation.spec.ts:134` ("shows the match analysis panel for a match
+that has one") fails as the tournament calendar advances. Its negative case
+(line 152) clicks `#match-selector-chips-PRE_GAME #btn-match-cze-mex-2026`,
+assuming CZE×MEX is still upcoming — but once that fixture kicks off, the chip
+moves out of the `PRE_GAME` status group and the click times out (observed
+2026-06-25; the 0.0.367 release shipped past this as a known non-regression
+flake). Lint + unit stay green; only this e2e assertion drifts.
+
+**Task**: stub the match status so the test no longer depends on the wall-clock
+date — e.g. `page.route("**/api/match-states", …)` to pin the negative-case match
+into `PRE_GAME` (or return empty states so the curated seed status holds), or
+select a fixture guaranteed to stay upcoming (a late-round group game / knockout
+placeholder). This is the concrete instance of the deferred "make prod-preflight
+e2e deterministic (stub FIFA / disable sync)" item — apply the same stubbing
+pattern the other `standings.spec.ts` tests already use.
+
+**Why it matters**: this flake blocks `scripts/deploy-preflight.sh` during live
+matches, forcing manual `dist/`-rsync deploys that skip the e2e gate. Fixing it
+restores a green automated release path. Belongs in `agora-dev`.
+
+**Effort**: S (≈half a day). **Depends on**: nothing.
 
 ---
 

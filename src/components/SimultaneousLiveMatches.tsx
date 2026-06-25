@@ -1,6 +1,5 @@
 import type { CommentaryEvent, Match, MatchOverlayEntry, TeamRef } from "../types";
 import { FlagIcon } from "./FlagIcon";
-import { PitchLineup } from "./PitchLineup";
 import { MatchWeatherChip } from "./MatchWeatherChip";
 import { WeatherSuspensionNotice } from "./WeatherSuspensionNotice";
 
@@ -25,10 +24,12 @@ const INCIDENT_ICON: Record<CommentaryEvent["type"], string> = {
 
 /**
  * When two or more matches are live at once (the final group round plays both of a
- * group's games simultaneously), the Ao Vivo page renders a FULL card for each —
- * scoreboard, "Onde assistir", live "Lances" and the lineup — stacked vertically,
- * so none is hidden behind a switch chip. Used in place of the single-match detail
- * whenever `liveMatches.length >= 2`.
+ * group's games simultaneously), the Ao Vivo page renders a COMPACT card for each —
+ * scoreboard, "Onde assistir" and live "Lances" — stacked vertically ABOVE the
+ * single-match detail, so every live game is visible at a glance. The lineup
+ * (Escalações) is intentionally left to the single-match detail below (and the
+ * Seleções view) so these cards stay light and don't turn Ao Vivo into a stack of
+ * full team pages. Rendered whenever `liveMatches.length >= 2`.
  */
 export function SimultaneousLiveMatches({
   matches,
@@ -181,11 +182,6 @@ export function SimultaneousLiveMatches({
               </div>
             )}
 
-            {/* Escalações */}
-            <div className={`mt-4 border-t pt-4 ${dividerClasses}`}>
-              <p className={`${sectionTitle} mb-3`}>Escalações</p>
-              <PitchLineup match={match} onSelectTeamLineup={onSelectTeamLineup} />
-            </div>
           </section>
         );
       })}
