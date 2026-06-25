@@ -25,8 +25,8 @@ export const FIFA_SCHEDULED_MATCHES: FifaScheduledMatchSeed[] = [
   // ── Grupo A ───────────────────────────────────────────────────────────────
   { teamA: "CZE", teamB: "RSA", kickoffTimestamp: "2026-06-18T13:00:00-03:00", status: "FINISHED", score: { teamA: 1, teamB: 1 }, ...v("CZE", "RSA") },
   { teamA: "MEX", teamB: "KOR", kickoffTimestamp: "2026-06-18T22:00:00-03:00", status: "FINISHED", score: { teamA: 1, teamB: 0 }, ...v("MEX", "KOR") },
-  { teamA: "CZE", teamB: "MEX", kickoffTimestamp: "2026-06-24T22:00:00-03:00", status: "PRE_GAME", ...v("CZE", "MEX") },
-  { teamA: "RSA", teamB: "KOR", kickoffTimestamp: "2026-06-24T22:00:00-03:00", status: "PRE_GAME", ...v("RSA", "KOR") },
+  { teamA: "CZE", teamB: "MEX", kickoffTimestamp: "2026-06-24T22:00:00-03:00", status: "FINISHED", score: { teamA: 0, teamB: 3 }, ...v("CZE", "MEX") },
+  { teamA: "RSA", teamB: "KOR", kickoffTimestamp: "2026-06-24T22:00:00-03:00", status: "FINISHED", score: { teamA: 1, teamB: 0 }, ...v("RSA", "KOR") },
 
   // ── Grupo B ───────────────────────────────────────────────────────────────
   { teamA: "QAT", teamB: "SUI", kickoffTimestamp: "2026-06-13T16:00:00-03:00", status: "FINISHED", score: { teamA: 1, teamB: 1 }, ...v("QAT", "SUI") },
