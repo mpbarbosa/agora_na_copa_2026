@@ -538,5 +538,35 @@
       "embedUrl": "https://www.youtube.com/embed/H1CgNuhJA0A",
       "title": "Melhores Momentos: Equador x Alemanha — Copa do Mundo 2026"
     }
+  ],
+  "par-aus-2026": [
+    {
+      "embedUrl": "https://www.youtube.com/embed/GyNaOcqANX8",
+      "title": "Paraguai x Austrália — Copa do Mundo 2026"
+    }
+  ],
+  "tur-usa-2026": [
+    {
+      "embedUrl": "https://www.youtube.com/embed/cAl4PErpiuE",
+      "title": "Turquia x Estados Unidos — Copa do Mundo 2026"
+    }
+  ],
+  "jpn-swe-2026": [
+    {
+      "embedUrl": "https://www.youtube.com/embed/w5OVy9QPQd0",
+      "title": "Japão x Suécia — Copa do Mundo 2026"
+    }
+  ],
+  "tun-ned-2026": [
+    {
+      "embedUrl": "https://www.youtube.com/embed/meWCRh7LE-0",
+      "title": "Tunísia x Holanda — Copa do Mundo 2026"
+    }
+  ],
+  "sen-irq-2026": [
+    {
+      "embedUrl": "https://www.youtube.com/embed/VFF2tuap6mo",
+      "title": "Senegal x Iraque — Copa do Mundo 2026"
+    }
   ]
 }
