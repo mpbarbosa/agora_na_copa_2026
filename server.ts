@@ -45,6 +45,10 @@ const TEAM_ANALYSIS_BY_CODE = TEAM_ANALYSIS as Record<
 import { computeStandings, groupStandings } from "./src/standings";
 import { buildPrediction, type PredictionTeam } from "./predict-core";
 import {
+  estimateQualificationOdds,
+  type QualificationOdds,
+} from "./qualification-sim-core";
+import {
   Position,
   type BroadcastGuideEntry,
   type CommentaryEvent,
@@ -2409,6 +2413,84 @@ app.post("/api/predict", (req, res) => {
   });
 
   res.json({ text: buildPrediction(toTeam(home), toTeam(away), userNotes), simulated: true });
+});
+
+// Monte-Carlo estimate of a team's odds of reaching the Round of 32 (top two of its
+// group, or one of the eight best thirds), simulated from the current standings by
+// qualification-sim-core. NOT FIFA-sourced: it is a model built locally and labeled
+// "simulado", never a claim of fact (mirrors /api/predict's simulated framing). The
+// odds are stable for the life of the process — APP_MATCHES does not change at
+// runtime — so each (team, iterations) pair is computed once and cached.
+const QUALIFICATION_SIM_SEED = 0x51bf2a3d;
+const DEFAULT_QUALIFICATION_ITERATIONS = 4000;
+const MIN_QUALIFICATION_ITERATIONS = 200;
+const MAX_QUALIFICATION_ITERATIONS = 20000;
+
+interface QualificationOddsResponse {
+  source: "simulated";
+  simulated: true;
+  note: string;
+  updatedAt: string;
+  team: { code: string; name: string; group: string };
+  iterations: number;
+  odds: QualificationOdds;
+}
+
+const qualificationOddsCache = new Map<string, QualificationOddsResponse>();
+
+app.get("/api/qualification-odds/:teamCode", (req, res) => {
+  const rawKey = typeof req.params.teamCode === "string" ? req.params.teamCode.trim() : "";
+  if (!rawKey) {
+    res.status(400).json({ error: "Informe a seleção (código ou nome)." });
+    return;
+  }
+
+  // Resolve by team code or name, exactly like /api/predict.
+  const rows = computeStandings(APP_MATCHES);
+  const byKey = new Map<string, (typeof rows)[number]>();
+  for (const row of rows) {
+    byKey.set(row.code.toUpperCase(), row);
+    byKey.set(row.name.toUpperCase(), row);
+  }
+  const team = byKey.get(rawKey.toUpperCase());
+  if (!team) {
+    res.status(404).json({ error: "Seleção não encontrada." });
+    return;
+  }
+
+  const requested = Number.parseInt(String(req.query.iterations ?? ""), 10);
+  const iterations = Number.isFinite(requested)
+    ? Math.min(MAX_QUALIFICATION_ITERATIONS, Math.max(MIN_QUALIFICATION_ITERATIONS, requested))
+    : DEFAULT_QUALIFICATION_ITERATIONS;
+
+  const cacheKey = `${team.code}:${iterations}`;
+  const cached = qualificationOddsCache.get(cacheKey);
+  if (cached) {
+    res.set("Cache-Control", "public, max-age=300");
+    res.json(cached);
+    return;
+  }
+
+  const odds = estimateQualificationOdds(APP_MATCHES, team.code, {
+    iterations,
+    seed: QUALIFICATION_SIM_SEED,
+  });
+
+  const payload: QualificationOddsResponse = {
+    source: "simulated",
+    simulated: true,
+    note: odds.deterministic
+      ? "Fase de grupos definida: a classificação já está decidida pelos resultados."
+      : "Probabilidade simulada (Monte Carlo) a partir da campanha atual — palpite para a torcida, não cravada de resultado.",
+    updatedAt: new Date().toISOString(),
+    team: { code: team.code, name: team.name, group: team.group },
+    iterations: odds.iterations,
+    odds,
+  };
+  qualificationOddsCache.set(cacheKey, payload);
+
+  res.set("Cache-Control", "public, max-age=300");
+  res.json(payload);
 });
 
 // In-memory "online users" presence, counted by DISTINCT (IP + per-browser id).
