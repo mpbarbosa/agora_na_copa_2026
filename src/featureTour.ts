@@ -44,7 +44,7 @@ export const TOUR_STEPS: DriveStep[] = [
   {
     element: "#btn-nav-chaveamento",
     popover: {
-      title: "Chaveamento",
+      title: "Mata-mata",
       description: "Acompanhe o caminho do mata-mata até a final.",
       side: "bottom",
       align: "start",

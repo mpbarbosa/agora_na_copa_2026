@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import { stubLiveApis } from "./fixtures/aoVivo";
 
 // Live-match chat ("Resenha ao vivo") on the Ao Vivo view. The panel's open/closed
 // state and message list come from GET /api/chat/:matchId, so we route-mock that feed to
@@ -7,6 +8,10 @@ import { test, expect } from "@playwright/test";
 test.describe("Live match chat (Ao Vivo)", () => {
   test.beforeEach(async ({ page }) => {
     await page.addInitScript(() => localStorage.setItem("feature-tour-seen", "1"));
+    // No live games → Ao Vivo stays on the focus detail, so the chat panel is
+    // mounted. The panel's open/closed state is driven by the /api/chat mock
+    // below, not by a match being live, so this stays deterministic.
+    await stubLiveApis(page);
   });
 
   test("shows the closed-state resenha panel when the match is not live", async ({ page }) => {

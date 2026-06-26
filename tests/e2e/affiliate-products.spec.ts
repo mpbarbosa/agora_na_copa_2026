@@ -1,8 +1,15 @@
 import { test, expect } from "@playwright/test";
 
 import { AFFILIATE_PRODUCTS, AMAZON_ASSOCIATES_TAG } from "../../src/config";
+import { stubLiveApis } from "./fixtures/aoVivo";
 
 test.describe("Affiliate products strip (Ao Vivo)", () => {
+  // No live games → Ao Vivo stays on the focus detail (broadcast tab + strip),
+  // not the "Os dois" overview that would unmount them.
+  test.beforeEach(async ({ page }) => {
+    await stubLiveApis(page);
+  });
+
   test("renders the Amazon gear strip on the broadcast tab with compliant links", async ({ page }) => {
     await page.goto("/");
 

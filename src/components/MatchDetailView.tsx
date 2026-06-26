@@ -49,6 +49,7 @@ import {
   Zap,
   Clock,
   Mic,
+  LayoutGrid,
 } from "lucide-react";
 
 // Header match-selector groups, split by match status
@@ -588,6 +589,12 @@ export function MatchDetailView({
   const [matchSelectionMode, setMatchSelectionMode] = useState<"auto" | "manual">(
     initialMatchId ? "manual" : "auto",
   );
+  // When 2+ matches are live at once, the simultaneous toggle alternates between
+  // an "overview" (both compact live cards grouped) and a per-match "focus" (the
+  // full single-match detail). Deep-linking to a match opens straight in focus.
+  const [liveViewMode, setLiveViewMode] = useState<"overview" | "focus">(
+    initialMatchId ? "focus" : "overview",
+  );
   const [activeTab, setActiveTab] = useState<"broadcast" | "lineup" | "pregame">(
     "broadcast",
   );
@@ -716,15 +723,13 @@ export function MatchDetailView({
     (match) => match.status === "LIVE" || match.status === "SUSPENDED",
   );
   const hasSimultaneousLive = liveMatches.length >= 2;
-  // Replace the single-match detail with stacked full cards (one per live match)
-  // when 2+ are live — but only on the live/default view ("auto") or while looking
-  // at a live match. If the viewer manually opened a finished/upcoming match, keep
-  // that single match's detail instead of hijacking it with the live cards.
-  const showSimultaneousLive =
-    hasSimultaneousLive &&
-    (matchSelectionMode === "auto" ||
-      currentMatch.status === "LIVE" ||
-      currentMatch.status === "SUSPENDED");
+  // The simultaneous toggle drives two mutually exclusive views when 2+ matches are
+  // live: "overview" stacks one full card per live game (SimultaneousLiveMatches) so
+  // none is missed; "focus" shows the single-match detail below (scoreboard, tabs,
+  // incidents, chat). With fewer than two live matches there is no overview, so the
+  // focus detail always shows and the toggle stays hidden.
+  const showLiveOverview = hasSimultaneousLive && liveViewMode === "overview";
+  const showFocusDetail = !showLiveOverview;
   // Other matches kicking off at the exact same time as the current pre-game match
   // (the final group round plays both of a group's games simultaneously). We surface
   // them in the scoreboard so a simultaneous slot is as clear BEFORE kickoff as it is
@@ -924,6 +929,8 @@ export function MatchDetailView({
   const handleSelectMatch = (matchId: string) => {
     setMatchSelectionMode("manual");
     setSelectedMatchId(matchId);
+    // Opening a specific match always lands on its full detail (focus view).
+    setLiveViewMode("focus");
     setStoredIncidentPlayer(null);
     setExpandedIncidentPlayerKey(null);
   };
@@ -1241,32 +1248,55 @@ export function MatchDetailView({
               Partidas simultâneas — toque para alternar:
             </span>
             <div className="flex flex-wrap items-center gap-1.5">
-              {liveMatches.map((m) => (
-                <button
-                  key={m.id}
-                  type="button"
-                  id={`btn-simultaneous-${m.id}`}
-                  onClick={() => handleSelectMatch(m.id)}
-                  aria-label={`Ver ${formatCountryNameForTooltip(m.teamA.name)} x ${formatCountryNameForTooltip(m.teamB.name)}`}
-                  aria-pressed={selectedMatchId === m.id}
-                  className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-1 font-anton text-xs uppercase tracking-wide transition ${
-                    selectedMatchId === m.id
-                      ? "border-amber-400 bg-amber-400 text-amber-950"
-                      : theme === "classic-light"
-                        ? "border-amber-200 bg-white text-amber-800 hover:border-amber-300"
-                        : "border-amber-400/30 bg-white/5 text-amber-100 hover:border-amber-400/60"
-                  }`}
-                >
-                  <span>{m.teamA.code}</span>
-                  <span className="opacity-60">x</span>
-                  <span>{m.teamB.code}</span>
-                  {m.score && (
-                    <span className="ml-1 font-mono font-bold">
-                      {m.score.teamA}-{m.score.teamB}
-                    </span>
-                  )}
-                </button>
-              ))}
+              {/* Overview pill: stack both live games side by side. The match pills
+                  that follow each open a single game's full detail (focus view). */}
+              <button
+                type="button"
+                id="btn-simultaneous-overview"
+                onClick={() => setLiveViewMode("overview")}
+                aria-label="Ver os dois jogos ao vivo lado a lado"
+                aria-pressed={liveViewMode === "overview"}
+                className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-1 font-anton text-xs uppercase tracking-wide transition ${
+                  liveViewMode === "overview"
+                    ? "border-amber-400 bg-amber-400 text-amber-950"
+                    : theme === "classic-light"
+                      ? "border-amber-200 bg-white text-amber-800 hover:border-amber-300"
+                      : "border-amber-400/30 bg-white/5 text-amber-100 hover:border-amber-400/60"
+                }`}
+              >
+                <LayoutGrid size={12} aria-hidden="true" />
+                <span>Os dois</span>
+              </button>
+              {liveMatches.map((m) => {
+                const isFocused =
+                  liveViewMode === "focus" && selectedMatchId === m.id;
+                return (
+                  <button
+                    key={m.id}
+                    type="button"
+                    id={`btn-simultaneous-${m.id}`}
+                    onClick={() => handleSelectMatch(m.id)}
+                    aria-label={`Ver ${formatCountryNameForTooltip(m.teamA.name)} x ${formatCountryNameForTooltip(m.teamB.name)}`}
+                    aria-pressed={isFocused}
+                    className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-1 font-anton text-xs uppercase tracking-wide transition ${
+                      isFocused
+                        ? "border-amber-400 bg-amber-400 text-amber-950"
+                        : theme === "classic-light"
+                          ? "border-amber-200 bg-white text-amber-800 hover:border-amber-300"
+                          : "border-amber-400/30 bg-white/5 text-amber-100 hover:border-amber-400/60"
+                    }`}
+                  >
+                    <span>{m.teamA.code}</span>
+                    <span className="opacity-60">x</span>
+                    <span>{m.teamB.code}</span>
+                    {m.score && (
+                      <span className="ml-1 font-mono font-bold">
+                        {m.score.teamA}-{m.score.teamB}
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
             </div>
           </div>
         </div>
@@ -1646,12 +1676,11 @@ export function MatchDetailView({
         </div>
       )}
 
-      {/* When two or more matches are live at once (final group round), surface a full
-          card for each ABOVE the single-match detail, so every live game is visible at
-          a glance while the scoreboard, match selector, tabs and team links below stay
-          reachable (don't hijack the whole view — that strands finished/upcoming
-          matches and the "Onde Assistir" strip behind the live cards). */}
-      {showSimultaneousLive && (
+      {/* OVERVIEW VIEW — when two or more matches are live at once (final group
+          round), the simultaneous toggle's "Os dois" option surfaces a full card per
+          live game so every match is visible at a glance. The per-match focus detail
+          below is hidden in this mode (they are mutually exclusive). */}
+      {showLiveOverview && (
         <SimultaneousLiveMatches
           matches={liveMatches}
           overlays={matchOverlays}
@@ -1660,6 +1689,11 @@ export function MatchDetailView({
           onOpenStandingsGroup={onOpenStandingsGroup}
         />
       )}
+      {/* FOCUS VIEW — single-match detail (scoreboard, tabs, incidents, chat). Shown
+          unless the live overview is active, so it is the default with 0–1 live
+          matches and the per-match drill-in while 2+ are live. */}
+      {showFocusDetail && (
+      <>
       {/* CORE HERO SECTION */}
       <section
         className="max-w-5xl mx-auto px-4 mt-8"
@@ -2549,6 +2583,8 @@ export function MatchDetailView({
         {/* Anonymous live-match chat ("Resenha ao vivo") — open only while LIVE */}
         <MatchChatPanel matchId={currentMatch.id} theme={theme} />
       </div>
+      </>
+      )}
 
       {selectedIncidentPlayer && (
         <PlayerOverlayCard

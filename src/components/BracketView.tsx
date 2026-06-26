@@ -355,7 +355,7 @@ export function BracketView({ theme, matches, onSelectTeamLineup, onSelectMatch 
           className={`font-anton text-2xl md:text-3xl uppercase tracking-wider ${headingClasses}`}
           id="bracket-title"
         >
-          Chaveamento do Mata-Mata
+          Mata-mata da Copa
         </h2>
         <p className={`font-mono text-[11px] uppercase tracking-wider ${mutedClasses}`}>
           Tabela oficial da FIFA • datas no horário de Brasília • vagas dos 16 avos preenchidas

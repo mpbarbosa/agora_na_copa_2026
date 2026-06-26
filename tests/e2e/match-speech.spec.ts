@@ -1,4 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
+import { stubLiveApis } from "./fixtures/aoVivo";
 
 // The speech engine is now vendored and bundled (no CDN), so it runs for real in
 // the test. We stub window.speechSynthesis to (a) record each utterance's text into
@@ -26,21 +27,6 @@ async function stubSpeechSynthesis(page: Page) {
     };
     Object.defineProperty(window, "speechSynthesis", { configurable: true, get: () => synth });
   });
-}
-
-async function stubLiveApis(page: Page) {
-  await page.route("**/api/match-overlays", (route) =>
-    route.fulfill({
-      contentType: "application/json",
-      body: JSON.stringify({ refreshAfterMs: 60000, overlays: {} }),
-    }),
-  );
-  await page.route("**/api/match-states", (route) =>
-    route.fulfill({
-      contentType: "application/json",
-      body: JSON.stringify({ states: {}, refreshAfterMs: 60000 }),
-    }),
-  );
 }
 
 const utterances = (page: Page) =>
