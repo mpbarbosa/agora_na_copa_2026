@@ -511,12 +511,32 @@
     {
       "embedUrl": "https://www.youtube.com/embed/D0947hff-G0",
       "title": "Tchéquia x México — Copa do Mundo 2026"
+    },
+    {
+      "embedUrl": "https://www.youtube.com/embed/2zN9aHg-ZEo",
+      "title": "Melhores Momentos: Tchéquia x México — Copa do Mundo 2026"
     }
   ],
   "rsa-kor-2026": [
     {
       "embedUrl": "https://www.youtube.com/embed/cFu_iI4h1to",
       "title": "África do Sul x Coreia do Sul — Copa do Mundo 2026"
+    },
+    {
+      "embedUrl": "https://www.youtube.com/embed/6wI3m58Scm8",
+      "title": "Melhores Momentos: África do Sul x Coreia do Sul — Copa do Mundo 2026"
+    }
+  ],
+  "cuw-civ-2026": [
+    {
+      "embedUrl": "https://www.youtube.com/embed/CcUSyWZPXNA",
+      "title": "Melhores Momentos: Curaçao x Costa do Marfim — Copa do Mundo 2026"
+    }
+  ],
+  "ecu-ger-2026": [
+    {
+      "embedUrl": "https://www.youtube.com/embed/H1CgNuhJA0A",
+      "title": "Melhores Momentos: Equador x Alemanha — Copa do Mundo 2026"
     }
   ]
 }
