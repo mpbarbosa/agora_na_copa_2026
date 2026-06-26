@@ -4,7 +4,7 @@ import { KNOCKOUT_MATCHES } from "../data/knockoutBracket";
 import type { KnockoutMatch, Match, TeamRef } from "../types";
 import { computeStandings, buildGroupPositionMap } from "../standings";
 import type { QualificationStatus, ProvisionalSlot } from "../standings";
-import { humanizeSlot } from "../utils/knockoutSlots";
+import { humanizeSlot, describeBestThirdSlot } from "../utils/knockoutSlots";
 import { FlagIcon } from "./FlagIcon";
 
 interface BracketViewProps {
@@ -142,6 +142,9 @@ function BracketSlotRow({
 
   const id = `bracket-slot-${matchNumber}-${slot.toLowerCase()}`;
   const baseClassName = `flex min-h-11 items-center justify-between gap-2 rounded-xl border px-3 py-2 font-archivo text-sm leading-5 ${rowClasses}`;
+  // Best-third combo slots ("3CDFGH") render as a terse "Melhor 3º · …" label;
+  // spell out what it means for screen readers and on hover. Null for other slots.
+  const bestThirdDescription = team ? null : describeBestThirdSlot(rawSlot);
 
   const content = team ? (
     <>
@@ -168,7 +171,7 @@ function BracketSlotRow({
       )}
     </>
   ) : (
-    <span className="truncate font-mono text-[11px] uppercase tracking-wider opacity-80">
+    <span className="whitespace-normal break-words leading-tight font-mono text-[11px] uppercase tracking-wider opacity-80">
       {humanizeSlot(rawSlot)}
     </span>
   );
@@ -194,7 +197,12 @@ function BracketSlotRow({
   }
 
   return (
-    <div id={id} className={baseClassName}>
+    <div
+      id={id}
+      className={baseClassName}
+      title={bestThirdDescription ?? undefined}
+      aria-label={bestThirdDescription ?? undefined}
+    >
       {content}
     </div>
   );
