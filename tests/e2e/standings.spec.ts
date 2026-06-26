@@ -229,6 +229,22 @@ test.describe("Standings view (Grupos)", () => {
     ]);
   });
 
+  test("the third-place ranking shows a simulated 'Chance' column", async ({ page }) => {
+    await page.goto("/");
+    await page.click("#btn-nav-grupos");
+    const table = page.getByTestId("third-place-ranking");
+    await expect(table).toBeVisible();
+
+    // allInnerTexts() returns the CSS-uppercased rendered text ("CHANCE").
+    const headerLabels = await table.locator("thead th").allInnerTexts();
+    expect(headerLabels.map((label) => label.trim())).toContain("CHANCE");
+
+    // The Chance cell (4th column: #, Gr., Equipe, Chance) resolves to a percentage
+    // once /api/qualification-odds returns — async, so wait for the value.
+    const firstChance = table.locator("tbody tr").first().locator("td").nth(3);
+    await expect(firstChance).toHaveText(/^\d+%$/, { timeout: 10000 });
+  });
+
   test("shows both games when a group has two simultaneous live matches", async ({ page }) => {
     // The final round plays a group's two matches at the same time.
     await page.route("**/api/match-states", (route) =>

@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import type { StandingsRow, TeamRef } from "../types";
 import { rankBestThirds } from "../standings";
 import { FlagIcon } from "./FlagIcon";
@@ -10,12 +11,50 @@ interface ThirdPlaceTableProps {
 
 const QUALIFYING_SLOTS = 8;
 
+// Simulated probability (0..1) of reaching the Round of 32, as a compact percent.
+function formatChance(advance: number | undefined): string {
+  return typeof advance === "number" ? `${Math.round(advance * 100)}%` : "—";
+}
+
 // Cross-group ranking of the 12 third-placed teams. The best 8 provisionally
 // advance to the Round of 32 (FIFA WC 2026 Art. 12.5); ranking criteria are
 // points → goal difference → goals for → fair play (Art. 13), shared with the
 // group tables and the bracket via rankBestThirds.
 export function ThirdPlaceTable({ groups, theme, onSelectTeamLineup }: ThirdPlaceTableProps) {
   const ranked = rankBestThirds(groups);
+  const codesKey = ranked.map((third) => third.row.code).join(",");
+
+  // Simulated Round-of-32 odds per ranked team, fetched from /api/qualification-odds
+  // (Monte-Carlo, server-cached). Best-effort: on any failure the cells fall back to
+  // "—" and the rest of the table is unaffected.
+  const [chanceByCode, setChanceByCode] = useState<Map<string, number>>(new Map());
+  useEffect(() => {
+    const codes = codesKey ? codesKey.split(",") : [];
+    if (codes.length === 0) {
+      setChanceByCode(new Map());
+      return;
+    }
+    let active = true;
+    void Promise.all(
+      codes.map(async (code) => {
+        try {
+          const res = await fetch(`/api/qualification-odds/${encodeURIComponent(code)}`);
+          if (!res.ok) return null;
+          const body = (await res.json()) as { odds?: { advance?: unknown } };
+          const advance = body?.odds?.advance;
+          return typeof advance === "number" ? ([code, advance] as const) : null;
+        } catch {
+          return null;
+        }
+      }),
+    ).then((entries) => {
+      if (!active) return;
+      setChanceByCode(new Map(entries.filter((e): e is readonly [string, number] => e !== null)));
+    });
+    return () => {
+      active = false;
+    };
+  }, [codesKey]);
 
   // Nothing meaningful to rank until at least one group-stage result exists —
   // an all-seed ranking would just be noise.
@@ -58,6 +97,12 @@ export function ThirdPlaceTable({ groups, theme, onSelectTeamLineup }: ThirdPlac
               </th>
               <th className={`py-1.5 text-left font-normal uppercase tracking-wider ${headerCellClasses}`}>
                 Equipe
+              </th>
+              <th
+                className={`px-1 py-1.5 text-right font-normal uppercase tracking-wider ${headerCellClasses}`}
+                title="Probabilidade simulada (Monte Carlo) de avançar ao mata-mata"
+              >
+                Chance
               </th>
               <th
                 className={`px-1 py-1.5 text-right font-normal uppercase tracking-wider ${headerCellClasses}`}
@@ -114,6 +159,14 @@ export function ThirdPlaceTable({ groups, theme, onSelectTeamLineup }: ThirdPlac
                       <span title={row.name}>{row.code}</span>
                     </div>
                   </td>
+                  <td
+                    className={`whitespace-nowrap px-1 py-1.5 text-right font-semibold ${
+                      qualifies ? accent : mutedClasses
+                    }`}
+                    title="Probabilidade simulada de avançar ao mata-mata"
+                  >
+                    {formatChance(chanceByCode.get(row.code))}
+                  </td>
                   <td className={`whitespace-nowrap px-1 py-1.5 text-right ${mutedClasses}`}>
                     {row.played}
                   </td>
@@ -137,8 +190,10 @@ export function ThirdPlaceTable({ groups, theme, onSelectTeamLineup }: ThirdPlac
       </div>
 
       <p className={`mt-3 font-mono text-[9px] uppercase tracking-wider leading-relaxed ${mutedClasses}`}>
-        A linha verde marca o corte dos 8 classificados. A alocação oficial de cada 3º
-        colocado às chaves do mata-mata só é definida ao fim da fase de grupos.
+        A linha verde marca o corte dos 8 classificados. A coluna Chance é uma
+        probabilidade simulada (Monte Carlo) de avançar ao mata-mata — palpite para a
+        torcida, não cravada de resultado. A alocação oficial de cada 3º colocado às
+        chaves do mata-mata só é definida ao fim da fase de grupos.
       </p>
     </section>
   );
