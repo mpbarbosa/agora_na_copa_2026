@@ -2,7 +2,7 @@ import type { KnockoutMatch } from "../types";
 
 /**
  * Humanize an official FIFA knockout slot label into pt-BR:
- *   "1A" → "1º A", "2B" → "2º B", "3EHIJK" → "3º E/H/I/J/K",
+ *   "1A" → "1º A", "2B" → "2º B", "3EHIJK" → "Melhor 3º · E/H/I/J/K",
  *   "W74" → "Vencedor #74", "RU101" → "Perdedor #101".
  * Unknown shapes pass through unchanged. Shared by BracketView (the Chaveamento
  * tree) and appMatches (knockout fixtures inserted into the scheduled list).
@@ -11,12 +11,38 @@ export function humanizeSlot(slot: string): string {
   const groupPos = slot.match(/^([12])([A-L])$/);
   if (groupPos) return `${groupPos[1]}º ${groupPos[2]}`;
   const bestThird = slot.match(/^3([A-L]{2,})$/);
-  if (bestThird) return `3º ${bestThird[1].split("").join("/")}`;
+  if (bestThird) return `Melhor 3º · ${bestThird[1].split("").join("/")}`;
   const winner = slot.match(/^W(\d+)$/);
   if (winner) return `Vencedor #${winner[1]}`;
   const loser = slot.match(/^RU(\d+)$/);
   if (loser) return `Perdedor #${loser[1]}`;
   return slot;
+}
+
+/**
+ * Long-form pt-BR description of a best-third combo slot ("3CDFGH"), for an a11y
+ * `title`/`aria-label` on the otherwise cryptic bracket placeholder. The slot is
+ * filled — once results come in — by one of the eight best third-placed teams,
+ * drawn from the listed groups (FIFA's allocation table picks which). Returns
+ * null for any non-best-third slot.
+ */
+export function describeBestThirdSlot(slot: string): string | null {
+  const bestThird = slot.match(/^3([A-L]{2,})$/);
+  if (!bestThird) return null;
+  const letters = bestThird[1].split("");
+  const groups = `${letters.slice(0, -1).join(", ")} ou ${letters[letters.length - 1]}`;
+  return `Um dos melhores terceiros colocados — dos grupos ${groups}`;
+}
+
+/**
+ * The bare group shortlist of a best-third combo slot ("3CDFGH" → "C/D/F/G/H"),
+ * for contexts (the bracket) where a separate "Melhor 3º" badge already conveys
+ * the category, so the label only needs the differentiating groups. Returns null
+ * for non-best-third slots.
+ */
+export function bestThirdGroups(slot: string): string | null {
+  const bestThird = slot.match(/^3([A-L]{2,})$/);
+  return bestThird ? bestThird[1].split("").join("/") : null;
 }
 
 /** Full pt-BR stage name for a knockout fixture, used as `Match.stageName`. */

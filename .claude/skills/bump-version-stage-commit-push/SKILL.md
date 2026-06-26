@@ -79,19 +79,21 @@ git branch --show-current
 git worktree list
 ```
 
-This project is worked through two worktrees with different publish rules.
-Detect which one you are in from the checked-out branch:
+This project is worked through several worktrees with different publish rules.
+**PUSH RULE (2026-06-26): only the `main` worktree (`agora_na_copa_2026`) pushes
+to `origin`.** Every other worktree publishes by merging into **local** `main`
+and stops. Detect which one you are in from the checked-out branch:
 
 | Branch | Role | Publish action (Step 8) |
 |--------|------|-------------------------|
-| `data-work` | **DATA repo** (`agora-data` worktree) | merge the commit into `main` |
-| anything else (e.g. `main`) | **CODE repo** (`agora_na_copa_2026` worktree) | push the current branch to its remote |
+| `main` | **CODE/release runner** (`agora_na_copa_2026` worktree) | bump, then **push** `main` to `origin` |
+| `data-work` | **DATA repo** (`agora-data` worktree) | merge the commit into **local** `main` — no bump, **no push** |
+| `agora-dev` / `agora-dev2` / agent worktree | **DEV repo** | merge the commit into **local** `main` — no bump, **no push** |
 
-The data worktree has **no upstream of its own** — its commits are published by
-fast-forwarding `main`, not by pushing a `data-work` branch. So a "missing
-upstream" is expected and correct for the data repo; do **not** stop on it. For
-the **code repo**, the branch must have an upstream — if it is missing, stop and
-report that push cannot proceed.
+Only the `main` worktree pushes to `origin`. `data-work` and the dev worktrees
+have **no upstream of their own** and publish by fast-forwarding **local** `main`,
+not by pushing — so a "missing upstream" is expected; do **not** stop on it.
+Their work reaches `origin` on the next `main`-side push.
 
 ### Step 2 — Bump the version (CODE repo only)
 
@@ -170,42 +172,42 @@ git commit -m "GENERATED_SUBJECT" -m "Co-Authored-By: Claude Sonnet 4.6 <noreply
 
 Use the role detected in Step 1.
 
-**DATA repo (branch `data-work`) → merge to `main`.** `main` is checked out in
-the sibling `agora_na_copa_2026` worktree, so this worktree publishes by
-fast-forwarding `main` to the new commit, then syncing the local `main`
-worktree (best-effort):
+**DATA repo (`data-work`) or DEV repo (`agora-dev`/`agora-dev2`/agent) → merge
+into LOCAL `main`, do NOT push.** `main` is checked out in the sibling
+`agora_na_copa_2026` worktree; publish by fast-forwarding **local** `main` and
+stop:
 
 ```bash
-git push origin HEAD:main
 mainwt="$(git worktree list --porcelain | awk '/^worktree /{wt=$2} $0=="branch refs/heads/main"{print wt}')"
-[ -n "$mainwt" ] && git -C "$mainwt" merge --ff-only data-work
+[ -n "$mainwt" ] && git -C "$mainwt" merge --ff-only "$(git branch --show-current)"
 ```
 
-**CODE repo (branch `main` or any non-`data-work` branch) → push the current
-branch to its remote:**
+The commit now sits on local `main`, ahead of `origin/main`, and reaches `origin`
+on the next `main`-side push. The harness also blocks pushes to the default
+branch from these worktrees, which is by design.
+
+**CODE/release runner (the `main` worktree only) → push the current branch:**
 
 ```bash
 git push origin "$(git branch --show-current)"
 ```
 
-Pushing to `main` updates the default branch directly. If the harness permission
-classifier blocks it, stop and ask the user to authorize the push (or to run
-`! git push origin HEAD:main` themselves) — do not work around the denial.
+Only when checked out as `main` in `agora_na_copa_2026`. Pushing to `main`
+updates the default branch directly. If the harness permission classifier blocks
+it, stop and ask the user to authorize the push (or to run
+`! git push origin main` themselves) — do not work around the denial.
 
 **If the push is REJECTED as non-fast-forward** (`Updates were rejected because a
 pushed branch tip is behind its remote counterpart` / `[rejected] ... (fetch
 first)`), the other worktree shipped while you were working. Do **not** force-push —
 rebase onto the new tip and retry. Recovery depends on role:
 
-**DATA repo** (no bump, so no version collision) — just rebase and re-push:
+**DATA / DEV repos don't push**, so they can't hit a non-fast-forward rejection.
+If the **local** `git -C "$mainwt" merge --ff-only` is rejected because local
+`main` advanced, re-run it once local `main` settles (or use a normal merge if
+local `main` legitimately diverged). The remote is untouched — nothing to recover.
 
-```bash
-git fetch origin
-git rebase origin/main                        # data commit doesn't touch the version line — integrates cleanly
-git push origin HEAD:main                     # now a fast-forward
-```
-
-**CODE repo** — since only the CODE repo bumps, a true same-version collision
+**CODE/release runner (the `main` worktree)** — since only `main` bumps, a true same-version collision
 only arises if two code releases race (rare with a single code session). Rebase,
 re-bump to the next free patch, and retry (the one safe-to-amend case — the
 commit is local and was never accepted by the remote):
@@ -217,7 +219,7 @@ npm version patch --no-git-tag-version        # bump past the now-duplicate vers
 git add -A
 npx tsc --noEmit
 git commit --amend -m "chore: bump version to <NEW> ; <same summary>" -m "Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>"
-git push origin HEAD:main                     # now a fast-forward
+git push origin main                          # from the main worktree only; now a fast-forward
 ```
 
 If `git rebase` reports a **real conflict** (same content edited on both sides),
@@ -246,14 +248,14 @@ stop, resolve or report it, and do not retry blindly.
 
 ```bash
 git status --short
-git branch --show-current            # detect role: data-work → DATA repo, else → CODE repo
-npm version patch --no-git-tag-version   # CODE repo ONLY — skip entirely in the DATA repo (data-work)
+git branch --show-current            # detect role: main → CODE/release runner; data-work/agora-dev* → no bump, no push
+npm version patch --no-git-tag-version   # main worktree ONLY — skip in data-work AND agora-dev/agora-dev2
 git add -A
 npm run lint
 git diff --cached --stat --summary
 git commit -m "GENERATED_SUBJECT" -m "Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>"
 
-# Publish (role-based — see Step 8):
-#   DATA repo (data-work): git push origin HEAD:main   # merge/fast-forward main (no bump)
-#   CODE repo (main/etc.): git push origin "$(git branch --show-current)"
+# Publish (role-based — see Step 8). ONLY the main worktree pushes to origin:
+#   DATA (data-work) / DEV (agora-dev*): no push — git -C "$mainwt" merge --ff-only "$(git branch --show-current)"
+#   CODE/release runner (main worktree): git push origin "$(git branch --show-current)"
 ```

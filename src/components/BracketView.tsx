@@ -1,10 +1,10 @@
 import { useMemo } from "react";
-import { CalendarDays, MapPin } from "lucide-react";
+import { CalendarDays, MapPin, Medal } from "lucide-react";
 import { KNOCKOUT_MATCHES } from "../data/knockoutBracket";
 import type { KnockoutMatch, Match, TeamRef } from "../types";
 import { computeStandings, buildGroupPositionMap } from "../standings";
 import type { QualificationStatus, ProvisionalSlot } from "../standings";
-import { humanizeSlot } from "../utils/knockoutSlots";
+import { humanizeSlot, describeBestThirdSlot, bestThirdGroups } from "../utils/knockoutSlots";
 import { FlagIcon } from "./FlagIcon";
 
 interface BracketViewProps {
@@ -142,6 +142,9 @@ function BracketSlotRow({
 
   const id = `bracket-slot-${matchNumber}-${slot.toLowerCase()}`;
   const baseClassName = `flex min-h-11 items-center justify-between gap-2 rounded-xl border px-3 py-2 font-archivo text-sm leading-5 ${rowClasses}`;
+  // Best-third combo slots ("3CDFGH") render as a terse "Melhor 3º · …" label;
+  // spell out what it means for screen readers and on hover. Null for other slots.
+  const bestThirdDescription = team ? null : describeBestThirdSlot(rawSlot);
 
   const content = team ? (
     <>
@@ -168,9 +171,37 @@ function BracketSlotRow({
       )}
     </>
   ) : (
-    <span className="truncate font-mono text-[11px] uppercase tracking-wider opacity-80">
-      {humanizeSlot(rawSlot)}
-    </span>
+    (() => {
+      const label = (
+        <span className="whitespace-normal break-words leading-tight font-mono text-[11px] uppercase tracking-wider opacity-80">
+          {humanizeSlot(rawSlot)}
+        </span>
+      );
+      // A best-third combo slot gets a bronze medal badge so it reads as a
+      // "3rd-place qualifier" berth at a glance — distinct from a plain
+      // winner/loser feeder ("Vencedor #79"), which keeps the bare label. The
+      // badge already conveys "Melhor 3º", so the label is just the group
+      // shortlist (the differentiating bit), avoiding a redundant prefix.
+      const groups = bestThirdGroups(rawSlot);
+      if (!groups) return label;
+      return (
+        <span className="flex min-w-0 items-center gap-2">
+          <span
+            className={`inline-flex shrink-0 items-center rounded border px-1 py-0.5 ${
+              isLight
+                ? "border-amber-500/40 bg-amber-500/10 text-amber-700"
+                : "border-amber-400/30 bg-amber-400/10 text-amber-300"
+            }`}
+            aria-hidden="true"
+          >
+            <Medal size={11} />
+          </span>
+          <span className="whitespace-normal break-words leading-tight font-mono text-[11px] uppercase tracking-wider opacity-80">
+            {groups}
+          </span>
+        </span>
+      );
+    })()
   );
 
   // A resolved team (confirmed or provisional) is clickable → opens its team page.
@@ -194,7 +225,12 @@ function BracketSlotRow({
   }
 
   return (
-    <div id={id} className={baseClassName}>
+    <div
+      id={id}
+      className={baseClassName}
+      title={bestThirdDescription ?? undefined}
+      aria-label={bestThirdDescription ?? undefined}
+    >
       {content}
     </div>
   );
@@ -392,6 +428,15 @@ export function BracketView({ theme, matches, onSelectTeamLineup, onSelectMatch 
               }`}
             >
               prov. Provisório
+            </span>
+            <span
+              className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 font-mono text-[10px] uppercase tracking-wider ${
+                isLight
+                  ? "border-amber-500/40 bg-amber-500/5 text-amber-700"
+                  : "border-amber-400/30 bg-amber-400/5 text-amber-300"
+              }`}
+            >
+              <Medal size={11} /> Melhor 3º
             </span>
             <span
               className={`inline-flex rounded-full border px-3 py-1 font-mono text-[10px] uppercase tracking-wider ${

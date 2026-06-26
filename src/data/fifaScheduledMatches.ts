@@ -56,8 +56,8 @@ export const FIFA_SCHEDULED_MATCHES: FifaScheduledMatchSeed[] = [
   // ── Grupo F ───────────────────────────────────────────────────────────────
   { teamA: "NED", teamB: "SWE", kickoffTimestamp: "2026-06-20T14:00:00-03:00", status: "FINISHED", score: { teamA: 5, teamB: 1 }, ...v("NED", "SWE") },
   { teamA: "TUN", teamB: "JPN", kickoffTimestamp: "2026-06-21T01:00:00-03:00", status: "FINISHED", score: { teamA: 0, teamB: 4 }, ...v("TUN", "JPN") },
-  { teamA: "JPN", teamB: "SWE", kickoffTimestamp: "2026-06-25T20:00:00-03:00", status: "PRE_GAME", ...v("JPN", "SWE") },
-  { teamA: "TUN", teamB: "NED", kickoffTimestamp: "2026-06-25T20:00:00-03:00", status: "PRE_GAME", ...v("TUN", "NED") },
+  { teamA: "JPN", teamB: "SWE", kickoffTimestamp: "2026-06-25T20:00:00-03:00", status: "FINISHED", score: { teamA: 1, teamB: 1 }, ...v("JPN", "SWE") },
+  { teamA: "TUN", teamB: "NED", kickoffTimestamp: "2026-06-25T20:00:00-03:00", status: "FINISHED", score: { teamA: 1, teamB: 3 }, ...v("TUN", "NED") },
 
   // ── Grupo G ───────────────────────────────────────────────────────────────
   { teamA: "BEL", teamB: "IRN", kickoffTimestamp: "2026-06-21T16:00:00-03:00", status: "FINISHED", score: { teamA: 0, teamB: 0 }, ...v("BEL", "IRN") },

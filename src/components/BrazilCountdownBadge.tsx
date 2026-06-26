@@ -1,22 +1,91 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import type { Match } from "../types";
 import { FlagIcon } from "./FlagIcon";
 import { useClockTick } from "../hooks/useClockTick";
+import { buildGroupPositionMap } from "../standings";
+import type { ProvisionalSlot } from "../standings";
 
 const BRAZIL_FLAG_SRC =
   "https://commons.wikimedia.org/wiki/Special:FilePath/Flag_of_Brazil.svg";
 
-function findBrazilFocusMatch(matches: Match[]): Match | null {
-  const braMatches = matches
-    .filter((m) => m.teamA.code === "BRA" || m.teamB.code === "BRA")
+type FixtureSide = Match["teamA"];
+
+interface ResolvedSide {
+  code: string;
+  name: string;
+  flagSvg: string;
+  // True when this side only provisionally holds its slot — i.e. it was resolved from a
+  // group position whose occupant isn't mathematically locked yet ("contention"). False
+  // for a confirmed/real team OR a group leader already locked into the slot ("qualified").
+  provisional: boolean;
+}
+
+interface BrazilFocus {
+  match: Match;
+  opponent: ResolvedSide;
+  // True when Brazil or the opponent only provisionally holds its group slot — i.e. the
+  // knockout confronto isn't locked yet. Surfaced so the badge never asserts an
+  // unconfirmed pairing as certain (a hard data-accuracy rule). Mirrors the bracket's
+  // qualified (✓, certain) vs contention ("prov.", uncertain) distinction.
+  provisional: boolean;
+}
+
+// Resolve a fixture side to the team effectively occupying it. A confirmed side keeps its
+// own identity; an unresolved R32 group slot ("1C","2F") resolves to the team currently
+// holding that group position, mirroring how BracketView renders the bracket. A slot whose
+// occupant is only in "contention" is flagged provisional; a "qualified" occupant is
+// already locked into the slot, so the pairing it implies is certain. Returns null for
+// slots with no determined occupant yet (winner/best-third refs).
+function resolveSide(
+  side: FixtureSide,
+  groupPositions: Map<string, ProvisionalSlot>,
+): ResolvedSide | null {
+  const slot = groupPositions.get(side.code);
+  if (slot) {
+    const { code, name, flagSvg } = slot.team;
+    return { code, name, flagSvg, provisional: slot.status !== "qualified" };
+  }
+  // A confirmed team carries a real flag; an undecided winner/best-third slot does not.
+  if (side.flagSvg) {
+    return { code: side.code, name: side.name, flagSvg: side.flagSvg, provisional: false };
+  }
+  return null;
+}
+
+// Brazil's most imminent live-or-upcoming fixture, resolving knockout slots from live
+// standings so a bracket pairing (e.g. "1C" once Brazil tops its group) still surfaces.
+// The badge's source (APP_MATCHES) keeps knockout slots as placeholder codes, unlike
+// BracketView which resolves them from live standings — so we apply the same resolution
+// here before matching on "BRA".
+function findBrazilFocus(
+  matches: Match[],
+  groupPositions: Map<string, ProvisionalSlot>,
+): BrazilFocus | null {
+  const braFixtures = matches
+    .map((match): BrazilFocus | null => {
+      const a = resolveSide(match.teamA, groupPositions);
+      const b = resolveSide(match.teamB, groupPositions);
+      const braIsA = a?.code === "BRA";
+      const braIsB = b?.code === "BRA";
+      if (!braIsA && !braIsB) return null;
+      const brazil = (braIsA ? a : b)!;
+      const opponent = braIsA ? b : a;
+      if (!opponent) return null; // opponent slot still undecided — nothing to show
+      return {
+        match,
+        opponent,
+        provisional: brazil.provisional || opponent.provisional,
+      };
+    })
+    .filter((f): f is BrazilFocus => f !== null)
     .sort(
-      (a, b) =>
-        new Date(a.kickoffTimestamp).getTime() -
-        new Date(b.kickoffTimestamp).getTime(),
+      (x, y) =>
+        new Date(x.match.kickoffTimestamp).getTime() -
+        new Date(y.match.kickoffTimestamp).getTime(),
     );
   return (
-    braMatches.find((m) => m.status === "LIVE") ??
-    braMatches.find((m) => m.status === "PRE_GAME") ??
+    braFixtures.find((f) => f.match.status === "LIVE") ??
+    braFixtures.find((f) => f.match.status === "PRE_GAME") ??
     null
   );
 }
@@ -43,13 +112,16 @@ export function BrazilCountdownBadge({ matches }: BrazilCountdownBadgeProps) {
   const [dismissed, setDismissed] = useState(false);
   const now = useClockTick();
 
+  const focus = useMemo(
+    () => findBrazilFocus(matches, buildGroupPositionMap(matches)),
+    [matches],
+  );
+
   if (dismissed) return null;
+  if (!focus) return null;
 
-  const match = findBrazilFocusMatch(matches);
-  if (!match) return null;
-
+  const { match, opponent, provisional } = focus;
   const isLive = match.status === "LIVE";
-  const opponent = match.teamA.code === "BRA" ? match.teamB : match.teamA;
   const secsRemaining = Math.max(
     0,
     Math.floor(
@@ -135,6 +207,14 @@ export function BrazilCountdownBadge({ matches }: BrazilCountdownBadgeProps) {
         <p className="mt-1 font-mono text-[9px] tracking-wide text-white/35">
           {match.kickoffDate} · {match.kickoffTime}
         </p>
+
+        {/* Confronto não confirmado: Brasil e/ou o adversário ainda dependem da
+            classificação — sinalizamos para não afirmar um cruzamento incerto. */}
+        {!isLive && provisional && (
+          <p className="mt-1 font-mono text-[8px] uppercase tracking-[0.16em] text-[#ffd84d]/80">
+            Confronto provável
+          </p>
+        )}
 
         {/* Countdown or live indicator */}
         {isLive ? (
