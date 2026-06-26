@@ -34,6 +34,17 @@ export function describeBestThirdSlot(slot: string): string | null {
   return `Um dos melhores terceiros colocados — dos grupos ${groups}`;
 }
 
+/**
+ * The bare group shortlist of a best-third combo slot ("3CDFGH" → "C/D/F/G/H"),
+ * for contexts (the bracket) where a separate "Melhor 3º" badge already conveys
+ * the category, so the label only needs the differentiating groups. Returns null
+ * for non-best-third slots.
+ */
+export function bestThirdGroups(slot: string): string | null {
+  const bestThird = slot.match(/^3([A-L]{2,})$/);
+  return bestThird ? bestThird[1].split("").join("/") : null;
+}
+
 /** Full pt-BR stage name for a knockout fixture, used as `Match.stageName`. */
 export const KNOCKOUT_STAGE_NAMES: Record<KnockoutMatch["stage"], string> = {
   R32: "16 Avos de Final",
