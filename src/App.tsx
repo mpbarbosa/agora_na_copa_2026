@@ -167,7 +167,7 @@ export default function App() {
       case "noticias":
         return <NewsView theme={theme} />;
       case "chaveamento":
-        return <BracketView theme={theme} matches={matches} onSelectTeamLineup={setLineupTeam} />;
+        return <BracketView theme={theme} matches={matches} onSelectTeamLineup={setLineupTeam} onSelectMatch={handleSelectMatch} />;
       case "fanzone":
         return <FanZoneView theme={theme} />;
       case "social-medias":
