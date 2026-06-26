@@ -162,7 +162,10 @@ If the FF is rejected because `main` diverged, stop and report — do not force.
 If the `main` worktree is dirty, stop and ask before touching it.
 
 **Pushing to origin is a separate, explicit action.** "Sync with main" means
-the local FF merge above. Only `git push` if the user asks.
+the local FF merge above — never a remote push. Per the project push rule, only
+the `main` worktree (`agora_na_copa_2026`) pushes to `origin`; this skill runs in
+`agora-dev` and must **not** `git push`. If the user asks to publish, the push
+happens from the `main` worktree, not here.
 
 ---
 

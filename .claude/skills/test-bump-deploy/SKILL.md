@@ -66,18 +66,22 @@ git branch --show-current
 git worktree list
 ```
 
-This project is worked through two worktrees with different publish rules.
-Detect which one you are in from the checked-out branch:
+This project is worked through several worktrees with different publish rules.
+**PUSH RULE (2026-06-26): only the `main` worktree (`agora_na_copa_2026`) pushes
+to `origin`.** Every other worktree publishes by merging into **local** `main`
+and stops. Detect which one you are in from the checked-out branch:
 
 | Branch | Role | Publish action (2g) |
 |--------|------|---------------------|
-| `data-work` | **DATA repo** (`agora-data` worktree) | merge the release commit into `main` |
-| anything else (e.g. `main`) | **CODE repo** (`agora_na_copa_2026` worktree) | push the current branch to its remote |
+| `main` | **CODE/release runner** (`agora_na_copa_2026` worktree) | bump, then **push** `main` to `origin` |
+| `data-work` | **DATA repo** (`agora-data` worktree) | merge the content commit into **local** `main` — no bump, **no push** |
+| `agora-dev` / `agora-dev2` / agent worktree | **DEV repo** | merge the feature commit into **local** `main` — no bump, **no push** |
 
-The data worktree has **no upstream of its own** — its commits are published by
-fast-forwarding `main`, not by pushing a `data-work` branch. So do **not** stop
-on a "missing upstream"; that is expected and correct for the data repo. Only
-the code repo needs an upstream, and `main` already has one.
+Only the `main` worktree pushes to `origin`; `data-work` and the dev worktrees
+have **no upstream of their own** and publish by fast-forwarding **local** `main`,
+not by pushing. So do **not** stop on a "missing upstream"; that is expected.
+Their work reaches `origin` on the next `main`-side push (this skill run from
+`main`, or an explicit user-authorized push from the `main` worktree).
 
 ### 2b. Bump version (CODE repo only)
 
@@ -132,47 +136,42 @@ git commit -m "GENERATED_SUBJECT" -m "Co-Authored-By: Claude Sonnet 4.6 <noreply
 
 Use the role detected in 2a.
 
-**DATA repo (branch `data-work`) → merge to `main`.** `main` is checked out in
-the sibling `agora_na_copa_2026` worktree, so this worktree publishes by
-fast-forwarding `main` to the new commit:
-
-```bash
-git push origin HEAD:main
-```
-
-Then keep the local `main` worktree in sync (best-effort; skip silently if it is
-dirty or absent):
+**DATA repo (`data-work`) or DEV repo (`agora-dev`/`agora-dev2`/agent) → merge
+into LOCAL `main`, do NOT push.** `main` is checked out in the sibling
+`agora_na_copa_2026` worktree; publish by fast-forwarding **local** `main` and
+stop. The harness permission classifier also blocks pushes to the default branch,
+which is by design here — these worktrees must never push.
 
 ```bash
 mainwt="$(git worktree list --porcelain | awk '/^worktree /{wt=$2} $0=="branch refs/heads/main"{print wt}')"
-[ -n "$mainwt" ] && git -C "$mainwt" merge --ff-only data-work
+[ -n "$mainwt" ] && git -C "$mainwt" merge --ff-only "$(git branch --show-current)"
 ```
 
-**CODE repo (branch `main` or any non-`data-work` branch) → push to remote.**
+The commit now sits on local `main`, ahead of `origin/main`, and reaches `origin`
+on the next `main`-side push.
+
+**CODE/release runner (the `main` worktree only) → push to remote.**
 
 ```bash
 git push origin "$(git branch --show-current)"
 ```
 
-Pushing to `main` updates the default branch directly. If the harness permission
-classifier blocks the push, **stop and ask the user to authorize it** (or to run
-`! git push origin HEAD:main` themselves) — do not attempt to work around the
-denial.
+Only run this when checked out as `main` in `agora_na_copa_2026`. Pushing to
+`main` updates the default branch directly. If the harness permission classifier
+blocks the push, **stop and ask the user to authorize it** (or to run
+`! git push origin main` themselves) — do not attempt to work around the denial.
 
 **If the push is REJECTED as non-fast-forward** (`Updates were rejected because a
 pushed branch tip is behind its remote counterpart` / `[rejected] ... (fetch
 first)`), the other worktree shipped while you were working. Do **not** force-push —
 rebase onto the new tip and retry. Recovery depends on role:
 
-**DATA repo** (no bump → no version collision) — rebase and re-push, no re-bump:
+**DATA / DEV repos don't push**, so they can't hit a non-fast-forward rejection.
+If the **local** `git -C "$mainwt" merge --ff-only` is rejected because local
+`main` advanced, just re-run it after the merge settles (or use a normal merge if
+local `main` legitimately diverged). The remote is untouched — nothing to recover.
 
-```bash
-git fetch origin
-git rebase origin/main                       # data commit doesn't touch the version line — integrates cleanly
-git push origin HEAD:main                     # now a fast-forward
-```
-
-**CODE repo** — since only the CODE repo bumps, a same-version collision only
+**CODE/release runner (the `main` worktree)** — since only `main` bumps, a same-version collision only
 arises if two code releases race (rare with one code session). Rebase, re-bump to
 the next free patch, and retry (the one safe-to-amend case — the commit is local
 and was never accepted by the remote):
@@ -184,7 +183,7 @@ npm version patch --no-git-tag-version       # e.g. 0.0.294 (dup) -> 0.0.295
 git add -A
 npx tsc --noEmit
 git commit --amend -m "chore: bump version to <NEW> ; <same summary>" -m "Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>"
-git push origin HEAD:main                     # now a fast-forward
+git push origin main                          # from the main worktree only; now a fast-forward
 ```
 
 If `git rebase` reports a **real conflict** (same content edited on both sides,
@@ -240,8 +239,8 @@ stopped, diagnose the issue, and report it. Do not retry silently.
 
 ```
 ✓ Tests passed (lint + unit + e2e)
-✓ Data committed and merged to origin/main (SHA: <short>) — no version bump
-↪ Ships with the next code release (rides its version bump + deploy)
+✓ Data committed and merged into LOCAL main (SHA: <short>) — no version bump, not pushed
+↪ Reaches origin on the next main-side push; ships with the next code release (rides its bump + deploy)
 ```
 
 If Stage 3 skips the live redeploy (no production install on this host), that
