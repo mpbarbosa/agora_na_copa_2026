@@ -14,8 +14,9 @@ interface ResolvedSide {
   code: string;
   name: string;
   flagSvg: string;
-  // True when this side only provisionally holds its slot (a group leader who hasn't
-  // mathematically locked the position), false for a confirmed/real team.
+  // True when this side only provisionally holds its slot — i.e. it was resolved from a
+  // group position whose occupant isn't mathematically locked yet ("contention"). False
+  // for a confirmed/real team OR a group leader already locked into the slot ("qualified").
   provisional: boolean;
 }
 
@@ -24,14 +25,17 @@ interface BrazilFocus {
   opponent: ResolvedSide;
   // True when Brazil or the opponent only provisionally holds its group slot — i.e. the
   // knockout confronto isn't locked yet. Surfaced so the badge never asserts an
-  // unconfirmed pairing as certain (a hard data-accuracy rule).
+  // unconfirmed pairing as certain (a hard data-accuracy rule). Mirrors the bracket's
+  // qualified (✓, certain) vs contention ("prov.", uncertain) distinction.
   provisional: boolean;
 }
 
 // Resolve a fixture side to the team effectively occupying it. A confirmed side keeps its
 // own identity; an unresolved R32 group slot ("1C","2F") resolves to the team currently
-// holding that group position, mirroring how BracketView renders the bracket. Returns
-// null for slots with no determined occupant yet (winner/best-third refs).
+// holding that group position, mirroring how BracketView renders the bracket. A slot whose
+// occupant is only in "contention" is flagged provisional; a "qualified" occupant is
+// already locked into the slot, so the pairing it implies is certain. Returns null for
+// slots with no determined occupant yet (winner/best-third refs).
 function resolveSide(
   side: FixtureSide,
   groupPositions: Map<string, ProvisionalSlot>,
@@ -39,7 +43,7 @@ function resolveSide(
   const slot = groupPositions.get(side.code);
   if (slot) {
     const { code, name, flagSvg } = slot.team;
-    return { code, name, flagSvg, provisional: true };
+    return { code, name, flagSvg, provisional: slot.status !== "qualified" };
   }
   // A confirmed team carries a real flag; an undecided winner/best-third slot does not.
   if (side.flagSvg) {
@@ -48,11 +52,11 @@ function resolveSide(
   return null;
 }
 
-// Brazil's most imminent live-or-upcoming fixture, resolving provisional knockout slots so
-// a not-yet-confirmed bracket pairing (e.g. "1C" once Brazil tops its group) still
-// surfaces. The badge's source (APP_MATCHES) keeps knockout slots as placeholder codes,
-// unlike BracketView which resolves them from live standings — so we apply the same
-// resolution here before matching on "BRA".
+// Brazil's most imminent live-or-upcoming fixture, resolving knockout slots from live
+// standings so a bracket pairing (e.g. "1C" once Brazil tops its group) still surfaces.
+// The badge's source (APP_MATCHES) keeps knockout slots as placeholder codes, unlike
+// BracketView which resolves them from live standings — so we apply the same resolution
+// here before matching on "BRA".
 function findBrazilFocus(
   matches: Match[],
   groupPositions: Map<string, ProvisionalSlot>,
