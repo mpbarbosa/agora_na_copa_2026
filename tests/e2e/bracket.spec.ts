@@ -55,6 +55,25 @@ test.describe("Bracket view (Chaveamento)", () => {
     await expect(final.locator("#bracket-slot-104-a")).toContainText("Vencedor #101");
   });
 
+  test("clicking a resolved bracket slot opens the team page", async ({ page }) => {
+    await page.goto("/");
+    await page.click("#btn-nav-chaveamento");
+    await expect(page.locator("#bracket-view")).toBeVisible();
+
+    // A confirmed team slot (Canadá in R32 #73) is a clickable button…
+    const canadaSlot = page.locator("#bracket-slot-73-b");
+    await expect(canadaSlot).toContainText(/canad/i);
+    expect(await canadaSlot.evaluate((el) => el.tagName)).toBe("BUTTON");
+    // …while an undecided winner-ref slot is a plain, non-clickable label.
+    const labelSlot = page.locator("#bracket-slot-89-a");
+    await expect(labelSlot).toContainText("Vencedor #74");
+    expect(await labelSlot.evaluate((el) => el.tagName)).toBe("DIV");
+
+    // Clicking the resolved slot opens that national team's page.
+    await canadaSlot.click();
+    await expect(page.locator("#team-lineup-view")).toBeVisible();
+  });
+
   test("renders correctly in dark theme without console errors", async ({ page }) => {
     const consoleErrors = collectAppConsoleErrors(page);
 

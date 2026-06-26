@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { CalendarDays, MapPin } from "lucide-react";
 import { KNOCKOUT_MATCHES } from "../data/knockoutBracket";
-import type { KnockoutMatch, Match } from "../types";
+import type { KnockoutMatch, Match, TeamRef } from "../types";
 import { computeStandings, buildGroupPositionMap } from "../standings";
 import type { QualificationStatus, ProvisionalSlot } from "../standings";
 import { humanizeSlot } from "../utils/knockoutSlots";
@@ -10,6 +10,7 @@ import { FlagIcon } from "./FlagIcon";
 interface BracketViewProps {
   theme: "classic-light" | "stadium-dark";
   matches: Match[];
+  onSelectTeamLineup: (team: TeamRef) => void;
 }
 
 type Stage = KnockoutMatch["stage"];
@@ -30,6 +31,23 @@ interface TeamMeta {
   name: string;
   code: string;
   flagSvg: string;
+  primaryColor: string;
+  secondaryColor: string;
+  group: string;
+}
+
+const NEUTRAL_COLORS = { primaryColor: "#64748b", secondaryColor: "#94a3b8", group: "" };
+
+// A slot's resolved team (confirmed or provisional) as a TeamRef, for opening its page.
+function toTeamRef(team: TeamMeta | ProvisionalSlot["team"]): TeamRef {
+  return {
+    name: team.name,
+    code: team.code,
+    flagSvg: team.flagSvg,
+    primaryColor: team.primaryColor,
+    secondaryColor: team.secondaryColor,
+    group: team.group,
+  };
 }
 
 // Brasília-time kickoff, e.g. "28 jun · 16:00". Module-level formatters avoid
@@ -55,7 +73,14 @@ function formatKickoff(iso: string): string {
 function buildTeamMetaMap(matches: Match[]): Map<string, TeamMeta> {
   const map = new Map<string, TeamMeta>();
   for (const row of computeStandings(matches)) {
-    map.set(row.code, { name: row.name, code: row.code, flagSvg: row.flagSvg });
+    map.set(row.code, {
+      name: row.name,
+      code: row.code,
+      flagSvg: row.flagSvg,
+      primaryColor: row.primaryColor,
+      secondaryColor: row.secondaryColor,
+      group: row.group,
+    });
   }
   return map;
 }
@@ -69,6 +94,7 @@ interface BracketSlotRowProps {
   confirmed: TeamMeta | null;
   provisional: ProvisionalSlot | null;
   theme: "classic-light" | "stadium-dark";
+  onSelectTeamLineup: (team: TeamRef) => void;
 }
 
 function BracketSlotRow({
@@ -78,6 +104,7 @@ function BracketSlotRow({
   confirmed,
   provisional,
   theme,
+  onSelectTeamLineup,
 }: BracketSlotRowProps) {
   const isLight = theme === "classic-light";
   const team = confirmed ?? provisional?.team ?? null;
@@ -100,40 +127,58 @@ function BracketSlotRow({
       ? "border-slate-200 bg-slate-50 text-slate-500"
       : "border-white/10 bg-white/5 text-slate-400";
 
-  return (
-    <div
-      id={`bracket-slot-${matchNumber}-${slot.toLowerCase()}`}
-      className={`flex min-h-11 items-center justify-between gap-2 rounded-xl border px-3 py-2 font-archivo text-sm leading-5 ${rowClasses}`}
-    >
-      {team ? (
-        <>
-          <span className="flex min-w-0 items-center gap-2">
-            <FlagIcon flag={team.flagSvg} className="h-4 w-6 shrink-0 rounded-[2px]" />
-            <span className="truncate">{team.name}</span>
-          </span>
-          {isConfirmed ? null : isQualified ? (
-            <span
-              className={`shrink-0 font-mono text-[9px] font-bold ${
-                isLight ? "text-[#009c3b]" : "text-[#00e476]"
-              }`}
-            >
-              ✓
-            </span>
-          ) : (
-            <span
-              className={`shrink-0 rounded border px-1 py-0.5 font-mono text-[8px] uppercase tracking-wider ${
-                isLight ? "border-amber-400/60 text-amber-700" : "border-[#ffd84d]/40 text-[#ffd84d]/70"
-              }`}
-            >
-              prov.
-            </span>
-          )}
-        </>
+  const id = `bracket-slot-${matchNumber}-${slot.toLowerCase()}`;
+  const baseClassName = `flex min-h-11 items-center justify-between gap-2 rounded-xl border px-3 py-2 font-archivo text-sm leading-5 ${rowClasses}`;
+
+  const content = team ? (
+    <>
+      <span className="flex min-w-0 items-center gap-2">
+        <FlagIcon flag={team.flagSvg} className="h-4 w-6 shrink-0 rounded-[2px]" />
+        <span className="truncate">{team.name}</span>
+      </span>
+      {isConfirmed ? null : isQualified ? (
+        <span
+          className={`shrink-0 font-mono text-[9px] font-bold ${
+            isLight ? "text-[#009c3b]" : "text-[#00e476]"
+          }`}
+        >
+          ✓
+        </span>
       ) : (
-        <span className="truncate font-mono text-[11px] uppercase tracking-wider opacity-80">
-          {humanizeSlot(rawSlot)}
+        <span
+          className={`shrink-0 rounded border px-1 py-0.5 font-mono text-[8px] uppercase tracking-wider ${
+            isLight ? "border-amber-400/60 text-amber-700" : "border-[#ffd84d]/40 text-[#ffd84d]/70"
+          }`}
+        >
+          prov.
         </span>
       )}
+    </>
+  ) : (
+    <span className="truncate font-mono text-[11px] uppercase tracking-wider opacity-80">
+      {humanizeSlot(rawSlot)}
+    </span>
+  );
+
+  // A resolved team (confirmed or provisional) is clickable → opens its team page.
+  // Undecided slots (winner/loser refs, best-third combos) render as a plain label.
+  if (team) {
+    return (
+      <button
+        type="button"
+        id={id}
+        onClick={() => onSelectTeamLineup(toTeamRef(team))}
+        aria-label={`Ver seleção ${team.name}`}
+        className={`${baseClassName} w-full cursor-pointer text-left transition hover:brightness-95`}
+      >
+        {content}
+      </button>
+    );
+  }
+
+  return (
+    <div id={id} className={baseClassName}>
+      {content}
     </div>
   );
 }
@@ -143,9 +188,10 @@ interface BracketMatchCardProps {
   theme: "classic-light" | "stadium-dark";
   teamMeta: Map<string, TeamMeta>;
   groupPositions: Map<string, ProvisionalSlot>;
+  onSelectTeamLineup: (team: TeamRef) => void;
 }
 
-function BracketMatchCard({ match, theme, teamMeta, groupPositions }: BracketMatchCardProps) {
+function BracketMatchCard({ match, theme, teamMeta, groupPositions, onSelectTeamLineup }: BracketMatchCardProps) {
   const isLight = theme === "classic-light";
   const cardClasses = isLight ? "bg-white border-slate-200" : "bg-[#161919] border-white/10";
   const subtleClasses = isLight ? "text-slate-500" : "text-slate-400";
@@ -153,7 +199,7 @@ function BracketMatchCard({ match, theme, teamMeta, groupPositions }: BracketMat
   const resolveConfirmed = (ref: KnockoutMatch["teamA"]): TeamMeta | null => {
     if (!ref) return null;
     const meta = teamMeta.get(ref.code);
-    return meta ?? { name: ref.name, code: ref.code, flagSvg: ref.code.toLowerCase() };
+    return meta ?? { name: ref.name, code: ref.code, flagSvg: ref.code.toLowerCase(), ...NEUTRAL_COLORS };
   };
 
   // Provisional group-position resolution only applies to R32 group slots and only
@@ -187,6 +233,7 @@ function BracketMatchCard({ match, theme, teamMeta, groupPositions }: BracketMat
           confirmed={confirmedA}
           provisional={resolveProvisional(match.slotA, confirmedA)}
           theme={theme}
+          onSelectTeamLineup={onSelectTeamLineup}
         />
         <BracketSlotRow
           matchNumber={match.matchNumber}
@@ -195,6 +242,7 @@ function BracketMatchCard({ match, theme, teamMeta, groupPositions }: BracketMat
           confirmed={confirmedB}
           provisional={resolveProvisional(match.slotB, confirmedB)}
           theme={theme}
+          onSelectTeamLineup={onSelectTeamLineup}
         />
       </div>
 
@@ -211,9 +259,10 @@ interface BracketStageColumnProps {
   theme: "classic-light" | "stadium-dark";
   teamMeta: Map<string, TeamMeta>;
   groupPositions: Map<string, ProvisionalSlot>;
+  onSelectTeamLineup: (team: TeamRef) => void;
 }
 
-function BracketStageColumn({ stage, matches, theme, teamMeta, groupPositions }: BracketStageColumnProps) {
+function BracketStageColumn({ stage, matches, theme, teamMeta, groupPositions, onSelectTeamLineup }: BracketStageColumnProps) {
   const isLight = theme === "classic-light";
   const stageClasses = isLight ? "bg-slate-50 border-slate-200" : "bg-white/5 border-white/10";
   const headingClasses = isLight ? "text-slate-900" : "text-white";
@@ -245,6 +294,7 @@ function BracketStageColumn({ stage, matches, theme, teamMeta, groupPositions }:
               theme={theme}
               teamMeta={teamMeta}
               groupPositions={groupPositions}
+              onSelectTeamLineup={onSelectTeamLineup}
             />
           </div>
         ))}
@@ -255,7 +305,7 @@ function BracketStageColumn({ stage, matches, theme, teamMeta, groupPositions }:
 
 // --- Main component ---
 
-export function BracketView({ theme, matches }: BracketViewProps) {
+export function BracketView({ theme, matches, onSelectTeamLineup }: BracketViewProps) {
   const teamMeta = useMemo(() => buildTeamMetaMap(matches), [matches]);
   const groupPositions = useMemo(() => buildGroupPositionMap(matches), [matches]);
 
@@ -338,6 +388,7 @@ export function BracketView({ theme, matches }: BracketViewProps) {
                 theme={theme}
                 teamMeta={teamMeta}
                 groupPositions={groupPositions}
+                onSelectTeamLineup={onSelectTeamLineup}
               />
             </div>
           ))}

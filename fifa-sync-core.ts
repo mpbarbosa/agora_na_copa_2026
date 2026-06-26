@@ -703,6 +703,11 @@ const toIncidentPlayerMention = (
   };
 };
 
+// FIFA `Goal.Type` integer codes seen in the api.fifa.com live feed: 2 = regular
+// goal, 3 = own goal (verified against real WC2026 own goals — e.g. Bounou's own
+// goal in MAR×HAI). Any other value is treated as a regular goal.
+const FIFA_OWN_GOAL_TYPE = 3;
+
 export const getIncidentsFromLiveFifa = (
   fifaMatch: FifaLiveMatch,
   homeTeamCode?: string,
@@ -714,24 +719,39 @@ export const getIncidentsFromLiveFifa = (
   const awayPlayers = buildFifaPlayerMap(fifaMatch.AwayTeam);
   const teamCodeFor = (team: "A" | "B") => (team === "A" ? homeTeamCode : awayTeamCode);
 
+  // FIFA marks an own goal with `Goal.Type === 3` (regular goals are Type 2). An own
+  // goal is credited to the team that benefits (`team`), but its scorer plays for the
+  // OPPONENT — so the scorer's IdPlayer resolves in the opponent's roster, not this
+  // team's. Resolving against the wrong roster is exactly why it used to read "Jogador
+  // marcou"; here we look the scorer up in the opponent's roster and label it clearly.
   const buildGoalIncidents = (
     goals: FifaLiveGoal[] | undefined,
     playerNames: Map<string, string>,
     players: Map<string, FifaLivePlayer>,
     team: "A" | "B",
+    oppPlayerNames: Map<string, string>,
+    oppPlayers: Map<string, FifaLivePlayer>,
+    oppTeam: "A" | "B",
   ) =>
     (goals || []).map((goal, index) => {
-      const playerName = goal.IdPlayer
-        ? playerNames.get(goal.IdPlayer) || "Jogador"
-        : "Jogador";
+      const isOwnGoal = goal.Type === FIFA_OWN_GOAL_TYPE;
+      const names = isOwnGoal ? oppPlayerNames : playerNames;
+      const playerMap = isOwnGoal ? oppPlayers : players;
+      const mentionTeam = isOwnGoal ? oppTeam : team;
+      const playerName = goal.IdPlayer ? names.get(goal.IdPlayer) || "Jogador" : "Jogador";
+      const text = isOwnGoal
+        ? playerName === "Jogador"
+          ? "Gol contra."
+          : `Gol contra de ${playerName}.`
+        : `${playerName} marcou.`;
 
       return {
         id: `${team}-goal-${goal.IdGoal || `${goal.Minute || "sem-minuto"}-${index}`}`,
         time: goal.Minute || "--'",
         type: "GOAL" as const,
-        text: `${playerName} marcou.`,
+        text,
         team,
-        playerMentions: [toIncidentPlayerMention(goal.IdPlayer ? players.get(goal.IdPlayer) : undefined, playerName, teamCodeFor(team))],
+        playerMentions: [toIncidentPlayerMention(goal.IdPlayer ? playerMap.get(goal.IdPlayer) : undefined, playerName, teamCodeFor(mentionTeam))],
         period: goal.Period,
       };
     });
@@ -814,8 +834,8 @@ export const getIncidentsFromLiveFifa = (
     });
 
   return [
-    ...buildGoalIncidents(fifaMatch.HomeTeam?.Goals, homePlayerNames, homePlayers, "A"),
-    ...buildGoalIncidents(fifaMatch.AwayTeam?.Goals, awayPlayerNames, awayPlayers, "B"),
+    ...buildGoalIncidents(fifaMatch.HomeTeam?.Goals, homePlayerNames, homePlayers, "A", awayPlayerNames, awayPlayers, "B"),
+    ...buildGoalIncidents(fifaMatch.AwayTeam?.Goals, awayPlayerNames, awayPlayers, "B", homePlayerNames, homePlayers, "A"),
     ...buildBookingIncidents(fifaMatch.HomeTeam?.Bookings, homePlayerNames, homePlayers, "A"),
     ...buildBookingIncidents(fifaMatch.AwayTeam?.Bookings, awayPlayerNames, awayPlayers, "B"),
     ...buildSubstitutionIncidents(
