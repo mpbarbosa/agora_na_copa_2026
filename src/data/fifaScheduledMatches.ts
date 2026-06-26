@@ -75,8 +75,8 @@ export const FIFA_SCHEDULED_MATCHES: FifaScheduledMatchSeed[] = [
   { teamA: "IRQ", teamB: "NOR", kickoffTimestamp: "2026-06-16T19:00:00-03:00", status: "FINISHED", score: { teamA: 1, teamB: 4 }, ...v("IRQ", "NOR") },
   { teamA: "FRA", teamB: "IRQ", kickoffTimestamp: "2026-06-22T18:00:00-03:00", status: "FINISHED", score: { teamA: 3, teamB: 0 }, ...v("FRA", "IRQ") },
   { teamA: "NOR", teamB: "SEN", kickoffTimestamp: "2026-06-22T21:00:00-03:00", status: "FINISHED", score: { teamA: 3, teamB: 2 }, ...v("NOR", "SEN") },
-  { teamA: "NOR", teamB: "FRA", kickoffTimestamp: "2026-06-26T16:00:00-03:00", status: "PRE_GAME", ...v("NOR", "FRA") },
-  { teamA: "SEN", teamB: "IRQ", kickoffTimestamp: "2026-06-26T16:00:00-03:00", status: "PRE_GAME", ...v("SEN", "IRQ") },
+  { teamA: "NOR", teamB: "FRA", kickoffTimestamp: "2026-06-26T16:00:00-03:00", status: "FINISHED", score: { teamA: 1, teamB: 4 }, ...v("NOR", "FRA") },
+  { teamA: "SEN", teamB: "IRQ", kickoffTimestamp: "2026-06-26T16:00:00-03:00", status: "FINISHED", score: { teamA: 5, teamB: 0 }, ...v("SEN", "IRQ") },
 
   // ── Grupo J ───────────────────────────────────────────────────────────────
   { teamA: "AUT", teamB: "JOR", kickoffTimestamp: "2026-06-17T01:00:00-03:00", status: "FINISHED", score: { teamA: 3, teamB: 1 }, ...v("AUT", "JOR") },
