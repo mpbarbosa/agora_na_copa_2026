@@ -1,5 +1,6 @@
 import { test, expect } from "@playwright/test";
 import { collectAppConsoleErrors } from "./fixtures/consoleErrors";
+import { stubLiveApis } from "./fixtures/aoVivo";
 
 import { NAV_ITEMS } from "../../src/navigation";
 
@@ -21,6 +22,10 @@ test.describe("Navigation shell", () => {
   test("loads with the Ao Vivo view by default", async ({ page }) => {
     const consoleErrors = collectAppConsoleErrors(page);
 
+    // Seed a no-live state so Ao Vivo lands on the single-match focus detail
+    // (the "Os dois" overview only appears with 2+ simultaneous live games),
+    // keeping the default-view scoreboard assertions deterministic.
+    await stubLiveApis(page);
     await page.goto("/");
 
     await expect(page.locator("#btn-nav-ao-vivo")).toHaveClass(/font-semibold/);
@@ -105,6 +110,9 @@ test.describe("Navigation shell", () => {
   });
 
   test("match selector switches the active match", async ({ page }) => {
+    // No live games → Ao Vivo stays on the focus detail, so the match-selector
+    // chips rail is mounted (the "Os dois" overview would unmount it).
+    await stubLiveApis(page);
     await page.goto("/");
 
     // Use the finished chips rail — always has multiple chips regardless of live/upcoming state

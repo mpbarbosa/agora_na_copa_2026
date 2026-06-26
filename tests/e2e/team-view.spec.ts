@@ -1,4 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
+import { stubLiveApis } from "./fixtures/aoVivo";
 
 async function mockTeamView(page: Page) {
   await page.route("**/api/team-view/*", async (route) => {
@@ -461,6 +462,10 @@ test.describe("Team view", () => {
   test("opens the full team page from a match flag click", async ({ page }) => {
     await mockTeamView(page);
 
+    // No live games → Ao Vivo stays on the single-match focus detail, so the
+    // scoreboard's team display (the entry point to the team page) is mounted
+    // (the "Os dois" overview would unmount it).
+    await stubLiveApis(page);
     await page.goto("/");
     await page.click("#team-a-display button[aria-label^='Ver escalação']");
 
@@ -479,6 +484,10 @@ test.describe("Team view", () => {
   test("shows the compact World Cup match-history table with results and live state", async ({ page }) => {
     await mockTeamView(page);
 
+    // No live games → Ao Vivo stays on the single-match focus detail, so the
+    // scoreboard's team display (the entry point to the team page) is mounted
+    // (the "Os dois" overview would unmount it).
+    await stubLiveApis(page);
     await page.goto("/");
     await page.click("#team-a-display button[aria-label^='Ver escalação']");
 
@@ -497,6 +506,10 @@ test.describe("Team view", () => {
   test("shows the editorial team analysis (Análise da seleção) when one is authored", async ({ page }) => {
     await mockTeamView(page);
 
+    // No live games → Ao Vivo stays on the single-match focus detail, so the
+    // scoreboard's team display (the entry point to the team page) is mounted
+    // (the "Os dois" overview would unmount it).
+    await stubLiveApis(page);
     await page.goto("/");
     await page.click("#team-a-display button[aria-label^='Ver escalação']");
 
@@ -511,6 +524,10 @@ test.describe("Team view", () => {
   test("flags whether the team analysis is up to date with the last match", async ({ page }) => {
     await mockTeamView(page);
 
+    // No live games → Ao Vivo stays on the single-match focus detail, so the
+    // scoreboard's team display (the entry point to the team page) is mounted
+    // (the "Os dois" overview would unmount it).
+    await stubLiveApis(page);
     await page.goto("/");
     await page.click("#team-a-display button[aria-label^='Ver escalação']");
 
@@ -529,6 +546,10 @@ test.describe("Team view", () => {
   test("shows the team's match videos (full game and highlights)", async ({ page }) => {
     await mockTeamView(page);
 
+    // No live games → Ao Vivo stays on the single-match focus detail, so the
+    // scoreboard's team display (the entry point to the team page) is mounted
+    // (the "Os dois" overview would unmount it).
+    await stubLiveApis(page);
     await page.goto("/");
     await page.click("#team-a-display button[aria-label^='Ver escalação']");
 
@@ -647,6 +668,10 @@ test.describe("Team view", () => {
   }) => {
     await mockTeamView(page);
 
+    // No live games → Ao Vivo stays on the single-match focus detail, so the
+    // scoreboard's team display (the entry point to the team page) is mounted
+    // (the "Os dois" overview would unmount it).
+    await stubLiveApis(page);
     await page.goto("/");
     await page.click("#team-a-display button[aria-label^='Ver escalação']");
     await expect(page.locator("#team-lineup-view")).toBeVisible();

@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import { stubLiveApis } from "./fixtures/aoVivo";
 
 test.describe("Player mention (Messi) in the match analysis", () => {
   test.beforeEach(async ({ page }) => {
@@ -6,6 +7,9 @@ test.describe("Player mention (Messi) in the match analysis", () => {
   });
 
   test("'Messi' links to a compact player-card preview", async ({ page }) => {
+    // No live games → Ao Vivo stays on the single-match focus detail, so the match
+    // selector and tabs are mounted (the overview would unmount them).
+    await stubLiveApis(page);
     await page.goto("/");
     await page.click("#btn-consent-accept").catch(() => {});
     // ARG x AUT (finished) — Messi scored both goals, so the recap mentions him.
