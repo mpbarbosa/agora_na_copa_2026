@@ -154,7 +154,7 @@ function startBracketTour(theme: Theme, onEnd?: () => void): void {
         element: "#btn-nav-chaveamento",
         title: "O caminho até a final 🏆",
         description:
-          'Acompanhe todo o mata-mata, dos 16 avos à decisão, na aba Chaveamento — toque em "Próximo".',
+          'Acompanhe todo o mata-mata, dos 16 avos à decisão, na aba Mata-mata — toque em "Próximo".',
         side: "bottom",
         align: "start",
         act: () => document.getElementById("btn-nav-chaveamento")?.click(),
@@ -162,7 +162,7 @@ function startBracketTour(theme: Theme, onEnd?: () => void): void {
       },
       {
         element: "#bracket-stage-grid",
-        title: "Chaveamento da Copa",
+        title: "Mata-mata da Copa",
         description:
           "A cada fase, o cruzamento se monta com os classificados — incluindo as vagas dos 8 melhores terceiros colocados.",
         side: "top",
