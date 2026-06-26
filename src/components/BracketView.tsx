@@ -11,6 +11,7 @@ interface BracketViewProps {
   theme: "classic-light" | "stadium-dark";
   matches: Match[];
   onSelectTeamLineup: (team: TeamRef) => void;
+  onSelectMatch: (matchId: string) => void;
 }
 
 type Stage = KnockoutMatch["stage"];
@@ -67,6 +68,18 @@ function formatKickoff(iso: string): string {
   const date = new Date(iso);
   const day = DAY_FMT.format(date).replace(" de ", " ").replace(".", "");
   return `${day} · ${TIME_FMT.format(date)}`;
+}
+
+// Map a knockout fixture's FIFA match number → the corresponding APP_MATCHES id
+// (knockout ids are "ko-<matchNumber>-<year>"), so a bracket card can open the
+// real match page. Parsed from the ids rather than hard-coding the year suffix.
+function buildKnockoutMatchIdByNumber(matches: Match[]): Map<number, string> {
+  const map = new Map<number, string>();
+  for (const match of matches) {
+    const n = /^ko-(\d+)-/.exec(match.id);
+    if (n) map.set(Number(n[1]), match.id);
+  }
+  return map;
 }
 
 // All 48 teams keyed by code, for resolving a confirmed knockout team's flag/name.
@@ -167,7 +180,11 @@ function BracketSlotRow({
       <button
         type="button"
         id={id}
-        onClick={() => onSelectTeamLineup(toTeamRef(team))}
+        onClick={(e) => {
+          // The card itself opens the match page; a team row opens that team's page.
+          e.stopPropagation();
+          onSelectTeamLineup(toTeamRef(team));
+        }}
         aria-label={`Ver seleção ${team.name}`}
         className={`${baseClassName} w-full cursor-pointer text-left transition hover:brightness-95`}
       >
@@ -188,10 +205,13 @@ interface BracketMatchCardProps {
   theme: "classic-light" | "stadium-dark";
   teamMeta: Map<string, TeamMeta>;
   groupPositions: Map<string, ProvisionalSlot>;
+  /** APP_MATCHES id for this fixture, when present — enables opening its match page. */
+  matchId: string | null;
   onSelectTeamLineup: (team: TeamRef) => void;
+  onSelectMatch: (matchId: string) => void;
 }
 
-function BracketMatchCard({ match, theme, teamMeta, groupPositions, onSelectTeamLineup }: BracketMatchCardProps) {
+function BracketMatchCard({ match, theme, teamMeta, groupPositions, matchId, onSelectTeamLineup, onSelectMatch }: BracketMatchCardProps) {
   const isLight = theme === "classic-light";
   const cardClasses = isLight ? "bg-white border-slate-200" : "bg-[#161919] border-white/10";
   const subtleClasses = isLight ? "text-slate-500" : "text-slate-400";
@@ -213,7 +233,8 @@ function BracketMatchCard({ match, theme, teamMeta, groupPositions, onSelectTeam
   return (
     <article
       id={`bracket-match-${match.matchNumber}`}
-      className={`rounded-2xl border p-3 ${cardClasses}`}
+      onClick={matchId ? () => onSelectMatch(matchId) : undefined}
+      className={`rounded-2xl border p-3 ${cardClasses} ${matchId ? "cursor-pointer transition hover:brightness-95" : ""}`}
     >
       <div className={`flex flex-wrap items-center gap-x-3 gap-y-1 font-mono text-[10px] uppercase tracking-wider ${subtleClasses}`}>
         <span className="font-bold">#{match.matchNumber}</span>
@@ -259,10 +280,12 @@ interface BracketStageColumnProps {
   theme: "classic-light" | "stadium-dark";
   teamMeta: Map<string, TeamMeta>;
   groupPositions: Map<string, ProvisionalSlot>;
+  matchIdByNumber: Map<number, string>;
   onSelectTeamLineup: (team: TeamRef) => void;
+  onSelectMatch: (matchId: string) => void;
 }
 
-function BracketStageColumn({ stage, matches, theme, teamMeta, groupPositions, onSelectTeamLineup }: BracketStageColumnProps) {
+function BracketStageColumn({ stage, matches, theme, teamMeta, groupPositions, matchIdByNumber, onSelectTeamLineup, onSelectMatch }: BracketStageColumnProps) {
   const isLight = theme === "classic-light";
   const stageClasses = isLight ? "bg-slate-50 border-slate-200" : "bg-white/5 border-white/10";
   const headingClasses = isLight ? "text-slate-900" : "text-white";
@@ -294,7 +317,9 @@ function BracketStageColumn({ stage, matches, theme, teamMeta, groupPositions, o
               theme={theme}
               teamMeta={teamMeta}
               groupPositions={groupPositions}
+              matchId={matchIdByNumber.get(match.matchNumber) ?? null}
               onSelectTeamLineup={onSelectTeamLineup}
+              onSelectMatch={onSelectMatch}
             />
           </div>
         ))}
@@ -305,9 +330,10 @@ function BracketStageColumn({ stage, matches, theme, teamMeta, groupPositions, o
 
 // --- Main component ---
 
-export function BracketView({ theme, matches, onSelectTeamLineup }: BracketViewProps) {
+export function BracketView({ theme, matches, onSelectTeamLineup, onSelectMatch }: BracketViewProps) {
   const teamMeta = useMemo(() => buildTeamMetaMap(matches), [matches]);
   const groupPositions = useMemo(() => buildGroupPositionMap(matches), [matches]);
+  const matchIdByNumber = useMemo(() => buildKnockoutMatchIdByNumber(matches), [matches]);
 
   const matchesByStage = useMemo(() => {
     const grouped = new Map<Stage, KnockoutMatch[]>();
@@ -388,7 +414,9 @@ export function BracketView({ theme, matches, onSelectTeamLineup }: BracketViewP
                 theme={theme}
                 teamMeta={teamMeta}
                 groupPositions={groupPositions}
+                matchIdByNumber={matchIdByNumber}
                 onSelectTeamLineup={onSelectTeamLineup}
+                onSelectMatch={onSelectMatch}
               />
             </div>
           ))}
