@@ -26,14 +26,14 @@ export const NAV_ITEMS: NavItem[] = [
     description: "Lista completa das seleções classificadas para a Copa com acesso ao painel de cada time.",
   },
   {
-    id: "jogadores",
-    label: "Jogadores",
-    description: "Perfis individuais dos atletas classificados para a Copa.",
-  },
-  {
     id: "chaveamento",
     label: "Mata-mata",
     description: "Mata-mata interativo até a grande final.",
+  },
+  {
+    id: "jogadores",
+    label: "Jogadores",
+    description: "Perfis individuais dos atletas classificados para a Copa.",
   },
   {
     id: "lideres",
