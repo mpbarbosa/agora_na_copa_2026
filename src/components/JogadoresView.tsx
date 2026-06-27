@@ -3,7 +3,7 @@ import { APP_MATCHES } from "../appMatches";
 import { getTeamSquad } from "../data/playerRegistry";
 import type { Player, TeamRef } from "../types";
 import { FlagIcon } from "./FlagIcon";
-import { PlayerPortrait, PlayerOverlayCard, PlayerPictureOverlay, buildTournamentStatCells, getPlayerAge, formatBirthDate } from "./PlayerOverlayCard";
+import { PlayerPortrait, PlayerOverlayCard, PlayerPictureOverlay, buildPlayerStatCells, formatBirthDate } from "./PlayerOverlayCard";
 import { InstagramBrandIcon } from "./InstagramBrandIcon";
 import { getPositionLabel } from "../utils/playerDisplay";
 import { usePlayerStats } from "../hooks/usePlayerStats";
@@ -568,18 +568,9 @@ export function JogadoresView({ theme, onSelectTeamLineup }: JogadoresViewProps)
           primaryColor={selected.team.primaryColor}
           secondaryColor={selected.team.secondaryColor}
           flagSvg={selected.team.flagSvg}
-          stats={[
-            { label: "Camisa", value: selected.player.number },
-            { label: "Posição", value: getPositionLabel(selected.player.position) },
-            ...(selected.player.dateOfBirth
-              ? [{ label: "Idade", value: getPlayerAge(selected.player.dateOfBirth) }]
-              : []),
-            ...(selected.player.height
-              ? [{ label: "Altura", value: `${selected.player.height} cm` }]
-              : []),
-            ...buildTournamentStatCells(selectedStats, theme),
-          ]}
+          stats={buildPlayerStatCells(selected.player, selectedStats, theme)}
           details={[
+            { label: "Posição", value: getPositionLabel(selected.player.position) },
             ...(selected.player.dateOfBirth
               ? [{ label: "Nascimento", value: formatBirthDate(selected.player.dateOfBirth) }]
               : []),

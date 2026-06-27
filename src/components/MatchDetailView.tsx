@@ -25,7 +25,7 @@ import { parseNoteSections } from "../utils/noteSections";
 import { resolveVenueTimeZone } from "../utils/venueCoordinates";
 import type { TeamLineupsMap } from "../utils/teamLineup";
 import { FlagIcon } from "./FlagIcon";
-import { PlayerOverlayCard, PlayerPictureOverlay, buildTournamentStatCells, getPlayerAge, formatBirthDate } from "./PlayerOverlayCard";
+import { PlayerOverlayCard, PlayerPictureOverlay, buildPlayerStatCells, formatBirthDate } from "./PlayerOverlayCard";
 import { usePlayerStats } from "../hooks/usePlayerStats";
 import { getPositionLabel, toTitleCasePtBr } from "../utils/playerDisplay";
 import { PitchLineup } from "./PitchLineup";
@@ -1725,72 +1725,79 @@ export function MatchDetailView({
           }`}
           id="live-jumbo-card"
         >
-          {/* Narração — live-match speech toggle, surfaced on the scoreboard */}
-          {matchSpeech.supported && (
-            <div className="mb-4 flex justify-end">
-              <MatchSpeechToggle
-                enabled={matchSpeech.enabled}
-                onToggle={matchSpeech.toggle}
-                theme={theme}
-              />
-            </div>
-          )}
-
-          {/* Simultaneous pré-jogo alert: another game kicks off at the very same
-              time (final group round). A bold, full-width banner at the TOP of the
-              card so the simultaneous slot is impossible to miss — and each sibling
-              chip jumps to that match. Mirrors the live SimultaneousLiveMatches case. */}
-          {simultaneousUpcomingMatches.length > 0 && (
-            <div
-              id="simultaneous-upcoming-matches"
-              data-testid="simultaneous-upcoming-matches"
-              className={`mb-5 flex flex-col items-center justify-center gap-2.5 rounded-2xl border-2 border-dashed px-4 py-3 text-center sm:flex-row sm:gap-3 ${
-                theme === "classic-light"
-                  ? "border-amber-300 bg-amber-50"
-                  : "border-amber-400/40 bg-amber-400/10"
-              }`}
-            >
-              <span
-                className={`flex items-center gap-2 font-anton text-sm uppercase tracking-wide ${
-                  theme === "classic-light" ? "text-amber-700" : "text-amber-300"
-                }`}
-              >
-                <Zap size={18} className="shrink-0 animate-pulse" aria-hidden="true" />
-                {simultaneousUpcomingMatches.length === 1
-                  ? "Atenção: outro jogo no mesmo horário"
-                  : "Atenção: outros jogos no mesmo horário"}
-              </span>
-              <div className="flex flex-wrap items-center justify-center gap-2">
-                {simultaneousUpcomingMatches.map((m) => {
-                  const a = resolveTeamDisplay(m, m.teamA, groupPositionMap);
-                  const b = resolveTeamDisplay(m, m.teamB, groupPositionMap);
-                  return (
-                  <button
-                    key={m.id}
-                    type="button"
-                    id={`btn-simultaneous-${m.id}`}
-                    onClick={() => handleSelectMatch(m.id)}
-                    title={`${formatCountryNameForTooltip(a.name)} x ${formatCountryNameForTooltip(b.name)} — começa no mesmo horário`}
-                    aria-label={`Ver ${formatCountryNameForTooltip(a.name)} contra ${formatCountryNameForTooltip(b.name)}, que começa no mesmo horário`}
-                    className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 font-anton text-sm uppercase tracking-wide transition ${
-                      theme === "classic-light"
-                        ? "border-amber-300 bg-white text-slate-800 hover:border-amber-400 hover:bg-amber-100"
-                        : "border-amber-400/30 bg-[#1a1c14] text-amber-50 hover:border-amber-300/60 hover:bg-amber-400/15"
+          {/* Narração toggle + the simultaneous-match alert share one row, so the
+              mic sits beside the "Atenção: outro jogo no mesmo horário" banner
+              instead of floating alone above it. Either can appear without the
+              other: with the banner the mic aligns to its right; without it the
+              mic stays pinned right (ml-auto). */}
+          {(matchSpeech.supported || simultaneousUpcomingMatches.length > 0) && (
+            <div className="mb-5 flex items-center gap-3">
+              {/* Simultaneous pré-jogo alert: another game kicks off at the very
+                  same time (final group round). A bold banner so the simultaneous
+                  slot is impossible to miss — and each sibling chip jumps to that
+                  match. Mirrors the live SimultaneousLiveMatches case. */}
+              {simultaneousUpcomingMatches.length > 0 && (
+                <div
+                  id="simultaneous-upcoming-matches"
+                  data-testid="simultaneous-upcoming-matches"
+                  className={`flex flex-1 flex-col items-center justify-center gap-2.5 rounded-2xl border-2 border-dashed px-4 py-3 text-center sm:flex-row sm:gap-3 ${
+                    theme === "classic-light"
+                      ? "border-amber-300 bg-amber-50"
+                      : "border-amber-400/40 bg-amber-400/10"
+                  }`}
+                >
+                  <span
+                    className={`flex items-center gap-2 font-anton text-sm uppercase tracking-wide ${
+                      theme === "classic-light" ? "text-amber-700" : "text-amber-300"
                     }`}
                   >
-                    <FlagIcon
-                      flag={a.flagSvg}
-                      className="h-4 w-6 shrink-0 rounded-[2px] object-cover"
-                    />
-                    <span>{a.code} x {b.code}</span>
-                    <FlagIcon
-                      flag={b.flagSvg}
-                      className="h-4 w-6 shrink-0 rounded-[2px] object-cover"
-                    />
-                  </button>
-                  );
-                })}
-              </div>
+                    <Zap size={18} className="shrink-0 animate-pulse" aria-hidden="true" />
+                    {simultaneousUpcomingMatches.length === 1
+                      ? "Atenção: outro jogo no mesmo horário"
+                      : "Atenção: outros jogos no mesmo horário"}
+                  </span>
+                  <div className="flex flex-wrap items-center justify-center gap-2">
+                    {simultaneousUpcomingMatches.map((m) => {
+                      const a = resolveTeamDisplay(m, m.teamA, groupPositionMap);
+                      const b = resolveTeamDisplay(m, m.teamB, groupPositionMap);
+                      return (
+                      <button
+                        key={m.id}
+                        type="button"
+                        id={`btn-simultaneous-${m.id}`}
+                        onClick={() => handleSelectMatch(m.id)}
+                        title={`${formatCountryNameForTooltip(a.name)} x ${formatCountryNameForTooltip(b.name)} — começa no mesmo horário`}
+                        aria-label={`Ver ${formatCountryNameForTooltip(a.name)} contra ${formatCountryNameForTooltip(b.name)}, que começa no mesmo horário`}
+                        className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 font-anton text-sm uppercase tracking-wide transition ${
+                          theme === "classic-light"
+                            ? "border-amber-300 bg-white text-slate-800 hover:border-amber-400 hover:bg-amber-100"
+                            : "border-amber-400/30 bg-[#1a1c14] text-amber-50 hover:border-amber-300/60 hover:bg-amber-400/15"
+                        }`}
+                      >
+                        <FlagIcon
+                          flag={a.flagSvg}
+                          className="h-4 w-6 shrink-0 rounded-[2px] object-cover"
+                        />
+                        <span>{a.code} x {b.code}</span>
+                        <FlagIcon
+                          flag={b.flagSvg}
+                          className="h-4 w-6 shrink-0 rounded-[2px] object-cover"
+                        />
+                      </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+              {matchSpeech.supported && (
+                <div className="ml-auto shrink-0">
+                  <MatchSpeechToggle
+                    enabled={matchSpeech.enabled}
+                    onToggle={matchSpeech.toggle}
+                    theme={theme}
+                  />
+                </div>
+              )}
             </div>
           )}
 
@@ -2615,22 +2622,13 @@ export function MatchDetailView({
           teamName={selectedIncidentPlayer.team.name}
           primaryColor={selectedIncidentPlayer.team.primaryColor}
           secondaryColor={selectedIncidentPlayer.team.secondaryColor}
-          stats={[
-            { label: "Camisa", value: selectedIncidentPlayer.player.number },
-            {
-              label: "Posição",
-              value: getPositionLabel(selectedIncidentPlayer.player.position),
-            },
-            { label: "Seleção", value: selectedIncidentPlayer.team.code },
-            ...(selectedIncidentPlayer.player.dateOfBirth
-              ? [{ label: "Idade", value: getPlayerAge(selectedIncidentPlayer.player.dateOfBirth) }]
-              : []),
-            ...(selectedIncidentPlayer.player.height
-              ? [{ label: "Altura", value: `${selectedIncidentPlayer.player.height} cm` }]
-              : []),
-            ...buildTournamentStatCells(incidentPlayerStats, theme),
-          ]}
+          stats={buildPlayerStatCells(
+            selectedIncidentPlayer.player,
+            incidentPlayerStats,
+            theme,
+          )}
           details={[
+            { label: "Posição", value: getPositionLabel(selectedIncidentPlayer.player.position) },
             ...(selectedIncidentPlayer.player.dateOfBirth
               ? [{ label: "Nascimento", value: formatBirthDate(selectedIncidentPlayer.player.dateOfBirth) }]
               : []),
