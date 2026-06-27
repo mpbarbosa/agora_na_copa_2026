@@ -22,6 +22,28 @@ function isGuaranteed(advance: number | undefined): boolean {
   return typeof advance === "number" && Math.round(advance * 100) >= 100;
 }
 
+// Hover explanation of a third-placed team's run at the eight best-third slots:
+// where it ranks among the 12 thirds, whether it sits inside the provisional cut,
+// and its simulated odds. Teams still in contention get the "na briga" framing;
+// locks and eliminated teams get a definitive line. Falls back to rank-only until
+// the simulated chance loads.
+function buildThirdTooltip(
+  name: string,
+  rankAmongThirds: number,
+  qualifies: boolean,
+  advance: number | undefined,
+  guaranteed: boolean,
+): string {
+  const ord = `${rankAmongThirds}º melhor 3º colocado`;
+  if (advance === undefined) return `${name} · ${ord}`;
+  const pct = Math.round(advance * 100);
+  if (guaranteed) return `${name} · ${ord} — classificação ao mata-mata garantida.`;
+  if (pct <= 0) return `${name} · ${ord} — eliminado: sem cenários de ficar entre os 8 melhores 3ºs.`;
+  if (qualifies)
+    return `${name} · ${ord} — dentro do corte provisório dos 8, mas sem vaga garantida (${pct}% nas simulações).`;
+  return `${name} · ${ord} — fora do corte provisório dos 8, mas ainda na briga (${pct}% nas simulações).`;
+}
+
 // Cross-group ranking of the 12 third-placed teams. The best 8 provisionally
 // advance to the Round of 32 (FIFA WC 2026 Art. 12.5); ranking criteria are
 // points → goal difference → goals for → fair play (Art. 13), shared with the
@@ -165,7 +187,9 @@ export function ThirdPlaceTable({ groups, theme, onSelectTeamLineup }: ThirdPlac
                         className="h-4 w-6"
                         onClick={() => onSelectTeamLineup(row)}
                       />
-                      <span title={row.name}>{row.code}</span>
+                      <span title={buildThirdTooltip(row.name, index + 1, qualifies, advance, guaranteed)}>
+                        {row.code}
+                      </span>
                       {guaranteed && (
                         <span
                           className={`rounded px-1 text-[9px] font-bold uppercase tracking-wider ${
