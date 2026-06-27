@@ -6,6 +6,8 @@ import { computeStandings, buildGroupPositionMap } from "../standings";
 import type { QualificationStatus, ProvisionalSlot } from "../standings";
 import { humanizeSlot, describeBestThirdSlot, bestThirdGroups } from "../utils/knockoutSlots";
 import { FlagIcon } from "./FlagIcon";
+import { BracketPredictorPanel } from "./BracketPredictorPanel";
+import type { PredictableFixture, ResolvedSlotTeam } from "./BracketPredictorPanel";
 
 interface BracketViewProps {
   theme: "classic-light" | "stadium-dark";
@@ -96,6 +98,51 @@ function buildTeamMetaMap(matches: Match[]): Map<string, TeamMeta> {
     });
   }
   return map;
+}
+
+// Resolve a knockout slot to a team — confirmed ref (filled by results) first, then
+// the provisional group-position holder from current standings. Best-third combo and
+// winner/loser refs have no entry in either map, so they resolve to null. Mirrors the
+// resolution BracketMatchCard renders, but flattened to the shape the predictor needs.
+function resolveSlotTeam(
+  rawSlot: string,
+  confirmedRef: KnockoutMatch["teamA"],
+  teamMeta: Map<string, TeamMeta>,
+  groupPositions: Map<string, ProvisionalSlot>,
+): ResolvedSlotTeam | null {
+  if (confirmedRef) {
+    const meta = teamMeta.get(confirmedRef.code);
+    return meta
+      ? { code: meta.code, name: meta.name, flagSvg: meta.flagSvg }
+      : { code: confirmedRef.code, name: confirmedRef.name, flagSvg: confirmedRef.code.toLowerCase() };
+  }
+  const provisional = groupPositions.get(rawSlot)?.team;
+  return provisional
+    ? { code: provisional.code, name: provisional.name, flagSvg: provisional.flagSvg }
+    : null;
+}
+
+// The knockout fixtures whose BOTH sides are already resolved (confirmed or provisional)
+// — the only ones the match predictor can forecast. Ties with an unresolved slot (a
+// best-third combo or a not-yet-played winner ref) are skipped.
+function buildPredictableFixtures(
+  teamMeta: Map<string, TeamMeta>,
+  groupPositions: Map<string, ProvisionalSlot>,
+): PredictableFixture[] {
+  const fixtures: PredictableFixture[] = [];
+  for (const match of KNOCKOUT_MATCHES) {
+    const home = resolveSlotTeam(match.slotA, match.teamA, teamMeta, groupPositions);
+    const away = resolveSlotTeam(match.slotB, match.teamB, teamMeta, groupPositions);
+    if (!home || !away) continue;
+    fixtures.push({
+      matchNumber: match.matchNumber,
+      stageLabel: STAGE_LABELS[match.stage],
+      kickoff: formatKickoff(match.dateUtc),
+      home,
+      away,
+    });
+  }
+  return fixtures.sort((a, b) => a.matchNumber - b.matchNumber);
 }
 
 // --- Sub-components ---
@@ -370,6 +417,10 @@ export function BracketView({ theme, matches, onSelectTeamLineup, onSelectMatch 
   const teamMeta = useMemo(() => buildTeamMetaMap(matches), [matches]);
   const groupPositions = useMemo(() => buildGroupPositionMap(matches), [matches]);
   const matchIdByNumber = useMemo(() => buildKnockoutMatchIdByNumber(matches), [matches]);
+  const predictableFixtures = useMemo(
+    () => buildPredictableFixtures(teamMeta, groupPositions),
+    [teamMeta, groupPositions],
+  );
 
   const matchesByStage = useMemo(() => {
     const grouped = new Map<Stage, KnockoutMatch[]>();
@@ -467,6 +518,8 @@ export function BracketView({ theme, matches, onSelectTeamLineup, onSelectMatch 
           ))}
         </div>
       </div>
+
+      <BracketPredictorPanel theme={theme} fixtures={predictableFixtures} />
     </div>
   );
 }

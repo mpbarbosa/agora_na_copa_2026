@@ -24,6 +24,7 @@ Each maps to one `NAV_ITEMS` entry in `src/navigation.ts` and is mounted by `src
 
 | Component | Purpose |
 |-----------|---------|
+| `BracketPredictorPanel.tsx` | "Palpite do confronto" panel at the bottom of `BracketView`: pick a knockout tie whose both sides are resolved (confirmed or provisional) and auto-forecast it via `/api/predict` — the same deterministic "palpite simulado" heuristic the Fan Zone uses. Fixtures are built by `buildPredictableFixtures()` in `BracketView` |
 | `PitchLineup.tsx` | Visual pitch with player `x`/`y` positions from `matches.json` |
 | `TeamPitchBoard.tsx` | Team-focused pitch board used by `TeamLineupView` |
 | `TeamLineupView.tsx` | Full team lineup panel (690 lines — standalone modal/panel) |
