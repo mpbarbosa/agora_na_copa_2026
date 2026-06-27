@@ -4,11 +4,19 @@
 # Usage:
 #   ./scripts/docker-test.sh              # build image + run all suites
 #   ./scripts/docker-test.sh --no-build   # skip build (reuse existing image)
+#
+# Env:
+#   E2E_WORKERS  Playwright worker cap for the e2e suite (default: 2). The
+#                Playwright default is ~half the host cores, which saturates this
+#                shared dev host and makes timing-sensitive specs flake. Capping
+#                it here (not in playwright.config.ts, which CI relies on) keeps
+#                local Docker runs stable. Raise it on an idle machine.
 set -euo pipefail
 
 IMAGE="agora-na-copa-tests"
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 BUILD=true
+E2E_WORKERS="${E2E_WORKERS:-2}"
 
 for arg in "$@"; do
   case "$arg" in
@@ -65,7 +73,7 @@ run_suite "Unit tests" \
 # matching the technique used in ci.yml (CJS node -e is independent of package
 # "type": "module").
 run_suite "End-to-end tests" \
-  'PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=$(node -e "const {chromium}=require(\"playwright-core\");process.stdout.write(chromium.executablePath())") npm run test:e2e'
+  'PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=$(node -e "const {chromium}=require(\"playwright-core\");process.stdout.write(chromium.executablePath())") npm run test:e2e -- --workers='"$E2E_WORKERS"
 
 # ── summary ───────────────────────────────────────────────────────────────────
 ELAPSED=$(( $(date +%s) - START ))
