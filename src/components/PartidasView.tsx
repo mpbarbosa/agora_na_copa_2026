@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import type { Match, MatchStatus, TeamRef } from "../types";
 import { buildGroupPositionMap } from "../standings";
 import type { QualificationStatus } from "../standings";
+import { resolveTeamDisplay as resolveKnockoutTeamDisplay } from "../utils/resolveTeamDisplay";
 import { FlagIcon } from "./FlagIcon";
 
 interface PartidasViewProps {
@@ -70,14 +71,6 @@ const STATUS_COPY: Record<
   },
 };
 
-const buildTeamRef = (team: Match["teamA"] | Match["teamB"]): TeamRef => ({
-  name: team.name,
-  code: team.code,
-  flagSvg: team.flagSvg,
-  primaryColor: team.primaryColor,
-  secondaryColor: team.secondaryColor,
-  group: team.group,
-});
 
 function matchPoints(scoreA: number, scoreB: number): { a: number; b: number } {
   if (scoreA > scoreB) return { a: 3, b: 0 };
@@ -222,25 +215,8 @@ export function PartidasView({ matches, theme, onSelectTeamLineup, onSelectMatch
   // ("BRASIL prov.") instead of raw labels. Combo/winner refs stay as labels.
   const groupPositionMap = useMemo(() => buildGroupPositionMap(matches), [matches]);
 
-  const resolveTeamDisplay = (match: Match, team: Match["teamA"]) => {
-    if (match.stageName !== "Group Stage") {
-      const slot = groupPositionMap.get(team.code);
-      if (slot) {
-        const t = slot.team;
-        const ref: TeamRef = {
-          name: t.name,
-          code: t.code,
-          flagSvg: t.flagSvg,
-          primaryColor: t.primaryColor,
-          secondaryColor: t.secondaryColor,
-          group: t.group,
-        };
-        return { name: t.name, code: t.code, flagSvg: t.flagSvg, ref, prov: slot.status };
-      }
-    }
-    const prov: QualificationStatus | null = null;
-    return { name: team.name, code: team.code, flagSvg: team.flagSvg, ref: buildTeamRef(team), prov };
-  };
+  const resolveTeamDisplay = (match: Match, team: Match["teamA"]) =>
+    resolveKnockoutTeamDisplay(match, team, groupPositionMap);
 
   const provBadge = (status: QualificationStatus | null) =>
     status === null ? null : status === "qualified" ? (
