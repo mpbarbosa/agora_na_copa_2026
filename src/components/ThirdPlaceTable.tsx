@@ -198,7 +198,7 @@ export function ThirdPlaceTable({ groups, theme, onSelectTeamLineup }: ThirdPlac
                           title="Classificação garantida ao mata-mata (100% nas simulações)"
                           aria-label="Classificação garantida"
                         >
-                          ✓ Classificado
+                          ✓
                         </span>
                       )}
                     </div>
