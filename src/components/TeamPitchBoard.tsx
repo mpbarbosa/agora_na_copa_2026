@@ -4,8 +4,7 @@ import {
   PlayerOverlayCard,
   PlayerPictureOverlay,
   PlayerPortrait,
-  buildTournamentStatCells,
-  getPlayerAge,
+  buildPlayerStatCells,
   formatBirthDate,
   renderSocialPlatformLabel,
 } from "./PlayerOverlayCard";
@@ -347,19 +346,13 @@ export const TeamPitchBoard: FC<TeamPitchBoardProps> = ({
           teamName={team.name}
           primaryColor={team.primaryColor}
           secondaryColor={team.secondaryColor}
-          stats={[
-            { label: "Camisa", value: featuredPlayer.number },
-            { label: "Posição", value: getPositionLabel(featuredPlayer.position) },
-            { label: "Seleção", value: team.name },
-            ...(featuredPlayer.dateOfBirth
-              ? [{ label: "Idade", value: getPlayerAge(featuredPlayer.dateOfBirth) }]
-              : []),
-            ...(featuredPlayer.height
-              ? [{ label: "Altura", value: `${featuredPlayer.height} cm` }]
-              : []),
-            ...buildTournamentStatCells(featuredPlayerStats, theme as "classic-light" | "stadium-dark"),
-          ]}
+          stats={buildPlayerStatCells(
+            featuredPlayer,
+            featuredPlayerStats,
+            theme as "classic-light" | "stadium-dark",
+          )}
           details={[
+            { label: "Posição", value: getPositionLabel(featuredPlayer.position) },
             ...(featuredPlayer.dateOfBirth
               ? [{ label: "Nascimento", value: formatBirthDate(featuredPlayer.dateOfBirth) }]
               : []),

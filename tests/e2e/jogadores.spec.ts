@@ -48,10 +48,12 @@ test.describe("Jogadores view — player overlay stats", () => {
     const overlay = page.locator("#jogadores-player-overlay");
     await expect(overlay).toBeVisible();
 
-    // Camisa and Posição always render — they come from the player object itself
+    // Camisa always renders as a stat tile; Posição is a categorical value, so it
+    // renders in the details rows (not the numeric tile grid). Both come from the
+    // player object itself, independent of the tournament-stats API.
     const stats = overlay.locator("#jogadores-player-overlay-stats");
     await expect(stats).toContainText("Camisa");
-    await expect(stats).toContainText("Posição");
+    await expect(overlay.locator("#jogadores-player-overlay-details")).toContainText("Posição");
 
     // Tournament stats must NOT appear when there are no goals or cards
     await expect(stats).not.toContainText("Gols");

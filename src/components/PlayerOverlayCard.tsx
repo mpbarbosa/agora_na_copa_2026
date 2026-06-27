@@ -57,6 +57,24 @@ export function buildTournamentStatCells(
   return cells;
 }
 
+// Numeric stat tiles for the "full" player card: shirt number, age, height, then
+// the tournament cells (goals/cards). All values are short numbers or "NNN cm",
+// so they share one uniform tile size. Categorical fields (Posição, Seleção) are
+// intentionally NOT tiles — long text breaks the grid's alignment, so callers put
+// Posição in the key/value details and Seleção lives in the header (teamName).
+export function buildPlayerStatCells(
+  player: { number?: number; dateOfBirth?: string; height?: number },
+  tournamentStats: TournamentStats | null | undefined,
+  theme: "classic-light" | "stadium-dark",
+) {
+  return [
+    ...(player.number != null ? [{ label: "Camisa", value: player.number }] : []),
+    ...(player.dateOfBirth ? [{ label: "Idade", value: getPlayerAge(player.dateOfBirth) }] : []),
+    ...(player.height ? [{ label: "Altura", value: `${player.height} cm` }] : []),
+    ...buildTournamentStatCells(tournamentStats, theme),
+  ];
+}
+
 const SOCIAL_PLATFORM_LABELS: Record<keyof PlayerSocials, string> = {
   instagram: "Instagram",
   x: "X",
@@ -427,29 +445,26 @@ export function PlayerOverlayCard({
               className="grid grid-cols-3 gap-2"
               id={id ? `${id}-stats` : undefined}
             >
-              {stats.map((stat) => {
-                // Long text values (e.g. "Meio-Campista") shrink so they fit a
-                // 1/3-width tile; min-w-0 + break-words keep any value from
-                // overflowing into the neighbouring tile's accent border.
-                const isLongTextValue = typeof stat.value === "string" && stat.value.length > 8;
-                return (
-                  <div
-                    key={stat.label}
-                    className="min-w-0 border-l-[3px] pl-3 py-1.5"
-                    style={{ borderLeftColor: accent }}
+              {/* All tile values are short numbers or "NNN cm" (categorical text
+                  lives in details/header), so they share one uniform size; min-w-0
+                  + break-words guard against any value touching the next tile. */}
+              {stats.map((stat) => (
+                <div
+                  key={stat.label}
+                  className="min-w-0 border-l-[3px] pl-3 py-1.5"
+                  style={{ borderLeftColor: accent }}
+                >
+                  <p
+                    className={`font-anton text-2xl uppercase leading-none break-words ${stat.accent ?? ""}`}
+                    style={!stat.accent ? { color: accent } : {}}
                   >
-                    <p
-                      className={`font-anton ${isLongTextValue ? "text-base" : "text-2xl"} uppercase leading-none break-words ${stat.accent ?? ""}`}
-                      style={!stat.accent ? { color: accent } : {}}
-                    >
-                      {stat.value}
-                    </p>
-                    <p className={`mt-1 font-mono text-[9px] uppercase tracking-wider ${mutedClasses}`}>
-                      {stat.label}
-                    </p>
-                  </div>
-                );
-              })}
+                    {stat.value}
+                  </p>
+                  <p className={`mt-1 font-mono text-[9px] uppercase tracking-wider ${mutedClasses}`}>
+                    {stat.label}
+                  </p>
+                </div>
+              ))}
             </div>
 
             {/* Detail rows — clean key/value with hairline dividers */}
