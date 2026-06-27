@@ -6,7 +6,7 @@
 #   ./scripts/docker-test.sh --no-build   # skip build (reuse existing image)
 #
 # Env:
-#   E2E_WORKERS  Playwright worker cap for the e2e suite (default: 2). The
+#   E2E_WORKERS  Playwright worker cap for the e2e suite (default: 3). The
 #                Playwright default is ~half the host cores, which saturates this
 #                shared dev host and makes timing-sensitive specs flake. Capping
 #                it here (not in playwright.config.ts, which CI relies on) keeps
@@ -16,7 +16,7 @@ set -euo pipefail
 IMAGE="agora-na-copa-tests"
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 BUILD=true
-E2E_WORKERS="${E2E_WORKERS:-2}"
+E2E_WORKERS="${E2E_WORKERS:-3}"
 
 for arg in "$@"; do
   case "$arg" in
