@@ -329,6 +329,7 @@ interface PlayerLeaderMetadata {
   socials?: PlayerSocials;
   pictureUrl?: string;
   instagramPostUrl?: string;
+  instagramPostUrls?: string[];
 }
 
 const buildPlayerLeaderKey = (teamCode: string, playerName: string) =>
@@ -364,6 +365,7 @@ const upsertPlayerLeaderMetadata = (
     socials?: PlayerSocials;
     pictureUrl?: string;
     instagramPostUrl?: string;
+    instagramPostUrls?: string[];
   },
 ) => {
   const playerKey = buildPlayerLeaderKey(teamCode, player.name);
@@ -378,6 +380,7 @@ const upsertPlayerLeaderMetadata = (
       socials: player.socials,
       pictureUrl: player.pictureUrl,
       instagramPostUrl: player.instagramPostUrl,
+      instagramPostUrls: player.instagramPostUrls,
     });
     return;
   }
@@ -390,6 +393,7 @@ const upsertPlayerLeaderMetadata = (
     socials: current.socials ?? player.socials,
     pictureUrl: current.pictureUrl ?? player.pictureUrl,
     instagramPostUrl: current.instagramPostUrl ?? player.instagramPostUrl,
+    instagramPostUrls: current.instagramPostUrls ?? player.instagramPostUrls,
   });
 };
 
@@ -410,6 +414,7 @@ const buildPlayerLeaderMetadataMap = (lineupsPayload: TeamLineupsResponse) => {
         socials: player.socials ?? entry?.socials,
         pictureUrl: player.pictureUrl ?? entry?.pictureUrl,
         instagramPostUrl: player.instagramPostUrl ?? entry?.instagramPostUrl,
+        instagramPostUrls: player.instagramPostUrls ?? entry?.instagramPostUrls,
       });
       const fifaId = player.fifaId ?? (isNumericFifaId(player.id) ? player.id : undefined);
       if (fifaId) {
@@ -590,6 +595,7 @@ const aggregateTournamentLeaders = async (
         socials: metadata?.socials,
         pictureUrl: metadata?.pictureUrl,
         instagramPostUrl: metadata?.instagramPostUrl,
+        instagramPostUrls: metadata?.instagramPostUrls,
         goals: 0,
         yellowCards: 0,
         redCards: 0,
@@ -1341,6 +1347,7 @@ const buildFallbackLineupEntry = (
       pictureUrl: player.pictureUrl ?? entry.pictureUrl,
       socials: player.socials ?? entry.socials,
       instagramPostUrl: player.instagramPostUrl ?? entry.instagramPostUrl,
+      instagramPostUrls: player.instagramPostUrls ?? entry.instagramPostUrls,
       worldCupNote: player.worldCupNote ?? entry.worldCupNote,
       fullName: player.fullName ?? entry.fullName,
       dateOfBirth: player.dateOfBirth ?? entry.dateOfBirth,

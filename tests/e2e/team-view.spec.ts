@@ -825,7 +825,7 @@ test.describe("Team view", () => {
       "data-instgrm-permalink",
       instagramPostUrl,
     );
-    await expect(page.locator("#player-feature-overlay-ig-open")).toHaveAttribute(
+    await expect(page.locator("#player-feature-overlay-ig-open-0")).toHaveAttribute(
       "href",
       instagramPostUrl,
     );

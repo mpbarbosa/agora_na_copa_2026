@@ -366,9 +366,83 @@ test.describe("Leaders view (Líderes)", () => {
       "data-instgrm-permalink",
       instagramPostUrl,
     );
-    await expect(page.locator("#leaders-player-overlay-ig-open")).toHaveAttribute(
+    await expect(page.locator("#leaders-player-overlay-ig-open-0")).toHaveAttribute(
       "href",
       instagramPostUrl,
+    );
+  });
+
+  test("renders multiple highlights and pluralizes the label when instagramPostUrls has several entries", async ({
+    page,
+  }) => {
+    const instagramPostUrls = [
+      "https://www.instagram.com/p/DZ3B-0cj0TN/",
+      "https://www.instagram.com/reel/DZzshFaxghJ/",
+    ];
+    // A singular field that must be ignored once the array is present (array wins).
+    const instagramPostUrl = "https://www.instagram.com/reel/should-not-render/";
+
+    await page.route("**/api/tournament-leaders", async (route) => {
+      await route.fulfill({
+        contentType: "application/json",
+        body: JSON.stringify({
+          updatedAt: "2026-06-15T18:00:00.000Z",
+          source: "fifa",
+          note: "Teste dos Destaques no Instagram.",
+          playerLeaders: {
+            topScorers: [
+              {
+                id: "cpv-vozinha",
+                name: "VOZINHA",
+                teamCode: "CPV",
+                teamName: "CABO VERDE",
+                teamFlagSvg: "cape-verde",
+                shirtNumber: 1,
+                goals: 1,
+                yellowCards: 0,
+                redCards: 0,
+                instagramPostUrl,
+                instagramPostUrls,
+              },
+            ],
+            yellowCards: [],
+            redCards: [],
+          },
+          teamLeaders: {
+            bestAttack: [],
+            bestDefense: [],
+            cleanSheets: [],
+          },
+        }),
+      });
+    });
+
+    await page.goto("/");
+    await page.click("#btn-nav-lideres");
+    await expect(page.locator("#tournament-leaders-view")).toBeVisible();
+
+    await page.click("#btn-leader-player-cpv-vozinha");
+    await expect(page.locator("#leaders-player-overlay")).toBeVisible();
+
+    // Several entries → the label is pluralized.
+    const toggle = page.locator("#leaders-player-overlay-ig-toggle");
+    await expect(toggle).toBeVisible();
+    await expect(toggle).toContainText("Destaques no Instagram");
+
+    await toggle.click();
+    await expect(toggle).toHaveAttribute("aria-expanded", "true");
+
+    // One embed + one open link per entry, in order; the singular field is ignored.
+    const panel = page.locator("#leaders-player-overlay-ig-panel");
+    await expect(panel).toBeVisible();
+    await expect(panel.locator("blockquote.instagram-media")).toHaveCount(instagramPostUrls.length);
+    await expect(page.locator("#leaders-player-overlay-ig-open-0")).toHaveAttribute(
+      "href",
+      instagramPostUrls[0],
+    );
+    await expect(page.locator("#leaders-player-overlay-ig-open-1")).toHaveAttribute(
+      "href",
+      instagramPostUrls[1],
     );
   });
 });

@@ -1,6 +1,6 @@
 import { getAllSquadPlayers } from "./playerRegistry";
 import { standings } from "./tournament";
-import { isSafeInstagramUrl } from "../utils/instagram";
+import { resolveInstagramPostUrls } from "../utils/instagram";
 import type { Position } from "../types";
 
 /** A squad player's Instagram highlight, enriched for the Redes Sociais feed. */
@@ -30,8 +30,10 @@ const teamMetaByCode = new Map(
 export const getInstagramHighlights = (): InstagramHighlight[] => {
   const highlights: InstagramHighlight[] = [];
   for (const player of getAllSquadPlayers()) {
-    const url = player.instagramPostUrl;
-    if (!url || !isSafeInstagramUrl(url)) continue;
+    // One representative highlight per player keeps the feed to a single card per
+    // fifaId; a player's full set of highlights is shown in their overlay card.
+    const [url] = resolveInstagramPostUrls(player.instagramPostUrls, player.instagramPostUrl);
+    if (!url) continue;
     const meta = teamMetaByCode.get(player.teamCode);
     highlights.push({
       fifaId: player.fifaId,

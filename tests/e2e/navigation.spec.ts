@@ -669,7 +669,7 @@ test.describe("Navigation shell", () => {
       "data-instgrm-permalink",
       instagramPostUrl,
     );
-    await expect(page.locator("#match-incident-player-overlay-ig-open")).toHaveAttribute(
+    await expect(page.locator("#match-incident-player-overlay-ig-open-0")).toHaveAttribute(
       "href",
       instagramPostUrl,
     );

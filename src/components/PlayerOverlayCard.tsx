@@ -8,7 +8,7 @@ import { WorldCupNoteCarousel } from "./WorldCupNoteCarousel";
 import { PlayerVideoRail } from "./PlayerVideoRail";
 import { PlayerNoteFreshness } from "./PlayerNoteFreshness";
 import { InstagramEmbed } from "./InstagramEmbed";
-import { isSafeInstagramUrl } from "../utils/instagram";
+import { resolveInstagramPostUrls } from "../utils/instagram";
 
 export const getPlayerAge = (dateOfBirth: string): number =>
   Math.floor((Date.now() - new Date(dateOfBirth).getTime()) / (365.25 * 24 * 3600 * 1000));
@@ -236,6 +236,7 @@ interface PlayerOverlayCardProps {
     pictureUrl?: string;
     socials?: PlayerSocials;
     instagramPostUrl?: string;
+    instagramPostUrls?: string[];
     worldCupNote?: string;
     captain?: boolean;
     dateOfBirth?: string;
@@ -284,10 +285,11 @@ export function PlayerOverlayCard({
   const photoBg = isLight ? `${accent}12` : "#111314";
 
   const socials = getPlayerSocialEntries(player.socials);
-  const safeInstagramPostUrl =
-    player.instagramPostUrl && isSafeInstagramUrl(player.instagramPostUrl)
-      ? player.instagramPostUrl
-      : null;
+  const instagramPostUrls = resolveInstagramPostUrls(
+    player.instagramPostUrls,
+    player.instagramPostUrl,
+  );
+  const hasInstagramHighlights = instagramPostUrls.length > 0;
 
   const handleToggleIg = () => setIgExpanded((prev) => !prev);
 
@@ -522,8 +524,8 @@ export function PlayerOverlayCard({
               </>
             )}
 
-            {/* Destaque no Instagram */}
-            {safeInstagramPostUrl && (
+            {/* Destaque(s) no Instagram */}
+            {hasInstagramHighlights && (
               <div className="mt-5" id={id ? `${id}-ig-highlight` : undefined}>
                 <button
                   type="button"
@@ -539,7 +541,9 @@ export function PlayerOverlayCard({
                   <span className="flex items-center gap-2">
                     <InstagramBrandIcon size={16} />
                     <span className="font-mono text-[10px] font-bold uppercase tracking-wider">
-                      Destaque no Instagram
+                      {instagramPostUrls.length > 1
+                        ? "Destaques no Instagram"
+                        : "Destaque no Instagram"}
                     </span>
                   </span>
                   <span
@@ -550,19 +554,23 @@ export function PlayerOverlayCard({
                 </button>
 
                 {igExpanded && (
-                  <div className="mt-3 space-y-3" id={id ? `${id}-ig-panel` : undefined}>
-                    <InstagramEmbed permalink={safeInstagramPostUrl} />
-                    <a
-                      href={safeInstagramPostUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      id={id ? `${id}-ig-open` : undefined}
-                      className={`inline-flex w-full items-center justify-center gap-2 rounded-xl border py-2.5 font-mono text-[10px] font-bold uppercase tracking-wider transition ${closeClasses}`}
-                      style={{ borderColor: `${accent}40` }}
-                    >
-                      <InstagramBrandIcon size={14} />
-                      Abrir no Instagram
-                    </a>
+                  <div className="mt-3 space-y-5" id={id ? `${id}-ig-panel` : undefined}>
+                    {instagramPostUrls.map((postUrl, index) => (
+                      <div key={postUrl} className="space-y-3">
+                        <InstagramEmbed permalink={postUrl} />
+                        <a
+                          href={postUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          id={id ? `${id}-ig-open-${index}` : undefined}
+                          className={`inline-flex w-full items-center justify-center gap-2 rounded-xl border py-2.5 font-mono text-[10px] font-bold uppercase tracking-wider transition ${closeClasses}`}
+                          style={{ borderColor: `${accent}40` }}
+                        >
+                          <InstagramBrandIcon size={14} />
+                          Abrir no Instagram
+                        </a>
+                      </div>
+                    ))}
                   </div>
                 )}
               </div>

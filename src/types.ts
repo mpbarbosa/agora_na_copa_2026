@@ -40,7 +40,10 @@ export interface Player {
   club?: string;
   pictureUrl?: string;
   socials?: PlayerSocials;
+  /** Single Instagram highlight permalink. Fallback when instagramPostUrls is absent/empty. */
   instagramPostUrl?: string;
+  /** Multiple Instagram highlight permalinks. Takes precedence over instagramPostUrl. */
+  instagramPostUrls?: string[];
   /** Editorial World Cup performance note ("Leitura") shown on the player card. */
   worldCupNote?: string;
   fifaId?: string;
@@ -60,7 +63,10 @@ export interface SquadPlayer {
   club?: string;
   pictureUrl?: string;
   socials?: PlayerSocials;
+  /** Single Instagram highlight permalink. Fallback when instagramPostUrls is absent/empty. */
   instagramPostUrl?: string;
+  /** Multiple Instagram highlight permalinks. Takes precedence over instagramPostUrl. */
+  instagramPostUrls?: string[];
   /** Editorial World Cup performance note ("Leitura") shown on the player card. */
   worldCupNote?: string;
   /** ISO-8601 timestamp the worldCupNote was last authored/refreshed (the match it covers). Null/absent when none. */
@@ -355,6 +361,7 @@ export interface TournamentPlayerLeader {
   socials?: PlayerSocials;
   pictureUrl?: string;
   instagramPostUrl?: string;
+  instagramPostUrls?: string[];
   goals: number;
   yellowCards: number;
   redCards: number;

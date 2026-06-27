@@ -152,7 +152,7 @@ test.describe("Jogadores view — player overlay stats", () => {
       "data-instgrm-permalink",
       instagramPostUrl,
     );
-    await expect(page.locator("#jogadores-player-overlay-ig-open")).toHaveAttribute(
+    await expect(page.locator("#jogadores-player-overlay-ig-open-0")).toHaveAttribute(
       "href",
       instagramPostUrl,
     );
