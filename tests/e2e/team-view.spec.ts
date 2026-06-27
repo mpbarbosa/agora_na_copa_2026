@@ -725,7 +725,7 @@ test.describe("Team view", () => {
     await page.click("#btn-open-player-overlay-card");
     await expect(page.locator("#player-feature-overlay")).toBeVisible();
     await expect(page.locator("#player-feature-overlay")).toContainText("Atacante Teste");
-    await expect(page.locator("#player-feature-overlay")).toContainText("MARROCOS");
+    await expect(page.locator("#player-feature-overlay")).toContainText("Marrocos");
     await expect(page.locator("#player-feature-overlay-social-link-instagram")).toHaveAttribute(
       "href",
       "https://instagram.com/atacanteteste",
