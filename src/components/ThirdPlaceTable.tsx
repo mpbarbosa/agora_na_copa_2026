@@ -16,6 +16,12 @@ function formatChance(advance: number | undefined): string {
   return typeof advance === "number" ? `${Math.round(advance * 100)}%` : "—";
 }
 
+// A team is treated as a lock for the Round of 32 once its simulated odds round
+// to 100% — every sampled scenario keeps it among the eight best thirds.
+function isGuaranteed(advance: number | undefined): boolean {
+  return typeof advance === "number" && Math.round(advance * 100) >= 100;
+}
+
 // Cross-group ranking of the 12 third-placed teams. The best 8 provisionally
 // advance to the Round of 32 (FIFA WC 2026 Art. 12.5); ranking criteria are
 // points → goal difference → goals for → fair play (Art. 13), shared with the
@@ -130,11 +136,14 @@ export function ThirdPlaceTable({ groups, theme, onSelectTeamLineup }: ThirdPlac
           <tbody>
             {ranked.map(({ row, groupLetter, qualifies }, index) => {
               const isCutLine = index === QUALIFYING_SLOTS;
+              const advance = chanceByCode.get(row.code);
+              const guaranteed = isGuaranteed(advance);
               return (
                 <tr
                   key={row.id}
                   id={`third-place-row-${row.code.toLowerCase()}`}
                   data-qualifies={qualifies ? "true" : "false"}
+                  data-guaranteed={guaranteed ? "true" : "false"}
                   className={`border-b last:border-b-0 ${rowBorderClasses} ${
                     isCutLine ? `border-t-2 ${cutLineClasses}` : ""
                   } ${
@@ -157,6 +166,17 @@ export function ThirdPlaceTable({ groups, theme, onSelectTeamLineup }: ThirdPlac
                         onClick={() => onSelectTeamLineup(row)}
                       />
                       <span title={row.name}>{row.code}</span>
+                      {guaranteed && (
+                        <span
+                          className={`rounded px-1 text-[9px] font-bold uppercase tracking-wider ${
+                            isLight ? "bg-[#009c3b] text-white" : "bg-[#00e476] text-black"
+                          }`}
+                          title="Classificação garantida ao mata-mata (100% nas simulações)"
+                          aria-label="Classificação garantida"
+                        >
+                          ✓ Classificado
+                        </span>
+                      )}
                     </div>
                   </td>
                   <td
@@ -165,7 +185,7 @@ export function ThirdPlaceTable({ groups, theme, onSelectTeamLineup }: ThirdPlac
                     }`}
                     title="Probabilidade simulada de avançar ao mata-mata"
                   >
-                    {formatChance(chanceByCode.get(row.code))}
+                    {formatChance(advance)}
                   </td>
                   <td className={`whitespace-nowrap px-1 py-1.5 text-right ${mutedClasses}`}>
                     {row.played}

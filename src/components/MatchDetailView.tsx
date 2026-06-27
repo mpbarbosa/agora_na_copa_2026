@@ -17,6 +17,8 @@ import {
   type Player,
 } from "../types";
 import { APP_MATCHES } from "../appMatches";
+import { buildGroupPositionMap } from "../standings";
+import { resolveTeamDisplay } from "../utils/resolveTeamDisplay";
 import MATCH_VIDEOS from "../data/matchVideos.json";
 import MATCH_ANALYSIS from "../data/matchAnalysis.json";
 import { parseNoteSections } from "../utils/noteSections";
@@ -25,7 +27,7 @@ import type { TeamLineupsMap } from "../utils/teamLineup";
 import { FlagIcon } from "./FlagIcon";
 import { PlayerOverlayCard, PlayerPictureOverlay, buildTournamentStatCells, getPlayerAge, formatBirthDate } from "./PlayerOverlayCard";
 import { usePlayerStats } from "../hooks/usePlayerStats";
-import { getPositionLabel } from "../utils/playerDisplay";
+import { getPositionLabel, toTitleCasePtBr } from "../utils/playerDisplay";
 import { PitchLineup } from "./PitchLineup";
 import { MatchChatPanel } from "./MatchChatPanel";
 import { AffiliateProducts } from "./AffiliateProducts";
@@ -641,6 +643,13 @@ export function MatchDetailView({
   }, [initialMatchId]);
   const currentMatch =
     matches.find((m) => m.id === selectedMatchId) || matches[0];
+  // Knockout fixtures carry placeholder slots ("2º A"). Project the team that
+  // currently holds each group-position slot from live standings — exactly like
+  // the Chaveamento bracket and Partidas — so the scoreboard and the match
+  // selector show the provisional team instead of the raw label/empty flag.
+  const groupPositionMap = useMemo(() => buildGroupPositionMap(matches), [matches]);
+  const currentTeamA = resolveTeamDisplay(currentMatch, currentMatch.teamA, groupPositionMap);
+  const currentTeamB = resolveTeamDisplay(currentMatch, currentMatch.teamB, groupPositionMap);
   const currentSimulatedState = simulatedMatchStates[currentMatch.id];
   const currentOverlay = matchOverlays[currentMatch.id];
   const currentLineupEntry = teamLineups[currentMatch.id];
@@ -1346,13 +1355,16 @@ export function MatchDetailView({
                       }`}
                       id={`match-selector-chips-${status}`}
                     >
-                      {group.map((m) => (
+                      {group.map((m) => {
+                        const a = resolveTeamDisplay(m, m.teamA, groupPositionMap);
+                        const b = resolveTeamDisplay(m, m.teamB, groupPositionMap);
+                        return (
                         <button
                           key={m.id}
                           id={`btn-match-${m.id}`}
                           onClick={() => handleSelectMatch(m.id)}
-                          title={`${formatCountryNameForTooltip(m.teamA.name)} x ${formatCountryNameForTooltip(m.teamB.name)}`}
-                          aria-label={`${formatCountryNameForTooltip(m.teamA.name)} x ${formatCountryNameForTooltip(m.teamB.name)}`}
+                          title={`${formatCountryNameForTooltip(a.name)} x ${formatCountryNameForTooltip(b.name)}`}
+                          aria-label={`${formatCountryNameForTooltip(a.name)} x ${formatCountryNameForTooltip(b.name)}`}
                           className={`shrink-0 px-3.5 py-2 rounded-md text-[13px] md:text-sm leading-none font-anton transition-all uppercase tracking-wide ${
                             selectedMatchId === m.id
                               ? theme === "classic-light"
@@ -1364,12 +1376,13 @@ export function MatchDetailView({
                           }`}
                         >
                           <span className="inline-flex items-center gap-1.5">
-                            <span>{m.teamA.code}</span>
+                            <span>{a.code}</span>
                             <span>x</span>
-                            <span>{m.teamB.code}</span>
+                            <span>{b.code}</span>
                           </span>
                         </button>
-                      ))}
+                        );
+                      })}
                     </div>
                   ) : (
                     <div className="flex min-w-0 items-center gap-2">
@@ -1395,13 +1408,16 @@ export function MatchDetailView({
                           }`}
                           id={`match-selector-chips-${status}`}
                         >
-                          {group.map((m) => (
+                          {group.map((m) => {
+                            const a = resolveTeamDisplay(m, m.teamA, groupPositionMap);
+                            const b = resolveTeamDisplay(m, m.teamB, groupPositionMap);
+                            return (
                             <button
                               key={m.id}
                               id={`btn-match-${m.id}`}
                               onClick={() => handleSelectMatch(m.id)}
-                              title={`${formatCountryNameForTooltip(m.teamA.name)} x ${formatCountryNameForTooltip(m.teamB.name)}`}
-                              aria-label={`${formatCountryNameForTooltip(m.teamA.name)} x ${formatCountryNameForTooltip(m.teamB.name)}`}
+                              title={`${formatCountryNameForTooltip(a.name)} x ${formatCountryNameForTooltip(b.name)}`}
+                              aria-label={`${formatCountryNameForTooltip(a.name)} x ${formatCountryNameForTooltip(b.name)}`}
                               className={`shrink-0 snap-center px-3.5 py-2 rounded-md text-[13px] md:text-sm leading-none font-anton transition-all uppercase tracking-wide ${
                                 selectedMatchId === m.id
                                   ? theme === "classic-light"
@@ -1413,12 +1429,13 @@ export function MatchDetailView({
                               }`}
                             >
                               <span className="inline-flex items-center gap-1.5">
-                                <span>{m.teamA.code}</span>
+                                <span>{a.code}</span>
                                 <span>x</span>
-                                <span>{m.teamB.code}</span>
+                                <span>{b.code}</span>
                               </span>
                             </button>
-                          ))}
+                            );
+                          })}
                         </div>
                       </div>
                       <button
@@ -1625,7 +1642,7 @@ export function MatchDetailView({
                 className="flex min-h-11 items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 font-anton text-xs uppercase tracking-wider text-slate-800 hover:bg-slate-50 dark:border-white/10 dark:bg-[#161919] dark:text-white dark:hover:bg-white/10"
               >
                 <Goal size={14} />
-                Gol {currentMatch.teamA.code}
+                Gol {currentTeamA.code}
               </button>
               <button
                 id="btn-sim-goal-b"
@@ -1634,7 +1651,7 @@ export function MatchDetailView({
                 className="flex min-h-11 items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 font-anton text-xs uppercase tracking-wider text-slate-800 hover:bg-slate-50 dark:border-white/10 dark:bg-[#161919] dark:text-white dark:hover:bg-white/10"
               >
                 <Goal size={14} />
-                Gol {currentMatch.teamB.code}
+                Gol {currentTeamB.code}
               </button>
               <button
                 id="btn-sim-yellow-a"
@@ -1643,7 +1660,7 @@ export function MatchDetailView({
                 className="flex min-h-11 items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 font-anton text-xs uppercase tracking-wider text-slate-800 hover:bg-slate-50 dark:border-white/10 dark:bg-[#161919] dark:text-white dark:hover:bg-white/10"
               >
                 <ShieldAlert size={14} />
-                Amarelo {currentMatch.teamA.code}
+                Amarelo {currentTeamA.code}
               </button>
               <button
                 id="btn-sim-red-b"
@@ -1652,7 +1669,7 @@ export function MatchDetailView({
                 className="flex min-h-11 items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 font-anton text-xs uppercase tracking-wider text-slate-800 hover:bg-slate-50 dark:border-white/10 dark:bg-[#161919] dark:text-white dark:hover:bg-white/10"
               >
                 <ShieldAlert size={14} />
-                Vermelho {currentMatch.teamB.code}
+                Vermelho {currentTeamB.code}
               </button>
               <button
                 id="btn-sim-finish-match"
@@ -1744,14 +1761,17 @@ export function MatchDetailView({
                   : "Atenção: outros jogos no mesmo horário"}
               </span>
               <div className="flex flex-wrap items-center justify-center gap-2">
-                {simultaneousUpcomingMatches.map((m) => (
+                {simultaneousUpcomingMatches.map((m) => {
+                  const a = resolveTeamDisplay(m, m.teamA, groupPositionMap);
+                  const b = resolveTeamDisplay(m, m.teamB, groupPositionMap);
+                  return (
                   <button
                     key={m.id}
                     type="button"
                     id={`btn-simultaneous-${m.id}`}
                     onClick={() => handleSelectMatch(m.id)}
-                    title={`${formatCountryNameForTooltip(m.teamA.name)} x ${formatCountryNameForTooltip(m.teamB.name)} — começa no mesmo horário`}
-                    aria-label={`Ver ${formatCountryNameForTooltip(m.teamA.name)} contra ${formatCountryNameForTooltip(m.teamB.name)}, que começa no mesmo horário`}
+                    title={`${formatCountryNameForTooltip(a.name)} x ${formatCountryNameForTooltip(b.name)} — começa no mesmo horário`}
+                    aria-label={`Ver ${formatCountryNameForTooltip(a.name)} contra ${formatCountryNameForTooltip(b.name)}, que começa no mesmo horário`}
                     className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 font-anton text-sm uppercase tracking-wide transition ${
                       theme === "classic-light"
                         ? "border-amber-300 bg-white text-slate-800 hover:border-amber-400 hover:bg-amber-100"
@@ -1759,16 +1779,17 @@ export function MatchDetailView({
                     }`}
                   >
                     <FlagIcon
-                      flag={m.teamA.flagSvg}
+                      flag={a.flagSvg}
                       className="h-4 w-6 shrink-0 rounded-[2px] object-cover"
                     />
-                    <span>{m.teamA.code} x {m.teamB.code}</span>
+                    <span>{a.code} x {b.code}</span>
                     <FlagIcon
-                      flag={m.teamB.flagSvg}
+                      flag={b.flagSvg}
                       className="h-4 w-6 shrink-0 rounded-[2px] object-cover"
                     />
                   </button>
-                ))}
+                  );
+                })}
               </div>
             </div>
           )}
@@ -1790,9 +1811,9 @@ export function MatchDetailView({
             >
               <div className="w-32 h-24 bg-white dark:bg-slate-900 rounded-2xl flex items-center justify-center border border-white/80 dark:border-white/10 shadow-lg overflow-hidden transition hover:scale-105 p-3">
                 <FlagIcon
-                  flag={currentMatch.teamA.flagSvg}
+                  flag={currentTeamA.flagSvg}
                   className="w-full h-full object-contain"
-                  onClick={() => onSelectTeamLineup(currentMatch.teamA)}
+                  onClick={() => onSelectTeamLineup(currentTeamA.ref)}
                 />
               </div>
               <h2
@@ -1800,7 +1821,7 @@ export function MatchDetailView({
                   theme === "classic-light" ? "text-slate-800" : "text-white"
                 }`}
               >
-                {currentMatch.teamA.name}
+                {currentTeamA.name}
               </h2>
             </div>
 
@@ -1868,9 +1889,9 @@ export function MatchDetailView({
             >
               <div className="w-32 h-24 bg-white dark:bg-slate-900 rounded-2xl flex items-center justify-center border border-white/80 dark:border-white/10 shadow-lg overflow-hidden transition hover:scale-105 p-3">
                 <FlagIcon
-                  flag={currentMatch.teamB.flagSvg}
+                  flag={currentTeamB.flagSvg}
                   className="w-full h-full object-contain"
-                  onClick={() => onSelectTeamLineup(currentMatch.teamB)}
+                  onClick={() => onSelectTeamLineup(currentTeamB.ref)}
                 />
               </div>
 
@@ -1879,7 +1900,7 @@ export function MatchDetailView({
                   theme === "classic-light" ? "text-slate-800" : "text-white"
                 }`}
               >
-                {currentMatch.teamB.name}
+                {currentTeamB.name}
               </h2>
             </div>
           </div>
@@ -2322,8 +2343,8 @@ export function MatchDetailView({
                                 }`}
                               >
                                 {incident.team === "A"
-                                  ? currentMatch.teamA.code
-                                  : currentMatch.teamB.code}
+                                  ? currentTeamA.code
+                                  : currentTeamB.code}
                               </span>
                             )}
                           </div>
@@ -2613,13 +2634,12 @@ export function MatchDetailView({
             ...(selectedIncidentPlayer.player.dateOfBirth
               ? [{ label: "Nascimento", value: formatBirthDate(selectedIncidentPlayer.player.dateOfBirth) }]
               : []),
-            {
-              label: "Clube atual",
-              value: selectedIncidentPlayer.player.club || "Seleção Nacional",
-            },
+            ...(selectedIncidentPlayer.player.club
+              ? [{ label: "Clube atual", value: selectedIncidentPlayer.player.club }]
+              : []),
             {
               label: "Contexto da partida",
-              value: `Contra ${selectedIncidentPlayer.opponentName}, ${selectedIncidentPlayer.player.name} aparece no radar dos lances da partida.`,
+              value: `${toTitleCasePtBr(selectedIncidentPlayer.team.name)} x ${toTitleCasePtBr(selectedIncidentPlayer.opponentName)}: ${toTitleCasePtBr(selectedIncidentPlayer.player.name)} aparece no radar dos lances da partida.`,
               fullWidth: true,
             },
           ]}

@@ -9,7 +9,7 @@ import {
   formatBirthDate,
   renderSocialPlatformLabel,
 } from "./PlayerOverlayCard";
-import { getPlayerSocialEntries, getPositionLabel } from "../utils/playerDisplay";
+import { getPlayerSocialEntries, getPositionLabel, toTitleCasePtBr } from "../utils/playerDisplay";
 import { usePlayerStats } from "../hooks/usePlayerStats";
 
 interface TeamPitchBoardProps {
@@ -195,7 +195,9 @@ export const TeamPitchBoard: FC<TeamPitchBoardProps> = ({
                   )}
                   <div>
                     <h4 className="font-anton text-lg tracking-wider text-white uppercase">{selectedPlayer.name}</h4>
-                    <p className="text-white/75 text-sm font-archivo">{selectedPlayer.club || "Seleção Nacional"}</p>
+                    {selectedPlayer.club && (
+                      <p className="text-white/75 text-sm font-archivo">{selectedPlayer.club}</p>
+                    )}
                   </div>
                 </div>
 
@@ -361,12 +363,14 @@ export const TeamPitchBoard: FC<TeamPitchBoardProps> = ({
             ...(featuredPlayer.dateOfBirth
               ? [{ label: "Nascimento", value: formatBirthDate(featuredPlayer.dateOfBirth) }]
               : []),
-            { label: "Clube atual", value: featuredPlayer.club || "Seleção Nacional" },
+            ...(featuredPlayer.club
+              ? [{ label: "Clube atual", value: featuredPlayer.club }]
+              : []),
             ...(opponentName
               ? [
                   {
                     label: "Contexto da partida",
-                    value: `Contra a ${opponentName}, ${featuredPlayer.name} aparece como peça-chave para o plano de jogo da ${team.name}.`,
+                    value: `${toTitleCasePtBr(team.name)} x ${toTitleCasePtBr(opponentName)}: ${toTitleCasePtBr(featuredPlayer.name)} aparece como peça-chave para o plano de jogo.`,
                     fullWidth: true as const,
                   },
                 ]
