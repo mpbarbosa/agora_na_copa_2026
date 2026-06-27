@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Tv, Volume2, Shirt, Popcorn, Snowflake, type LucideIcon } from "lucide-react";
 import { AFFILIATE_PRODUCTS, withAffiliateTag } from "../config";
 import type { AffiliateProduct } from "../types";
@@ -15,6 +16,33 @@ const ICONS: Record<string, LucideIcon> = {
   popcorn: Popcorn,
   snowflake: Snowflake,
 };
+
+/**
+ * Renders a product's licensed generic photo (`imageUrl`) when present, falling
+ * back to its lucide icon when no image is configured OR the image fails to load
+ * (so a missing/expired asset degrades to the icon rather than a broken image).
+ * Note: imageUrl must be a self-hosted, licensed GENERIC category photo — never
+ * an Amazon product image (see AffiliateProduct.imageUrl).
+ */
+function ProductMedia({ product, accentClass }: { product: AffiliateProduct; accentClass: string }) {
+  const [imageFailed, setImageFailed] = useState(false);
+  const Icon = ICONS[product.icon] ?? Tv;
+
+  if (product.imageUrl && !imageFailed) {
+    return (
+      <img
+        src={product.imageUrl}
+        alt={product.imageAlt ?? product.title}
+        loading="lazy"
+        decoding="async"
+        onError={() => setImageFailed(true)}
+        className="h-20 w-full rounded-lg object-contain"
+      />
+    );
+  }
+
+  return <Icon size={24} strokeWidth={1.75} className={accentClass} aria-hidden="true" />;
+}
 
 /**
  * "Equipe para assistir à Copa" — an Amazon Associates gear strip shown under
@@ -51,7 +79,6 @@ export function AffiliateProducts({ theme, products = AFFILIATE_PRODUCTS }: Prop
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
         {products.map((p) => {
-          const Icon = ICONS[p.icon] ?? Tv;
           return (
             <a
               key={p.id}
@@ -61,7 +88,7 @@ export function AffiliateProducts({ theme, products = AFFILIATE_PRODUCTS }: Prop
               data-affiliate-id={p.id}
               className={`flex flex-col gap-1 rounded-xl border p-3 transition ${tile}`}
             >
-              <Icon size={24} strokeWidth={1.75} className={accent} aria-hidden="true" />
+              <ProductMedia product={p} accentClass={accent} />
               <span className="mt-1 text-sm font-semibold leading-tight">{p.title}</span>
               <span className={`text-xs leading-snug ${muted}`}>{p.blurb}</span>
               <span className={`mt-1 text-xs font-bold ${accent}`}>Ver na Amazon →</span>

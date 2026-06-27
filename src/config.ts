@@ -23,6 +23,8 @@ export const AFFILIATE_PRODUCTS: AffiliateProduct[] = [
     title: "Smart TV 4K",
     blurb: "Tela grande pra não perder nenhum lance.",
     icon: "tv",
+    imageUrl: "/affiliate/smart-tv.jpg",
+    imageAlt: "Smart TV 4K",
     searchUrl: "https://www.amazon.com.br/s?k=smart+tv+4k+50+polegadas",
   },
   {
@@ -30,6 +32,8 @@ export const AFFILIATE_PRODUCTS: AffiliateProduct[] = [
     title: "Soundbar",
     blurb: "Som de estádio dentro de casa.",
     icon: "soundbar",
+    imageUrl: "/affiliate/soundbar.jpg",
+    imageAlt: "Soundbar para a TV",
     searchUrl: "https://www.amazon.com.br/s?k=soundbar",
   },
   {
@@ -37,6 +41,8 @@ export const AFFILIATE_PRODUCTS: AffiliateProduct[] = [
     title: "Camisa do Brasil",
     blurb: "Entre em campo com o time.",
     icon: "shirt",
+    imageUrl: "/affiliate/camisa-brasil.jpg",
+    imageAlt: "Camisa da seleção brasileira",
     searchUrl: "https://www.amazon.com.br/s?k=camisa+sele%C3%A7%C3%A3o+brasileira",
   },
   {
@@ -44,6 +50,8 @@ export const AFFILIATE_PRODUCTS: AffiliateProduct[] = [
     title: "Petiscos do jogo",
     blurb: "Pra aguentar os 90 minutos (e a prorrogação).",
     icon: "popcorn",
+    imageUrl: "/affiliate/petiscos.jpg",
+    imageAlt: "Petiscos para assistir ao jogo",
     searchUrl: "https://www.amazon.com.br/s?k=petiscos",
   },
   {
@@ -51,6 +59,8 @@ export const AFFILIATE_PRODUCTS: AffiliateProduct[] = [
     title: "Cooler térmico",
     blurb: "Bebida gelada do apito inicial ao final.",
     icon: "snowflake",
+    imageUrl: "/affiliate/cooler.jpg",
+    imageAlt: "Cooler térmico com bebidas geladas",
     searchUrl: "https://www.amazon.com.br/s?k=cooler+t%C3%A9rmico",
   },
 ];

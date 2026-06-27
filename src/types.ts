@@ -24,8 +24,17 @@ export interface AffiliateProduct {
   title: string;
   /** Short pt-BR blurb in broadcast voice. */
   blurb: string;
-  /** lucide-react icon key (resolved via the ICONS map in AffiliateProducts). */
+  /** lucide-react icon key (resolved via the ICONS map in AffiliateProducts). Used as the fallback when no imageUrl is set or the image fails to load. */
   icon: string;
+  /**
+   * Optional self-hosted, licensed GENERIC category photo (e.g. /affiliate/smart-tv.jpg).
+   * NOT an Amazon product image — Amazon's images are licensed only via the
+   * (sales-gated) product-advertising API and may not be stored. When unset or
+   * the image fails to load, the lucide `icon` renders instead.
+   */
+  imageUrl?: string;
+  /** Alt text for imageUrl (pt-BR); falls back to `title` when absent. */
+  imageAlt?: string;
   /** Amazon Brasil URL WITHOUT the affiliate tag (the tag is appended at render). */
   searchUrl: string;
 }
