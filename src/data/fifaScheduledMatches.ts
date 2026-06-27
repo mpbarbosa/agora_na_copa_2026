@@ -68,8 +68,8 @@ export const FIFA_SCHEDULED_MATCHES: FifaScheduledMatchSeed[] = [
   // ── Grupo H ───────────────────────────────────────────────────────────────
   { teamA: "ESP", teamB: "KSA", kickoffTimestamp: "2026-06-21T13:00:00-03:00", status: "FINISHED", score: { teamA: 4, teamB: 0 }, ...v("ESP", "KSA") },
   { teamA: "URU", teamB: "CPV", kickoffTimestamp: "2026-06-21T19:00:00-03:00", status: "FINISHED", score: { teamA: 2, teamB: 2 }, ...v("URU", "CPV") },
-  { teamA: "CPV", teamB: "KSA", kickoffTimestamp: "2026-06-26T21:00:00-03:00", status: "PRE_GAME", ...v("CPV", "KSA") },
-  { teamA: "URU", teamB: "ESP", kickoffTimestamp: "2026-06-26T21:00:00-03:00", status: "PRE_GAME", ...v("URU", "ESP") },
+  { teamA: "CPV", teamB: "KSA", kickoffTimestamp: "2026-06-26T21:00:00-03:00", status: "FINISHED", score: { teamA: 0, teamB: 0 }, ...v("CPV", "KSA") },
+  { teamA: "URU", teamB: "ESP", kickoffTimestamp: "2026-06-26T21:00:00-03:00", status: "FINISHED", score: { teamA: 0, teamB: 1 }, ...v("URU", "ESP") },
 
   // ── Grupo I ───────────────────────────────────────────────────────────────
   { teamA: "IRQ", teamB: "NOR", kickoffTimestamp: "2026-06-16T19:00:00-03:00", status: "FINISHED", score: { teamA: 1, teamB: 4 }, ...v("IRQ", "NOR") },
