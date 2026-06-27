@@ -25,6 +25,9 @@ export const getPlayerByFifaId = (fifaId: string): SquadPlayer | null =>
 export const getTeamSquad = (teamCode: string): SquadPlayer[] =>
   byTeamCode.get(teamCode.toUpperCase()) ?? [];
 
+/** Every registered squad player, in squads.json insertion order. */
+export const getAllSquadPlayers = (): SquadPlayer[] => [...byFifaId.values()];
+
 /**
  * Resolve a registry entry for a player.
  * When fifaId is known, uses it directly.

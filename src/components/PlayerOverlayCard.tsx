@@ -7,12 +7,8 @@ import { getPlayerSocialEntries } from "../utils/playerDisplay";
 import { WorldCupNoteCarousel } from "./WorldCupNoteCarousel";
 import { PlayerVideoRail } from "./PlayerVideoRail";
 import { PlayerNoteFreshness } from "./PlayerNoteFreshness";
-
-declare global {
-  interface Window {
-    instgrm?: { Embeds: { process: () => void } };
-  }
-}
+import { InstagramEmbed } from "./InstagramEmbed";
+import { isSafeInstagramUrl } from "../utils/instagram";
 
 export const getPlayerAge = (dateOfBirth: string): number =>
   Math.floor((Date.now() - new Date(dateOfBirth).getTime()) / (365.25 * 24 * 3600 * 1000));
@@ -240,12 +236,6 @@ interface PlayerOverlayCardProps {
   id?: string;
 }
 
-const INSTAGRAM_ORIGIN = "https://www.instagram.com/";
-
-function isSafeInstagramUrl(url: string): boolean {
-  return url.startsWith(INSTAGRAM_ORIGIN);
-}
-
 export function PlayerOverlayCard({
   theme,
   player,
@@ -263,7 +253,6 @@ export function PlayerOverlayCard({
 }: PlayerOverlayCardProps) {
   useEscapeKey(onClose);
   const [igExpanded, setIgExpanded] = useState(false);
-  const igScriptLoadedRef = React.useRef(false);
 
   const accent = primaryColor ?? "#00e476";
   const isLight = theme === "classic-light";
@@ -282,23 +271,7 @@ export function PlayerOverlayCard({
       ? player.instagramPostUrl
       : null;
 
-  const handleToggleIg = () => {
-    setIgExpanded((prev) => {
-      const opening = !prev;
-      if (opening) {
-        if (!igScriptLoadedRef.current) {
-          const script = document.createElement("script");
-          script.src = "https://www.instagram.com/embed.js";
-          script.async = true;
-          document.head.appendChild(script);
-          igScriptLoadedRef.current = true;
-        } else {
-          window.instgrm?.Embeds.process();
-        }
-      }
-      return opening;
-    });
-  };
+  const handleToggleIg = () => setIgExpanded((prev) => !prev);
 
   return (
     <div
@@ -563,12 +536,7 @@ export function PlayerOverlayCard({
 
                 {igExpanded && (
                   <div className="mt-3 space-y-3" id={id ? `${id}-ig-panel` : undefined}>
-                    <blockquote
-                      className="instagram-media"
-                      data-instgrm-permalink={safeInstagramPostUrl}
-                      data-instgrm-version="14"
-                      style={{ width: "100%", minWidth: 0, margin: 0 }}
-                    />
+                    <InstagramEmbed permalink={safeInstagramPostUrl} />
                     <a
                       href={safeInstagramPostUrl}
                       target="_blank"

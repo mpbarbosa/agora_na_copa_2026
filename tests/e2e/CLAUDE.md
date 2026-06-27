@@ -21,6 +21,7 @@ Playwright end-to-end specs for "Agora na Copa 26". The suite boots the dev serv
 | `news.spec.ts` | News feed, article cards | 1.6 KB |
 | `fanzone.spec.ts` | Fan Zone quiz, answer interaction | 1.5 KB |
 | `social-medias.spec.ts` | Social Medias feed ("Redes Sociais" tab): Google Trends card, category/hashtag filters, likes, nested comments | 4.0 KB |
+| `instagram-highlights.spec.ts` | "Destaques no Instagram" feed on Redes Sociais: section renders with ≥1 player card, only the first card's embed is mounted by default (others mount on tap), an expanded card carries the `blockquote.instagram-media` permalink + "Abrir no Instagram" link, dark-theme without console errors. Stubs `embed.js` to a no-op (offline-safe) | 3.4 KB |
 | `polish.spec.ts` | Visual/UX polish checks (no broken images, no empty text nodes, etc.) | 2.0 KB |
 | `affiliate-products.spec.ts` | Amazon affiliate gear strip on Ao Vivo (broadcast tab): renders, link compliance (tag/rel/target), tab gating | 1.2 KB |
 | `consent-privacy.spec.ts` | LGPD cookie-consent banner (show/accept/persist), dormant AdSlot + GA4, footer privacy link, privacidade.html + ads.txt served | 2.1 KB |

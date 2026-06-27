@@ -12,6 +12,8 @@ import {
 } from "lucide-react";
 import type { GoogleTrendTopic, GoogleTrendsResponse } from "../types";
 import { InstagramBrandIcon } from "./InstagramBrandIcon";
+import { InstagramEmbed } from "./InstagramEmbed";
+import { InstagramHighlightsFeed } from "./InstagramHighlightsFeed";
 
 interface SocialMediasViewProps {
   theme: "classic-light" | "stadium-dark";
@@ -157,19 +159,6 @@ export function SocialMediasView({ theme }: SocialMediasViewProps) {
     return () => {
       active = false;
     };
-  }, []);
-
-  // Carrega o embed.js da Instagram uma vez e renderiza o reel oficial da FIFA.
-  useEffect(() => {
-    if (window.instgrm) {
-      window.instgrm.Embeds.process();
-      return;
-    }
-
-    const script = document.createElement("script");
-    script.src = "https://www.instagram.com/embed.js";
-    script.async = true;
-    document.head.appendChild(script);
   }, []);
 
   const trending = useMemo(() => {
@@ -333,14 +322,12 @@ export function SocialMediasView({ theme }: SocialMediasViewProps) {
 
         {/* Reel oficial em destaque, embutido via embed.js da Instagram */}
         <div className="mt-4" id="social-medias-fifa-reel" data-testid="social-fifa-reel">
-          <blockquote
-            className="instagram-media"
-            data-instgrm-permalink={FIFA_REEL_URL}
-            data-instgrm-version="14"
-            style={{ width: "100%", minWidth: 0, margin: 0 }}
-          />
+          <InstagramEmbed permalink={FIFA_REEL_URL} />
         </div>
       </section>
+
+      {/* Destaques de jogadores no Instagram (dados reais de squads.json) */}
+      <InstagramHighlightsFeed theme={theme} />
 
       {/* Google Trends card */}
       {trendsStatus !== "empty" && (
