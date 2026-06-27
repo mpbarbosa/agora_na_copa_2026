@@ -109,7 +109,10 @@
       "instagram": "leomessi",
       "wikipedia": "https://pt.wikipedia.org/wiki/Lionel_Messi"
     },
-    "instagramPostUrl": "https://www.instagram.com/reel/DZ0RteXxomP/",
+    "instagramPostUrls": [
+      "https://www.instagram.com/p/DZ5zea7jzW5/",
+      "https://www.instagram.com/reel/DZ0RteXxomP/"
+    ],
     "worldCupNote": "## Leitura\nMessi está em estado de graça e é o grande nome do início da Copa. Com 5 gols em apenas 2 jogos, o capitão coloca a Argentina como favorita ao título e já encaminha a vaga no mata-mata. Lidera a artilharia, e a comissão pode dosar seus minutos com a classificação cada vez mais perto.\n## Desempenho\nComeçou com um hat-trick na goleada por 3 a 0 sobre a Argélia (gols aos 17, 60 e 76) e seguiu decisivo contra a Áustria: marcou duas vezes no 2 a 0, aos 38 e nos acréscimos finais (90+5). Cinco gols, nenhum sofrido pela Argentina e ficha disciplinar limpa — futebol de outro nível.\n## Números\nJ2 · 5 gols · 0 cartões · artilheiro isolado da Copa. A Argentina lidera o Grupo J com 6 pontos, 100% de aproveitamento e dois clean sheets. Messi decide e comanda — o protagonista absoluto deste início de Mundial.",
     "worldCupNoteUpdatedAt": "2026-06-22T17:00:00.000Z",
     "dateOfBirth": "1987-06-24",
