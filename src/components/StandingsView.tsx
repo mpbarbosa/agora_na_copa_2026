@@ -379,13 +379,23 @@ export function StandingsView({
                   <tbody>
                     {rows.map((row, index) => {
                       const isQualifying = index < 2;
-                      const status = qualification.get(row.code) ?? "contention";
+                      const bestThird = bestThirdsRank.get(row.code);
                       // Finished 3rd in its group while the best-thirds cut is still
                       // pending (not every group is done) → waiting to learn if it is
                       // one of the 8 best third-placed teams that advance.
                       const isAwaitingBestThird =
                         index === 2 && groupFinished && !allGroupsFinished;
-                      const bestThird = bestThirdsRank.get(row.code);
+                      // Once every group is done, a 3rd-placed team's fate is fixed by
+                      // the cross-group best-thirds ranking: the 8 best advance, the
+                      // rest are eliminated. The per-group qualification still reports
+                      // "contention" here (it can't see other groups), so resolve it.
+                      const isResolvedBestThird =
+                        index === 2 && groupFinished && allGroupsFinished && !!bestThird;
+                      const status = isResolvedBestThird
+                        ? bestThird!.qualifies
+                          ? "qualified"
+                          : "eliminated"
+                        : qualification.get(row.code) ?? "contention";
                       const ptsCellColor =
                         isQualifying
                           ? theme === "classic-light" ? "text-[#009c3b]" : "text-[#00e476]"
@@ -409,7 +419,11 @@ export function StandingsView({
                           ? "Aguardando a definição dos 8 melhores terceiros colocados"
                           : undefined;
                       const note =
-                        status === "qualified"
+                        isResolvedBestThird
+                          ? bestThird!.qualifies
+                            ? `Terminou em 3º no ${group} e avançou ao mata-mata como um dos 8 melhores terceiros colocados (${bestThird!.position}º entre os 12).`
+                            : `Terminou em 3º no ${group} e está eliminado — ficou fora dos 8 melhores terceiros colocados (${bestThird!.position}º entre os 12).`
+                          : status === "qualified"
                           ? computeQualificationNote(row.code, rows, liveMatches)
                           : status === "eliminated"
                           ? computeEliminationNote(row.code, rows, liveMatches)
