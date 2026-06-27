@@ -22,6 +22,12 @@ function isGuaranteed(advance: number | undefined): boolean {
   return typeof advance === "number" && Math.round(advance * 100) >= 100;
 }
 
+// A team is treated as eliminated once its simulated odds round to 0% — no sampled
+// scenario keeps it among the eight best thirds.
+function isEliminated(advance: number | undefined): boolean {
+  return typeof advance === "number" && Math.round(advance * 100) <= 0;
+}
+
 // Hover explanation of a third-placed team's run at the eight best-third slots:
 // where it ranks among the 12 thirds, whether it sits inside the provisional cut,
 // and its simulated odds. Teams still in contention get the "na briga" framing;
@@ -160,12 +166,14 @@ export function ThirdPlaceTable({ groups, theme, onSelectTeamLineup }: ThirdPlac
               const isCutLine = index === QUALIFYING_SLOTS;
               const advance = chanceByCode.get(row.code);
               const guaranteed = isGuaranteed(advance);
+              const eliminated = isEliminated(advance);
               return (
                 <tr
                   key={row.id}
                   id={`third-place-row-${row.code.toLowerCase()}`}
                   data-qualifies={qualifies ? "true" : "false"}
                   data-guaranteed={guaranteed ? "true" : "false"}
+                  data-eliminated={eliminated ? "true" : "false"}
                   className={`border-b last:border-b-0 ${rowBorderClasses} ${
                     isCutLine ? `border-t-2 ${cutLineClasses}` : ""
                   } ${
@@ -199,6 +207,17 @@ export function ThirdPlaceTable({ groups, theme, onSelectTeamLineup }: ThirdPlac
                           aria-label="Classificação garantida"
                         >
                           ✓
+                        </span>
+                      )}
+                      {eliminated && (
+                        <span
+                          className={`rounded px-1 text-[9px] font-bold uppercase tracking-wider ${
+                            isLight ? "bg-[#9f1239] text-white" : "bg-[#ff879d] text-black"
+                          }`}
+                          title="Eliminado: 0% de chance de ficar entre os 8 melhores 3ºs"
+                          aria-label="Eliminado"
+                        >
+                          ✕
                         </span>
                       )}
                     </div>
