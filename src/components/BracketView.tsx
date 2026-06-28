@@ -1,6 +1,7 @@
-import { useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { CalendarDays, MapPin, Medal } from "lucide-react";
 import { KNOCKOUT_MATCHES } from "../data/knockoutBracket";
+import { registerBracketHover } from "../bracketHover";
 import type { KnockoutMatch, Match, TeamRef } from "../types";
 import { computeStandings, buildGroupPositionMap } from "../standings";
 import type { QualificationStatus, ProvisionalSlot } from "../standings";
@@ -559,6 +560,10 @@ export function BracketView({ theme, matches, onSelectTeamLineup, onSelectMatch 
   // Hovering a card spotlights the fixtures that feed it in the previous column
   // (e.g. an Oitavas tie highlights its two 16-avos feeders, hiding the rest).
   const [hoveredMatch, setHoveredMatch] = useState<number | null>(null);
+  // Expose an imperative clear so the guided tip tour can drop the spotlight directly
+  // on teardown (see bracketHover.ts) — deterministic where a synthetic pointerleave
+  // can race under load. setHoveredMatch is a stable setter, so this registers once.
+  useEffect(() => registerBracketHover(setHoveredMatch), []);
   const feederHighlight = useMemo<FeederHighlight | null>(() => {
     if (hoveredMatch === null) return null;
     const match = KNOCKOUT_MATCHES.find((m) => m.matchNumber === hoveredMatch);

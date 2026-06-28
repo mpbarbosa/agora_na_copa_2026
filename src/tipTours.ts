@@ -1,6 +1,7 @@
 import { driver, type Side, type Alignment } from "driver.js";
 import "driver.js/dist/driver.css";
 import { startMessiTour } from "./messiTour";
+import { clearBracketSpotlight } from "./bracketHover";
 
 type Theme = "classic-light" | "stadium-dark";
 
@@ -36,6 +37,19 @@ function runActionTour(theme: Theme, steps: ActionStep[], onEnd?: () => void): v
   const popoverClass =
     theme === "classic-light" ? "agora-tour agora-tour-light" : "agora-tour agora-tour-dark";
 
+  // Run the teardown exactly once, whichever close path fires. Driver.js skips its
+  // `onDestroyed` hook when a step transition hasn't committed `__activeStep` yet (which
+  // happens under CPU load when Escape lands mid-transition) — yet it still removes the
+  // popover. So we drive teardown from `onDestroyStarted`, which fires reliably on Escape /
+  // X-close before the popover is torn down, and keep `onDestroyed` for the "Entendi"
+  // completion path (which routes through `d.destroy()`, bypassing `onDestroyStarted`).
+  let ended = false;
+  const finish = () => {
+    if (ended) return;
+    ended = true;
+    onEnd?.();
+  };
+
   const d = driver({
     showProgress: true,
     progressText: "{{current}} de {{total}}",
@@ -59,7 +73,11 @@ function runActionTour(theme: Theme, steps: ActionStep[], onEnd?: () => void): v
       if (step.waitFor) waitForElement(step.waitFor, () => d.moveNext());
       else d.moveNext();
     },
-    onDestroyed: () => onEnd?.(),
+    onDestroyStarted: () => {
+      finish();
+      d.destroy();
+    },
+    onDestroyed: () => finish(),
   });
 
   d.drive();
@@ -176,7 +194,10 @@ function startBracketTour(theme: Theme, onEnd?: () => void): void {
 // An Oitavas tie whose two 16-avos feeders are confirmed numbers (#74 and #77), used to
 // demo the feeder spotlight. The spotlight is hover-driven in BracketView; we trigger it
 // with a synthetic MOUSE pointer event (never focus) so it survives the tour popover taking
-// focus — and clear it with the matching leave event when the tour ends.
+// focus. We CLEAR it imperatively (clearBracketSpotlight) rather than via a synthetic
+// pointerleave: the teardown runs while Driver.js destroys its popover, and under CPU load
+// React isn't guaranteed to process a synthesized leave in time — leaving the feeders stuck
+// lit. The direct clear is deterministic regardless of host load.
 const FEEDER_DEMO_MATCH = 89;
 
 function dispatchMousePointer(card: HTMLElement, types: string[]): void {
@@ -190,9 +211,8 @@ function spotlightTie(matchNumber: number): void {
   if (card) dispatchMousePointer(card, ["pointerover", "pointerenter"]);
 }
 
-function clearTieSpotlight(matchNumber: number): void {
-  const card = document.getElementById(`bracket-match-${matchNumber}`);
-  if (card) dispatchMousePointer(card, ["pointerout", "pointerleave"]);
+function clearTieSpotlight(): void {
+  clearBracketSpotlight();
 }
 
 /** "Quem decide o adversário" — Chaveamento → hover an Oitavas tie → spotlight its 16-avos feeders. */
@@ -233,7 +253,7 @@ function startBracketFeederTour(theme: Theme, onEnd?: () => void): void {
       },
     ],
     () => {
-      clearTieSpotlight(FEEDER_DEMO_MATCH);
+      clearTieSpotlight();
       onEnd?.();
     },
   );
