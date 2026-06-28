@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useRef, useState } from "react";
 import { CalendarDays, MapPin, Medal } from "lucide-react";
 import { KNOCKOUT_MATCHES } from "../data/knockoutBracket";
 import type { KnockoutMatch, Match, TeamRef } from "../types";
@@ -82,6 +82,25 @@ function buildKnockoutMatchIdByNumber(matches: Match[]): Map<number, string> {
     if (n) map.set(Number(n[1]), match.id);
   }
   return map;
+}
+
+// A later-round slot references its feeder fixture by number — "W74" (winner of #74),
+// "RU101" (runner-up / loser of #101). Parse those out so hovering a card can highlight
+// the matches that feed it. Group / best-third slots ("2A", "3ABCDF") have no feeder.
+function feederMatchNumbers(match: KnockoutMatch): number[] {
+  const numbers: number[] = [];
+  for (const slot of [match.slotA, match.slotB]) {
+    const parsed = /^(?:W|RU|L)(\d+)$/.exec(slot);
+    if (parsed) numbers.push(Number(parsed[1]));
+  }
+  return numbers;
+}
+
+// The set of feeder fixtures to spotlight when a card is hovered: their match numbers
+// and the stage (column) they live in, so only that column is filtered.
+interface FeederHighlight {
+  stage: Stage;
+  numbers: Set<number>;
 }
 
 // All 48 teams keyed by code, for resolving a confirmed knockout team's flag/name.
@@ -290,14 +309,39 @@ interface BracketMatchCardProps {
   groupPositions: Map<string, ProvisionalSlot>;
   /** APP_MATCHES id for this fixture, when present — enables opening its match page. */
   matchId: string | null;
+  /** Active feeder spotlight (from a hovered later-round card), or null. */
+  feederHighlight: FeederHighlight | null;
+  /** The currently spotlighted match number (hover/focus/tap), or null. */
+  hoveredMatch: number | null;
+  onHoverMatch: (matchNumber: number | null) => void;
   onSelectTeamLineup: (team: TeamRef) => void;
   onSelectMatch: (matchId: string) => void;
 }
 
-function BracketMatchCard({ match, theme, teamMeta, groupPositions, matchId, onSelectTeamLineup, onSelectMatch }: BracketMatchCardProps) {
+function BracketMatchCard({ match, theme, teamMeta, groupPositions, matchId, feederHighlight, hoveredMatch, onHoverMatch, onSelectTeamLineup, onSelectMatch }: BracketMatchCardProps) {
   const isLight = theme === "classic-light";
   const cardClasses = isLight ? "bg-white border-slate-200" : "bg-[#161919] border-white/10";
   const subtleClasses = isLight ? "text-slate-500" : "text-slate-400";
+
+  // When another card is hovered, spotlight the fixtures that feed it: ring the feeders
+  // and dim the rest of that same column. Cards in other columns are left untouched.
+  const isFeeder = feederHighlight?.numbers.has(match.matchNumber) ?? false;
+  const isDimmed = !!feederHighlight && feederHighlight.stage === match.stage && !isFeeder;
+  const highlightState = isFeeder ? "feeder" : isDimmed ? "dimmed" : "none";
+  const feederRingClass = isFeeder
+    ? isLight
+      ? "ring-2 ring-[#009c3b]"
+      : "ring-2 ring-[#00e476]"
+    : "";
+  const dimClass = isDimmed ? "opacity-40" : "";
+
+  // Two-stage tap: on touch, the first tap on a feeder-bearing card reveals its feeders
+  // (no navigation); a second tap on the already-spotlighted card opens its match. We
+  // snapshot the active state and pointer type at pointerdown — before any focus/emulated
+  // mouse events fire — so the first tap can never be mistaken for the second.
+  const hasFeeders = feederMatchNumbers(match).length > 0;
+  const pointerTypeRef = useRef("mouse");
+  const wasActiveAtDownRef = useRef(false);
 
   const resolveConfirmed = (ref: KnockoutMatch["teamA"]): TeamMeta | null => {
     if (!ref) return null;
@@ -316,8 +360,36 @@ function BracketMatchCard({ match, theme, teamMeta, groupPositions, matchId, onS
   return (
     <article
       id={`bracket-match-${match.matchNumber}`}
-      onClick={matchId ? () => onSelectMatch(matchId) : undefined}
-      className={`rounded-2xl border p-3 ${cardClasses} ${matchId ? "cursor-pointer transition hover:brightness-95" : ""}`}
+      data-feeder-highlight={highlightState}
+      // Mouse spotlights on hover and opens on click; keyboard spotlights on focus (Tab)
+      // and opens on Enter (click detail 0); touch uses the two-stage tap below. tabIndex
+      // makes the card focusable for keyboard users and a visible focus ring. Hover is
+      // driven by POINTER events guarded to a real mouse — the emulated mouseenter/leave
+      // a tap fires would otherwise clear the spotlight the tap just set.
+      tabIndex={0}
+      onPointerEnter={(event) => {
+        if (event.pointerType === "mouse") onHoverMatch(match.matchNumber);
+      }}
+      onPointerLeave={(event) => {
+        if (event.pointerType === "mouse") onHoverMatch(null);
+      }}
+      onFocus={() => onHoverMatch(match.matchNumber)}
+      onBlur={() => onHoverMatch(null)}
+      onPointerDown={(event) => {
+        pointerTypeRef.current = event.pointerType || "mouse";
+        wasActiveAtDownRef.current = hoveredMatch === match.matchNumber;
+      }}
+      onClick={(event) => {
+        const isTouch = pointerTypeRef.current === "touch" || pointerTypeRef.current === "pen";
+        // First touch tap on a feeder-bearing card: reveal feeders, keep focus, don't open.
+        if (event.detail !== 0 && isTouch && hasFeeders && !wasActiveAtDownRef.current) {
+          onHoverMatch(match.matchNumber);
+          event.currentTarget.focus({ preventScroll: true });
+          return;
+        }
+        if (matchId) onSelectMatch(matchId);
+      }}
+      className={`rounded-2xl border p-3 outline-none transition focus-visible:ring-2 focus-visible:ring-sky-400 ${cardClasses} ${feederRingClass} ${dimClass} ${matchId ? "cursor-pointer hover:brightness-95" : ""}`}
     >
       <div className={`flex flex-wrap items-center gap-x-3 gap-y-1 font-mono text-[10px] uppercase tracking-wider ${subtleClasses}`}>
         <span className="font-bold">#{match.matchNumber}</span>
@@ -364,11 +436,14 @@ interface BracketStageColumnProps {
   teamMeta: Map<string, TeamMeta>;
   groupPositions: Map<string, ProvisionalSlot>;
   matchIdByNumber: Map<number, string>;
+  feederHighlight: FeederHighlight | null;
+  hoveredMatch: number | null;
+  onHoverMatch: (matchNumber: number | null) => void;
   onSelectTeamLineup: (team: TeamRef) => void;
   onSelectMatch: (matchId: string) => void;
 }
 
-function BracketStageColumn({ stage, matches, theme, teamMeta, groupPositions, matchIdByNumber, onSelectTeamLineup, onSelectMatch }: BracketStageColumnProps) {
+function BracketStageColumn({ stage, matches, theme, teamMeta, groupPositions, matchIdByNumber, feederHighlight, hoveredMatch, onHoverMatch, onSelectTeamLineup, onSelectMatch }: BracketStageColumnProps) {
   const isLight = theme === "classic-light";
   const stageClasses = isLight ? "bg-slate-50 border-slate-200" : "bg-white/5 border-white/10";
   const headingClasses = isLight ? "text-slate-900" : "text-white";
@@ -401,6 +476,9 @@ function BracketStageColumn({ stage, matches, theme, teamMeta, groupPositions, m
               teamMeta={teamMeta}
               groupPositions={groupPositions}
               matchId={matchIdByNumber.get(match.matchNumber) ?? null}
+              feederHighlight={feederHighlight}
+              hoveredMatch={hoveredMatch}
+              onHoverMatch={onHoverMatch}
               onSelectTeamLineup={onSelectTeamLineup}
               onSelectMatch={onSelectMatch}
             />
@@ -429,6 +507,20 @@ export function BracketView({ theme, matches, onSelectTeamLineup, onSelectMatch 
     for (const list of grouped.values()) list.sort((a, b) => a.matchNumber - b.matchNumber);
     return grouped;
   }, []);
+
+  // Hovering a card spotlights the fixtures that feed it in the previous column
+  // (e.g. an Oitavas tie highlights its two 16-avos feeders, dimming the rest).
+  const [hoveredMatch, setHoveredMatch] = useState<number | null>(null);
+  const feederHighlight = useMemo<FeederHighlight | null>(() => {
+    if (hoveredMatch === null) return null;
+    const match = KNOCKOUT_MATCHES.find((m) => m.matchNumber === hoveredMatch);
+    if (!match) return null;
+    const numbers = feederMatchNumbers(match);
+    if (numbers.length === 0) return null;
+    const feederStage = KNOCKOUT_MATCHES.find((m) => m.matchNumber === numbers[0])?.stage;
+    if (!feederStage) return null;
+    return { stage: feederStage, numbers: new Set(numbers) };
+  }, [hoveredMatch]);
 
   const isLight = theme === "classic-light";
   const shellClasses = isLight ? "bg-white border-slate-200 shadow-sm" : "bg-[#121414] border-white/10";
@@ -511,6 +603,9 @@ export function BracketView({ theme, matches, onSelectTeamLineup, onSelectMatch 
                 teamMeta={teamMeta}
                 groupPositions={groupPositions}
                 matchIdByNumber={matchIdByNumber}
+                feederHighlight={feederHighlight}
+                hoveredMatch={hoveredMatch}
+                onHoverMatch={setHoveredMatch}
                 onSelectTeamLineup={onSelectTeamLineup}
                 onSelectMatch={onSelectMatch}
               />
