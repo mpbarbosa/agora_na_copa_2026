@@ -188,3 +188,42 @@ test.describe("Bracket feeder spotlight on touch (two-stage tap)", () => {
     expect(consoleErrors).toEqual([]);
   });
 });
+
+// On the mobile (narrow) layout, selecting a tie collapses the bracket to that tie's context:
+// the unselected siblings in its own column AND the unrelated cards in the feeder column are
+// removed from the flow (display:none) so only the selected card + its two feeders remain.
+test.describe("Bracket feeder spotlight on mobile (collapses the columns)", () => {
+  test.use({ hasTouch: true, viewport: { width: 390, height: 844 } });
+
+  test.beforeEach(async ({ page }) => {
+    await page.addInitScript(() => localStorage.setItem("feature-tour-seen", "1"));
+  });
+
+  test("selecting an Oitavas tie hides its siblings and the unrelated 16-avos cards", async ({ page }) => {
+    await page.goto("/");
+    await page.click("#btn-nav-chaveamento");
+    await expect(page.locator("#bracket-view")).toBeVisible();
+
+    const selected = page.locator("#bracket-stage-r16 #bracket-match-89");
+    const sibling = page.locator("#bracket-stage-r16 #bracket-match-90"); // another Oitavas tie
+    const feederA = page.locator("#bracket-stage-r32 #bracket-match-74");
+    const feederB = page.locator("#bracket-stage-r32 #bracket-match-77");
+    const unrelated = page.locator("#bracket-stage-r32 #bracket-match-73");
+
+    // Idle: the whole column is visible.
+    await expect(sibling).toBeVisible();
+    await expect(unrelated).toBeVisible();
+
+    // First tap collapses everything but the selected tie and its two feeders.
+    await selected.tap();
+    await expect(selected).toBeVisible();
+    await expect(feederA).toBeVisible();
+    await expect(feederB).toBeVisible();
+    await expect(sibling).toBeHidden(); // display:none — out of the flow
+    await expect(unrelated).toBeHidden();
+
+    // Second tap on the selected card still opens its match page.
+    await selected.tap();
+    await expect(page.locator("#match-detail-view")).toBeVisible();
+  });
+});
