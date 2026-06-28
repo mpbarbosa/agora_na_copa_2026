@@ -97,10 +97,26 @@ function feederMatchNumbers(match: KnockoutMatch): number[] {
 }
 
 // The set of feeder fixtures to spotlight when a card is hovered: their match numbers
-// and the stage (column) they live in, so only that column is filtered.
+// and the stage (column) they live in, so only that column is filtered. Also carries the
+// hovered card itself (sourceStage/sourceMatch) so the mobile layout can collapse its
+// column down to just the selected card.
 interface FeederHighlight {
+  sourceStage: Stage;
+  sourceMatch: number;
   stage: Stage;
   numbers: Set<number>;
+}
+
+// Whether a card collapses out of the flow on mobile while another tie is selected: either an
+// unrelated card in the feeder column, or an unselected sibling in the hovered card's own
+// column. Applied to the card's flex wrapper (not the card) so its gap-3 collapses too.
+function isCollapsedOnMobile(match: KnockoutMatch, highlight: FeederHighlight | null): boolean {
+  if (!highlight) return false;
+  const isFeeder = highlight.numbers.has(match.matchNumber);
+  const isUnrelatedFeeder = highlight.stage === match.stage && !isFeeder;
+  const isUnselectedSibling =
+    highlight.sourceStage === match.stage && match.matchNumber !== highlight.sourceMatch;
+  return isUnrelatedFeeder || isUnselectedSibling;
 }
 
 // All 48 teams keyed by code, for resolving a confirmed knockout team's flag/name.
@@ -326,10 +342,10 @@ function BracketMatchCard({ match, theme, teamMeta, groupPositions, matchId, fee
   const subtleClasses = isLight ? "text-slate-500" : "text-slate-400";
 
   // When another card is hovered, spotlight the fixtures that feed it: ring the two feeders
-  // and hide the rest of that same column. Hidden cards stay in the layout (visibility:hidden)
-  // so the column keeps its height and nothing else jumps; the two feeders are then slid
-  // together (translateY via feederShift, measured by the parent) to sit side-by-side next to
-  // the hovered card. Cards in other columns are left untouched.
+  // and hide the rest of that same column. On desktop the hidden feeders stay in the layout
+  // (visibility:hidden) so the column keeps its height and nothing jumps, and the two feeders
+  // slide together (translateY via feederShift) to sit beside the hovered card. Cards in
+  // other columns are left untouched.
   const isFeeder = feederHighlight?.numbers.has(match.matchNumber) ?? false;
   const isHidden = !!feederHighlight && feederHighlight.stage === match.stage && !isFeeder;
   const highlightState = isFeeder ? "feeder" : isHidden ? "hidden" : "none";
@@ -338,6 +354,8 @@ function BracketMatchCard({ match, theme, teamMeta, groupPositions, matchId, fee
       ? "ring-2 ring-[#009c3b]"
       : "ring-2 ring-[#00e476]"
     : "";
+  // Desktop: unrelated feeders stay in the layout (visibility:hidden) so nothing jumps. On
+  // mobile the whole card is collapsed out of the flow at the wrapper level (see the column).
   const hideClass = isHidden ? "invisible" : "";
   // Only a feeder slides, and only once its shift has been measured; everything else sits put.
   const feederShiftClass = isFeeder ? "relative z-10 transition-transform duration-200 ease-out" : "";
@@ -481,7 +499,7 @@ function BracketStageColumn({ stage, matches, theme, teamMeta, groupPositions, m
 
       <div className="relative flex flex-col gap-3">
         {matches.map((match) => (
-          <div key={match.matchNumber}>
+          <div key={match.matchNumber} className={isCollapsedOnMobile(match, feederHighlight) ? "max-md:hidden" : ""}>
             <BracketMatchCard
               match={match}
               theme={theme}
@@ -532,7 +550,7 @@ export function BracketView({ theme, matches, onSelectTeamLineup, onSelectMatch 
     if (numbers.length === 0) return null;
     const feederStage = KNOCKOUT_MATCHES.find((m) => m.matchNumber === numbers[0])?.stage;
     if (!feederStage) return null;
-    return { stage: feederStage, numbers: new Set(numbers) };
+    return { sourceStage: match.stage, sourceMatch: match.matchNumber, stage: feederStage, numbers: new Set(numbers) };
   }, [hoveredMatch]);
 
   // The two feeders sit several rows apart in their column, so spotlighting them alone leaves
@@ -542,7 +560,10 @@ export function BracketView({ theme, matches, onSelectTeamLineup, onSelectMatch 
   // and run in a layout effect so the slide is set before paint. Keyed by match number.
   const [feederShifts, setFeederShifts] = useState<Map<number, number>>(() => new Map());
   useLayoutEffect(() => {
-    if (hoveredMatch === null || !feederHighlight) {
+    // On mobile the column collapses (display:none) so the feeders are already adjacent —
+    // no translateY needed there, and measuring the collapsed layout would be meaningless.
+    const isMobile = window.matchMedia("(max-width: 767px)").matches;
+    if (hoveredMatch === null || !feederHighlight || isMobile) {
       setFeederShifts((prev) => (prev.size === 0 ? prev : new Map()));
       return;
     }

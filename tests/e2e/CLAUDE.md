@@ -16,7 +16,7 @@ Playwright end-to-end specs for "Agora na Copa 26". The suite boots the dev serv
 | `teams.spec.ts` | Seleções tab, team cards, flag rendering | 2.6 KB |
 | `player-metadata.spec.ts` | Player dateOfBirth, height display in overlay | 3.1 KB |
 | `venues.spec.ts` | Venue map, stadium cards | 2.5 KB |
-| `bracket.spec.ts` | Knockout bracket rendering; hovering/focusing an Oitavas card spotlights its 16-avos feeders (`data-feeder-highlight`) and hides the rest; on touch a two-stage tap previews feeders then opens the match | 1.1 KB |
+| `bracket.spec.ts` | Knockout bracket rendering; hovering/focusing an Oitavas card spotlights its 16-avos feeders (`data-feeder-highlight`) and hides the rest (grouping the feeders beside the card); on touch a two-stage tap previews feeders then opens the match; on the mobile layout selecting a tie collapses (display:none) its unselected siblings and the unrelated feeders so only the tie + its two feeders remain | 1.1 KB |
 | `bracket-predictor.spec.ts` | "Palpite do confronto" panel on Chaveamento: renders with the Simulado badge, auto-forecasts the selected resolved tie via `/api/predict` (or shows the empty state), re-forecasts on switching ties, dark-theme without console errors | 3.0 KB |
 | `news.spec.ts` | News feed, article cards | 1.6 KB |
 | `fanzone.spec.ts` | Fan Zone quiz, answer interaction | 1.5 KB |
