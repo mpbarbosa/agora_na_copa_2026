@@ -415,6 +415,17 @@ function getMatchGroupLabel(match: Match) {
   return match.teamA.group === match.teamB.group ? match.teamA.group : match.teamA.group || null;
 }
 
+// Knockout matches have no group, so the scoreboard shows the round name
+// (e.g. "16 Avos de Final", "Oitavas de Final", "Final") in place of the
+// "Grupo X" label, keeping stage context once the group stage is over.
+function getMatchStageLabel(match: Match) {
+  if (match.stageName === "Group Stage" || !match.stageName) {
+    return null;
+  }
+
+  return match.stageName;
+}
+
 function formatBrasiliaTime(date: Date) {
   return date.toLocaleTimeString("pt-BR", {
     timeZone: "America/Sao_Paulo",
@@ -708,6 +719,7 @@ export function MatchDetailView({
       ? currentOverlay.matchState.referee
       : undefined;
   const currentMatchGroupLabel = getMatchGroupLabel(currentMatch);
+  const currentMatchStageLabel = getMatchStageLabel(currentMatch);
   const headerMatchGroups = HEADER_MATCH_STATUS_GROUPS.map(({ status, label }) => ({
     status,
     label,
@@ -1885,6 +1897,19 @@ export function MatchDetailView({
                 >
                   {currentMatchGroupLabel}
                 </button>
+              )}
+
+              {!currentMatchGroupLabel && currentMatchStageLabel && (
+                <span
+                  className={`rounded-full border px-3 py-1 font-mono text-[10px] font-bold uppercase tracking-[0.22em] ${
+                    theme === "classic-light"
+                      ? "border-slate-200 bg-slate-100 text-slate-700"
+                      : "border-white/10 bg-white/5 text-slate-100"
+                  }`}
+                  id="scoreboard-stage-label"
+                >
+                  {currentMatchStageLabel}
+                </span>
               )}
 
             </div>

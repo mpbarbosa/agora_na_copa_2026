@@ -31,7 +31,15 @@ test.describe("Navigation shell", () => {
     await expect(page.locator("#btn-nav-ao-vivo")).toHaveClass(/font-semibold/);
     await expect(page.locator("#match-detail-view")).toBeVisible();
     await expect(page.locator("#core-live-scoreboard")).toBeVisible();
-    await expect(page.locator("#scoreboard-group-label")).toContainText(/Grupo [A-L]/);
+    // The scoreboard carries a stage label: "Grupo X" for group games, or the
+    // round name for knockout fixtures. The default (next upcoming) match is a
+    // group game during the group stage and a knockout fixture afterwards, so
+    // accept either — whichever the current phase makes the default.
+    await expect(
+      page.locator("#scoreboard-group-label, #scoreboard-stage-label"),
+    ).toContainText(
+      /Grupo [A-L]|16 Avos de Final|Oitavas de Final|Quartas de Final|Semifinal|Disputa do 3º Lugar|Final/,
+    );
     await expect(page.locator("#broadcast-section-title")).toBeVisible();
 
     expect(consoleErrors).toEqual([]);
