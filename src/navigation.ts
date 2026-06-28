@@ -21,14 +21,14 @@ export const NAV_ITEMS: NavItem[] = [
     description: "Tabelas de classificação dos 12 grupos do torneio.",
   },
   {
-    id: "selecoes",
-    label: "Seleções",
-    description: "Lista completa das seleções classificadas para a Copa com acesso ao painel de cada time.",
-  },
-  {
     id: "chaveamento",
     label: "Mata-mata",
     description: "Mata-mata interativo até a grande final.",
+  },
+  {
+    id: "selecoes",
+    label: "Seleções",
+    description: "Lista completa das seleções classificadas para a Copa com acesso ao painel de cada time.",
   },
   {
     id: "jogadores",
