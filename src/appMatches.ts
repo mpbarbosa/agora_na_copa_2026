@@ -70,10 +70,21 @@ const teamByCode = new Map(
   ]),
 );
 
+const PT_WEEKDAYS = [
+  "domingo",
+  "segunda-feira",
+  "terça-feira",
+  "quarta-feira",
+  "quinta-feira",
+  "sexta-feira",
+  "sábado",
+];
+
 const formatKickoffDate = (kickoffTimestamp: string) => {
   const [datePart] = kickoffTimestamp.split("T");
   const [year, month, day] = datePart.split("-").map(Number);
-  return `${day} ${PT_MONTHS[month - 1]}, ${year}`;
+  const weekday = PT_WEEKDAYS[new Date(Date.UTC(year, month - 1, day)).getUTCDay()];
+  return `${day} ${PT_MONTHS[month - 1]} ${year} (${weekday})`;
 };
 
 const formatKickoffTime = (kickoffTimestamp: string) => kickoffTimestamp.slice(11, 16);
@@ -168,13 +179,17 @@ export const APP_MATCHES: Match[] = [
   ).map(buildSupplementalMatch),
   ...KNOCKOUT_MATCHES.map(buildKnockoutMatch),
 ].map((match) => {
+  // Normalize the display date for every match (including the static base
+  // fixtures) so they all share the "29 Junho 2026 (segunda-feira)" format.
+  const kickoffDate = formatKickoffDate(match.kickoffTimestamp);
   const officialVenue = FIFA_MATCH_VENUES[match.id];
   if (!officialVenue) {
-    return match;
+    return { ...match, kickoffDate };
   }
 
   return {
     ...match,
+    kickoffDate,
     stadiumName: officialVenue.stadiumName.trim(),
     city: officialVenue.city.trim(),
   };

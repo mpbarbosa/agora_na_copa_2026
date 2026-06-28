@@ -171,7 +171,7 @@ export interface Match {
   city: string;
   stageName: string;
   kickoffTime: string; // e.g., "16:00"
-  kickoffDate: string; // e.g., "15 Junho, 2026"
+  kickoffDate: string; // e.g., "15 Junho 2026 (segunda-feira)"
   kickoffTimestamp: string; // ISO 8601 with offset, e.g., "2026-06-15T16:00:00-03:00"
   officialMatchUrl?: string;
   status: MatchStatus;
