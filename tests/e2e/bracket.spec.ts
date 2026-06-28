@@ -74,6 +74,85 @@ test.describe("Bracket view (Chaveamento)", () => {
     await expect(page.locator("#team-lineup-view")).toBeVisible();
   });
 
+  test("hovering an Oitavas card spotlights its 16-avos feeders and dims the rest", async ({ page }) => {
+    await page.goto("/");
+    await page.click("#btn-nav-chaveamento");
+    await expect(page.locator("#bracket-view")).toBeVisible();
+
+    // R16 #89 is fed by R32 #74 and #77; #73 is an unrelated 16-avos fixture.
+    const oitavas = page.locator("#bracket-stage-r16 #bracket-match-89");
+    const feederA = page.locator("#bracket-stage-r32 #bracket-match-74");
+    const feederB = page.locator("#bracket-stage-r32 #bracket-match-77");
+    const unrelated = page.locator("#bracket-stage-r32 #bracket-match-73");
+
+    // Idle: no spotlight anywhere.
+    await expect(feederA).toHaveAttribute("data-feeder-highlight", "none");
+
+    await oitavas.hover();
+
+    // The two feeders are highlighted; the unrelated 16-avos card is dimmed.
+    await expect(feederA).toHaveAttribute("data-feeder-highlight", "feeder");
+    await expect(feederB).toHaveAttribute("data-feeder-highlight", "feeder");
+    await expect(unrelated).toHaveAttribute("data-feeder-highlight", "dimmed");
+
+    // Moving the cursor away clears the spotlight.
+    await page.locator("#bracket-title").hover();
+    await expect(feederA).toHaveAttribute("data-feeder-highlight", "none");
+    await expect(unrelated).toHaveAttribute("data-feeder-highlight", "none");
+  });
+
+  test("keyboard focus spotlights the feeders (no hover)", async ({ page }) => {
+    await page.goto("/");
+    await page.click("#btn-nav-chaveamento");
+    await expect(page.locator("#bracket-view")).toBeVisible();
+
+    const oitavas = page.locator("#bracket-stage-r16 #bracket-match-89");
+    const feederA = page.locator("#bracket-stage-r32 #bracket-match-74");
+    const unrelated = page.locator("#bracket-stage-r32 #bracket-match-73");
+
+    // Tabbing to the card (focus) lights up its feeders…
+    await oitavas.focus();
+    await expect(feederA).toHaveAttribute("data-feeder-highlight", "feeder");
+    await expect(unrelated).toHaveAttribute("data-feeder-highlight", "dimmed");
+
+    // …and blurring it clears the spotlight.
+    await oitavas.blur();
+    await expect(feederA).toHaveAttribute("data-feeder-highlight", "none");
+  });
+});
+
+// Every knockout card also opens its match page on tap, so on touch the spotlight uses a
+// two-stage tap: the first tap reveals the feeders, a second tap on the same card opens
+// the match. Needs a touch-capable context (no hover), so it lives in its own group.
+test.describe("Bracket feeder spotlight on touch (two-stage tap)", () => {
+  test.use({ hasTouch: true });
+
+  test.beforeEach(async ({ page }) => {
+    await page.addInitScript(() => localStorage.setItem("feature-tour-seen", "1"));
+  });
+
+  test("first tap previews the 16-avos feeders, second tap opens the match", async ({ page }) => {
+    await page.goto("/");
+    await page.click("#btn-nav-chaveamento");
+    await expect(page.locator("#bracket-view")).toBeVisible();
+
+    const oitavas = page.locator("#bracket-stage-r16 #bracket-match-89");
+    const feederA = page.locator("#bracket-stage-r32 #bracket-match-74");
+    const feederB = page.locator("#bracket-stage-r32 #bracket-match-77");
+    const unrelated = page.locator("#bracket-stage-r32 #bracket-match-73");
+
+    // First tap spotlights the feeders WITHOUT leaving the bracket.
+    await oitavas.tap();
+    await expect(feederA).toHaveAttribute("data-feeder-highlight", "feeder");
+    await expect(feederB).toHaveAttribute("data-feeder-highlight", "feeder");
+    await expect(unrelated).toHaveAttribute("data-feeder-highlight", "dimmed");
+    await expect(page.locator("#bracket-view")).toBeVisible();
+
+    // Second tap on the same card opens its match page.
+    await oitavas.tap();
+    await expect(page.locator("#match-detail-view")).toBeVisible();
+  });
+
   test("renders correctly in dark theme without console errors", async ({ page }) => {
     const consoleErrors = collectAppConsoleErrors(page);
 

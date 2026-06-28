@@ -12,7 +12,7 @@
 // qualifying slot. Extracted from any endpoint so it can be tested in isolation
 // (tests/qualification-sim-core.test.ts) — mirrors predict-core.ts / weather-core.ts.
 
-import type { Match, StandingsRow } from "./src/types";
+import type { Match, StandingsRow, MatchOutcome } from "./src/types";
 import { computeStandings, groupStandings, rankBestThirds } from "./src/standings";
 
 // --- Seeded RNG (mulberry32) ---------------------------------------------------
@@ -140,8 +140,52 @@ function dixonColesTau(x: number, y: number, lambda: number, mu: number, rho: nu
 
 const STRENGTH_FALLBACK: TeamStrength = { attack: 1, defense: 1 };
 
+// A fixture's full scoreline grid: the expected goals (λ for home, μ for away) and the
+// normalised probability of every scoreline 0-0 … MAX×MAX. Built once per matchup and
+// shared by both the RNG sampler and the single-match predictor (predictMatchOutcome),
+// so the simulated tables and the bracket/Fan Zone palpite use the exact same model.
+interface ScoreCell {
+  home: number;
+  away: number;
+  prob: number;
+}
+
+interface ScoreGrid {
+  lambda: number; // expected home goals
+  mu: number; // expected away goals
+  cells: ScoreCell[]; // probabilities sum to 1
+}
+
+function buildScoreGrid(
+  model: StrengthModel,
+  homeCode: string,
+  awayCode: string,
+  rho: number,
+): ScoreGrid {
+  const home = model.teams.get(homeCode) ?? STRENGTH_FALLBACK;
+  const away = model.teams.get(awayCode) ?? STRENGTH_FALLBACK;
+  // λ = baseline · attack(self) · defense(opponent). Symmetric for the away side.
+  const lambda = clamp(model.baseline * home.attack * away.defense, MIN_EXPECTED_GOALS, MAX_EXPECTED_GOALS);
+  const mu = clamp(model.baseline * away.attack * home.defense, MIN_EXPECTED_GOALS, MAX_EXPECTED_GOALS);
+
+  const pmfHome = poissonPmf(lambda, MAX_GOALS_PER_SIDE);
+  const pmfAway = poissonPmf(mu, MAX_GOALS_PER_SIDE);
+
+  const cells: ScoreCell[] = [];
+  let total = 0;
+  for (let x = 0; x <= MAX_GOALS_PER_SIDE; x += 1) {
+    for (let y = 0; y <= MAX_GOALS_PER_SIDE; y += 1) {
+      const weight = pmfHome[x] * pmfAway[y] * Math.max(0, dixonColesTau(x, y, lambda, mu, rho));
+      total += weight;
+      cells.push({ home: x, away: y, prob: weight });
+    }
+  }
+  for (const cell of cells) cell.prob /= total;
+  return { lambda, mu, cells };
+}
+
 // A fixture's full scoreline distribution as a flat cumulative table, sampled by one
-// RNG draw. Built once per matchup and reused across iterations (λ/μ never change).
+// RNG draw. Built once per matchup and reused across iterations (the grid never changes).
 interface ScoreDistribution {
   cumulative: number[];
   scores: SampledScore[];
@@ -153,30 +197,13 @@ function buildScoreDistribution(
   awayCode: string,
   rho: number,
 ): ScoreDistribution {
-  const home = model.teams.get(homeCode) ?? STRENGTH_FALLBACK;
-  const away = model.teams.get(awayCode) ?? STRENGTH_FALLBACK;
-  // λ = baseline · attack(self) · defense(opponent). Symmetric for the away side.
-  const lambda = clamp(model.baseline * home.attack * away.defense, MIN_EXPECTED_GOALS, MAX_EXPECTED_GOALS);
-  const mu = clamp(model.baseline * away.attack * home.defense, MIN_EXPECTED_GOALS, MAX_EXPECTED_GOALS);
-
-  const pmfHome = poissonPmf(lambda, MAX_GOALS_PER_SIDE);
-  const pmfAway = poissonPmf(mu, MAX_GOALS_PER_SIDE);
-
+  const { cells } = buildScoreGrid(model, homeCode, awayCode, rho);
   const scores: SampledScore[] = [];
-  const weights: number[] = [];
-  let total = 0;
-  for (let x = 0; x <= MAX_GOALS_PER_SIDE; x += 1) {
-    for (let y = 0; y <= MAX_GOALS_PER_SIDE; y += 1) {
-      const weight = pmfHome[x] * pmfAway[y] * Math.max(0, dixonColesTau(x, y, lambda, mu, rho));
-      total += weight;
-      scores.push({ teamA: x, teamB: y });
-      weights.push(weight);
-    }
-  }
   const cumulative: number[] = [];
   let running = 0;
-  for (const weight of weights) {
-    running += weight / total;
+  for (const cell of cells) {
+    running += cell.prob;
+    scores.push({ teamA: cell.home, teamB: cell.away });
     cumulative.push(running);
   }
   return { cumulative, scores };
@@ -209,6 +236,50 @@ export function createPoissonSampler(
       if (u <= cumulative[i]) return scores[i];
     }
     return scores[scores.length - 1]; // RNG rounding guard
+  };
+}
+
+// --- Single-match prediction ---------------------------------------------------
+// The same Dixon–Coles bivariate Poisson model, collapsed for ONE fixture into a
+// win/draw/loss split plus the modal scoreline. No RNG, no sampling: it sums the
+// closed-form scoreline grid directly, so it is exact and deterministic. Powers the
+// Fan Zone and bracket "palpite simulado" (predict-core.ts narrates this outcome).
+
+/**
+ * Predict a single fixture from the current standings using the default Dixon–Coles
+ * Poisson model. Returns the home/draw/away probabilities (summing to ~1), each side's
+ * expected goals (λ/μ), and the most likely scoreline. Deterministic — same standings →
+ * same outcome. Unknown team codes fall back to league-average strength.
+ */
+export function predictMatchOutcome(
+  standings: StandingsRow[],
+  homeCode: string,
+  awayCode: string,
+  options: PoissonSamplerOptions = {},
+): MatchOutcome {
+  const priorWeight = Math.max(0, options.priorWeight ?? DEFAULT_PRIOR_WEIGHT);
+  const rho = options.rho ?? DEFAULT_RHO;
+  const model = buildStrengthModel(standings, priorWeight);
+  const { lambda, mu, cells } = buildScoreGrid(model, homeCode, awayCode, rho);
+
+  let homeWin = 0;
+  let draw = 0;
+  let awayWin = 0;
+  let modal = cells[0];
+  for (const cell of cells) {
+    if (cell.home > cell.away) homeWin += cell.prob;
+    else if (cell.home < cell.away) awayWin += cell.prob;
+    else draw += cell.prob;
+    if (cell.prob > modal.prob) modal = cell;
+  }
+
+  return {
+    homeWin,
+    draw,
+    awayWin,
+    expectedHomeGoals: lambda,
+    expectedAwayGoals: mu,
+    mostLikelyScore: { teamA: modal.home, teamB: modal.away },
   };
 }
 
