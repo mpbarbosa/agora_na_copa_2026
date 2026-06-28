@@ -46,6 +46,7 @@ import { computeStandings, groupStandings } from "./src/standings";
 import { buildPrediction, type PredictionTeam } from "./predict-core";
 import {
   estimateQualificationOdds,
+  predictMatchOutcome,
   type QualificationOdds,
 } from "./qualification-sim-core";
 import {
@@ -2371,11 +2372,12 @@ app.get("/api/questions", (_req, res) => {
   res.json(TRIVIA_QUESTIONS);
 });
 
-// POST /api/predict — Fan Zone match predictor. Body { homeTeam, awayTeam, userNotes? }
-// where home/awayTeam are team codes (or names). Returns { text (pt-BR markdown),
-// simulated: true } built by the deterministic predict-core heuristic from each
-// team's REAL current standings. No AI dependency, no env var, no failure mode —
-// always "simulated". Not FIFA-sourced, so it carries no resilience shape.
+// POST /api/predict — Fan Zone / bracket match predictor. Body { homeTeam, awayTeam,
+// userNotes? } where home/awayTeam are team codes (or names). Returns { text (pt-BR
+// markdown), simulated: true }: the Dixon–Coles bivariate Poisson model
+// (predictMatchOutcome) over each team's REAL current standings, narrated by
+// predict-core. No AI dependency, no env var, no failure mode — always "simulated".
+// Not FIFA-sourced, so it carries no resilience shape.
 app.post("/api/predict", (req, res) => {
   res.set("Cache-Control", "no-store");
   const body = (req.body ?? {}) as { homeTeam?: unknown; awayTeam?: unknown; userNotes?: unknown };
@@ -2419,7 +2421,8 @@ app.post("/api/predict", (req, res) => {
     goalDifference: row.goalDifference,
   });
 
-  res.json({ text: buildPrediction(toTeam(home), toTeam(away), userNotes), simulated: true });
+  const outcome = predictMatchOutcome(rows, home.code, away.code);
+  res.json({ text: buildPrediction(toTeam(home), toTeam(away), outcome, userNotes), simulated: true });
 });
 
 // Monte-Carlo estimate of a team's odds of reaching the Round of 32 (top two of its

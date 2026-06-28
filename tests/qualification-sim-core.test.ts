@@ -8,6 +8,7 @@ import {
   createPoissonSampler,
   createRng,
   listRemainingGroupMatches,
+  predictMatchOutcome,
 } from "../qualification-sim-core";
 
 // --- Fixtures grounded in the real seed roster --------------------------------
@@ -194,4 +195,34 @@ test("shrinkage pulls an inflated expectation toward the league baseline", () =>
   };
   // Heavy shrinkage must produce fewer expected goals than no shrinkage.
   assert.ok(meanGoals(5) < meanGoals(0), "more shrinkage should lower an inflated expectation");
+});
+
+// --- Single-match prediction (predictMatchOutcome) ----------------------------
+
+test("predictMatchOutcome returns a coherent win/draw/loss distribution", () => {
+  const standings = [row("AAA", 2, 3, 2), row("BBB", 2, 2, 3)];
+  const outcome = predictMatchOutcome(standings, "AAA", "BBB");
+  for (const p of [outcome.homeWin, outcome.draw, outcome.awayWin]) {
+    assert.ok(p >= 0 && p <= 1, `probability out of range: ${p}`);
+  }
+  assert.ok(Math.abs(outcome.homeWin + outcome.draw + outcome.awayWin - 1) < 1e-9, "win/draw/loss must sum to 1");
+  assert.ok(outcome.expectedHomeGoals > 0 && outcome.expectedAwayGoals > 0);
+  assert.ok(Number.isInteger(outcome.mostLikelyScore.teamA) && Number.isInteger(outcome.mostLikelyScore.teamB));
+});
+
+test("predictMatchOutcome favors the stronger campaign and is deterministic", () => {
+  // FRK scored freely and conceded nothing; WEK was thrashed — FRK should be favored.
+  const standings = [row("FRK", 2, 6, 0), row("WEK", 2, 0, 6)];
+  const a = predictMatchOutcome(standings, "FRK", "WEK");
+  const b = predictMatchOutcome(standings, "FRK", "WEK");
+  assert.deepEqual(a, b); // same standings → same outcome (no RNG)
+  assert.ok(a.homeWin > a.awayWin, "the stronger side should win more often");
+  assert.ok(a.expectedHomeGoals > a.expectedAwayGoals, "the stronger side should be expected to score more");
+});
+
+test("predictMatchOutcome treats two equal teams symmetrically", () => {
+  const standings = [row("EQA", 2, 2, 2), row("EQB", 2, 2, 2)];
+  const outcome = predictMatchOutcome(standings, "EQA", "EQB");
+  assert.ok(Math.abs(outcome.homeWin - outcome.awayWin) < 1e-9, "equal teams → equal win odds (no home edge modeled)");
+  assert.ok(Math.abs(outcome.expectedHomeGoals - outcome.expectedAwayGoals) < 1e-9);
 });

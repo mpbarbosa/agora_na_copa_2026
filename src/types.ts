@@ -356,6 +356,21 @@ export interface PredictionResponse {
   simulated: boolean;
 }
 
+/**
+ * A single match's outcome distribution from the Dixon–Coles-corrected bivariate
+ * Poisson model (built in `qualification-sim-core.ts`). `homeWin`/`draw`/`awayWin`
+ * sum to ~1; `mostLikelyScore` is the grid's modal scoreline (teamA = home goals).
+ * Consumed by `predict-core.ts` to narrate the Fan Zone / bracket "palpite simulado".
+ */
+export interface MatchOutcome {
+  homeWin: number;
+  draw: number;
+  awayWin: number;
+  expectedHomeGoals: number;
+  expectedAwayGoals: number;
+  mostLikelyScore: { teamA: number; teamB: number };
+}
+
 export interface TournamentPlayerLeader {
   id: string;
   name: string;

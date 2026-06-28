@@ -27,9 +27,9 @@ interface BracketPredictorPanelProps {
 type Status = "idle" | "loading" | "ready" | "error";
 
 // Predicts a defined knockout tie via /api/predict — the same deterministic
-// "palpite simulado" heuristic the Fan Zone uses, but driven by the bracket's
-// own already-resolved fixtures (confirmed or provisional) rather than a free
-// two-team choice. Only fixtures with both sides resolved are offered.
+// Dixon–Coles Poisson "palpite simulado" the Fan Zone uses, but driven by the
+// bracket's own already-resolved fixtures (confirmed or provisional) rather than
+// a free two-team choice. Only fixtures with both sides resolved are offered.
 export function BracketPredictorPanel({ theme, fixtures }: BracketPredictorPanelProps) {
   const isLight = theme === "classic-light";
   const [selected, setSelected] = useState<number | null>(fixtures[0]?.matchNumber ?? null);
@@ -94,7 +94,8 @@ export function BracketPredictorPanel({ theme, fixtures }: BracketPredictorPanel
             Palpite do confronto
           </h3>
           <p className={`mt-1 font-archivo text-sm ${mutedClasses}`}>
-            Escolha um cruzamento já definido do mata-mata e gere um prognóstico pela campanha atual das seleções.
+            Escolha um cruzamento já definido do mata-mata e gere um prognóstico por um modelo estatístico
+            (Poisson/Dixon-Coles) sobre a campanha atual das seleções.
           </p>
         </div>
         <span
