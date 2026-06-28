@@ -90,8 +90,8 @@ export const FIFA_SCHEDULED_MATCHES: FifaScheduledMatchSeed[] = [
   { teamA: "UZB", teamB: "COL", kickoffTimestamp: "2026-06-17T23:00:00-03:00", status: "FINISHED", score: { teamA: 1, teamB: 3 }, ...v("UZB", "COL") },
   { teamA: "POR", teamB: "UZB", kickoffTimestamp: "2026-06-23T14:00:00-03:00", status: "FINISHED", score: { teamA: 5, teamB: 0 }, ...v("POR", "UZB") },
   { teamA: "COL", teamB: "COD", kickoffTimestamp: "2026-06-23T23:00:00-03:00", status: "FINISHED", score: { teamA: 1, teamB: 0 }, ...v("COL", "COD") },
-  { teamA: "COL", teamB: "POR", kickoffTimestamp: "2026-06-27T20:30:00-03:00", status: "PRE_GAME", ...v("COL", "POR") },
-  { teamA: "COD", teamB: "UZB", kickoffTimestamp: "2026-06-27T20:30:00-03:00", status: "PRE_GAME", ...v("COD", "UZB") },
+  { teamA: "COL", teamB: "POR", kickoffTimestamp: "2026-06-27T20:30:00-03:00", status: "FINISHED", score: { teamA: 0, teamB: 0 }, ...v("COL", "POR") },
+  { teamA: "COD", teamB: "UZB", kickoffTimestamp: "2026-06-27T20:30:00-03:00", status: "FINISHED", score: { teamA: 3, teamB: 1 }, ...v("COD", "UZB") },
 
   // ── Grupo L ───────────────────────────────────────────────────────────────
   { teamA: "ENG", teamB: "CRO", kickoffTimestamp: "2026-06-17T17:00:00-03:00", status: "FINISHED", score: { teamA: 4, teamB: 2 }, ...v("ENG", "CRO") },
