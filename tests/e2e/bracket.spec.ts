@@ -209,10 +209,15 @@ test.describe("Bracket feeder spotlight on mobile (collapses the columns)", () =
     const feederA = page.locator("#bracket-stage-r32 #bracket-match-74");
     const feederB = page.locator("#bracket-stage-r32 #bracket-match-77");
     const unrelated = page.locator("#bracket-stage-r32 #bracket-match-73");
+    // The visible (mobile) count in each column's subheading.
+    const r16Count = page.locator("#bracket-stage-r16-summary span:visible");
+    const r32Count = page.locator("#bracket-stage-r32-summary span:visible");
 
-    // Idle: the whole column is visible.
+    // Idle: the whole column is visible, full tally shown.
     await expect(sibling).toBeVisible();
     await expect(unrelated).toBeVisible();
+    await expect(r16Count).toHaveText("8 confrontos");
+    await expect(r32Count).toHaveText("16 confrontos");
 
     // First tap collapses everything but the selected tie and its two feeders.
     await selected.tap();
@@ -221,6 +226,9 @@ test.describe("Bracket feeder spotlight on mobile (collapses the columns)", () =
     await expect(feederB).toBeVisible();
     await expect(sibling).toBeHidden(); // display:none — out of the flow
     await expect(unrelated).toBeHidden();
+    // …and the subheadings follow the collapse: just the tie, just its two feeders.
+    await expect(r16Count).toHaveText("1 confronto");
+    await expect(r32Count).toHaveText("2 confrontos");
 
     // Second tap on the selected card still opens its match page.
     await selected.tap();
