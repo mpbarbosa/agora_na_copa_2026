@@ -97,6 +97,26 @@ test.describe("Bracket view (Chaveamento)", () => {
     await expect(unrelated).toBeHidden();
     await expect(feederA).toBeVisible();
 
+    // The two feeders slide together (≈12px gap-3 apart) and centre on the hovered card,
+    // instead of staying several rows apart in their column.
+    await expect
+      .poll(async () => {
+        const a = await feederA.boundingBox();
+        const b = await feederB.boundingBox();
+        return a && b ? Math.round(b.y - (a.y + a.height)) : null;
+      })
+      .toBeLessThanOrEqual(14);
+    const aBox = await feederA.boundingBox();
+    const bBox = await feederB.boundingBox();
+    const oBox = await oitavas.boundingBox();
+    // The hovered card's centre falls within the grouped pair's vertical span — i.e. the
+    // pair sits right beside what it feeds (centred on it when the column edges allow).
+    const pairTop = aBox!.y;
+    const pairBottom = bBox!.y + bBox!.height;
+    const cardCentre = oBox!.y + oBox!.height / 2;
+    expect(cardCentre).toBeGreaterThanOrEqual(pairTop - 4);
+    expect(cardCentre).toBeLessThanOrEqual(pairBottom + 4);
+
     // Moving the cursor away clears the spotlight.
     await page.locator("#bracket-title").hover();
     await expect(feederA).toHaveAttribute("data-feeder-highlight", "none");
