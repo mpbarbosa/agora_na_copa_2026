@@ -119,6 +119,11 @@ function isCollapsedOnMobile(match: KnockoutMatch, highlight: FeederHighlight | 
   return isUnrelatedFeeder || isUnselectedSibling;
 }
 
+// "N confrontos" (singular when N === 1), for the column subheading.
+function confrontosLabel(count: number): string {
+  return `${count} ${count === 1 ? "confronto" : "confrontos"}`;
+}
+
 // All 48 teams keyed by code, for resolving a confirmed knockout team's flag/name.
 function buildTeamMetaMap(matches: Match[]): Map<string, TeamMeta> {
   const map = new Map<string, TeamMeta>();
@@ -479,6 +484,10 @@ function BracketStageColumn({ stage, matches, theme, teamMeta, groupPositions, m
   const headingClasses = isLight ? "text-slate-900" : "text-white";
   const subtleClasses = isLight ? "text-slate-500" : "text-slate-400";
 
+  // On mobile the column collapses to the cards still in view, so the count must follow —
+  // desktop keeps the full tally. Equal (the full count) whenever nothing is collapsed.
+  const mobileVisibleCount = matches.filter((m) => !isCollapsedOnMobile(m, feederHighlight)).length;
+
   return (
     <section
       id={`bracket-stage-${stage.toLowerCase()}`}
@@ -488,12 +497,20 @@ function BracketStageColumn({ stage, matches, theme, teamMeta, groupPositions, m
         <h3 className={`font-anton text-lg uppercase tracking-wide ${headingClasses}`}>
           {STAGE_LABELS[stage]}
         </h3>
-        <p className={`mt-1 font-mono text-[10px] uppercase tracking-wider ${subtleClasses}`}>
-          {stage === "F"
-            ? "Grande final em East Rutherford"
-            : stage === "TP"
-              ? "Disputa do 3º lugar"
-              : `${matches.length} confrontos`}
+        <p
+          id={`bracket-stage-${stage.toLowerCase()}-summary`}
+          className={`mt-1 font-mono text-[10px] uppercase tracking-wider ${subtleClasses}`}
+        >
+          {stage === "F" ? (
+            "Grande final em East Rutherford"
+          ) : stage === "TP" ? (
+            "Disputa do 3º lugar"
+          ) : (
+            <>
+              <span className="md:hidden">{confrontosLabel(mobileVisibleCount)}</span>
+              <span className="hidden md:inline">{confrontosLabel(matches.length)}</span>
+            </>
+          )}
         </p>
       </div>
 
