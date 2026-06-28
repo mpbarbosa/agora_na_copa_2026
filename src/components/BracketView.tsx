@@ -324,16 +324,17 @@ function BracketMatchCard({ match, theme, teamMeta, groupPositions, matchId, fee
   const subtleClasses = isLight ? "text-slate-500" : "text-slate-400";
 
   // When another card is hovered, spotlight the fixtures that feed it: ring the feeders
-  // and dim the rest of that same column. Cards in other columns are left untouched.
+  // and hide the rest of that same column (kept in the layout via visibility:hidden so the
+  // feeders stay aligned with their connectors). Cards in other columns are left untouched.
   const isFeeder = feederHighlight?.numbers.has(match.matchNumber) ?? false;
-  const isDimmed = !!feederHighlight && feederHighlight.stage === match.stage && !isFeeder;
-  const highlightState = isFeeder ? "feeder" : isDimmed ? "dimmed" : "none";
+  const isHidden = !!feederHighlight && feederHighlight.stage === match.stage && !isFeeder;
+  const highlightState = isFeeder ? "feeder" : isHidden ? "hidden" : "none";
   const feederRingClass = isFeeder
     ? isLight
       ? "ring-2 ring-[#009c3b]"
       : "ring-2 ring-[#00e476]"
     : "";
-  const dimClass = isDimmed ? "opacity-40" : "";
+  const hideClass = isHidden ? "invisible" : "";
 
   // Two-stage tap: on touch, the first tap on a feeder-bearing card reveals its feeders
   // (no navigation); a second tap on the already-spotlighted card opens its match. We
@@ -389,7 +390,7 @@ function BracketMatchCard({ match, theme, teamMeta, groupPositions, matchId, fee
         }
         if (matchId) onSelectMatch(matchId);
       }}
-      className={`rounded-2xl border p-3 outline-none transition focus-visible:ring-2 focus-visible:ring-sky-400 ${cardClasses} ${feederRingClass} ${dimClass} ${matchId ? "cursor-pointer hover:brightness-95" : ""}`}
+      className={`rounded-2xl border p-3 outline-none transition focus-visible:ring-2 focus-visible:ring-sky-400 ${cardClasses} ${feederRingClass} ${hideClass} ${matchId ? "cursor-pointer hover:brightness-95" : ""}`}
     >
       <div className={`flex flex-wrap items-center gap-x-3 gap-y-1 font-mono text-[10px] uppercase tracking-wider ${subtleClasses}`}>
         <span className="font-bold">#{match.matchNumber}</span>
@@ -509,7 +510,7 @@ export function BracketView({ theme, matches, onSelectTeamLineup, onSelectMatch 
   }, []);
 
   // Hovering a card spotlights the fixtures that feed it in the previous column
-  // (e.g. an Oitavas tie highlights its two 16-avos feeders, dimming the rest).
+  // (e.g. an Oitavas tie highlights its two 16-avos feeders, hiding the rest).
   const [hoveredMatch, setHoveredMatch] = useState<number | null>(null);
   const feederHighlight = useMemo<FeederHighlight | null>(() => {
     if (hoveredMatch === null) return null;
