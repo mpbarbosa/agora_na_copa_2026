@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from "react";
+import { useLayoutEffect, useMemo, useRef, useState } from "react";
 import { CalendarDays, MapPin, Medal } from "lucide-react";
 import { KNOCKOUT_MATCHES } from "../data/knockoutBracket";
 import type { KnockoutMatch, Match, TeamRef } from "../types";
@@ -313,19 +313,23 @@ interface BracketMatchCardProps {
   feederHighlight: FeederHighlight | null;
   /** The currently spotlighted match number (hover/focus/tap), or null. */
   hoveredMatch: number | null;
+  /** translateY (px) to slide this feeder card next to its sibling, beside the hovered card. */
+  feederShift: number | undefined;
   onHoverMatch: (matchNumber: number | null) => void;
   onSelectTeamLineup: (team: TeamRef) => void;
   onSelectMatch: (matchId: string) => void;
 }
 
-function BracketMatchCard({ match, theme, teamMeta, groupPositions, matchId, feederHighlight, hoveredMatch, onHoverMatch, onSelectTeamLineup, onSelectMatch }: BracketMatchCardProps) {
+function BracketMatchCard({ match, theme, teamMeta, groupPositions, matchId, feederHighlight, hoveredMatch, feederShift, onHoverMatch, onSelectTeamLineup, onSelectMatch }: BracketMatchCardProps) {
   const isLight = theme === "classic-light";
   const cardClasses = isLight ? "bg-white border-slate-200" : "bg-[#161919] border-white/10";
   const subtleClasses = isLight ? "text-slate-500" : "text-slate-400";
 
-  // When another card is hovered, spotlight the fixtures that feed it: ring the feeders
-  // and hide the rest of that same column (kept in the layout via visibility:hidden so the
-  // feeders stay aligned with their connectors). Cards in other columns are left untouched.
+  // When another card is hovered, spotlight the fixtures that feed it: ring the two feeders
+  // and hide the rest of that same column. Hidden cards stay in the layout (visibility:hidden)
+  // so the column keeps its height and nothing else jumps; the two feeders are then slid
+  // together (translateY via feederShift, measured by the parent) to sit side-by-side next to
+  // the hovered card. Cards in other columns are left untouched.
   const isFeeder = feederHighlight?.numbers.has(match.matchNumber) ?? false;
   const isHidden = !!feederHighlight && feederHighlight.stage === match.stage && !isFeeder;
   const highlightState = isFeeder ? "feeder" : isHidden ? "hidden" : "none";
@@ -335,6 +339,10 @@ function BracketMatchCard({ match, theme, teamMeta, groupPositions, matchId, fee
       : "ring-2 ring-[#00e476]"
     : "";
   const hideClass = isHidden ? "invisible" : "";
+  // Only a feeder slides, and only once its shift has been measured; everything else sits put.
+  const feederShiftClass = isFeeder ? "relative z-10 transition-transform duration-200 ease-out" : "";
+  const feederShiftStyle =
+    isFeeder && feederShift !== undefined ? { transform: `translateY(${feederShift}px)` } : undefined;
 
   // Two-stage tap: on touch, the first tap on a feeder-bearing card reveals its feeders
   // (no navigation); a second tap on the already-spotlighted card opens its match. We
@@ -390,7 +398,8 @@ function BracketMatchCard({ match, theme, teamMeta, groupPositions, matchId, fee
         }
         if (matchId) onSelectMatch(matchId);
       }}
-      className={`rounded-2xl border p-3 outline-none transition focus-visible:ring-2 focus-visible:ring-sky-400 ${cardClasses} ${feederRingClass} ${hideClass} ${matchId ? "cursor-pointer hover:brightness-95" : ""}`}
+      style={feederShiftStyle}
+      className={`rounded-2xl border p-3 outline-none transition focus-visible:ring-2 focus-visible:ring-sky-400 ${cardClasses} ${feederRingClass} ${hideClass} ${feederShiftClass} ${matchId ? "cursor-pointer hover:brightness-95" : ""}`}
     >
       <div className={`flex flex-wrap items-center gap-x-3 gap-y-1 font-mono text-[10px] uppercase tracking-wider ${subtleClasses}`}>
         <span className="font-bold">#{match.matchNumber}</span>
@@ -439,12 +448,14 @@ interface BracketStageColumnProps {
   matchIdByNumber: Map<number, string>;
   feederHighlight: FeederHighlight | null;
   hoveredMatch: number | null;
+  /** matchNumber → translateY (px) for the feeders being grouped beside the hovered card. */
+  feederShifts: Map<number, number>;
   onHoverMatch: (matchNumber: number | null) => void;
   onSelectTeamLineup: (team: TeamRef) => void;
   onSelectMatch: (matchId: string) => void;
 }
 
-function BracketStageColumn({ stage, matches, theme, teamMeta, groupPositions, matchIdByNumber, feederHighlight, hoveredMatch, onHoverMatch, onSelectTeamLineup, onSelectMatch }: BracketStageColumnProps) {
+function BracketStageColumn({ stage, matches, theme, teamMeta, groupPositions, matchIdByNumber, feederHighlight, hoveredMatch, feederShifts, onHoverMatch, onSelectTeamLineup, onSelectMatch }: BracketStageColumnProps) {
   const isLight = theme === "classic-light";
   const stageClasses = isLight ? "bg-slate-50 border-slate-200" : "bg-white/5 border-white/10";
   const headingClasses = isLight ? "text-slate-900" : "text-white";
@@ -468,7 +479,7 @@ function BracketStageColumn({ stage, matches, theme, teamMeta, groupPositions, m
         </p>
       </div>
 
-      <div className="flex flex-col gap-3">
+      <div className="relative flex flex-col gap-3">
         {matches.map((match) => (
           <div key={match.matchNumber}>
             <BracketMatchCard
@@ -479,6 +490,7 @@ function BracketStageColumn({ stage, matches, theme, teamMeta, groupPositions, m
               matchId={matchIdByNumber.get(match.matchNumber) ?? null}
               feederHighlight={feederHighlight}
               hoveredMatch={hoveredMatch}
+              feederShift={feederShifts.get(match.matchNumber)}
               onHoverMatch={onHoverMatch}
               onSelectTeamLineup={onSelectTeamLineup}
               onSelectMatch={onSelectMatch}
@@ -522,6 +534,51 @@ export function BracketView({ theme, matches, onSelectTeamLineup, onSelectMatch 
     if (!feederStage) return null;
     return { stage: feederStage, numbers: new Set(numbers) };
   }, [hoveredMatch]);
+
+  // The two feeders sit several rows apart in their column, so spotlighting them alone leaves
+  // a gap. Measure the live layout and slide each feeder (translateY) so the pair stacks
+  // together, vertically centred on the hovered card — grouped right beside what they feed.
+  // We use offsetTop (immune to any transform already applied) so re-hovering never drifts,
+  // and run in a layout effect so the slide is set before paint. Keyed by match number.
+  const [feederShifts, setFeederShifts] = useState<Map<number, number>>(() => new Map());
+  useLayoutEffect(() => {
+    if (hoveredMatch === null || !feederHighlight) {
+      setFeederShifts((prev) => (prev.size === 0 ? prev : new Map()));
+      return;
+    }
+    const hovered = document.getElementById(`bracket-match-${hoveredMatch}`);
+    // article → key wrapper → the relative list column the offsets are measured against.
+    const listOf = (el: HTMLElement | null) => el?.parentElement?.parentElement ?? null;
+    const hoveredList = listOf(hovered);
+    const feeders = [...feederHighlight.numbers]
+      .sort((a, b) => a - b)
+      .map((n) => document.getElementById(`bracket-match-${n}`))
+      .filter((el): el is HTMLElement => el !== null);
+    const feederList = listOf(feeders[0]);
+    if (!hovered || !hoveredList || feeders.length === 0 || !feederList) {
+      setFeederShifts((prev) => (prev.size === 0 ? prev : new Map()));
+      return;
+    }
+
+    const GAP = 12; // matches the column's gap-3
+    const hoveredListTop = hoveredList.getBoundingClientRect().top;
+    const feederListTop = feederList.getBoundingClientRect().top;
+    const hoveredCentre = hoveredListTop + hovered.offsetTop + hovered.offsetHeight / 2;
+
+    const pairHeight = feeders.reduce((sum, el) => sum + el.offsetHeight, 0) + GAP * (feeders.length - 1);
+    // Keep the grouped pair inside the feeder column's body (never overlapping its heading).
+    const maxTop = feederListTop + feederList.offsetHeight - pairHeight;
+    const pairTop = Math.max(feederListTop, Math.min(hoveredCentre - pairHeight / 2, maxTop));
+
+    const next = new Map<number, number>();
+    let cursor = pairTop;
+    for (const el of feeders) {
+      const current = feederListTop + el.offsetTop;
+      next.set(Number(el.id.replace("bracket-match-", "")), cursor - current);
+      cursor += el.offsetHeight + GAP;
+    }
+    setFeederShifts(next);
+  }, [hoveredMatch, feederHighlight]);
 
   const isLight = theme === "classic-light";
   const shellClasses = isLight ? "bg-white border-slate-200 shadow-sm" : "bg-[#121414] border-white/10";
@@ -606,6 +663,7 @@ export function BracketView({ theme, matches, onSelectTeamLineup, onSelectMatch 
                 matchIdByNumber={matchIdByNumber}
                 feederHighlight={feederHighlight}
                 hoveredMatch={hoveredMatch}
+                feederShifts={feederShifts}
                 onHoverMatch={setHoveredMatch}
                 onSelectTeamLineup={onSelectTeamLineup}
                 onSelectMatch={onSelectMatch}
