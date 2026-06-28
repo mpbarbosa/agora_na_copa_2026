@@ -173,6 +173,72 @@ function startBracketTour(theme: Theme, onEnd?: () => void): void {
   );
 }
 
+// An Oitavas tie whose two 16-avos feeders are confirmed numbers (#74 and #77), used to
+// demo the feeder spotlight. The spotlight is hover-driven in BracketView; we trigger it
+// with a synthetic MOUSE pointer event (never focus) so it survives the tour popover taking
+// focus — and clear it with the matching leave event when the tour ends.
+const FEEDER_DEMO_MATCH = 89;
+
+function dispatchMousePointer(card: HTMLElement, types: string[]): void {
+  for (const type of types) {
+    card.dispatchEvent(new PointerEvent(type, { pointerType: "mouse", bubbles: true, cancelable: true }));
+  }
+}
+
+function spotlightTie(matchNumber: number): void {
+  const card = document.getElementById(`bracket-match-${matchNumber}`);
+  if (card) dispatchMousePointer(card, ["pointerover", "pointerenter"]);
+}
+
+function clearTieSpotlight(matchNumber: number): void {
+  const card = document.getElementById(`bracket-match-${matchNumber}`);
+  if (card) dispatchMousePointer(card, ["pointerout", "pointerleave"]);
+}
+
+/** "Quem decide o adversário" — Chaveamento → hover an Oitavas tie → spotlight its 16-avos feeders. */
+function startBracketFeederTour(theme: Theme, onEnd?: () => void): void {
+  const OITAVAS = `#bracket-match-${FEEDER_DEMO_MATCH}`;
+  const FEEDER = "#bracket-match-74";
+  const FEEDER_ACTIVE = '#bracket-stage-r32 [data-feeder-highlight="feeder"]';
+  runActionTour(
+    theme,
+    [
+      {
+        element: "#btn-nav-chaveamento",
+        title: "Quem decide o adversário? 🔍",
+        description:
+          'No Mata-mata, cada confronto nasce de dois jogos da fase anterior — e dá para ver quais. Abra a aba Mata-mata no "Próximo".',
+        side: "bottom",
+        align: "start",
+        act: () => document.getElementById("btn-nav-chaveamento")?.click(),
+        waitFor: "#bracket-stage-grid",
+      },
+      {
+        element: OITAVAS,
+        title: "Aponte para um jogo das Oitavas",
+        description:
+          'Passe o mouse (ou toque, no celular) num confronto das Oitavas. No "Próximo" eu faço isso por você.',
+        side: "bottom",
+        align: "center",
+        act: () => spotlightTie(FEEDER_DEMO_MATCH),
+        waitFor: FEEDER_ACTIVE,
+      },
+      {
+        element: FEEDER,
+        title: "Os 2 jogos das 16 avos ✓",
+        description:
+          "Prontinho! As 16 avos acendem os dois jogos que decidem quem chega a este confronto — destacados e lado a lado. O resto da coluna some para focar no caminho.",
+        side: "bottom",
+        align: "center",
+      },
+    ],
+    () => {
+      clearTieSpotlight(FEEDER_DEMO_MATCH);
+      onEnd?.();
+    },
+  );
+}
+
 /** "Histórico de jogos do grupo" — Grupos → open a group card's match-history details. */
 function startGroupHistoryTour(theme: Theme, onEnd?: () => void): void {
   const HISTORY = "#standings-group-history-grupo-a";
@@ -233,4 +299,5 @@ export const TIP_TOURS: TipTour[] = [
   { id: "best-thirds", start: startBestThirdsTour },
   { id: "bracket", start: startBracketTour },
   { id: "group-history", start: startGroupHistoryTour },
+  { id: "bracket-feeder", start: startBracketFeederTour },
 ];
