@@ -74,7 +74,7 @@ test.describe("Bracket view (Chaveamento)", () => {
     await expect(page.locator("#team-lineup-view")).toBeVisible();
   });
 
-  test("hovering an Oitavas card spotlights its 16-avos feeders and dims the rest", async ({ page }) => {
+  test("hovering an Oitavas card spotlights its 16-avos feeders and hides the rest", async ({ page }) => {
     await page.goto("/");
     await page.click("#btn-nav-chaveamento");
     await expect(page.locator("#bracket-view")).toBeVisible();
@@ -90,10 +90,12 @@ test.describe("Bracket view (Chaveamento)", () => {
 
     await oitavas.hover();
 
-    // The two feeders are highlighted; the unrelated 16-avos card is dimmed.
+    // The two feeders are highlighted; the unrelated 16-avos card is hidden.
     await expect(feederA).toHaveAttribute("data-feeder-highlight", "feeder");
     await expect(feederB).toHaveAttribute("data-feeder-highlight", "feeder");
-    await expect(unrelated).toHaveAttribute("data-feeder-highlight", "dimmed");
+    await expect(unrelated).toHaveAttribute("data-feeder-highlight", "hidden");
+    await expect(unrelated).toBeHidden();
+    await expect(feederA).toBeVisible();
 
     // Moving the cursor away clears the spotlight.
     await page.locator("#bracket-title").hover();
@@ -113,7 +115,7 @@ test.describe("Bracket view (Chaveamento)", () => {
     // Tabbing to the card (focus) lights up its feeders…
     await oitavas.focus();
     await expect(feederA).toHaveAttribute("data-feeder-highlight", "feeder");
-    await expect(unrelated).toHaveAttribute("data-feeder-highlight", "dimmed");
+    await expect(unrelated).toHaveAttribute("data-feeder-highlight", "hidden");
 
     // …and blurring it clears the spotlight.
     await oitavas.blur();
@@ -145,7 +147,7 @@ test.describe("Bracket feeder spotlight on touch (two-stage tap)", () => {
     await oitavas.tap();
     await expect(feederA).toHaveAttribute("data-feeder-highlight", "feeder");
     await expect(feederB).toHaveAttribute("data-feeder-highlight", "feeder");
-    await expect(unrelated).toHaveAttribute("data-feeder-highlight", "dimmed");
+    await expect(unrelated).toHaveAttribute("data-feeder-highlight", "hidden");
     await expect(page.locator("#bracket-view")).toBeVisible();
 
     // Second tap on the same card opens its match page.
