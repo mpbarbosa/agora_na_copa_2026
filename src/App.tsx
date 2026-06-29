@@ -127,7 +127,7 @@ export default function App() {
   const renderActiveView = () => {
     switch (activeNavItem.id) {
       case "dashboard":
-        return <DashboardView theme={theme} />;
+        return <DashboardView theme={theme} matches={matches} />;
       case "ao-vivo":
         return (
           <MatchDetailView

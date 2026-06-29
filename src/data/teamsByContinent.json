@@ -1,0 +1,242 @@
+{
+  "title": "Seleções por continente",
+  "tournament": "Copa do Mundo FIFA 2026",
+  "totalTeams": 48,
+  "note": "Seleções classificadas agrupadas por confederação da FIFA (a noção de continente no futebol). Os totais refletem o chaveamento real, incluindo as vencedoras da repescagem intercontinental.",
+  "continents": [
+    {
+      "continent": "Europa",
+      "confederation": "UEFA",
+      "count": 16,
+      "teams": [
+        {
+          "code": "GER",
+          "name": "Alemanha"
+        },
+        {
+          "code": "AUT",
+          "name": "Áustria"
+        },
+        {
+          "code": "BEL",
+          "name": "Bélgica"
+        },
+        {
+          "code": "BIH",
+          "name": "Bósnia e Herzegovina"
+        },
+        {
+          "code": "CRO",
+          "name": "Croácia"
+        },
+        {
+          "code": "SCO",
+          "name": "Escócia"
+        },
+        {
+          "code": "ESP",
+          "name": "Espanha"
+        },
+        {
+          "code": "FRA",
+          "name": "França"
+        },
+        {
+          "code": "NED",
+          "name": "Holanda"
+        },
+        {
+          "code": "ENG",
+          "name": "Inglaterra"
+        },
+        {
+          "code": "NOR",
+          "name": "Noruega"
+        },
+        {
+          "code": "POR",
+          "name": "Portugal"
+        },
+        {
+          "code": "SWE",
+          "name": "Suécia"
+        },
+        {
+          "code": "SUI",
+          "name": "Suíça"
+        },
+        {
+          "code": "CZE",
+          "name": "Tchéquia"
+        },
+        {
+          "code": "TUR",
+          "name": "Turquia"
+        }
+      ]
+    },
+    {
+      "continent": "África",
+      "confederation": "CAF",
+      "count": 10,
+      "teams": [
+        {
+          "code": "RSA",
+          "name": "África do Sul"
+        },
+        {
+          "code": "ALG",
+          "name": "Argélia"
+        },
+        {
+          "code": "CPV",
+          "name": "Cabo Verde"
+        },
+        {
+          "code": "CIV",
+          "name": "Costa do Marfim"
+        },
+        {
+          "code": "EGY",
+          "name": "Egito"
+        },
+        {
+          "code": "GHA",
+          "name": "Gana"
+        },
+        {
+          "code": "MAR",
+          "name": "Marrocos"
+        },
+        {
+          "code": "COD",
+          "name": "RD Congo"
+        },
+        {
+          "code": "SEN",
+          "name": "Senegal"
+        },
+        {
+          "code": "TUN",
+          "name": "Tunísia"
+        }
+      ]
+    },
+    {
+      "continent": "Ásia",
+      "confederation": "AFC",
+      "count": 9,
+      "teams": [
+        {
+          "code": "KSA",
+          "name": "Arábia Saudita"
+        },
+        {
+          "code": "AUS",
+          "name": "Austrália"
+        },
+        {
+          "code": "QAT",
+          "name": "Catar"
+        },
+        {
+          "code": "KOR",
+          "name": "Coréia do Sul"
+        },
+        {
+          "code": "IRN",
+          "name": "Irã"
+        },
+        {
+          "code": "IRQ",
+          "name": "Iraque"
+        },
+        {
+          "code": "JPN",
+          "name": "Japão"
+        },
+        {
+          "code": "JOR",
+          "name": "Jordânia"
+        },
+        {
+          "code": "UZB",
+          "name": "Uzbequistão"
+        }
+      ]
+    },
+    {
+      "continent": "América do Sul",
+      "confederation": "CONMEBOL",
+      "count": 6,
+      "teams": [
+        {
+          "code": "ARG",
+          "name": "Argentina"
+        },
+        {
+          "code": "BRA",
+          "name": "Brasil"
+        },
+        {
+          "code": "COL",
+          "name": "Colômbia"
+        },
+        {
+          "code": "ECU",
+          "name": "Equador"
+        },
+        {
+          "code": "PAR",
+          "name": "Paraguai"
+        },
+        {
+          "code": "URU",
+          "name": "Uruguai"
+        }
+      ]
+    },
+    {
+      "continent": "América do Norte, Central e Caribe",
+      "confederation": "CONCACAF",
+      "count": 6,
+      "teams": [
+        {
+          "code": "CAN",
+          "name": "Canadá"
+        },
+        {
+          "code": "CUW",
+          "name": "Curaçao"
+        },
+        {
+          "code": "USA",
+          "name": "Estados Unidos"
+        },
+        {
+          "code": "HAI",
+          "name": "Haiti"
+        },
+        {
+          "code": "MEX",
+          "name": "México"
+        },
+        {
+          "code": "PAN",
+          "name": "Panamá"
+        }
+      ]
+    },
+    {
+      "continent": "Oceania",
+      "confederation": "OFC",
+      "count": 1,
+      "teams": [
+        {
+          "code": "NZL",
+          "name": "Nova Zelândia"
+        }
+      ]
+    }
+  ]
+}
