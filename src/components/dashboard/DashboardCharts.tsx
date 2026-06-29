@@ -158,6 +158,104 @@ export function VerticalBars({ theme, data, color }: VerticalBarsProps) {
   );
 }
 
+export interface ScatterDatum {
+  x: number;
+  y: number;
+}
+
+interface ScatterPlotProps {
+  theme: Theme;
+  data: ScatterDatum[];
+  /** Upper bound of the x axis; the series max is used when larger. */
+  xMax?: number;
+  xLabel: string;
+  yLabel: string;
+  /** Dashed reference lines on the x axis (e.g. half-time / full-time), with captions. */
+  xMarkers?: { x: number; label: string }[];
+  color?: string;
+}
+
+/**
+ * Dependency-free SVG scatter plot. A fixed 640×260 viewBox scales responsively; data
+ * coordinates map into the padded plot area. Dots are translucent so overlaps read as
+ * density. X ticks every 15 units, Y ticks at whole numbers up to the series max.
+ */
+export function ScatterPlot({
+  theme,
+  data,
+  xMax,
+  xLabel,
+  yLabel,
+  xMarkers = [],
+  color,
+}: ScatterPlotProps) {
+  const isLight = theme === "classic-light";
+  const axisColor = isLight ? "#cbd5e1" : "#334155";
+  const tickTextColor = isLight ? "#64748b" : "#94a3b8";
+  const markerColor = isLight ? "#94a3b8" : "#64748b";
+  const dotColor = color ?? accent(theme);
+
+  const W = 640;
+  const H = 260;
+  const m = { top: 14, right: 16, bottom: 30, left: 30 };
+  const plotW = W - m.left - m.right;
+  const plotH = H - m.top - m.bottom;
+
+  const dataXMax = data.reduce((max, d) => Math.max(max, d.x), 0);
+  const xTop = Math.max(xMax ?? 0, dataXMax, 1);
+  const yTop = Math.max(1, ...data.map((d) => d.y));
+
+  const px = (x: number) => m.left + (x / xTop) * plotW;
+  const py = (y: number) => m.top + plotH - (y / yTop) * plotH;
+
+  const xTicks: number[] = [];
+  for (let t = 0; t <= xTop; t += 15) xTicks.push(t);
+  const yTicks = Array.from({ length: yTop + 1 }, (_, i) => i);
+
+  return (
+    <svg viewBox={`0 0 ${W} ${H}`} className="w-full" role="img" aria-label={`${yLabel} por ${xLabel}`}>
+      {/* Y gridlines + ticks */}
+      {yTicks.map((t) => (
+        <g key={`y${t}`}>
+          <line x1={m.left} y1={py(t)} x2={W - m.right} y2={py(t)} stroke={axisColor} strokeWidth={0.5} opacity={t === 0 ? 1 : 0.4} />
+          <text x={m.left - 6} y={py(t) + 3} textAnchor="end" fontSize={10} fill={tickTextColor} fontFamily="monospace">
+            {t}
+          </text>
+        </g>
+      ))}
+      {/* X ticks */}
+      {xTicks.map((t) => (
+        <g key={`x${t}`}>
+          <line x1={px(t)} y1={m.top + plotH} x2={px(t)} y2={m.top + plotH + 4} stroke={axisColor} strokeWidth={0.5} />
+          <text x={px(t)} y={m.top + plotH + 16} textAnchor="middle" fontSize={10} fill={tickTextColor} fontFamily="monospace">
+            {t}
+          </text>
+        </g>
+      ))}
+      {/* Reference markers (half-time / full-time) */}
+      {xMarkers.map((mk) => (
+        <g key={`mk${mk.x}`}>
+          <line x1={px(mk.x)} y1={m.top} x2={px(mk.x)} y2={m.top + plotH} stroke={markerColor} strokeWidth={0.75} strokeDasharray="3 3" />
+          <text x={px(mk.x)} y={m.top + 9} textAnchor="middle" fontSize={9} fill={markerColor} fontFamily="monospace">
+            {mk.label}
+          </text>
+        </g>
+      ))}
+      {/* Data points */}
+      {data.map((d) => (
+        <circle key={`${d.x}-${d.y}`} cx={px(d.x)} cy={py(d.y)} r={4} fill={dotColor} opacity={0.7} />
+      ))}
+      {/* Axis captions */}
+      <text x={m.left + plotW / 2} y={H - 1} textAnchor="middle" fontSize={9} fill={tickTextColor} fontFamily="monospace" letterSpacing="0.08em">
+        {xLabel.toUpperCase()}
+      </text>
+      <text transform={`rotate(-90 9 ${m.top + plotH / 2})`} x={9} y={m.top + plotH / 2} textAnchor="middle" fontSize={9} fill={tickTextColor} fontFamily="monospace" letterSpacing="0.08em">
+        {yLabel.toUpperCase()}
+      </text>
+    </svg>
+  );
+}
+
 export interface DonutSegment {
   label: string;
   value: number;

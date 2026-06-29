@@ -4,6 +4,7 @@ import { computeStandings } from "../standings";
 import {
   continentBreakdown,
   goalsByGroup,
+  goalsByMinute,
   matchStatusBreakdown,
   topScoringTeams,
   tournamentTotals,
@@ -13,6 +14,7 @@ import {
   ChartCard,
   Donut,
   HorizontalBars,
+  ScatterPlot,
   SERIES_PALETTE,
   StatCard,
   VerticalBars,
@@ -48,11 +50,14 @@ export function DashboardView({ theme, matches }: DashboardViewProps) {
     groupGoals,
     statusSegments,
     topTeams,
+    goalScatter,
+    scatterTotal,
   } = useMemo(() => {
     const standings = computeStandings(matches);
     const palette = SERIES_PALETTE[theme];
     const statusColors = STATUS_COLORS[theme];
     const statusData = matchStatusBreakdown(matches);
+    const minuteSeries = goalsByMinute();
     return {
       totals: tournamentTotals(matches, standings),
       continents: continentBreakdown().map((c, i) => ({
@@ -72,6 +77,8 @@ export function DashboardView({ theme, matches }: DashboardViewProps) {
         value: t.goalsFor,
         color: t.primaryColor,
       })),
+      goalScatter: minuteSeries.map((d) => ({ x: d.minute, y: d.goals })),
+      scatterTotal: minuteSeries.reduce((sum, d) => sum + d.goals, 0),
     };
   }, [matches, theme]);
 
@@ -162,6 +169,27 @@ export function DashboardView({ theme, matches }: DashboardViewProps) {
           subtitle="fase de grupos · 8 maiores ataques"
         >
           <HorizontalBars theme={theme} data={topTeams} />
+        </ChartCard>
+      </div>
+
+      {/* Goals by minute — full width */}
+      <div className="mt-4">
+        <ChartCard
+          theme={theme}
+          title="Gols por minuto"
+          subtitle={`todos os jogos encerrados · ${scatterTotal} gols · minuto do jogo × nº de gols`}
+        >
+          <ScatterPlot
+            theme={theme}
+            data={goalScatter}
+            xMax={90}
+            xLabel="minuto"
+            yLabel="gols"
+            xMarkers={[
+              { x: 45, label: "intervalo" },
+              { x: 90, label: "90'" },
+            ]}
+          />
         </ChartCard>
       </div>
     </div>

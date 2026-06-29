@@ -3,8 +3,10 @@ import assert from "node:assert/strict";
 import type { Match, StandingsRow } from "../src/types";
 import {
   TEAM_COUNT,
+  aggregateGoalsByMinute,
   continentBreakdown,
   goalsByGroup,
+  goalsByMinute,
   matchStatusBreakdown,
   topScoringTeams,
   tournamentTotals,
@@ -105,6 +107,39 @@ test("matchStatusBreakdown returns the three situations in order", () => {
       ["upcoming", 2],
     ],
   );
+});
+
+test("aggregateGoalsByMinute counts goals per minute and sorts ascending", () => {
+  const perMatch = [
+    [7, 45, 45],
+    [45, 90],
+    [7],
+  ];
+  assert.deepEqual(aggregateGoalsByMinute(perMatch), [
+    { minute: 7, goals: 2 },
+    { minute: 45, goals: 3 },
+    { minute: 90, goals: 1 },
+  ]);
+  // Total across points equals the flattened goal count.
+  const total = aggregateGoalsByMinute(perMatch).reduce((s, d) => s + d.goals, 0);
+  assert.equal(total, 6);
+});
+
+test("aggregateGoalsByMinute returns [] for no goals", () => {
+  assert.deepEqual(aggregateGoalsByMinute([]), []);
+  assert.deepEqual(aggregateGoalsByMinute([[], []]), []);
+});
+
+test("goalsByMinute reads the seeded timeline and stays monotonic with positive counts", () => {
+  const series = goalsByMinute();
+  assert.ok(series.length > 0, "expected seeded goal-timeline data");
+  for (let i = 1; i < series.length; i++) {
+    assert.ok(series[i].minute > series[i - 1].minute, "minutes must be strictly ascending");
+  }
+  for (const point of series) {
+    assert.ok(point.minute >= 1, "minute should be a real clock minute");
+    assert.ok(point.goals >= 1, "each plotted minute has at least one goal");
+  }
 });
 
 test("topScoringTeams sorts by goals then name, and honours the limit", () => {

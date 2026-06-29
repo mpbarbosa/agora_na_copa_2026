@@ -1,6 +1,7 @@
 import type { Match, StandingsRow } from "./types";
 import { stadiums } from "./data/tournament";
 import teamsByContinent from "./data/teamsByContinent.json";
+import goalTimeline from "./data/goalTimeline.json";
 
 /**
  * Pure aggregation logic for the Dashboard view. Each function takes already-computed
@@ -116,4 +117,31 @@ export function topScoringTeams(standings: StandingsRow[], limit = 8): TeamGoals
     .sort((a, b) => b.goalsFor - a.goalsFor || a.name.localeCompare(b.name, "pt-BR"))
     .slice(0, limit)
     .map(({ code, name, goalsFor, primaryColor }) => ({ code, name, goalsFor, primaryColor }));
+}
+
+export interface GoalMinuteDatum {
+  /** Elapsed match minute (stoppage folded in, e.g. 45'+5' → 50). */
+  minute: number;
+  /** Number of goals scored across all finished matches at that minute. */
+  goals: number;
+}
+
+/**
+ * Collapse per-match goal-minute lists into a (minute → count) scatter series, sorted by
+ * minute. Pure over its input so it's unit-tested; `goalsByMinute` is the thin wrapper
+ * that feeds it the generated `goalTimeline.json`.
+ */
+export function aggregateGoalsByMinute(perMatchMinutes: number[][]): GoalMinuteDatum[] {
+  const counts = new Map<number, number>();
+  for (const minutes of perMatchMinutes) {
+    for (const minute of minutes) counts.set(minute, (counts.get(minute) ?? 0) + 1);
+  }
+  return [...counts.entries()]
+    .sort(([a], [b]) => a - b)
+    .map(([minute, goals]) => ({ minute, goals }));
+}
+
+/** Scatter points (minute, goal count) over every finished match, from `goalTimeline.json`. */
+export function goalsByMinute(): GoalMinuteDatum[] {
+  return aggregateGoalsByMinute(Object.values(goalTimeline as Record<string, number[]>));
 }
