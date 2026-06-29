@@ -3,6 +3,7 @@ import type { Match, MatchStatus, TeamRef } from "../types";
 import { buildGroupPositionMap } from "../standings";
 import type { QualificationStatus } from "../standings";
 import { resolveTeamDisplay as resolveKnockoutTeamDisplay } from "../utils/resolveTeamDisplay";
+import { finishedSideResult, type ResultTone } from "../utils/matchResult";
 import { FlagIcon } from "./FlagIcon";
 
 interface PartidasViewProps {
@@ -72,14 +73,11 @@ const STATUS_COPY: Record<
 };
 
 
-function matchPoints(scoreA: number, scoreB: number): { a: number; b: number } {
-  if (scoreA > scoreB) return { a: 3, b: 0 };
-  if (scoreA < scoreB) return { a: 0, b: 3 };
-  return { a: 1, b: 1 };
-}
-
-function ptLabel(pts: number): string {
-  return pts === 1 ? "+1 pt" : pts > 0 ? `+${pts} pts` : "0 pts";
+// Tailwind colour for a finished-result tone, branched by theme (no `dark:` utilities).
+function resultToneClass(tone: ResultTone, theme: "classic-light" | "stadium-dark", mutedClass: string): string {
+  if (tone === "win") return theme === "classic-light" ? "text-[#009c3b]" : "text-[#00e476]";
+  if (tone === "draw") return theme === "classic-light" ? "text-amber-600" : "text-amber-400";
+  return mutedClass;
 }
 
 const sortMatchesForStatus = (status: MatchStatus, matches: Match[]) => {
@@ -318,17 +316,12 @@ export function PartidasView({ matches, theme, onSelectTeamLineup, onSelectMatch
                     <p className={`font-mono text-[10px] uppercase tracking-[0.22em] ${softMutedClasses}`}>
                       {dispA.code}
                     </p>
-                    {match.status === "FINISHED" && match.score && (() => {
-                      const pts = matchPoints(match.score.teamA, match.score.teamB).a;
+                    {(() => {
+                      const result = finishedSideResult(match, "a");
+                      if (!result) return null;
                       return (
-                        <p className={`font-mono text-[10px] font-bold uppercase tracking-[0.18em] ${
-                          pts === 3
-                            ? theme === "classic-light" ? "text-[#009c3b]" : "text-[#00e476]"
-                            : pts === 1
-                              ? theme === "classic-light" ? "text-amber-600" : "text-amber-400"
-                              : softMutedClasses
-                        }`}>
-                          {ptLabel(pts)}
+                        <p className={`font-mono text-[10px] font-bold uppercase tracking-[0.18em] ${resultToneClass(result.tone, theme, softMutedClasses)}`}>
+                          {result.label}
                         </p>
                       );
                     })()}
@@ -380,17 +373,12 @@ export function PartidasView({ matches, theme, onSelectTeamLineup, onSelectMatch
                     <p className={`font-mono text-[10px] uppercase tracking-[0.22em] ${softMutedClasses}`}>
                       {dispB.code}
                     </p>
-                    {match.status === "FINISHED" && match.score && (() => {
-                      const pts = matchPoints(match.score.teamA, match.score.teamB).b;
+                    {(() => {
+                      const result = finishedSideResult(match, "b");
+                      if (!result) return null;
                       return (
-                        <p className={`font-mono text-[10px] font-bold uppercase tracking-[0.18em] ${
-                          pts === 3
-                            ? theme === "classic-light" ? "text-[#009c3b]" : "text-[#00e476]"
-                            : pts === 1
-                              ? theme === "classic-light" ? "text-amber-600" : "text-amber-400"
-                              : softMutedClasses
-                        }`}>
-                          {ptLabel(pts)}
+                        <p className={`font-mono text-[10px] font-bold uppercase tracking-[0.18em] ${resultToneClass(result.tone, theme, softMutedClasses)}`}>
+                          {result.label}
                         </p>
                       );
                     })()}
