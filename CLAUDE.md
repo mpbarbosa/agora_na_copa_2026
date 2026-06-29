@@ -47,7 +47,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ### Frontend
 
 - **`src/App.tsx`** — shell: global header (theme toggle) + top-level nav + routed view. Theme state (`"classic-light"` | `"stadium-dark"`) and match-selection state live here.
-- **`src/navigation.ts`** — `NAV_ITEMS` array (11 tabs: Ao Vivo, Partidas, Grupos, Seleções, Jogadores, Líderes, Chaveamento, Estádios, Notícias, Fan Zone, Redes Sociais). Each entry has `id`, `label`, `description`. Tabs without a shipped view render `ComingSoonView`.
+- **`src/navigation.ts`** — `NAV_ITEMS` array (12 tabs: Dashboard, Ao Vivo, Partidas, Grupos, Seleções, Jogadores, Líderes, Chaveamento, Estádios, Notícias, Fan Zone, Redes Sociais). Each entry has `id`, `label`, `description`. Dashboard (`DashboardView`) is currently a blank placeholder ("Em breve").
 - **`src/types.ts`** — single source of truth for all TypeScript shapes (`Match`, `Player`, `Broadcaster`, `BroadcastGuideEntry`, `MatchStateEntry`, `Team`, `StandingsRow`, `Stadium`, `BracketNode`, `NewsArticle`, etc.). Extend here first before touching data or components.
 
 ### Components

@@ -6,6 +6,11 @@ export interface NavItem {
 
 export const NAV_ITEMS: NavItem[] = [
   {
+    id: "dashboard",
+    label: "Dashboard",
+    description: "Painel em construção.",
+  },
+  {
     id: "ao-vivo",
     label: "Ao Vivo",
     description: "Acompanhe o cronômetro, transmissões e lances de cada jogo.",

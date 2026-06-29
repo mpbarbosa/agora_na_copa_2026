@@ -14,6 +14,7 @@ import { SocialMediasView } from "./components/SocialMediasView";
 import { JogadoresView } from "./components/JogadoresView";
 import { TeamLineupView } from "./components/TeamLineupView";
 import { PartidasView } from "./components/PartidasView";
+import { DashboardView } from "./components/DashboardView";
 import { BrazilCountdownBadge } from "./components/BrazilCountdownBadge";
 import { BrazilGoalFireworks } from "./components/BrazilGoalFireworks";
 import { CookieConsentBanner } from "./components/CookieConsentBanner";
@@ -39,7 +40,7 @@ export default function App() {
     "classic-light",
   );
   const [matches, setMatches] = useState<Match[]>(() => APP_MATCHES);
-  const [activeNavId, setActiveNavId] = useState<string>(NAV_ITEMS[0].id);
+  const [activeNavId, setActiveNavId] = useState<string>("ao-vivo");
   const [lineupTeam, setLineupTeam] = useState<TeamRef | null>(null);
   const [standingsFocusGroupSlug, setStandingsFocusGroupSlug] = useState<string | null>(null);
   const [aoVivoMatchId, setAoVivoMatchId] = useState<string | null>(null);
@@ -125,6 +126,8 @@ export default function App() {
 
   const renderActiveView = () => {
     switch (activeNavItem.id) {
+      case "dashboard":
+        return <DashboardView theme={theme} />;
       case "ao-vivo":
         return (
           <MatchDetailView
