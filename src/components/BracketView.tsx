@@ -6,6 +6,7 @@ import type { KnockoutMatch, Match, TeamRef } from "../types";
 import { computeStandings, buildGroupPositionMap } from "../standings";
 import type { QualificationStatus, ProvisionalSlot } from "../standings";
 import { humanizeSlot, describeBestThirdSlot, bestThirdGroups } from "../utils/knockoutSlots";
+import { knockoutWinnerSlot } from "../utils/matchResult";
 import { FlagIcon } from "./FlagIcon";
 import { BracketPredictorPanel } from "./BracketPredictorPanel";
 import type { PredictableFixture, ResolvedSlotTeam } from "./BracketPredictorPanel";
@@ -19,6 +20,8 @@ interface BracketViewProps {
 
 type Stage = KnockoutMatch["stage"];
 type Slot = "A" | "B";
+// A slot's result once its tie has finished: it advanced, it's out, or undecided (null).
+type SlotOutcome = "won" | "lost" | null;
 
 const STAGE_ORDER: Stage[] = ["R32", "R16", "QF", "SF", "TP", "F"];
 
@@ -81,6 +84,19 @@ function buildKnockoutMatchIdByNumber(matches: Match[]): Map<number, string> {
   for (const match of matches) {
     const n = /^ko-(\d+)-/.exec(match.id);
     if (n) map.set(Number(n[1]), match.id);
+  }
+  return map;
+}
+
+// Map a knockout fixture's match number → the slot that WON it ("A"/"B"), for the finished
+// ties only (Match.score.teamA/B align with slotA/slotB, see appMatches). Winner resolution
+// — incl. leaving drawn-on-penalties ties unmarked — lives in the tested knockoutWinnerSlot.
+function buildWinnerSlotByNumber(matches: Match[]): Map<number, Slot> {
+  const map = new Map<number, Slot>();
+  for (const match of matches) {
+    const n = /^ko-(\d+)-/.exec(match.id);
+    const winner = n ? knockoutWinnerSlot(match) : null;
+    if (n && winner) map.set(Number(n[1]), winner);
   }
   return map;
 }
@@ -194,6 +210,8 @@ interface BracketSlotRowProps {
   rawSlot: string;
   confirmed: TeamMeta | null;
   provisional: ProvisionalSlot | null;
+  /** Result of this side once its tie finished: won (advanced), lost (out), or null. */
+  outcome: SlotOutcome;
   theme: "classic-light" | "stadium-dark";
   onSelectTeamLineup: (team: TeamRef) => void;
 }
@@ -204,6 +222,7 @@ function BracketSlotRow({
   rawSlot,
   confirmed,
   provisional,
+  outcome,
   theme,
   onSelectTeamLineup,
 }: BracketSlotRowProps) {
@@ -212,15 +231,19 @@ function BracketSlotRow({
   const isConfirmed = !!confirmed;
   const isQualified = provisional?.status === "qualified";
 
+  // A finished tie wins out over the plain "confirmed" green: the loser is muted and
+  // dimmed, the winner keeps the green. Otherwise fall back to the confirmed/provisional
+  // styling.
+  const greenClasses = isLight
+    ? "border-[#009c3b]/30 bg-[#009c3b]/5 text-[#065f2c]"
+    : "border-[#00e476]/25 bg-[#00e476]/5 text-[#a7e6bf]";
   const rowClasses = team
-    ? isConfirmed
+    ? outcome === "lost"
       ? isLight
-        ? "border-[#009c3b]/30 bg-[#009c3b]/5 text-[#065f2c]"
-        : "border-[#00e476]/25 bg-[#00e476]/5 text-[#a7e6bf]"
-      : isQualified
-        ? isLight
-          ? "border-[#009c3b]/30 bg-[#009c3b]/5 text-[#065f2c]"
-          : "border-[#00e476]/25 bg-[#00e476]/5 text-[#a7e6bf]"
+        ? "border-slate-200 bg-slate-50 text-slate-400"
+        : "border-white/10 bg-white/5 text-slate-500"
+      : outcome === "won" || isConfirmed || isQualified
+        ? greenClasses
         : isLight
           ? "border-dashed border-amber-400/60 bg-amber-50/40 text-slate-700"
           : "border-dashed border-[#ffd84d]/35 bg-[#ffd84d]/5 text-slate-200"
@@ -229,7 +252,8 @@ function BracketSlotRow({
       : "border-white/10 bg-white/5 text-slate-400";
 
   const id = `bracket-slot-${matchNumber}-${slot.toLowerCase()}`;
-  const baseClassName = `flex min-h-11 items-center justify-between gap-2 rounded-xl border px-3 py-2 font-archivo text-sm leading-5 ${rowClasses}`;
+  const dimClass = outcome === "lost" ? "opacity-70" : "";
+  const baseClassName = `flex min-h-11 items-center justify-between gap-2 rounded-xl border px-3 py-2 font-archivo text-sm leading-5 ${rowClasses} ${dimClass}`;
   // Best-third combo slots ("3CDFGH") render as a terse "Melhor 3º · …" label;
   // spell out what it means for screen readers and on hover. Null for other slots.
   const bestThirdDescription = team ? null : describeBestThirdSlot(rawSlot);
@@ -240,7 +264,25 @@ function BracketSlotRow({
         <FlagIcon flag={team.flagSvg} className="h-4 w-6 shrink-0 rounded-[2px]" />
         <span className="truncate">{team.name}</span>
       </span>
-      {isConfirmed ? null : isQualified ? (
+      {outcome === "won" ? (
+        <span
+          data-bracket-outcome="won"
+          title="Classificado"
+          aria-label="Classificado"
+          className={`shrink-0 font-mono text-[11px] font-bold ${isLight ? "text-[#009c3b]" : "text-[#00e476]"}`}
+        >
+          ✓
+        </span>
+      ) : outcome === "lost" ? (
+        <span
+          data-bracket-outcome="lost"
+          title="Eliminado"
+          aria-label="Eliminado"
+          className={`shrink-0 font-mono text-[11px] font-bold ${isLight ? "text-rose-500" : "text-rose-400"}`}
+        >
+          ✕
+        </span>
+      ) : isConfirmed ? null : isQualified ? (
         <span
           className={`shrink-0 font-mono text-[9px] font-bold ${
             isLight ? "text-[#009c3b]" : "text-[#00e476]"
@@ -331,6 +373,8 @@ interface BracketMatchCardProps {
   groupPositions: Map<string, ProvisionalSlot>;
   /** APP_MATCHES id for this fixture, when present — enables opening its match page. */
   matchId: string | null;
+  /** The slot that won this tie ("A"/"B"), once finished — drives the winner/loser markers. */
+  winnerSlot: Slot | undefined;
   /** Active feeder spotlight (from a hovered later-round card), or null. */
   feederHighlight: FeederHighlight | null;
   /** The currently spotlighted match number (hover/focus/tap), or null. */
@@ -342,7 +386,11 @@ interface BracketMatchCardProps {
   onSelectMatch: (matchId: string) => void;
 }
 
-function BracketMatchCard({ match, theme, teamMeta, groupPositions, matchId, feederHighlight, hoveredMatch, feederShift, onHoverMatch, onSelectTeamLineup, onSelectMatch }: BracketMatchCardProps) {
+function BracketMatchCard({ match, theme, teamMeta, groupPositions, matchId, winnerSlot, feederHighlight, hoveredMatch, feederShift, onHoverMatch, onSelectTeamLineup, onSelectMatch }: BracketMatchCardProps) {
+  // Once a tie is finished, mark the slot that advanced vs the one that's out. Undecided
+  // (or drawn-on-penalties) ties pass null and render no marker.
+  const slotOutcome = (slot: Slot): SlotOutcome =>
+    winnerSlot ? (slot === winnerSlot ? "won" : "lost") : null;
   const isLight = theme === "classic-light";
   const cardClasses = isLight ? "bg-white border-slate-200" : "bg-[#161919] border-white/10";
   const subtleClasses = isLight ? "text-slate-500" : "text-slate-400";
@@ -442,6 +490,7 @@ function BracketMatchCard({ match, theme, teamMeta, groupPositions, matchId, fee
           rawSlot={match.slotA}
           confirmed={confirmedA}
           provisional={resolveProvisional(match.slotA, confirmedA)}
+          outcome={slotOutcome("A")}
           theme={theme}
           onSelectTeamLineup={onSelectTeamLineup}
         />
@@ -451,6 +500,7 @@ function BracketMatchCard({ match, theme, teamMeta, groupPositions, matchId, fee
           rawSlot={match.slotB}
           confirmed={confirmedB}
           provisional={resolveProvisional(match.slotB, confirmedB)}
+          outcome={slotOutcome("B")}
           theme={theme}
           onSelectTeamLineup={onSelectTeamLineup}
         />
@@ -470,6 +520,8 @@ interface BracketStageColumnProps {
   teamMeta: Map<string, TeamMeta>;
   groupPositions: Map<string, ProvisionalSlot>;
   matchIdByNumber: Map<number, string>;
+  /** matchNumber → the slot that won a finished tie ("A"/"B"), for winner/loser markers. */
+  winnerSlotByNumber: Map<number, Slot>;
   feederHighlight: FeederHighlight | null;
   hoveredMatch: number | null;
   /** matchNumber → translateY (px) for the feeders being grouped beside the hovered card. */
@@ -479,7 +531,7 @@ interface BracketStageColumnProps {
   onSelectMatch: (matchId: string) => void;
 }
 
-function BracketStageColumn({ stage, matches, theme, teamMeta, groupPositions, matchIdByNumber, feederHighlight, hoveredMatch, feederShifts, onHoverMatch, onSelectTeamLineup, onSelectMatch }: BracketStageColumnProps) {
+function BracketStageColumn({ stage, matches, theme, teamMeta, groupPositions, matchIdByNumber, winnerSlotByNumber, feederHighlight, hoveredMatch, feederShifts, onHoverMatch, onSelectTeamLineup, onSelectMatch }: BracketStageColumnProps) {
   const isLight = theme === "classic-light";
   const stageClasses = isLight ? "bg-slate-50 border-slate-200" : "bg-white/5 border-white/10";
   const headingClasses = isLight ? "text-slate-900" : "text-white";
@@ -524,6 +576,7 @@ function BracketStageColumn({ stage, matches, theme, teamMeta, groupPositions, m
               teamMeta={teamMeta}
               groupPositions={groupPositions}
               matchId={matchIdByNumber.get(match.matchNumber) ?? null}
+              winnerSlot={winnerSlotByNumber.get(match.matchNumber)}
               feederHighlight={feederHighlight}
               hoveredMatch={hoveredMatch}
               feederShift={feederShifts.get(match.matchNumber)}
@@ -544,6 +597,7 @@ export function BracketView({ theme, matches, onSelectTeamLineup, onSelectMatch 
   const teamMeta = useMemo(() => buildTeamMetaMap(matches), [matches]);
   const groupPositions = useMemo(() => buildGroupPositionMap(matches), [matches]);
   const matchIdByNumber = useMemo(() => buildKnockoutMatchIdByNumber(matches), [matches]);
+  const winnerSlotByNumber = useMemo(() => buildWinnerSlotByNumber(matches), [matches]);
   const predictableFixtures = useMemo(
     () => buildPredictableFixtures(teamMeta, groupPositions),
     [teamMeta, groupPositions],
@@ -700,6 +754,7 @@ export function BracketView({ theme, matches, onSelectTeamLineup, onSelectMatch 
               <BracketStageColumn
                 stage={stage}
                 matches={matchesByStage.get(stage) ?? []}
+                winnerSlotByNumber={winnerSlotByNumber}
                 theme={theme}
                 teamMeta={teamMeta}
                 groupPositions={groupPositions}
