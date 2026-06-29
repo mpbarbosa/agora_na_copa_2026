@@ -47,3 +47,15 @@ export function finishedSideResult(
         : advanced ? "Classificado" : "Eliminado";
   return { label, tone: advanced ? "win" : "loss" };
 }
+
+/**
+ * Which slot ("A" = home, "B" = away) won a knockout tie, for the bracket's winner/loser
+ * markers. Null when the tie isn't a decided knockout: a non-finished or scoreless match, a
+ * group-stage fixture, or a draw (settled on penalties the app doesn't model — never guess).
+ */
+export function knockoutWinnerSlot(match: Match): "A" | "B" | null {
+  if (match.status !== "FINISHED" || !match.score || match.stageName === "Group Stage") return null;
+  const { teamA, teamB } = match.score;
+  if (teamA === teamB) return null;
+  return teamA > teamB ? "A" : "B";
+}

@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import type { Match } from "../src/types";
-import { finishedSideResult, matchPoints, ptLabel } from "../src/utils/matchResult";
+import { finishedSideResult, knockoutWinnerSlot, matchPoints, ptLabel } from "../src/utils/matchResult";
 import { KNOCKOUT_STAGE_NAMES } from "../src/utils/knockoutSlots";
 
 // finishedSideResult only reads status/score/stageName, so a tiny partial is enough.
@@ -44,4 +44,13 @@ test("a drawn knockout score shows nothing (penalties not modeled), and so do no
   assert.equal(finishedSideResult(finished(KNOCKOUT_STAGE_NAMES.R16, 1, 1), "a"), null);
   assert.equal(finishedSideResult(m({ status: "PRE_GAME" }), "a"), null);
   assert.equal(finishedSideResult(m({ status: "FINISHED", score: undefined }), "b"), null);
+});
+
+test("knockoutWinnerSlot picks the winning side, null for undecided/drawn/group", () => {
+  assert.equal(knockoutWinnerSlot(finished(KNOCKOUT_STAGE_NAMES.R32, 0, 1)), "B"); // RSA 0 x 1 Canada
+  assert.equal(knockoutWinnerSlot(finished(KNOCKOUT_STAGE_NAMES.QF, 2, 1)), "A");
+  assert.equal(knockoutWinnerSlot(finished(KNOCKOUT_STAGE_NAMES.R16, 1, 1)), null); // penalties — unknown
+  assert.equal(knockoutWinnerSlot(finished("Group Stage", 3, 0)), null); // group has no bracket winner
+  assert.equal(knockoutWinnerSlot(m({ status: "PRE_GAME" })), null);
+  assert.equal(knockoutWinnerSlot(m({ status: "FINISHED", score: undefined })), null);
 });
