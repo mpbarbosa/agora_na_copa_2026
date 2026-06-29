@@ -4,6 +4,7 @@ import { FIFA_SCHEDULED_MATCHES, type FifaScheduledMatchSeed } from "./data/fifa
 import { standings as seedStandings } from "./data/tournament";
 import { resolvePlayerEntry } from "./data/playerRegistry";
 import { KNOCKOUT_MATCHES } from "./data/knockoutBracket";
+import { KNOCKOUT_RESULTS } from "./data/knockoutResults";
 import { humanizeSlot, KNOCKOUT_STAGE_NAMES } from "./utils/knockoutSlots";
 import type { Match, KnockoutMatch, KnockoutTeamRef } from "./types";
 
@@ -149,13 +150,17 @@ const buildKnockoutTeamEntry = (ref: KnockoutTeamRef | null, slot: string): Matc
   return { name: humanizeSlot(slot), code: slot, flagSvg: "", ...NEUTRAL_TEAM_STYLE, group: "", lineup: [] };
 };
 
-// Official knockout fixture → a PRE_GAME Match for the scheduled list: real date,
-// venue and stage; TBD sides show the official slot label. Stable matchNumber-based
-// id so a fixture updates in place once its teams resolve. stageName is intentionally
-// NOT "Group Stage", so standings/group computations ignore these (see standings.ts).
+// Official knockout fixture → a Match for the scheduled list: real date, venue and
+// stage; TBD sides show the official slot label. Stable matchNumber-based id so a
+// fixture updates in place once its teams resolve. stageName is intentionally NOT
+// "Group Stage", so standings/group computations ignore these (see standings.ts).
+// A seeded result (KNOCKOUT_RESULTS) marks the fixture LIVE/FINISHED with its score so
+// the bracket resolves the tie's winner on a cold visit, before the live overlay loads;
+// unseeded ties stay PRE_GAME.
 const buildKnockoutMatch = (km: KnockoutMatch): Match => {
   const kickoffTimestamp = toBrasiliaTimestamp(km.dateUtc);
   const kickoffMs = new Date(km.dateUtc).getTime();
+  const result = KNOCKOUT_RESULTS[km.matchNumber];
   return {
     id: `ko-${km.matchNumber}-2026`,
     teamA: buildKnockoutTeamEntry(km.teamA, km.slotA),
@@ -166,7 +171,9 @@ const buildKnockoutMatch = (km: KnockoutMatch): Match => {
     kickoffTime: formatKickoffTime(kickoffTimestamp),
     kickoffDate: formatKickoffDate(kickoffTimestamp),
     kickoffTimestamp,
-    status: "PRE_GAME",
+    status: result?.status ?? "PRE_GAME",
+    score: result?.score,
+    matchTime: result?.matchTime,
     countdownTargetSeconds: Math.max(0, Math.floor((kickoffMs - Date.now()) / 1000)),
     broadcasters: [],
   };
