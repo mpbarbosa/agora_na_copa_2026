@@ -101,6 +101,24 @@ function buildWinnerSlotByNumber(matches: Match[]): Map<number, Slot> {
   return map;
 }
 
+// Resolve later-round feeder slots to a concrete team once their feeder tie has finished:
+// "W74" → that tie's winner, "RU101" → its loser. Lets an Oitavas card show "Canadá"
+// instead of "Vencedor #73" the moment #73 is decided. Keyed by the raw slot label so a
+// card can look its slots up directly.
+function buildFeederTeamBySlot(matches: Match[]): Map<string, NonNullable<KnockoutMatch["teamA"]>> {
+  const winnerSlot = buildWinnerSlotByNumber(matches);
+  const map = new Map<string, NonNullable<KnockoutMatch["teamA"]>>();
+  for (const km of KNOCKOUT_MATCHES) {
+    const won = winnerSlot.get(km.matchNumber);
+    if (!won) continue;
+    const winnerRef = won === "A" ? km.teamA : km.teamB;
+    const loserRef = won === "A" ? km.teamB : km.teamA;
+    if (winnerRef) map.set(`W${km.matchNumber}`, winnerRef);
+    if (loserRef) map.set(`RU${km.matchNumber}`, loserRef);
+  }
+  return map;
+}
+
 // A later-round slot references its feeder fixture by number — "W74" (winner of #74),
 // "RU101" (runner-up / loser of #101). Parse those out so hovering a card can highlight
 // the matches that feed it. Group / best-third slots ("2A", "3ABCDF") have no feeder.
@@ -375,6 +393,8 @@ interface BracketMatchCardProps {
   matchId: string | null;
   /** The slot that won this tie ("A"/"B"), once finished — drives the winner/loser markers. */
   winnerSlot: Slot | undefined;
+  /** Raw feeder slot label → resolved team, to fill "Vencedor #73" once #73 is decided. */
+  feederTeamBySlot: Map<string, NonNullable<KnockoutMatch["teamA"]>>;
   /** Active feeder spotlight (from a hovered later-round card), or null. */
   feederHighlight: FeederHighlight | null;
   /** The currently spotlighted match number (hover/focus/tap), or null. */
@@ -386,7 +406,7 @@ interface BracketMatchCardProps {
   onSelectMatch: (matchId: string) => void;
 }
 
-function BracketMatchCard({ match, theme, teamMeta, groupPositions, matchId, winnerSlot, feederHighlight, hoveredMatch, feederShift, onHoverMatch, onSelectTeamLineup, onSelectMatch }: BracketMatchCardProps) {
+function BracketMatchCard({ match, theme, teamMeta, groupPositions, matchId, winnerSlot, feederTeamBySlot, feederHighlight, hoveredMatch, feederShift, onHoverMatch, onSelectTeamLineup, onSelectMatch }: BracketMatchCardProps) {
   // Once a tie is finished, mark the slot that advanced vs the one that's out. Undecided
   // (or drawn-on-penalties) ties pass null and render no marker.
   const slotOutcome = (slot: Slot): SlotOutcome =>
@@ -435,8 +455,10 @@ function BracketMatchCard({ match, theme, teamMeta, groupPositions, matchId, win
   const resolveProvisional = (rawSlot: string, confirmed: TeamMeta | null): ProvisionalSlot | null =>
     confirmed ? null : (groupPositions.get(rawSlot) ?? null);
 
-  const confirmedA = resolveConfirmed(match.teamA);
-  const confirmedB = resolveConfirmed(match.teamB);
+  // The official ref when set (R32), else the resolved feeder winner/loser once that tie
+  // has finished ("W73" → Canadá), else null (still "Vencedor #73").
+  const confirmedA = resolveConfirmed(match.teamA ?? feederTeamBySlot.get(match.slotA) ?? null);
+  const confirmedB = resolveConfirmed(match.teamB ?? feederTeamBySlot.get(match.slotB) ?? null);
 
   return (
     <article
@@ -522,6 +544,8 @@ interface BracketStageColumnProps {
   matchIdByNumber: Map<number, string>;
   /** matchNumber → the slot that won a finished tie ("A"/"B"), for winner/loser markers. */
   winnerSlotByNumber: Map<number, Slot>;
+  /** Raw feeder slot label ("W73", "RU101") → the resolved team once its feeder tie finished. */
+  feederTeamBySlot: Map<string, NonNullable<KnockoutMatch["teamA"]>>;
   feederHighlight: FeederHighlight | null;
   hoveredMatch: number | null;
   /** matchNumber → translateY (px) for the feeders being grouped beside the hovered card. */
@@ -531,7 +555,7 @@ interface BracketStageColumnProps {
   onSelectMatch: (matchId: string) => void;
 }
 
-function BracketStageColumn({ stage, matches, theme, teamMeta, groupPositions, matchIdByNumber, winnerSlotByNumber, feederHighlight, hoveredMatch, feederShifts, onHoverMatch, onSelectTeamLineup, onSelectMatch }: BracketStageColumnProps) {
+function BracketStageColumn({ stage, matches, theme, teamMeta, groupPositions, matchIdByNumber, winnerSlotByNumber, feederTeamBySlot, feederHighlight, hoveredMatch, feederShifts, onHoverMatch, onSelectTeamLineup, onSelectMatch }: BracketStageColumnProps) {
   const isLight = theme === "classic-light";
   const stageClasses = isLight ? "bg-slate-50 border-slate-200" : "bg-white/5 border-white/10";
   const headingClasses = isLight ? "text-slate-900" : "text-white";
@@ -577,6 +601,7 @@ function BracketStageColumn({ stage, matches, theme, teamMeta, groupPositions, m
               groupPositions={groupPositions}
               matchId={matchIdByNumber.get(match.matchNumber) ?? null}
               winnerSlot={winnerSlotByNumber.get(match.matchNumber)}
+              feederTeamBySlot={feederTeamBySlot}
               feederHighlight={feederHighlight}
               hoveredMatch={hoveredMatch}
               feederShift={feederShifts.get(match.matchNumber)}
@@ -598,6 +623,7 @@ export function BracketView({ theme, matches, onSelectTeamLineup, onSelectMatch 
   const groupPositions = useMemo(() => buildGroupPositionMap(matches), [matches]);
   const matchIdByNumber = useMemo(() => buildKnockoutMatchIdByNumber(matches), [matches]);
   const winnerSlotByNumber = useMemo(() => buildWinnerSlotByNumber(matches), [matches]);
+  const feederTeamBySlot = useMemo(() => buildFeederTeamBySlot(matches), [matches]);
   const predictableFixtures = useMemo(
     () => buildPredictableFixtures(teamMeta, groupPositions),
     [teamMeta, groupPositions],
@@ -755,6 +781,7 @@ export function BracketView({ theme, matches, onSelectTeamLineup, onSelectMatch 
                 stage={stage}
                 matches={matchesByStage.get(stage) ?? []}
                 winnerSlotByNumber={winnerSlotByNumber}
+                feederTeamBySlot={feederTeamBySlot}
                 theme={theme}
                 teamMeta={teamMeta}
                 groupPositions={groupPositions}
