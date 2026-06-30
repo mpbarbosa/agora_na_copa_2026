@@ -1,6 +1,7 @@
 import type { Match, StandingsRow } from "./types";
 import { stadiums } from "./data/tournament";
 import { KNOCKOUT_MATCHES } from "./data/knockoutBracket";
+import { KNOCKOUT_RESULTS } from "./data/knockoutResults";
 import teamsByContinent from "./data/teamsByContinent.json";
 import goalTimeline from "./data/goalTimeline.json";
 
@@ -74,33 +75,44 @@ export interface ContinentPhaseDatum {
   groupStage: number;
   /** Teams that advanced to the Round of 32 (16-avos). */
   roundOf32: number;
+  /** Teams that advanced to the Round of 16 (oitavas) — only the decided ties so far. */
+  roundOf16: number;
+}
+
+/** Tally how many of `codes` belong to each continent, via the code→continent index. */
+function countByContinent(codeToContinent: Map<string, string>, codes: string[]): Map<string, number> {
+  const counts = new Map<string, number>();
+  for (const code of codes) {
+    const continent = codeToContinent.get(code);
+    if (continent) counts.set(continent, (counts.get(continent) ?? 0) + 1);
+  }
+  return counts;
 }
 
 /**
- * Teams per continent broken down by phase reached: group stage (all qualified) vs the
- * Round of 32. Pure over its inputs — `continents` is the seeded breakdown and
- * `roundOf32Codes` the 32 advancing team codes — so it's unit-tested; `continentByPhase`
- * is the wrapper that sources them from the JSON + the knockout bracket. A R32 code with no
- * continent mapping is ignored (defensive; every real code resolves).
+ * Teams per continent broken down by phase reached: group stage (all qualified), the Round
+ * of 32, and the Round of 16. Pure over its inputs — `continents` is the seeded breakdown,
+ * `roundOf32Codes` the 32 R32 participants, `roundOf16Codes` the confirmed R16 qualifiers —
+ * so it's unit-tested; `continentByPhase` sources them from the JSON + bracket + results. A
+ * code with no continent mapping is ignored (defensive; every real code resolves).
  */
 export function aggregateContinentByPhase(
   continents: ContinentJson[],
   roundOf32Codes: string[],
+  roundOf16Codes: string[],
 ): ContinentPhaseDatum[] {
   const codeToContinent = new Map<string, string>();
   for (const c of continents) {
     for (const team of c.teams) codeToContinent.set(team.code, c.continent);
   }
-  const r32ByContinent = new Map<string, number>();
-  for (const code of roundOf32Codes) {
-    const continent = codeToContinent.get(code);
-    if (continent) r32ByContinent.set(continent, (r32ByContinent.get(continent) ?? 0) + 1);
-  }
+  const r32 = countByContinent(codeToContinent, roundOf32Codes);
+  const r16 = countByContinent(codeToContinent, roundOf16Codes);
   return continents.map((c) => ({
     continent: c.continent,
     confederation: c.confederation,
     groupStage: c.count,
-    roundOf32: r32ByContinent.get(c.continent) ?? 0,
+    roundOf32: r32.get(c.continent) ?? 0,
+    roundOf16: r16.get(c.continent) ?? 0,
   }));
 }
 
@@ -115,9 +127,32 @@ export function roundOf32TeamCodes(): string[] {
   return codes;
 }
 
-/** Continent × phase breakdown (group stage vs Round of 32) from the seeded data + bracket. */
+/**
+ * The confirmed Round-of-16 (oitavas) qualifiers: the decisive winners of finished R32 ties,
+ * read from the seeded `KNOCKOUT_RESULTS` (the same source the bracket resolves from). Ties
+ * drawn in normal time are settled on penalties the app does not model, so they yield no
+ * winner here — we never invent who advanced (mirrors `knockoutWinnerSlot`).
+ */
+export function roundOf16TeamCodes(): string[] {
+  const codes: string[] = [];
+  for (const match of KNOCKOUT_MATCHES) {
+    if (match.stage !== "R32" || !match.teamA || !match.teamB) continue;
+    const result = KNOCKOUT_RESULTS[match.matchNumber];
+    if (!result || result.status !== "FINISHED") continue;
+    const { teamA, teamB } = result.score;
+    if (teamA === teamB) continue; // decided on penalties — winner unknown to the app
+    codes.push(teamA > teamB ? match.teamA.code : match.teamB.code);
+  }
+  return codes;
+}
+
+/** Continent × phase breakdown (group stage → 16-avos → oitavas) from the seeded data. */
 export function continentByPhase(): ContinentPhaseDatum[] {
-  return aggregateContinentByPhase(teamsByContinent.continents, roundOf32TeamCodes());
+  return aggregateContinentByPhase(
+    teamsByContinent.continents,
+    roundOf32TeamCodes(),
+    roundOf16TeamCodes(),
+  );
 }
 
 export interface GroupGoalsDatum {

@@ -31,10 +31,13 @@ const STATUS_COLORS: Record<"classic-light" | "stadium-dark", Record<MatchStatus
   "stadium-dark": { finished: "#00e476", live: "#ff5c7a", upcoming: "#64748b" },
 };
 
-// Phase series for the continent funnel: group stage (all qualified) vs Round of 32.
-const PHASE_COLORS: Record<"classic-light" | "stadium-dark", { groupStage: string; roundOf32: string }> = {
-  "classic-light": { groupStage: "#0033a0", roundOf32: "#009c3b" },
-  "stadium-dark": { groupStage: "#4f8cff", roundOf32: "#00e476" },
+// Phase series for the continent funnel: group stage → Round of 32 → Round of 16.
+const PHASE_COLORS: Record<
+  "classic-light" | "stadium-dark",
+  { groupStage: string; roundOf32: string; roundOf16: string }
+> = {
+  "classic-light": { groupStage: "#0033a0", roundOf32: "#009c3b", roundOf16: "#e8730c" },
+  "stadium-dark": { groupStage: "#4f8cff", roundOf32: "#00e476", roundOf16: "#ffa94d" },
 };
 
 const integer = (n: number) => new Intl.NumberFormat("pt-BR").format(n);
@@ -74,11 +77,13 @@ export function DashboardView({ theme, matches }: DashboardViewProps) {
         bars: [
           { value: c.groupStage, color: phaseColors.groupStage },
           { value: c.roundOf32, color: phaseColors.roundOf32 },
+          { value: c.roundOf16, color: phaseColors.roundOf16 },
         ],
       })),
       continentTotals: {
         groupStage: phased.reduce((s, c) => s + c.groupStage, 0),
         roundOf32: phased.reduce((s, c) => s + c.roundOf32, 0),
+        roundOf16: phased.reduce((s, c) => s + c.roundOf16, 0),
       },
       groupGoals: goalsByGroup(standings).map((g) => ({ label: g.group, value: g.goals })),
       statusSegments: statusData.map<DonutSegment>((s) => ({
@@ -151,7 +156,7 @@ export function DashboardView({ theme, matches }: DashboardViewProps) {
         <ChartCard
           theme={theme}
           title="Seleções por continente"
-          subtitle={`por fase · ${continentTotals.groupStage} nos grupos → ${continentTotals.roundOf32} nos 16-avos`}
+          subtitle={`por fase · ${continentTotals.groupStage} grupos → ${continentTotals.roundOf32} 16-avos → ${continentTotals.roundOf16} oitavas`}
         >
           <GroupedBars
             theme={theme}
@@ -159,6 +164,7 @@ export function DashboardView({ theme, matches }: DashboardViewProps) {
             legend={[
               { label: "Fase de grupos", color: PHASE_COLORS[theme].groupStage },
               { label: "16-avos", color: PHASE_COLORS[theme].roundOf32 },
+              { label: "Oitavas", color: PHASE_COLORS[theme].roundOf16 },
             ]}
           />
         </ChartCard>

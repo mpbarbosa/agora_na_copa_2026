@@ -10,6 +10,7 @@ import {
   goalsByGroup,
   goalsByMinute,
   matchStatusBreakdown,
+  roundOf16TeamCodes,
   roundOf32TeamCodes,
   topScoringTeams,
   tournamentTotals,
@@ -66,39 +67,47 @@ test("continentBreakdown sums to the 48-team field", () => {
   }
 });
 
-test("aggregateContinentByPhase counts group-stage vs Round-of-32 teams per continent", () => {
+test("aggregateContinentByPhase counts group-stage, Round-of-32 and Round-of-16 per continent", () => {
   const continents = [
     { continent: "Europa", confederation: "UEFA", count: 3, teams: [{ code: "GER" }, { code: "ESP" }, { code: "POR" }] },
     { continent: "Ásia", confederation: "AFC", count: 2, teams: [{ code: "JPN" }, { code: "KOR" }] },
     { continent: "Oceania", confederation: "OFC", count: 1, teams: [{ code: "NZL" }] },
   ];
-  // GER, ESP and JPN advanced; POR, KOR, NZL did not.
-  const out = aggregateContinentByPhase(continents as never, ["GER", "ESP", "JPN"]);
+  // R32: GER, ESP, JPN advanced. R16: only GER survived (subset of R32).
+  const out = aggregateContinentByPhase(continents as never, ["GER", "ESP", "JPN"], ["GER"]);
   assert.deepEqual(out, [
-    { continent: "Europa", confederation: "UEFA", groupStage: 3, roundOf32: 2 },
-    { continent: "Ásia", confederation: "AFC", groupStage: 2, roundOf32: 1 },
-    { continent: "Oceania", confederation: "OFC", groupStage: 1, roundOf32: 0 },
+    { continent: "Europa", confederation: "UEFA", groupStage: 3, roundOf32: 2, roundOf16: 1 },
+    { continent: "Ásia", confederation: "AFC", groupStage: 2, roundOf32: 1, roundOf16: 0 },
+    { continent: "Oceania", confederation: "OFC", groupStage: 1, roundOf32: 0, roundOf16: 0 },
   ]);
 });
 
-test("aggregateContinentByPhase ignores R32 codes with no continent mapping", () => {
+test("aggregateContinentByPhase ignores codes with no continent mapping", () => {
   const continents = [
     { continent: "Europa", confederation: "UEFA", count: 1, teams: [{ code: "GER" }] },
   ];
-  const out = aggregateContinentByPhase(continents as never, ["GER", "ZZZ"]);
+  const out = aggregateContinentByPhase(continents as never, ["GER", "ZZZ"], ["ZZZ"]);
   assert.equal(out[0].roundOf32, 1); // ZZZ dropped, not crashed
+  assert.equal(out[0].roundOf16, 0);
 });
 
-test("roundOf32TeamCodes yields the 32 bracket teams, each known to a continent", () => {
-  const codes = roundOf32TeamCodes();
-  assert.equal(codes.length, 32);
+test("roundOf16TeamCodes are a subset of R32 participants (winners only)", () => {
+  const r32 = new Set(roundOf32TeamCodes());
+  const r16 = roundOf16TeamCodes();
+  for (const code of r16) assert.ok(r32.has(code), `${code} in R16 but not an R32 participant`);
+  // At most one survivor per R32 tie → never more R16 than half of R32.
+  assert.ok(r16.length <= r32.size / 2, "more R16 qualifiers than ties allow");
+});
+
+test("continentByPhase is a monotonic funnel covering the 48-team field", () => {
   const phased = continentByPhase();
-  // The per-continent R32 counts sum to exactly the 32 advancing teams.
-  assert.equal(phased.reduce((s, c) => s + c.roundOf32, 0), 32);
-  // Group-stage totals still cover the full 48-team field.
   assert.equal(phased.reduce((s, c) => s + c.groupStage, 0), 48);
-  // No continent advances more teams than it qualified.
-  for (const c of phased) assert.ok(c.roundOf32 <= c.groupStage, `${c.continent} R32 > grupos`);
+  assert.equal(phased.reduce((s, c) => s + c.roundOf32, 0), 32);
+  // Each phase is a subset of the previous: grupos ≥ 16-avos ≥ oitavas.
+  for (const c of phased) {
+    assert.ok(c.roundOf32 <= c.groupStage, `${c.continent} R32 > grupos`);
+    assert.ok(c.roundOf16 <= c.roundOf32, `${c.continent} oitavas > 16-avos`);
+  }
 });
 
 test("goalsByGroup strips the 'Grupo ' prefix, sums per group, and orders by letter", () => {
