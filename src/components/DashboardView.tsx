@@ -1,8 +1,9 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import type { Match } from "../types";
 import { computeStandings } from "../standings";
 import {
   continentByPhase,
+  goalScorerTeams,
   goalsByGroup,
   goalsByMinute,
   goalsByPhase,
@@ -61,8 +62,6 @@ export function DashboardView({ theme, matches }: DashboardViewProps) {
     groupGoals,
     statusSegments,
     topTeams,
-    goalScatter,
-    scatterTotal,
     phaseGoals,
     phaseGoalsTotal,
   } = useMemo(() => {
@@ -70,7 +69,6 @@ export function DashboardView({ theme, matches }: DashboardViewProps) {
     const phaseColors = PHASE_COLORS[theme];
     const statusColors = STATUS_COLORS[theme];
     const statusData = matchStatusBreakdown(matches);
-    const minuteSeries = goalsByMinute();
     const phased = continentByPhase();
     const phaseSeries = goalsByPhase(standings);
     const phaseGoalColor: Record<string, string> = {
@@ -105,8 +103,6 @@ export function DashboardView({ theme, matches }: DashboardViewProps) {
         value: t.goalsFor,
         color: t.primaryColor,
       })),
-      goalScatter: minuteSeries.map((d) => ({ x: d.minute, y: d.goals })),
-      scatterTotal: minuteSeries.reduce((sum, d) => sum + d.goals, 0),
       phaseGoals: phaseSeries.map((p) => ({
         label: p.phase,
         value: p.goals,
@@ -120,6 +116,19 @@ export function DashboardView({ theme, matches }: DashboardViewProps) {
   const goalsPerMatch = totals.groupGoalsPerMatch
     ? totals.groupGoalsPerMatch.toFixed(2).replace(".", ",")
     : "—";
+
+  // "Gols por minuto" national-team filter ("" = all teams). The scatter is independent of
+  // the theme/matches memo above, so it recomputes only when the selected team changes.
+  const [goalsTeam, setGoalsTeam] = useState("");
+  const goalScorerTeamOptions = useMemo(() => goalScorerTeams(), []);
+  const { goalScatter, scatterTotal, goalsTeamName } = useMemo(() => {
+    const series = goalsByMinute(goalsTeam || null);
+    return {
+      goalScatter: series.map((d) => ({ x: d.minute, y: d.goals })),
+      scatterTotal: series.reduce((sum, d) => sum + d.goals, 0),
+      goalsTeamName: goalScorerTeamOptions.find((t) => t.code === goalsTeam)?.name ?? null,
+    };
+  }, [goalsTeam, goalScorerTeamOptions]);
 
   return (
     <div className="max-w-7xl mx-auto px-4 mt-8" id="dashboard-view">
@@ -226,13 +235,42 @@ export function DashboardView({ theme, matches }: DashboardViewProps) {
         </ChartCard>
       </div>
 
-      {/* Goals by minute — full width */}
+      {/* Goals by minute — full width, filterable by national team */}
       <div className="mt-4">
         <ChartCard
           theme={theme}
           title="Gols por minuto"
-          subtitle={`todos os jogos encerrados · ${scatterTotal} gols · minuto do jogo × nº de gols`}
+          subtitle={
+            goalsTeamName
+              ? `${goalsTeamName} · ${scatterTotal} ${scatterTotal === 1 ? "gol" : "gols"} · minuto do jogo × nº de gols`
+              : `todos os jogos encerrados · ${scatterTotal} gols · minuto do jogo × nº de gols`
+          }
+          headerAction={
+            <select
+              id="dashboard-goals-team-filter"
+              aria-label="Filtrar gols por minuto por seleção"
+              value={goalsTeam}
+              onChange={(event) => setGoalsTeam(event.target.value)}
+              className={`rounded-lg border px-2.5 py-1.5 font-mono text-[11px] uppercase tracking-wider outline-none transition focus-visible:ring-2 focus-visible:ring-sky-400 ${
+                isLight
+                  ? "border-slate-200 bg-white text-slate-700 hover:border-slate-300"
+                  : "border-white/10 bg-[#1a1d1d] text-slate-200 hover:border-white/20"
+              }`}
+            >
+              <option value="">Todas as seleções</option>
+              {goalScorerTeamOptions.map((team) => (
+                <option key={team.code} value={team.code}>
+                  {team.name} ({team.goals})
+                </option>
+              ))}
+            </select>
+          }
         >
+          {goalScatter.length === 0 ? (
+            <p className={`py-10 text-center font-mono text-xs uppercase tracking-wider ${mutedClasses}`}>
+              Sem gols registrados para esta seleção
+            </p>
+          ) : (
           <ScatterPlot
             theme={theme}
             data={goalScatter}
@@ -244,6 +282,7 @@ export function DashboardView({ theme, matches }: DashboardViewProps) {
               { x: 90, label: "90'" },
             ]}
           />
+          )}
         </ChartCard>
       </div>
     </div>

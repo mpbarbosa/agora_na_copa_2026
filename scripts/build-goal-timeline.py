@@ -14,10 +14,14 @@ Minute parsing (elapsed clock, so a goal's literal timestamp):
     "90'+2'" -> 92
 Every incident with type == "GOAL" counts (own goals and penalties are all "GOAL" in the
 feed and all change the score), so the per-match goal count reconciles with the scoreline.
+Goals are split by the side they are credited to (`incident.team` "A"/"B", which aligns
+with the side the score increments), so the Dashboard can filter the plot by national team.
+The side → team code mapping is resolved in TypeScript from APP_MATCHES (which knows each
+match's teamA/teamB, group and knockout alike), so this file stays minimal — just the sides.
 
-Output shape (keyed by match id, value = sorted list of goal minutes):
+Output shape (keyed by match id, value = goal minutes split by side, each sorted):
     {
-      "usa-par-2026": [7, 31, 50, 73],
+      "usa-par-2026": { "teamA": [7, 50], "teamB": [31, 73] },
       ...
     }
 
@@ -58,15 +62,23 @@ def parse_minute(time_label: str) -> int | None:
     return int(m.group(1)) + (int(m.group(2)) if m.group(2) else 0)
 
 
-def goal_minutes(incidents: list) -> list:
-    minutes = []
+def goal_minutes_by_side(incidents: list) -> dict:
+    """Goal minutes split by the side credited (`incident.team`): {"teamA": [...], "teamB": [...]}."""
+    sides: dict = {"teamA": [], "teamB": []}
     for ev in incidents:
         if ev.get("type") != "GOAL":
             continue
         minute = parse_minute(ev.get("time", ""))
-        if minute is not None:
-            minutes.append(minute)
-    return sorted(minutes)
+        if minute is None:
+            continue
+        side = ev.get("team")
+        if side == "A":
+            sides["teamA"].append(minute)
+        elif side == "B":
+            sides["teamB"].append(minute)
+    sides["teamA"].sort()
+    sides["teamB"].sort()
+    return sides
 
 
 def main() -> None:
@@ -78,9 +90,9 @@ def main() -> None:
         state = ov.get("matchState") or {}
         if state.get("status") != "FINISHED":
             continue
-        minutes = goal_minutes(state.get("incidents") or [])
-        if minutes:
-            result[mid] = minutes
+        sides = goal_minutes_by_side(state.get("incidents") or [])
+        if sides["teamA"] or sides["teamB"]:
+            result[mid] = sides
 
     # Stable, diff-friendly ordering.
     result = {k: result[k] for k in sorted(result)}
@@ -92,7 +104,7 @@ def main() -> None:
 
     with open(os.path.normpath(OUT_PATH), "w", encoding="utf-8") as fh:
         fh.write(payload)
-    total = sum(len(v) for v in result.values())
+    total = sum(len(v["teamA"]) + len(v["teamB"]) for v in result.values())
     print(f"Wrote {len(result)} matches ({total} goals) to {os.path.normpath(OUT_PATH)}")
 
 

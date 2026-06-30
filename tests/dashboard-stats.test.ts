@@ -6,8 +6,10 @@ import {
   aggregateContinentByPhase,
   aggregateGoalsByMinute,
   aggregateGoalsByPhase,
+  collectGoalMinutes,
   continentBreakdown,
   continentByPhase,
+  goalScorerTeams,
   goalsByGroup,
   goalsByMinute,
   goalsByPhase,
@@ -16,6 +18,7 @@ import {
   roundOf32TeamCodes,
   topScoringTeams,
   tournamentTotals,
+  type MatchGoalTimeline,
 } from "../src/dashboardStats";
 
 // A minimal StandingsRow factory — only the fields the dashboard stats read.
@@ -189,6 +192,53 @@ test("goalsByMinute reads the seeded timeline and stays monotonic with positive 
     assert.ok(point.minute >= 1, "minute should be a real clock minute");
     assert.ok(point.goals >= 1, "each plotted minute has at least one goal");
   }
+});
+
+test("collectGoalMinutes returns all goals unfiltered, and one team's goals when filtered", () => {
+  const timeline: Record<string, MatchGoalTimeline> = {
+    "bra-jpn": { teamA: [56, 90], teamB: [29] },
+    "bra-mar": { teamA: [21], teamB: [44] },
+    "ger-par": { teamA: [54], teamB: [42] },
+  };
+  const sideCodes = {
+    "bra-jpn": { a: "BRA", b: "JPN" },
+    "bra-mar": { a: "BRA", b: "MAR" },
+    "ger-par": { a: "GER", b: "PAR" },
+  };
+  // null → every goal from both sides of every match.
+  assert.deepEqual(
+    collectGoalMinutes(timeline, sideCodes, null).sort((a, b) => a - b),
+    [21, 29, 42, 44, 54, 56, 90],
+  );
+  // BRA is the home side in both bra-* matches → only its scored minutes.
+  assert.deepEqual(collectGoalMinutes(timeline, sideCodes, "BRA").sort((a, b) => a - b), [21, 56, 90]);
+  // JPN is the away side in bra-jpn → just its goal.
+  assert.deepEqual(collectGoalMinutes(timeline, sideCodes, "JPN"), [29]);
+  // A team that didn't score → empty.
+  assert.deepEqual(collectGoalMinutes(timeline, sideCodes, "ARG"), []);
+  // A match with no side-code mapping is skipped under a team filter (never crashes).
+  assert.deepEqual(collectGoalMinutes({ x: { teamA: [10], teamB: [20] } }, {}, "BRA"), []);
+});
+
+test("goalScorerTeams lists only teams that scored, sorted by name, with a per-team tally", () => {
+  const teams = goalScorerTeams();
+  assert.ok(teams.length > 0, "expected seeded scorers");
+  for (const t of teams) {
+    assert.ok(t.goals >= 1, `${t.code} listed with no goals`);
+    assert.ok(t.name.length > 0, `${t.code} missing a name`);
+  }
+  const names = teams.map((t) => t.name);
+  assert.deepEqual(names, [...names].sort((a, b) => a.localeCompare(b, "pt-BR")), "sorted by name");
+  // Every goal belongs to exactly one scoring team, so the tallies sum to the all-teams total.
+  const totalFromTeams = teams.reduce((s, t) => s + t.goals, 0);
+  const allGoals = goalsByMinute(null).reduce((s, d) => s + d.goals, 0);
+  assert.equal(totalFromTeams, allGoals);
+});
+
+test("goalsByMinute(teamCode) plots exactly that team's goal tally", () => {
+  const team = goalScorerTeams()[0];
+  const teamTotal = goalsByMinute(team.code).reduce((s, d) => s + d.goals, 0);
+  assert.equal(teamTotal, team.goals);
 });
 
 test("topScoringTeams sorts by goals then name, and honours the limit", () => {

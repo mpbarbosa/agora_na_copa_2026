@@ -23,22 +23,29 @@ interface CardProps {
   subtitle?: string;
   children: ReactNode;
   className?: string;
+  /** Optional control (e.g. a filter) shown at the top-right of the card header. */
+  headerAction?: ReactNode;
 }
 
 /** The shared glass panel every chart sits in — Anton title + JetBrains-mono subtitle. */
-export function ChartCard({ theme, title, subtitle, children, className }: CardProps) {
+export function ChartCard({ theme, title, subtitle, children, className, headerAction }: CardProps) {
   const isLight = theme === "classic-light";
   const cardClasses = isLight ? "bg-white border-slate-200 shadow-sm" : "bg-[#121414] border-white/10";
   const headingClasses = isLight ? "text-slate-900" : "text-white";
   const subtleClasses = isLight ? "text-slate-500" : "text-slate-400";
   return (
     <section className={`rounded-3xl border p-5 ${cardClasses} ${className ?? ""}`}>
-      <h3 className={`font-anton text-lg uppercase tracking-wide ${headingClasses}`}>{title}</h3>
-      {subtitle && (
-        <p className={`mt-1 font-mono text-[10px] uppercase tracking-wider ${subtleClasses}`}>
-          {subtitle}
-        </p>
-      )}
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <h3 className={`font-anton text-lg uppercase tracking-wide ${headingClasses}`}>{title}</h3>
+          {subtitle && (
+            <p className={`mt-1 font-mono text-[10px] uppercase tracking-wider ${subtleClasses}`}>
+              {subtitle}
+            </p>
+          )}
+        </div>
+        {headerAction && <div className="shrink-0">{headerAction}</div>}
+      </div>
       <div className="mt-4">{children}</div>
     </section>
   );

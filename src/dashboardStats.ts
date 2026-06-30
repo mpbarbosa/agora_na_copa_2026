@@ -1,5 +1,6 @@
 import type { KnockoutMatch, Match, StandingsRow } from "./types";
 import { stadiums } from "./data/tournament";
+import { APP_MATCHES } from "./appMatches";
 import { KNOCKOUT_MATCHES } from "./data/knockoutBracket";
 import { KNOCKOUT_RESULTS } from "./data/knockoutResults";
 import teamsByContinent from "./data/teamsByContinent.json";
@@ -240,9 +241,85 @@ export function aggregateGoalsByMinute(perMatchMinutes: number[][]): GoalMinuteD
     .map(([minute, goals]) => ({ minute, goals }));
 }
 
-/** Scatter points (minute, goal count) over every finished match, from `goalTimeline.json`. */
-export function goalsByMinute(): GoalMinuteDatum[] {
-  return aggregateGoalsByMinute(Object.values(goalTimeline as Record<string, number[]>));
+/** Per-match goal minutes split by the side credited (mirrors the scoreline). */
+export interface MatchGoalTimeline {
+  teamA: number[];
+  teamB: number[];
+}
+
+const GOAL_TIMELINE = goalTimeline as Record<string, MatchGoalTimeline>;
+
+// matchId → the two sides' team codes, resolved from APP_MATCHES (group + knockout, the
+// latter resolved once its teams are known). Lets the per-side timeline be filtered by team
+// without embedding codes in the JSON.
+const MATCH_SIDE_CODES: Record<string, { a: string; b: string }> = Object.fromEntries(
+  APP_MATCHES.map((match) => [match.id, { a: match.teamA.code, b: match.teamB.code }]),
+);
+
+// Team code → display name, for the goal-filter option labels.
+const TEAM_NAME_BY_CODE: Record<string, string> = Object.fromEntries(
+  APP_MATCHES.flatMap((match) => [
+    [match.teamA.code, match.teamA.name],
+    [match.teamB.code, match.teamB.name],
+  ]),
+);
+
+/**
+ * Flat list of goal minutes for the scatter, optionally limited to one national team's goals.
+ * Pure over its inputs (the per-side timeline + a matchId → side-codes map) so it is
+ * unit-tested; `goalsByMinute` feeds it the seeded timeline + APP_MATCHES. `teamCode` null →
+ * every team's goals; otherwise only the minutes credited to that team's side of each match.
+ */
+export function collectGoalMinutes(
+  timeline: Record<string, MatchGoalTimeline>,
+  sideCodes: Record<string, { a: string; b: string }>,
+  teamCode: string | null,
+): number[] {
+  const minutes: number[] = [];
+  for (const [matchId, sides] of Object.entries(timeline)) {
+    if (teamCode === null) {
+      minutes.push(...sides.teamA, ...sides.teamB);
+      continue;
+    }
+    const codes = sideCodes[matchId];
+    if (!codes) continue;
+    if (codes.a === teamCode) minutes.push(...sides.teamA);
+    if (codes.b === teamCode) minutes.push(...sides.teamB);
+  }
+  return minutes;
+}
+
+/**
+ * Scatter points (minute, goal count) over finished matches, from `goalTimeline.json`.
+ * Pass a `teamCode` to limit the plot to that national team's goals; null/omitted = all.
+ */
+export function goalsByMinute(teamCode: string | null = null): GoalMinuteDatum[] {
+  return aggregateGoalsByMinute([collectGoalMinutes(GOAL_TIMELINE, MATCH_SIDE_CODES, teamCode)]);
+}
+
+export interface GoalScorerTeam {
+  code: string;
+  name: string;
+  /** Goals this team scored across the timeline (the count shown in the filter). */
+  goals: number;
+}
+
+/**
+ * National teams that scored at least one goal in the timeline, with their tally, sorted by
+ * name (pt-BR) — the option set for the "Gols por minuto" team filter. Teams with no goals
+ * are omitted (nothing to plot for them).
+ */
+export function goalScorerTeams(): GoalScorerTeam[] {
+  const tally = new Map<string, number>();
+  for (const [matchId, sides] of Object.entries(GOAL_TIMELINE)) {
+    const codes = MATCH_SIDE_CODES[matchId];
+    if (!codes) continue;
+    if (sides.teamA.length) tally.set(codes.a, (tally.get(codes.a) ?? 0) + sides.teamA.length);
+    if (sides.teamB.length) tally.set(codes.b, (tally.get(codes.b) ?? 0) + sides.teamB.length);
+  }
+  return [...tally.entries()]
+    .map(([code, goals]) => ({ code, name: TEAM_NAME_BY_CODE[code] ?? code, goals }))
+    .sort((a, b) => a.name.localeCompare(b.name, "pt-BR"));
 }
 
 export interface PhaseGoalsDatum {
