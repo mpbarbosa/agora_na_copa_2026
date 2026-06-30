@@ -11,6 +11,7 @@ import { FlagIcon } from "./FlagIcon";
 import { TeamPitchBoard } from "./TeamPitchBoard";
 import { PlayerOverlayCard } from "./PlayerOverlayCard";
 import { getPositionLabel } from "../utils/playerDisplay";
+import { getTeamTournamentStatus } from "../utils/teamTournamentStatus";
 import { parseNoteSections } from "../utils/noteSections";
 import { formatAnalysisTimestamp } from "../utils/dateFormat";
 import { AnalysisFreshnessBadge } from "./AnalysisFreshnessBadge";
@@ -765,6 +766,9 @@ export const TeamLineupView: React.FC<TeamLineupViewProps> = ({ team, theme, onB
   const activeMatchCount = teamView
     ? [teamView.currentMatch, teamView.nextMatch, teamView.lastMatch].filter(Boolean).length
     : 0;
+  // Concluded tournament status (e.g. "Eliminado em 16 avos de final", "Campeão")
+  // derived from the team's finished knockout matches. Null while still alive.
+  const tournamentStatus = teamView ? getTeamTournamentStatus(teamView.matchHistory) : null;
 
   return (
     <div className="mx-auto mt-8 max-w-7xl px-4 2xl:max-w-[1600px]" id="team-lineup-view">
@@ -797,6 +801,27 @@ export const TeamLineupView: React.FC<TeamLineupViewProps> = ({ team, theme, onB
               <p className={`mt-1 font-mono text-[11px] uppercase tracking-wider ${mutedClasses}`}>
                 {team.code} {team.group ? `• Grupo ${team.group.replace("Grupo ", "")}` : ""}
               </p>
+              {tournamentStatus && (
+                <p
+                  id="team-tournament-status"
+                  data-status-tone={tournamentStatus.tone}
+                  className={`mt-2 inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 font-mono text-[10px] font-bold uppercase tracking-wider ${
+                    tournamentStatus.tone === "eliminated"
+                      ? theme === "classic-light"
+                        ? "border-rose-200 bg-rose-50 text-rose-700"
+                        : "border-rose-400/30 bg-rose-400/10 text-rose-300"
+                      : tournamentStatus.tone === "champion"
+                        ? theme === "classic-light"
+                          ? "border-amber-300 bg-amber-50 text-amber-700"
+                          : "border-amber-400/30 bg-amber-400/10 text-amber-300"
+                        : theme === "classic-light"
+                          ? "border-[#009c3b]/30 bg-[#009c3b]/10 text-[#065f2c]"
+                          : "border-[#00e476]/25 bg-[#00e476]/10 text-[#a7e6bf]"
+                  }`}
+                >
+                  {tournamentStatus.label}
+                </p>
+              )}
               {coach && (
                 <p
                   className={`mt-1 font-mono text-[11px] uppercase tracking-wider ${mutedClasses}`}
