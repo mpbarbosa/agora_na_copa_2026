@@ -2707,7 +2707,10 @@
     },
     "dateOfBirth": "1998-12-20",
     "height": 180,
-    "instagramPostUrl": "https://www.instagram.com/p/DZqaoeeAhUg/",
+    "instagramPostUrls": [
+      "https://www.instagram.com/p/DZqaoeeAhUg/",
+      "https://www.instagram.com/p/DZ7YVf1Anjj/"
+    ],
     "worldCupNote": "## Leitura\nComo sempre, Mbappé é o farol da França — e fechou a fase de grupos com 100% de aproveitamento e a liderança do Grupo I. Capitão e principal estrela, o camisa 10 soma quatro gols e leva a França às oitavas como uma das forças do Mundial.\n## Desempenho\nNa estreia, marcou duas vezes na vitória por 3 a 1 sobre o Senegal (66' e 90'+6'). Contra o Iraque, repetiu a dose: abriu aos 14 e ampliou aos 54 no 3 a 0. No fechamento, na vitória por 4 a 1 sobre a Noruega, atuou até os 86 sem balançar as redes, mas a França selou a campanha perfeita. Ficha disciplinar limpa.\n## Números\nJ3 · 4 gols · 0 cartões · França em 1º do Grupo I com 9 pontos (100%) e saldo +8. Entre os artilheiros do Mundial, Mbappé lidera o favorito rumo às oitavas.",
     "worldCupNoteUpdatedAt": "2026-06-26T19:00:00.000Z"
   },
