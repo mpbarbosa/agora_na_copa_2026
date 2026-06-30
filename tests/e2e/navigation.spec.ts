@@ -673,12 +673,12 @@ test.describe("Navigation shell", () => {
     await toggle.click();
     await expect(toggle).toHaveAttribute("aria-expanded", "true");
 
-    // Panel shows the embed blockquote and redirect link
+    // Panel shows the script-free /embed/ iframe and redirect link
     const panel = page.locator("#match-incident-player-overlay-ig-panel");
     await expect(panel).toBeVisible();
-    await expect(panel.locator("blockquote.instagram-media")).toHaveAttribute(
-      "data-instgrm-permalink",
-      instagramPostUrl,
+    await expect(page.locator("#match-incident-player-overlay-ig-embed-0")).toHaveAttribute(
+      "src",
+      `${instagramPostUrl}embed/`,
     );
     await expect(page.locator("#match-incident-player-overlay-ig-open-0")).toHaveAttribute(
       "href",

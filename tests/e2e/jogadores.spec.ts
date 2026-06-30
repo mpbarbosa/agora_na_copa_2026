@@ -148,9 +148,9 @@ test.describe("Jogadores view — player overlay stats", () => {
 
     const panel = page.locator("#jogadores-player-overlay-ig-panel");
     await expect(panel).toBeVisible();
-    await expect(panel.locator("blockquote.instagram-media")).toHaveAttribute(
-      "data-instgrm-permalink",
-      instagramPostUrl,
+    await expect(page.locator("#jogadores-player-overlay-ig-embed-0")).toHaveAttribute(
+      "src",
+      `${instagramPostUrl}embed/`,
     );
     await expect(page.locator("#jogadores-player-overlay-ig-open-0")).toHaveAttribute(
       "href",

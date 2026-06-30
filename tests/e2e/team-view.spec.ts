@@ -818,12 +818,12 @@ test.describe("Team view", () => {
     await toggle.click();
     await expect(toggle).toHaveAttribute("aria-expanded", "true");
 
-    // Panel shows the embed blockquote and redirect link
+    // Panel shows the script-free /embed/ iframe and the redirect link
     const panel = page.locator("#player-feature-overlay-ig-panel");
     await expect(panel).toBeVisible();
-    await expect(panel.locator("blockquote.instagram-media")).toHaveAttribute(
-      "data-instgrm-permalink",
-      instagramPostUrl,
+    await expect(page.locator("#player-feature-overlay-ig-embed-0")).toHaveAttribute(
+      "src",
+      `${instagramPostUrl}embed/`,
     );
     await expect(page.locator("#player-feature-overlay-ig-open-0")).toHaveAttribute(
       "href",

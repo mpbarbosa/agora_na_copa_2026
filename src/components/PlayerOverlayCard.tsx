@@ -7,7 +7,7 @@ import { getPlayerSocialEntries } from "../utils/playerDisplay";
 import { WorldCupNoteCarousel } from "./WorldCupNoteCarousel";
 import { PlayerVideoRail } from "./PlayerVideoRail";
 import { PlayerNoteFreshness } from "./PlayerNoteFreshness";
-import { InstagramEmbed } from "./InstagramEmbed";
+import { InstagramPostFrame } from "./InstagramPostFrame";
 import { resolveInstagramPostUrls } from "../utils/instagram";
 
 export const getPlayerAge = (dateOfBirth: string): number =>
@@ -438,6 +438,61 @@ export function PlayerOverlayCard({
                 </div>
               </div>
             )}
+
+            {/* Destaque(s) no Instagram — grouped with the official Instagram link above */}
+            {hasInstagramHighlights && (
+              <div className="mt-3" id={id ? `${id}-ig-highlight` : undefined}>
+                <button
+                  type="button"
+                  onClick={handleToggleIg}
+                  className={`flex w-full items-center justify-between rounded-xl border px-3 py-2.5 transition ${
+                    isLight
+                      ? "border-slate-200 bg-slate-50 hover:bg-slate-100"
+                      : "border-white/10 bg-white/5 hover:bg-white/10"
+                  }`}
+                  aria-expanded={igExpanded}
+                  id={id ? `${id}-ig-toggle` : undefined}
+                >
+                  <span className="flex items-center gap-2">
+                    <InstagramBrandIcon size={16} />
+                    <span className="font-mono text-[10px] font-bold uppercase tracking-wider">
+                      {instagramPostUrls.length > 1
+                        ? "Destaques no Instagram"
+                        : "Destaque no Instagram"}
+                    </span>
+                  </span>
+                  <span
+                    className={`font-mono text-[10px] transition-transform duration-200 ${igExpanded ? "rotate-180" : ""} ${mutedClasses}`}
+                  >
+                    ▾
+                  </span>
+                </button>
+
+                {igExpanded && (
+                  <div className="mt-3 space-y-5" id={id ? `${id}-ig-panel` : undefined}>
+                    {instagramPostUrls.map((postUrl, index) => (
+                      <div key={postUrl} className="space-y-3">
+                        <InstagramPostFrame
+                          permalink={postUrl}
+                          id={id ? `${id}-ig-embed-${index}` : undefined}
+                        />
+                        <a
+                          href={postUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          id={id ? `${id}-ig-open-${index}` : undefined}
+                          className={`inline-flex w-full items-center justify-center gap-2 rounded-xl border py-2.5 font-mono text-[10px] font-bold uppercase tracking-wider transition ${closeClasses}`}
+                          style={{ borderColor: `${accent}40` }}
+                        >
+                          <InstagramBrandIcon size={14} />
+                          Abrir no Instagram
+                        </a>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Stats + details column */}
@@ -522,58 +577,6 @@ export function PlayerOverlayCard({
                   id={id ? `${id}-note-freshness` : undefined}
                 />
               </>
-            )}
-
-            {/* Destaque(s) no Instagram */}
-            {hasInstagramHighlights && (
-              <div className="mt-5" id={id ? `${id}-ig-highlight` : undefined}>
-                <button
-                  type="button"
-                  onClick={handleToggleIg}
-                  className={`flex w-full items-center justify-between rounded-xl border px-3 py-2.5 transition ${
-                    isLight
-                      ? "border-slate-200 bg-slate-50 hover:bg-slate-100"
-                      : "border-white/10 bg-white/5 hover:bg-white/10"
-                  }`}
-                  aria-expanded={igExpanded}
-                  id={id ? `${id}-ig-toggle` : undefined}
-                >
-                  <span className="flex items-center gap-2">
-                    <InstagramBrandIcon size={16} />
-                    <span className="font-mono text-[10px] font-bold uppercase tracking-wider">
-                      {instagramPostUrls.length > 1
-                        ? "Destaques no Instagram"
-                        : "Destaque no Instagram"}
-                    </span>
-                  </span>
-                  <span
-                    className={`font-mono text-[10px] transition-transform duration-200 ${igExpanded ? "rotate-180" : ""} ${mutedClasses}`}
-                  >
-                    ▾
-                  </span>
-                </button>
-
-                {igExpanded && (
-                  <div className="mt-3 space-y-5" id={id ? `${id}-ig-panel` : undefined}>
-                    {instagramPostUrls.map((postUrl, index) => (
-                      <div key={postUrl} className="space-y-3">
-                        <InstagramEmbed permalink={postUrl} />
-                        <a
-                          href={postUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          id={id ? `${id}-ig-open-${index}` : undefined}
-                          className={`inline-flex w-full items-center justify-center gap-2 rounded-xl border py-2.5 font-mono text-[10px] font-bold uppercase tracking-wider transition ${closeClasses}`}
-                          style={{ borderColor: `${accent}40` }}
-                        >
-                          <InstagramBrandIcon size={14} />
-                          Abrir no Instagram
-                        </a>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
             )}
           </div>
         </div>

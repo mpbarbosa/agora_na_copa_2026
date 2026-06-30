@@ -359,12 +359,12 @@ test.describe("Leaders view (Líderes)", () => {
     await toggle.click();
     await expect(toggle).toHaveAttribute("aria-expanded", "true");
 
-    // Panel shows the embed blockquote and redirect link
+    // Panel shows the script-free /embed/ iframe and the redirect link
     const panel = page.locator("#leaders-player-overlay-ig-panel");
     await expect(panel).toBeVisible();
-    await expect(panel.locator("blockquote.instagram-media")).toHaveAttribute(
-      "data-instgrm-permalink",
-      instagramPostUrl,
+    await expect(page.locator("#leaders-player-overlay-ig-embed-0")).toHaveAttribute(
+      "src",
+      `${instagramPostUrl}embed/`,
     );
     await expect(page.locator("#leaders-player-overlay-ig-open-0")).toHaveAttribute(
       "href",
@@ -432,10 +432,18 @@ test.describe("Leaders view (Líderes)", () => {
     await toggle.click();
     await expect(toggle).toHaveAttribute("aria-expanded", "true");
 
-    // One embed + one open link per entry, in order; the singular field is ignored.
+    // One /embed/ iframe + one open link per entry, in order; the singular field is ignored.
     const panel = page.locator("#leaders-player-overlay-ig-panel");
     await expect(panel).toBeVisible();
-    await expect(panel.locator("blockquote.instagram-media")).toHaveCount(instagramPostUrls.length);
+    await expect(panel.locator("iframe")).toHaveCount(instagramPostUrls.length);
+    await expect(page.locator("#leaders-player-overlay-ig-embed-0")).toHaveAttribute(
+      "src",
+      `${instagramPostUrls[0]}embed/`,
+    );
+    await expect(page.locator("#leaders-player-overlay-ig-embed-1")).toHaveAttribute(
+      "src",
+      `${instagramPostUrls[1]}embed/`,
+    );
     await expect(page.locator("#leaders-player-overlay-ig-open-0")).toHaveAttribute(
       "href",
       instagramPostUrls[0],
