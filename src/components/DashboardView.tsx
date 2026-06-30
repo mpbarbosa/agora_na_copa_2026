@@ -5,6 +5,7 @@ import {
   continentByPhase,
   goalsByGroup,
   goalsByMinute,
+  goalsByPhase,
   matchStatusBreakdown,
   topScoringTeams,
   tournamentTotals,
@@ -62,6 +63,8 @@ export function DashboardView({ theme, matches }: DashboardViewProps) {
     topTeams,
     goalScatter,
     scatterTotal,
+    phaseGoals,
+    phaseGoalsTotal,
   } = useMemo(() => {
     const standings = computeStandings(matches);
     const phaseColors = PHASE_COLORS[theme];
@@ -69,6 +72,12 @@ export function DashboardView({ theme, matches }: DashboardViewProps) {
     const statusData = matchStatusBreakdown(matches);
     const minuteSeries = goalsByMinute();
     const phased = continentByPhase();
+    const phaseSeries = goalsByPhase(standings);
+    const phaseGoalColor: Record<string, string> = {
+      "Fase de grupos": phaseColors.groupStage,
+      "16-avos": phaseColors.roundOf32,
+      Oitavas: phaseColors.roundOf16,
+    };
     return {
       totals: tournamentTotals(matches, standings),
       continents: phased.map((c) => ({
@@ -98,6 +107,13 @@ export function DashboardView({ theme, matches }: DashboardViewProps) {
       })),
       goalScatter: minuteSeries.map((d) => ({ x: d.minute, y: d.goals })),
       scatterTotal: minuteSeries.reduce((sum, d) => sum + d.goals, 0),
+      phaseGoals: phaseSeries.map((p) => ({
+        label: p.phase,
+        value: p.goals,
+        color: phaseGoalColor[p.phase],
+        sublabel: `${p.played} ${p.played === 1 ? "jogo" : "jogos"}`,
+      })),
+      phaseGoalsTotal: phaseSeries.reduce((sum, p) => sum + p.goals, 0),
     };
   }, [matches, theme]);
 
@@ -196,6 +212,17 @@ export function DashboardView({ theme, matches }: DashboardViewProps) {
           subtitle="fase de grupos · 8 maiores ataques"
         >
           <HorizontalBars theme={theme} data={topTeams} />
+        </ChartCard>
+      </div>
+
+      {/* Goals by phase — full width */}
+      <div className="mt-4">
+        <ChartCard
+          theme={theme}
+          title="Gols por fase"
+          subtitle={`gols marcados por fase · grupos + mata-mata · ${integer(phaseGoalsTotal)} gols`}
+        >
+          <HorizontalBars theme={theme} data={phaseGoals} />
         </ChartCard>
       </div>
 

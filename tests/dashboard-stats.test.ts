@@ -5,10 +5,12 @@ import {
   TEAM_COUNT,
   aggregateContinentByPhase,
   aggregateGoalsByMinute,
+  aggregateGoalsByPhase,
   continentBreakdown,
   continentByPhase,
   goalsByGroup,
   goalsByMinute,
+  goalsByPhase,
   matchStatusBreakdown,
   roundOf16TeamCodes,
   roundOf32TeamCodes,
@@ -202,4 +204,58 @@ test("topScoringTeams sorts by goals then name, and honours the limit", () => {
     ["TOP", "MIDA", "MIDB"], // 5, then 3/3 broken alphabetically (Alfa < Beta)
   );
   assert.equal(top.length, 3);
+});
+
+test("aggregateGoalsByPhase orders phases, sums knockout scores, and skips unplayed phases", () => {
+  const knockout = [
+    { stage: "R32" as const, matchNumber: 73 },
+    { stage: "R32" as const, matchNumber: 74 },
+    { stage: "R16" as const, matchNumber: 89 }, // not played yet → omitted
+  ];
+  const results = {
+    73: { status: "FINISHED", score: { teamA: 0, teamB: 1 } },
+    74: { status: "FINISHED", score: { teamA: 1, teamB: 1 } }, // decided on pens → still 2 open-play goals
+    89: undefined,
+  };
+  const out = aggregateGoalsByPhase(312, 104, knockout, results);
+  assert.deepEqual(out, [
+    { phase: "Fase de grupos", goals: 312, played: 104 },
+    { phase: "16-avos", goals: 3, played: 2 }, // (0+1) + (1+1)
+  ]);
+});
+
+test("aggregateGoalsByPhase omits the group stage before any group match is played", () => {
+  const out = aggregateGoalsByPhase(0, 0, [{ stage: "R32" as const, matchNumber: 73 }], {
+    73: { status: "FINISHED", score: { teamA: 2, teamB: 0 } },
+  });
+  assert.deepEqual(out, [{ phase: "16-avos", goals: 2, played: 1 }]);
+});
+
+test("aggregateGoalsByPhase ignores live/unfinished knockout ties", () => {
+  const out = aggregateGoalsByPhase(10, 4, [
+    { stage: "R32" as const, matchNumber: 73 },
+    { stage: "R32" as const, matchNumber: 74 },
+  ], {
+    73: { status: "FINISHED", score: { teamA: 1, teamB: 2 } },
+    74: { status: "LIVE", score: { teamA: 1, teamB: 0 } }, // in progress → excluded
+  });
+  assert.deepEqual(out, [
+    { phase: "Fase de grupos", goals: 10, played: 4 },
+    { phase: "16-avos", goals: 3, played: 1 },
+  ]);
+});
+
+test("goalsByPhase leads with the group stage and never exceeds bracket order", () => {
+  const standings = [
+    row({ code: "AAA", group: "Grupo A", goalsFor: 6, played: 3 }),
+    row({ code: "BBB", group: "Grupo A", goalsFor: 4, played: 3 }),
+  ];
+  const phases = goalsByPhase(standings);
+  assert.ok(phases.length >= 1, "at least the group stage is present");
+  assert.equal(phases[0].phase, "Fase de grupos");
+  assert.equal(phases[0].goals, 10);
+  const order = ["Fase de grupos", "16-avos", "Oitavas", "Quartas", "Semifinais", "3º lugar", "Final"];
+  const indices = phases.map((p) => order.indexOf(p.phase));
+  assert.deepEqual(indices, [...indices].sort((a, b) => a - b), "phases stay in bracket order");
+  for (const p of phases) assert.ok(p.played > 0, `${p.phase} has a completed match`);
 });

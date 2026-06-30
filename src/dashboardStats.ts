@@ -1,4 +1,4 @@
-import type { Match, StandingsRow } from "./types";
+import type { KnockoutMatch, Match, StandingsRow } from "./types";
 import { stadiums } from "./data/tournament";
 import { KNOCKOUT_MATCHES } from "./data/knockoutBracket";
 import { KNOCKOUT_RESULTS } from "./data/knockoutResults";
@@ -235,4 +235,65 @@ export function aggregateGoalsByMinute(perMatchMinutes: number[][]): GoalMinuteD
 /** Scatter points (minute, goal count) over every finished match, from `goalTimeline.json`. */
 export function goalsByMinute(): GoalMinuteDatum[] {
   return aggregateGoalsByMinute(Object.values(goalTimeline as Record<string, number[]>));
+}
+
+export interface PhaseGoalsDatum {
+  /** Short pt-BR phase label, e.g. "Fase de grupos", "16-avos". */
+  phase: string;
+  /** Goals scored in completed matches of this phase (penalty shoot-outs excluded). */
+  goals: number;
+  /** Completed matches counted into this phase. */
+  played: number;
+}
+
+/** Knockout stage → short pt-BR label, in bracket order, for the goals-by-phase chart. */
+const KNOCKOUT_PHASE_LABELS: { stage: KnockoutMatch["stage"]; label: string }[] = [
+  { stage: "R32", label: "16-avos" },
+  { stage: "R16", label: "Oitavas" },
+  { stage: "QF", label: "Quartas" },
+  { stage: "SF", label: "Semifinais" },
+  { stage: "TP", label: "3º lugar" },
+  { stage: "F", label: "Final" },
+];
+
+/**
+ * Goals scored per tournament phase, over COMPLETED matches only and in bracket order
+ * (group stage → 16-avos → … → final). Group-stage goals are the reconciled `groupGoals`
+ * (the same group-only figure as `tournamentTotals`); knockout goals sum each FINISHED
+ * tie's regulation + extra-time score from `results` — penalty shoot-outs are NOT goals
+ * and are excluded, so a 1–1 tie decided on penalties contributes its two open-play goals.
+ * A phase with no completed match yet is omitted, so the chart grows as the bracket plays
+ * out. Pure over its inputs so it is unit-tested; `goalsByPhase` sources them from the
+ * standings + the seeded bracket/results.
+ */
+export function aggregateGoalsByPhase(
+  groupGoals: number,
+  groupMatchesPlayed: number,
+  knockoutMatches: { stage: KnockoutMatch["stage"]; matchNumber: number }[],
+  results: Record<number, { status: string; score: { teamA: number; teamB: number } } | undefined>,
+): PhaseGoalsDatum[] {
+  const out: PhaseGoalsDatum[] = [];
+  if (groupMatchesPlayed > 0) {
+    out.push({ phase: "Fase de grupos", goals: groupGoals, played: groupMatchesPlayed });
+  }
+  for (const { stage, label } of KNOCKOUT_PHASE_LABELS) {
+    let goals = 0;
+    let played = 0;
+    for (const m of knockoutMatches) {
+      if (m.stage !== stage) continue;
+      const result = results[m.matchNumber];
+      if (!result || result.status !== "FINISHED") continue;
+      goals += result.score.teamA + result.score.teamB;
+      played += 1;
+    }
+    if (played > 0) out.push({ phase: label, goals, played });
+  }
+  return out;
+}
+
+/** Goals per phase across the whole tournament, from the standings + the knockout seed. */
+export function goalsByPhase(standings: StandingsRow[]): PhaseGoalsDatum[] {
+  const groupGoals = standings.reduce((sum, row) => sum + row.goalsFor, 0);
+  const groupMatchesPlayed = standings.reduce((sum, row) => sum + row.played, 0) / 2;
+  return aggregateGoalsByPhase(groupGoals, groupMatchesPlayed, KNOCKOUT_MATCHES, KNOCKOUT_RESULTS);
 }
