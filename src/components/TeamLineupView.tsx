@@ -15,6 +15,7 @@ import { getTeamTournamentStatus } from "../utils/teamTournamentStatus";
 import { parseNoteSections } from "../utils/noteSections";
 import { formatAnalysisTimestamp } from "../utils/dateFormat";
 import { AnalysisFreshnessBadge } from "./AnalysisFreshnessBadge";
+import { TeamInstagramHighlights } from "./TeamInstagramHighlights";
 import { ArrowLeft, ExternalLink } from "lucide-react";
 import MATCH_VIDEOS from "../data/matchVideos.json";
 
@@ -969,6 +970,8 @@ export const TeamLineupView: React.FC<TeamLineupViewProps> = ({ team, theme, onB
                 )}
               </section>
             )}
+
+            <TeamInstagramHighlights teamCode={team.code} theme={theme} />
 
             <section className={`rounded-3xl border p-4 md:p-6 ${cardClasses}`} id="team-lineup-board-card">
               <div className="flex flex-wrap items-center justify-between gap-3">
