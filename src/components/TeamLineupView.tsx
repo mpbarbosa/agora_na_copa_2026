@@ -173,12 +173,18 @@ const getStatusLabel = (status: TeamViewMatchSummary["status"]) => {
 };
 
 const getMatchHeadline = (match: TeamViewMatchSummary) => {
+  // A knockout tie decided on penalties is level on the scoreline, so the
+  // shootout tally is appended to make the headline self-explanatory.
+  const penaltySuffix = match.penaltyScore
+    ? ` (${match.penaltyScore.team} x ${match.penaltyScore.opponent} pên.)`
+    : "";
+
   if (match.status === "LIVE" && match.score) {
-    return `${match.team.code} ${match.score.team} x ${match.score.opponent} ${match.opponent.code}`;
+    return `${match.team.code} ${match.score.team} x ${match.score.opponent} ${match.opponent.code}${penaltySuffix}`;
   }
 
   if (match.status === "FINISHED" && match.score) {
-    return `${match.team.code} ${match.score.team} x ${match.score.opponent} ${match.opponent.code}`;
+    return `${match.team.code} ${match.score.team} x ${match.score.opponent} ${match.opponent.code}${penaltySuffix}`;
   }
 
   return `${match.team.code} x ${match.opponent.code}`;
@@ -286,6 +292,11 @@ const getMatchOutcome = (match: TeamViewMatchSummary): MatchOutcome | null => {
   if (match.status !== "FINISHED" || !match.score) return null;
   if (match.score.team > match.score.opponent) return "V";
   if (match.score.team < match.score.opponent) return "D";
+  // Level after regular/extra time → the penalty shootout decided who advanced.
+  if (match.penaltyScore) {
+    if (match.penaltyScore.team > match.penaltyScore.opponent) return "V";
+    if (match.penaltyScore.team < match.penaltyScore.opponent) return "D";
+  }
   return "E";
 };
 
@@ -444,8 +455,15 @@ function MatchHistoryTable({
                   </td>
                   <td className="py-2.5 pr-3 text-center align-middle">
                     {match.score ? (
-                      <span className={`font-mono text-sm font-bold ${isLive ? "text-[#00e476]" : headingClasses}`}>
-                        {match.score.team} x {match.score.opponent}
+                      <span className="flex flex-col items-center leading-tight">
+                        <span className={`font-mono text-sm font-bold ${isLive ? "text-[#00e476]" : headingClasses}`}>
+                          {match.score.team} x {match.score.opponent}
+                        </span>
+                        {match.penaltyScore && (
+                          <span className={`font-mono text-[9px] uppercase tracking-wider ${subtleClasses}`}>
+                            {match.penaltyScore.team} x {match.penaltyScore.opponent} pên.
+                          </span>
+                        )}
                       </span>
                     ) : (
                       <span className={`font-mono text-[11px] ${subtleClasses}`}>

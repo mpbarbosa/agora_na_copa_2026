@@ -461,6 +461,15 @@ export interface TeamViewMatchSummary {
     team: number;
     opponent: number;
   };
+  /**
+   * Penalty-shootout score (team/opponent oriented), present only when a
+   * knockout tie was decided on penalties. `score` then holds the level result
+   * and the side with the higher `penaltyScore` advanced.
+   */
+  penaltyScore?: {
+    team: number;
+    opponent: number;
+  };
   broadcasters: Broadcaster[];
   source: "fifa" | "fallback";
   note: string;
