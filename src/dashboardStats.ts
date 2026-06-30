@@ -1,7 +1,10 @@
 import type { Match, StandingsRow } from "./types";
 import { stadiums } from "./data/tournament";
+import { KNOCKOUT_MATCHES } from "./data/knockoutBracket";
 import teamsByContinent from "./data/teamsByContinent.json";
 import goalTimeline from "./data/goalTimeline.json";
+
+type ContinentJson = (typeof teamsByContinent)["continents"][number];
 
 /**
  * Pure aggregation logic for the Dashboard view. Each function takes already-computed
@@ -62,6 +65,59 @@ export function continentBreakdown(): ContinentDatum[] {
     confederation,
     count,
   }));
+}
+
+export interface ContinentPhaseDatum {
+  continent: string;
+  confederation: string;
+  /** Teams that reached the group stage (i.e. all qualified — the 48-team field). */
+  groupStage: number;
+  /** Teams that advanced to the Round of 32 (16-avos). */
+  roundOf32: number;
+}
+
+/**
+ * Teams per continent broken down by phase reached: group stage (all qualified) vs the
+ * Round of 32. Pure over its inputs — `continents` is the seeded breakdown and
+ * `roundOf32Codes` the 32 advancing team codes — so it's unit-tested; `continentByPhase`
+ * is the wrapper that sources them from the JSON + the knockout bracket. A R32 code with no
+ * continent mapping is ignored (defensive; every real code resolves).
+ */
+export function aggregateContinentByPhase(
+  continents: ContinentJson[],
+  roundOf32Codes: string[],
+): ContinentPhaseDatum[] {
+  const codeToContinent = new Map<string, string>();
+  for (const c of continents) {
+    for (const team of c.teams) codeToContinent.set(team.code, c.continent);
+  }
+  const r32ByContinent = new Map<string, number>();
+  for (const code of roundOf32Codes) {
+    const continent = codeToContinent.get(code);
+    if (continent) r32ByContinent.set(continent, (r32ByContinent.get(continent) ?? 0) + 1);
+  }
+  return continents.map((c) => ({
+    continent: c.continent,
+    confederation: c.confederation,
+    groupStage: c.count,
+    roundOf32: r32ByContinent.get(c.continent) ?? 0,
+  }));
+}
+
+/** The 32 team codes contesting the Round of 32 (16-avos), from the resolved bracket draw. */
+export function roundOf32TeamCodes(): string[] {
+  const codes: string[] = [];
+  for (const match of KNOCKOUT_MATCHES) {
+    if (match.stage !== "R32") continue;
+    if (match.teamA?.code) codes.push(match.teamA.code);
+    if (match.teamB?.code) codes.push(match.teamB.code);
+  }
+  return codes;
+}
+
+/** Continent × phase breakdown (group stage vs Round of 32) from the seeded data + bracket. */
+export function continentByPhase(): ContinentPhaseDatum[] {
+  return aggregateContinentByPhase(teamsByContinent.continents, roundOf32TeamCodes());
 }
 
 export interface GroupGoalsDatum {

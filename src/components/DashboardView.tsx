@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import type { Match } from "../types";
 import { computeStandings } from "../standings";
 import {
-  continentBreakdown,
+  continentByPhase,
   goalsByGroup,
   goalsByMinute,
   matchStatusBreakdown,
@@ -13,9 +13,9 @@ import {
 import {
   ChartCard,
   Donut,
+  GroupedBars,
   HorizontalBars,
   ScatterPlot,
-  SERIES_PALETTE,
   StatCard,
   VerticalBars,
   type DonutSegment,
@@ -29,6 +29,12 @@ interface DashboardViewProps {
 const STATUS_COLORS: Record<"classic-light" | "stadium-dark", Record<MatchStatusKey, string>> = {
   "classic-light": { finished: "#009c3b", live: "#db1730", upcoming: "#94a3b8" },
   "stadium-dark": { finished: "#00e476", live: "#ff5c7a", upcoming: "#64748b" },
+};
+
+// Phase series for the continent funnel: group stage (all qualified) vs Round of 32.
+const PHASE_COLORS: Record<"classic-light" | "stadium-dark", { groupStage: string; roundOf32: string }> = {
+  "classic-light": { groupStage: "#0033a0", roundOf32: "#009c3b" },
+  "stadium-dark": { groupStage: "#4f8cff", roundOf32: "#00e476" },
 };
 
 const integer = (n: number) => new Intl.NumberFormat("pt-BR").format(n);
@@ -47,6 +53,7 @@ export function DashboardView({ theme, matches }: DashboardViewProps) {
   const {
     totals,
     continents,
+    continentTotals,
     groupGoals,
     statusSegments,
     topTeams,
@@ -54,18 +61,25 @@ export function DashboardView({ theme, matches }: DashboardViewProps) {
     scatterTotal,
   } = useMemo(() => {
     const standings = computeStandings(matches);
-    const palette = SERIES_PALETTE[theme];
+    const phaseColors = PHASE_COLORS[theme];
     const statusColors = STATUS_COLORS[theme];
     const statusData = matchStatusBreakdown(matches);
     const minuteSeries = goalsByMinute();
+    const phased = continentByPhase();
     return {
       totals: tournamentTotals(matches, standings),
-      continents: continentBreakdown().map((c, i) => ({
+      continents: phased.map((c) => ({
         label: c.continent,
-        value: c.count,
         sublabel: c.confederation,
-        color: palette[i % palette.length],
+        bars: [
+          { value: c.groupStage, color: phaseColors.groupStage },
+          { value: c.roundOf32, color: phaseColors.roundOf32 },
+        ],
       })),
+      continentTotals: {
+        groupStage: phased.reduce((s, c) => s + c.groupStage, 0),
+        roundOf32: phased.reduce((s, c) => s + c.roundOf32, 0),
+      },
       groupGoals: goalsByGroup(standings).map((g) => ({ label: g.group, value: g.goals })),
       statusSegments: statusData.map<DonutSegment>((s) => ({
         label: s.label,
@@ -137,9 +151,16 @@ export function DashboardView({ theme, matches }: DashboardViewProps) {
         <ChartCard
           theme={theme}
           title="Seleções por continente"
-          subtitle="48 classificadas · por confederação"
+          subtitle={`por fase · ${continentTotals.groupStage} nos grupos → ${continentTotals.roundOf32} nos 16-avos`}
         >
-          <HorizontalBars theme={theme} data={continents} />
+          <GroupedBars
+            theme={theme}
+            data={continents}
+            legend={[
+              { label: "Fase de grupos", color: PHASE_COLORS[theme].groupStage },
+              { label: "16-avos", color: PHASE_COLORS[theme].roundOf32 },
+            ]}
+          />
         </ChartCard>
 
         <ChartCard

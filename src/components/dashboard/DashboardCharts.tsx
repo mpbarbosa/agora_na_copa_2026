@@ -122,6 +122,76 @@ export function HorizontalBars({ theme, data }: HorizontalBarsProps) {
   );
 }
 
+export interface GroupedBarRow {
+  label: string;
+  sublabel?: string;
+  /** One entry per phase/series, aligned to the `legend` order. */
+  bars: { value: number; color: string }[];
+}
+
+interface GroupedBarsProps {
+  theme: Theme;
+  data: GroupedBarRow[];
+  /** Series legend (phase name + colour), in the same order as each row's `bars`. */
+  legend: { label: string; color: string }[];
+}
+
+/**
+ * Grouped horizontal bars: each category (row) holds several thin bars — one per series
+ * (e.g. tournament phase) — sharing one global scale so phases compare across rows. A
+ * colour legend names the series. Used for the continent × phase funnel.
+ */
+export function GroupedBars({ theme, data, legend }: GroupedBarsProps) {
+  const isLight = theme === "classic-light";
+  const max = Math.max(1, ...data.flatMap((d) => d.bars.map((b) => b.value)));
+  const trackClasses = isLight ? "bg-slate-100" : "bg-white/5";
+  const labelClasses = isLight ? "text-slate-700" : "text-slate-200";
+  const subClasses = isLight ? "text-slate-400" : "text-slate-500";
+  const valueClasses = isLight ? "text-slate-900" : "text-white";
+  const legendClasses = isLight ? "text-slate-600" : "text-slate-300";
+  return (
+    <div className="flex flex-col gap-4">
+      <ul className="flex flex-wrap items-center gap-x-4 gap-y-1">
+        {legend.map((l) => (
+          <li key={l.label} className="flex items-center gap-1.5">
+            <span className="h-2.5 w-2.5 shrink-0 rounded-sm" style={{ backgroundColor: l.color }} />
+            <span className={`font-mono text-[10px] uppercase tracking-wider ${legendClasses}`}>
+              {l.label}
+            </span>
+          </li>
+        ))}
+      </ul>
+      <div className="flex flex-col gap-3">
+        {data.map((row) => (
+          <div key={row.label} className="flex items-center gap-3">
+            <div className="w-28 shrink-0 truncate text-right">
+              <span className={`font-archivo text-xs ${labelClasses}`}>{row.label}</span>
+              {row.sublabel && (
+                <span className={`ml-1 font-mono text-[9px] uppercase ${subClasses}`}>{row.sublabel}</span>
+              )}
+            </div>
+            <div className="flex flex-1 flex-col gap-1">
+              {row.bars.map((bar, i) => (
+                <div key={legend[i]?.label ?? i} className="flex items-center gap-2">
+                  <div className={`relative h-2.5 flex-1 overflow-hidden rounded-full ${trackClasses}`}>
+                    <div
+                      className="absolute inset-y-0 left-0 rounded-full transition-[width] duration-700 ease-out"
+                      style={{ width: `${(bar.value / max) * 100}%`, backgroundColor: bar.color }}
+                    />
+                  </div>
+                  <span className={`w-7 shrink-0 text-right font-mono text-xs tabular-nums ${valueClasses}`}>
+                    {bar.value}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export interface VerticalBarDatum {
   label: string;
   value: number;

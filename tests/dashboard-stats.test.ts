@@ -3,11 +3,14 @@ import assert from "node:assert/strict";
 import type { Match, StandingsRow } from "../src/types";
 import {
   TEAM_COUNT,
+  aggregateContinentByPhase,
   aggregateGoalsByMinute,
   continentBreakdown,
+  continentByPhase,
   goalsByGroup,
   goalsByMinute,
   matchStatusBreakdown,
+  roundOf32TeamCodes,
   topScoringTeams,
   tournamentTotals,
 } from "../src/dashboardStats";
@@ -61,6 +64,41 @@ test("continentBreakdown sums to the 48-team field", () => {
     assert.ok(c.confederation.length > 0, `missing confederation for ${c.continent}`);
     assert.ok(c.count > 0);
   }
+});
+
+test("aggregateContinentByPhase counts group-stage vs Round-of-32 teams per continent", () => {
+  const continents = [
+    { continent: "Europa", confederation: "UEFA", count: 3, teams: [{ code: "GER" }, { code: "ESP" }, { code: "POR" }] },
+    { continent: "Ásia", confederation: "AFC", count: 2, teams: [{ code: "JPN" }, { code: "KOR" }] },
+    { continent: "Oceania", confederation: "OFC", count: 1, teams: [{ code: "NZL" }] },
+  ];
+  // GER, ESP and JPN advanced; POR, KOR, NZL did not.
+  const out = aggregateContinentByPhase(continents as never, ["GER", "ESP", "JPN"]);
+  assert.deepEqual(out, [
+    { continent: "Europa", confederation: "UEFA", groupStage: 3, roundOf32: 2 },
+    { continent: "Ásia", confederation: "AFC", groupStage: 2, roundOf32: 1 },
+    { continent: "Oceania", confederation: "OFC", groupStage: 1, roundOf32: 0 },
+  ]);
+});
+
+test("aggregateContinentByPhase ignores R32 codes with no continent mapping", () => {
+  const continents = [
+    { continent: "Europa", confederation: "UEFA", count: 1, teams: [{ code: "GER" }] },
+  ];
+  const out = aggregateContinentByPhase(continents as never, ["GER", "ZZZ"]);
+  assert.equal(out[0].roundOf32, 1); // ZZZ dropped, not crashed
+});
+
+test("roundOf32TeamCodes yields the 32 bracket teams, each known to a continent", () => {
+  const codes = roundOf32TeamCodes();
+  assert.equal(codes.length, 32);
+  const phased = continentByPhase();
+  // The per-continent R32 counts sum to exactly the 32 advancing teams.
+  assert.equal(phased.reduce((s, c) => s + c.roundOf32, 0), 32);
+  // Group-stage totals still cover the full 48-team field.
+  assert.equal(phased.reduce((s, c) => s + c.groupStage, 0), 48);
+  // No continent advances more teams than it qualified.
+  for (const c of phased) assert.ok(c.roundOf32 <= c.groupStage, `${c.continent} R32 > grupos`);
 });
 
 test("goalsByGroup strips the 'Grupo ' prefix, sums per group, and orders by letter", () => {
