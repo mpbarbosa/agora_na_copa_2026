@@ -1,8 +1,11 @@
 # Code Quality Control Guide
 
 This guide defines quality-control expectations for implementation changes in
-Agora na Copa 26, with focus on boundary-heavy integration code such as the FIFA
-API adapter, broadcaster normalization, and match data assembly.
+Agora na Copa 26, with focus on boundary-heavy integration code: the FIFA API
+adapter and broadcaster normalization (`fifa-sync-core.ts`), the other external
+adapters (`weather-core.ts`, `trends-core.ts`), the pure simulators
+(`predict-core.ts`, `qualification-sim-core.ts`), and match data assembly
+(`src/appMatches.ts`).
 
 It is intentionally narrow: use it to review the quality of implementation
 changes, not as a replacement for the architecture and design guides.
@@ -36,15 +39,25 @@ Primary integration boundaries to review:
 
 | Boundary | Location | What to check |
 |---|---|---|
-| FIFA API → internal model | `fifa-sync-core.ts` | FIFA shapes not leaking into `src/types.ts` |
+| FIFA API → internal model | `fifa-sync-core.ts` | FIFA shapes (`FifaCalendarMatch`, `FifaLiveMatch`, …) stay in the core; not leaking into `src/types.ts` |
+| Other external APIs → internal model | `weather-core.ts` (Open-Meteo), `trends-core.ts` (Google Trends RSS) | Provider response parsed inside the core; only the resilience-shaped result crosses into `server.ts` |
+| Pure domain logic | `predict-core.ts`, `qualification-sim-core.ts` | Deterministic (RNG seeded where applicable); no I/O, no SDK; unit-tested in isolation |
+| In-memory session state | `chat-core.ts`, `presence-core.ts` | Pure state transitions; HTTP/transport wiring stays in `server.ts` |
 | Internal model → API response | `server.ts` route handlers | Consistent resilience shape (`source`, `note`, `updatedAt`) |
 | API response → React components | `src/types.ts` interfaces | Components consuming typed shapes, not raw fetch results |
 | External data → match fixtures | `src/appMatches.ts` | Merge logic stays correct when FIFA data shape changes |
 | React component tree | `src/components/` | Single responsibility per component; props typed; state local; reusable side effects in named hooks (`src/hooks/`); view-scoped fetches may stay in component `useEffect` with proper cancellation — see [React Guide](./REACT_GUIDE.md) |
 
+The pure backend logic lives in seven root-level `*-core.ts` modules —
+`fifa-sync-core.ts`, `trends-core.ts`, `weather-core.ts`, `predict-core.ts`,
+`qualification-sim-core.ts`, `chat-core.ts`, `presence-core.ts` — each imported
+by both `server.ts` and a matching `tests/<name>.test.ts`. New pure logic
+extracted from a route belongs in the relevant core (or a new one), not inlined
+in the handler.
+
 When reviewing `server.ts` changes: verify each new route follows the resilience
 shape, returns the narrowest accurate status code, and delegates domain logic to
-`fifa-sync-core.ts` rather than inlining it in the route handler.
+the relevant `*-core.ts` module rather than inlining it in the route handler.
 
 ## Code Quality Control and Code LLMs
 
@@ -146,15 +159,20 @@ Every substantive code change should satisfy these gates.
 - Update user-facing docs when public API behavior, exports, or recommended
   usage changes.
 - Cross-link to related design guides instead of restating them.
-- Call out intentional breaking cleanup in `CHANGELOG.md`.
+- This repo has no `CHANGELOG.md`; record intentional breaking cleanup in the
+  commit message using the conventional-commit style already in history
+  (`feat:` / `fix:` / `chore:` / `data:`) so the change is discoverable.
 
 ### 8. Architecture gate
 
 The project's layering (see `CLAUDE.md` for the full architecture):
 
-- `fifa-sync-core.ts` must not import from `server.ts` — dependency is one-way.
-- `src/types.ts` shapes should not embed FIFA API response structures directly —
-  translate at the `fifa-sync-core.ts` boundary.
+- The pure core modules (`fifa-sync-core.ts`, `trends-core.ts`, `weather-core.ts`,
+  `predict-core.ts`, `qualification-sim-core.ts`, `chat-core.ts`,
+  `presence-core.ts`) must not import from `server.ts` — the dependency is
+  one-way: `server.ts` imports them.
+- `src/types.ts` shapes should not embed FIFA (or other provider) API response
+  structures directly — translate at the relevant `*-core.ts` boundary.
 - React components (`src/components/`) must not import from `server.ts`. They
   consume typed shapes from `src/types.ts`. Reusable or view-spanning fetch logic
   belongs in a named hook in `src/hooks/` (e.g. `useTeamLineups`,
@@ -198,7 +216,8 @@ Run these commands for substantive code changes:
 - Pure helpers are short, stateless, and directly testable.
 - Each piece of logic has one home; changing it requires editing one file.
 - Unit, integration, and end-to-end tests are clearly separated and all pass.
-- Docs and changelog are updated as part of the change, not in a follow-up.
+- Docs are updated as part of the change — and the commit message records any
+  breaking cleanup — not in a follow-up.
 - A reviewer can identify the layer and responsibility of any changed file from
   its imports and contents alone.
 
@@ -227,7 +246,8 @@ Run these commands for substantive code changes:
 - [ ] Unit tests cover the changed boundary and any newly extracted critical helper.
 - [ ] Cross-boundary behavior is covered by integration tests against real boundaries.
 - [ ] Critical user-visible flows are covered by end-to-end tests.
-- [ ] Docs and changelog reflect any meaningful API or behavior change.
+- [ ] Docs reflect any meaningful API or behavior change, and the commit message
+      records any intentional breaking cleanup (this repo has no `CHANGELOG.md`).
 - [ ] Repository validation commands still pass.
 - [ ] No inner-layer file (domain, use case) imports from an outer layer.
 - [ ] Domain and use-case files have no framework, database, or SDK imports.
