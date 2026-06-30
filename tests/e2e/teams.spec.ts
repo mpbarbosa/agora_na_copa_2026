@@ -107,4 +107,22 @@ test.describe("Teams view (Seleções)", () => {
     await expect(page.locator("#btn-team-card-hai")).toContainText("✕");
     await expect(page.getByTestId("team-eliminated-mex")).toHaveCount(0);
   });
+
+  test("resolves a 3rd-placed team's fate by the best-thirds ranking", async ({ page }) => {
+    await page.goto("/");
+    await page.click("#btn-nav-selecoes");
+    await expect(page.locator("#teams-view")).toBeVisible();
+
+    // With every group finished, a 3rd-placed team is decided by the cross-group
+    // best-thirds cut (Art. 12.5) — the same resolution the Grupos view applies.
+    // KOR finished 3rd in Grupo A and falls outside the 8 best thirds, so it is
+    // eliminated (not left badge-less in "contention").
+    await expect(page.getByTestId("team-eliminated-kor")).toBeVisible();
+    await expect(page.getByTestId("team-eliminated-kor")).toContainText("Eliminada");
+
+    // SEN finished 3rd in Grupo I but ranks inside the 8 best thirds, so it
+    // carries the qualified badge.
+    await expect(page.getByTestId("team-qualified-sen")).toBeVisible();
+    await expect(page.getByTestId("team-qualified-sen")).toContainText("Classificada");
+  });
 });

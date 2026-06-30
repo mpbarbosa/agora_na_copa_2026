@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import type { Match, TeamRef } from "../types";
-import { computeStandings, groupStandings } from "../standings";
+import { computeStandings, groupStandings, rankBestThirds } from "../standings";
 import { FlagIcon } from "./FlagIcon";
 
 interface TeamsViewProps {
@@ -60,6 +60,30 @@ export function TeamsView({ matches, theme, onSelectTeamLineup }: TeamsViewProps
 
   const groups = useMemo(() => groupStandings(computeStandings(liveMatches), liveMatches), [liveMatches]);
 
+  // Cross-group ranking of every group's 3rd-placed team — the 8 best advance
+  // (Art. 12.5). Keyed by team code → whether it currently sits inside the
+  // qualifying eight. Mirrors StandingsView so both views agree on a 3rd-placed
+  // team's fate.
+  const bestThirdsQualifies = useMemo(() => {
+    const ranked = rankBestThirds(groups);
+    return new Map(ranked.map((third) => [third.row.code, third.qualifies]));
+  }, [groups]);
+
+  // The best-thirds cut is only DEFINED once all 12 groups have finished (all 12
+  // third-placed teams are known). Until then a 3rd-placed team's badge stays
+  // pending — it can't yet be resolved to qualified/eliminated.
+  const allGroupsFinished = useMemo(
+    () =>
+      groups.every(({ rows }) => {
+        const codes = new Set(rows.map((r) => r.code));
+        const groupMatches = liveMatches.filter(
+          (m) => codes.has(m.teamA.code) && codes.has(m.teamB.code),
+        );
+        return groupMatches.length > 0 && groupMatches.every((m) => m.status === "FINISHED");
+      }),
+    [groups, liveMatches],
+  );
+
   const cardClasses =
     theme === "classic-light"
       ? "bg-white border-slate-200 shadow-sm"
@@ -99,8 +123,18 @@ export function TeamsView({ matches, theme, onSelectTeamLineup }: TeamsViewProps
             </div>
 
             <div className="mt-4 space-y-3">
-              {rows.map((team) => {
-                const status = qualification.get(team.code);
+              {rows.map((team, index) => {
+                // A 3rd-placed team in a finished group is decided by the
+                // cross-group best-thirds ranking once every group is done: the 8
+                // best advance, the rest are eliminated. The per-group
+                // qualification reports "contention" here (it can't see other
+                // groups), so resolve it — matching the Grupos view.
+                const isResolvedBestThird = index === 2 && allGroupsFinished && bestThirdsQualifies.has(team.code);
+                const status = isResolvedBestThird
+                  ? bestThirdsQualifies.get(team.code)
+                    ? "qualified"
+                    : "eliminated"
+                  : qualification.get(team.code);
                 const isQualified = status === "qualified";
                 const isEliminated = status === "eliminated";
 
