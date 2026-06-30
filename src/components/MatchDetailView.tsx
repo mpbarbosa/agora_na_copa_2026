@@ -689,6 +689,17 @@ export function MatchDetailView({
   const currentMatchScoreText = currentMatch.score
     ? `${currentMatch.score.teamA} x ${currentMatch.score.teamB}`
     : null;
+  // Penalty-shootout result, present only on a knockout tie decided on
+  // penalties. The team with the higher tally advanced; an equal tally never
+  // happens (one side always wins the shootout) but is guarded just in case.
+  const currentMatchPenaltyScore = currentMatch.penaltyScore;
+  const penaltyShootoutWinnerName = currentMatchPenaltyScore
+    ? currentMatchPenaltyScore.teamA === currentMatchPenaltyScore.teamB
+      ? null
+      : currentMatchPenaltyScore.teamA > currentMatchPenaltyScore.teamB
+        ? currentTeamA.name
+        : currentTeamB.name
+    : null;
   const currentMatchMapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
     `${currentMatch.stadiumName}, ${currentMatch.city}`,
   )}`;
@@ -1013,6 +1024,7 @@ export function MatchDetailView({
                     broadcasters: data.overlays[match.id].broadcastGuide.broadcasters,
                     status: data.overlays[match.id].matchState.status,
                     score: data.overlays[match.id].matchState.score,
+                    penaltyScore: data.overlays[match.id].matchState.penaltyScore,
                     matchTime: data.overlays[match.id].matchState.matchTime,
                   }
                 : match,
@@ -1870,6 +1882,36 @@ export function MatchDetailView({
               >
                 {hasCurrentMatchScore ? currentMatchScoreText : currentMatch.kickoffTime}
               </div>
+
+              {/* Penalty-shootout result, for a knockout tie decided on penalties */}
+              {currentMatchPenaltyScore && (
+                <div
+                  className="flex flex-col items-center gap-1"
+                  id="scoreboard-penalty"
+                >
+                  <span
+                    className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-0.5 font-mono text-xs font-bold uppercase tracking-wider ${
+                      theme === "classic-light"
+                        ? "border-amber-300 bg-amber-50 text-amber-700"
+                        : "border-amber-400/30 bg-amber-400/10 text-amber-300"
+                    }`}
+                    title="Resultado da disputa por pênaltis"
+                  >
+                    Pênaltis {currentMatchPenaltyScore.teamA}
+                    <span className="opacity-50">x</span>
+                    {currentMatchPenaltyScore.teamB}
+                  </span>
+                  {penaltyShootoutWinnerName && currentMatch.status === "FINISHED" && (
+                    <span
+                      className={`font-archivo text-[11px] font-semibold uppercase tracking-wide ${
+                        theme === "classic-light" ? "text-slate-500" : "text-slate-300"
+                      }`}
+                    >
+                      {penaltyShootoutWinnerName} avança nos pênaltis
+                    </span>
+                  )}
+                </div>
+              )}
 
               {/* Match date (Ex: "11 Junho, 2026") */}
               <div

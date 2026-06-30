@@ -117,6 +117,16 @@ export interface MatchStateEntry {
     teamA: number;
     teamB: number;
   };
+  /**
+   * Penalty-shootout score, present only when a knockout tie was decided on
+   * penalties (FIFA `HomeTeamPenaltyScore`/`AwayTeamPenaltyScore`). When set,
+   * `score` holds the level result after extra time and the team with the
+   * higher `penaltyScore` advanced.
+   */
+  penaltyScore?: {
+    teamA: number;
+    teamB: number;
+  };
   matchTime?: string;
   /** Official FIFA status/period label in pt-BR (e.g. "2º tempo", "Intervalo", "Encerrado"). */
   officialStatus?: string;
@@ -176,6 +186,15 @@ export interface Match {
   officialMatchUrl?: string;
   status: MatchStatus;
   score?: {
+    teamA: number;
+    teamB: number;
+  };
+  /**
+   * Penalty-shootout score, present only when a knockout tie was decided on
+   * penalties. `score` then holds the level result and the team with the
+   * higher `penaltyScore` advanced.
+   */
+  penaltyScore?: {
     teamA: number;
     teamB: number;
   };

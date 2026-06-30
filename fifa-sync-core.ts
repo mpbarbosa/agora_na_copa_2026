@@ -36,6 +36,8 @@ export interface FifaCalendarMatch {
   MatchStatus?: number | null;
   HomeTeamScore?: number | null;
   AwayTeamScore?: number | null;
+  HomeTeamPenaltyScore?: number | null;
+  AwayTeamPenaltyScore?: number | null;
   Home?: FifaCalendarTeam;
   Away?: FifaCalendarTeam;
   Officials?: FifaMatchOfficial[];
@@ -117,6 +119,8 @@ export interface FifaLiveMatch {
   AwayTeam?: FifaLiveTeam;
   HomeTeamScore?: number | null;
   AwayTeamScore?: number | null;
+  HomeTeamPenaltyScore?: number | null;
+  AwayTeamPenaltyScore?: number | null;
 }
 
 export const SPORTV_URL = "https://ge.globo.com/sportv/";
@@ -443,6 +447,34 @@ export const getScoreFromLiveFifa = (fifaMatch: FifaLiveMatch) => {
     return {
       teamA: homeScore,
       teamB: awayScore,
+    };
+  }
+
+  return undefined;
+};
+
+// A penalty shootout only exists when FIFA reports BOTH teams' shootout
+// scores. Returns the pair only then — a match level on the scoreboard but
+// never taken to penalties leaves these fields null. Reads from the live
+// payload first (during/just after the shootout) and falls back to the
+// calendar (settled result), mirroring `getScoreFrom*Fifa`.
+export const getPenaltyScoreFromFifa = (
+  fifaMatch: FifaCalendarMatch,
+  fifaLiveMatch?: FifaLiveMatch,
+) => {
+  const homePenalties =
+    typeof fifaLiveMatch?.HomeTeamPenaltyScore === "number"
+      ? fifaLiveMatch.HomeTeamPenaltyScore
+      : fifaMatch.HomeTeamPenaltyScore;
+  const awayPenalties =
+    typeof fifaLiveMatch?.AwayTeamPenaltyScore === "number"
+      ? fifaLiveMatch.AwayTeamPenaltyScore
+      : fifaMatch.AwayTeamPenaltyScore;
+
+  if (typeof homePenalties === "number" && typeof awayPenalties === "number") {
+    return {
+      teamA: homePenalties,
+      teamB: awayPenalties,
     };
   }
 
@@ -908,6 +940,7 @@ export const buildMatchStateEntry = (
     return {
       status: localMatch.status,
       score: localMatch.score,
+      penaltyScore: localMatch.penaltyScore,
       source: "fallback",
       note: "Dados oficiais da FIFA indisponíveis para esta partida no momento; exibindo o estado local.",
       updatedAt: new Date().toISOString(),
@@ -916,6 +949,7 @@ export const buildMatchStateEntry = (
 
   const fifaScore = getScoreFromFifa(fifaMatch);
   const liveScore = fifaLiveMatch ? getScoreFromLiveFifa(fifaLiveMatch) : undefined;
+  const penaltyScore = getPenaltyScoreFromFifa(fifaMatch, fifaLiveMatch);
   const incidents = fifaLiveMatch
     ? getIncidentsFromLiveFifa(fifaLiveMatch, localMatch.teamA.code, localMatch.teamB.code)
     : undefined;
@@ -937,6 +971,7 @@ export const buildMatchStateEntry = (
   return {
     status,
     score: liveScore || fifaScore || (status === "PRE_GAME" ? undefined : localMatch.score),
+    penaltyScore: status === "PRE_GAME" ? undefined : penaltyScore,
     matchTime:
       status === "LIVE" && fifaLiveMatch?.MatchTime ? fifaLiveMatch.MatchTime : undefined,
     officialStatus,

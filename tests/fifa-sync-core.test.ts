@@ -6,6 +6,7 @@ import {
   buildMatchStateEntry,
   findCalendarMatch,
   getMatchStatusFromFifa,
+  getPenaltyScoreFromFifa,
   getOfficialFifaStatusLabel,
   getRefereeFromFifa,
   normalizeBroadcasters,
@@ -205,6 +206,68 @@ test("buildMatchStateEntry prefers live FIFA score and minute over calendar data
   assert.equal(entry.matchTime, "44'");
   assert.equal(entry.source, "fifa");
   assert.equal(entry.fifaMatchId, "400021464");
+});
+
+test("getPenaltyScoreFromFifa returns the shootout score only when both tallies exist", () => {
+  // Knockout tie decided on penalties (e.g. GER 1-1 PAR, 3-4 on penalties).
+  assert.deepEqual(
+    getPenaltyScoreFromFifa({
+      IdMatch: "400021513",
+      Date: "2026-06-29T20:30:00Z",
+      MatchStatus: 0,
+      HomeTeamScore: 1,
+      AwayTeamScore: 1,
+      HomeTeamPenaltyScore: 3,
+      AwayTeamPenaltyScore: 4,
+    }),
+    { teamA: 3, teamB: 4 },
+  );
+
+  // A match that never went to penalties has null/absent tallies.
+  assert.equal(
+    getPenaltyScoreFromFifa({
+      IdMatch: "400021464",
+      Date: "2026-06-14T17:00:00Z",
+      MatchStatus: 0,
+      HomeTeamScore: 2,
+      AwayTeamScore: 1,
+      HomeTeamPenaltyScore: null,
+      AwayTeamPenaltyScore: null,
+    }),
+    undefined,
+  );
+
+  // Live payload wins over the (still empty) calendar during the shootout.
+  assert.deepEqual(
+    getPenaltyScoreFromFifa(
+      { IdMatch: "400021513", Date: "2026-06-29T20:30:00Z", MatchStatus: 3 },
+      {
+        IdMatch: "400021513",
+        HomeTeamPenaltyScore: 3,
+        AwayTeamPenaltyScore: 4,
+      },
+    ),
+    { teamA: 3, teamB: 4 },
+  );
+});
+
+test("buildMatchStateEntry surfaces the penalty-shootout score on a finished tie", () => {
+  const localMatch = createMatch({ status: "PRE_GAME" });
+  const calendarMatch: FifaCalendarMatch = {
+    IdMatch: "400021513",
+    Date: "2026-06-29T20:30:00Z",
+    MatchStatus: 0,
+    HomeTeamScore: 1,
+    AwayTeamScore: 1,
+    HomeTeamPenaltyScore: 3,
+    AwayTeamPenaltyScore: 4,
+  };
+
+  const entry = buildMatchStateEntry(localMatch, calendarMatch);
+
+  assert.equal(entry.status, "FINISHED");
+  assert.deepEqual(entry.score, { teamA: 1, teamB: 1 });
+  assert.deepEqual(entry.penaltyScore, { teamA: 3, teamB: 4 });
 });
 
 test("buildMatchStateEntry includes sorted FIFA incidents from live data", () => {
