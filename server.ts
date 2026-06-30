@@ -1572,6 +1572,15 @@ const buildTeamViewPayload = async (
     ),
   );
 
+  // Group stage finished tournament-wide → the bracket (incl. the eight best
+  // thirds) is fully drawn, so a team with no knockout fixture is eliminated in
+  // the group phase. Resolved against the same live state matchHistory uses.
+  const groupStageComplete = APP_MATCHES.filter(
+    (match) => match.stageName === "Group Stage",
+  ).every(
+    (match) => (matchStatesPayload.states[match.id]?.status ?? match.status) === "FINISHED",
+  );
+
   const lineupReference =
     currentMatchReference ?? nextMatchReference ?? lastMatchReference ?? teamMatches[0] ?? null;
   const lineup = lineupReference
@@ -1643,6 +1652,7 @@ const buildTeamViewPayload = async (
     nextMatch,
     lastMatch,
     matchHistory,
+    groupStageComplete,
     teamAnalysis: teamAnalysisEntry?.text ?? null,
     teamAnalysisUpdatedAt,
     teamAnalysisUpToDate,

@@ -527,6 +527,8 @@ export interface TeamViewResponse {
   lastMatch: TeamViewMatchSummary | null;
   /** Every World Cup 2026 fixture for this team, chronological (finished, live and scheduled). */
   matchHistory: TeamViewMatchSummary[];
+  /** True when every group-stage match in the tournament is finished — the bracket (incl. best thirds) is then fully drawn, so a team with no knockout fixture is eliminated. */
+  groupStageComplete: boolean;
   /** Editorial team-level analysis ("Análise da seleção"), `## Section` format. Null when none authored. */
   teamAnalysis: string | null;
   /** ISO-8601 timestamp the analysis was last authored/refreshed. Null when none. */

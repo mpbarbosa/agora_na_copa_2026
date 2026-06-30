@@ -766,9 +766,12 @@ export const TeamLineupView: React.FC<TeamLineupViewProps> = ({ team, theme, onB
   const activeMatchCount = teamView
     ? [teamView.currentMatch, teamView.nextMatch, teamView.lastMatch].filter(Boolean).length
     : 0;
-  // Concluded tournament status (e.g. "Eliminado em 16 avos de final", "Campeão")
-  // derived from the team's finished knockout matches. Null while still alive.
-  const tournamentStatus = teamView ? getTeamTournamentStatus(teamView.matchHistory) : null;
+  // Concluded tournament status (e.g. "Eliminado em 16 avos de final", "Campeão",
+  // or "Eliminada na fase de grupos" once the group stage is over) derived from
+  // the team's knockout matches. Null while still alive.
+  const tournamentStatus = teamView
+    ? getTeamTournamentStatus(teamView.matchHistory, teamView.groupStageComplete)
+    : null;
 
   return (
     <div className="mx-auto mt-8 max-w-7xl px-4 2xl:max-w-[1600px]" id="team-lineup-view">

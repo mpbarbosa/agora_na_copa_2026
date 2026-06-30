@@ -22,15 +22,23 @@ const NEXT_KNOCKOUT_STAGE: Record<string, string> = {
 // title/podium labels at the Final and 3rd-place match, and "Classificado para
 // …" (the round it qualified for) both after a win and once the bracket places
 // it in a tie it hasn't played yet — including a group qualifier whose 16-avos
-// tie is merely scheduled. Returns null while still in the group phase (or not
-// placed in the bracket) and for a Semifinal loss (the team drops to the
-// 3rd-place match, status pending).
+// tie is merely scheduled. With `groupStageComplete`, a team that never reaches
+// the bracket reads "Eliminada na fase de grupos" (see below). Returns null
+// while still in the group phase (or not placed in the bracket) and for a
+// Semifinal loss (the team drops to the 3rd-place match, status pending).
 //
 // A level knockout scoreline is resolved from the real penalty-shootout tally
 // (`penaltyScore`); without it the outcome is unknown and the status is omitted
 // (the app never invents who advanced).
+//
+// `groupStageComplete` lets the caller (server-fed, from APP_MATCHES) signal
+// that every group-stage match is finished. Only then can a side with no
+// knockout fixture be called eliminated in the group phase — until the stage
+// ends the eight best thirds aren't fixed, so a future qualifier and an
+// eliminated team are indistinguishable from one team's history alone.
 export function getTeamTournamentStatus(
   matchHistory: TeamViewMatchSummary[] | undefined | null,
+  groupStageComplete = false,
 ): TeamTournamentStatus | null {
   if (!Array.isArray(matchHistory)) return null; // payload may omit the history (fallback/stub)
   const classifiedFor = (stageName: string): TeamTournamentStatus => ({
@@ -84,6 +92,16 @@ export function getTeamTournamentStatus(
   // with its 16-avos tie scheduled → "Classificado para 16 avos de final").
   const upcomingKnockout = matchHistory.find((m) => m.stageName !== "Group Stage");
   if (upcomingKnockout) return classifiedFor(upcomingKnockout.stageName);
+
+  // No knockout fixture at all. Once the group stage is globally complete the
+  // bracket — including the eight best thirds — is fully drawn, so a side still
+  // without a tie did not advance: eliminated in the group phase. (A qualified
+  // team, best thirds included, carries its R32 fixture in matchHistory and was
+  // handled above.) Mid-group-stage we can't tell a future qualifier from an
+  // eliminated team, so stay quiet.
+  if (groupStageComplete) {
+    return { label: "Eliminada na fase de grupos", tone: "eliminated" };
+  }
 
   return null; // still in the group phase, or not placed in the bracket
 }

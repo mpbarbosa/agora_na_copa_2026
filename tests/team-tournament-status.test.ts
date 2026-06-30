@@ -102,6 +102,23 @@ test("no knockout fixture at all yields no status (group phase / not placed)", (
   assert.equal(getTeamTournamentStatus([]), null);
 });
 
+test("once the group stage is over, a team with no knockout tie is eliminated in the group phase", () => {
+  // South Korea / Czechia: only group games, no bracket fixture, group stage complete.
+  const history = [group(2, 1), group(0, 1), group(1, 1)];
+  assert.deepEqual(getTeamTournamentStatus(history, true), {
+    label: "Eliminada na fase de grupos",
+    tone: "eliminated",
+  });
+  // Mid-group-stage (not yet complete) we can't tell a future qualifier apart — stay quiet.
+  assert.equal(getTeamTournamentStatus(history, false), null);
+  // A qualifier with a scheduled R32 tie still reads "Classificado", complete or not.
+  const qualifier = [group(2, 0), group(1, 0), group(3, 0), koScheduled(KNOCKOUT_STAGE_NAMES.R32)];
+  assert.deepEqual(getTeamTournamentStatus(qualifier, true), {
+    label: "Classificado para 16 avos de final",
+    tone: "advanced",
+  });
+});
+
 test("a missing/non-array history is tolerated (fallback or stubbed payload)", () => {
   assert.equal(getTeamTournamentStatus(undefined), null);
   assert.equal(getTeamTournamentStatus(null), null);
