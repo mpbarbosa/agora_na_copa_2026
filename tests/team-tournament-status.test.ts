@@ -40,10 +40,26 @@ test("a penalty-shootout loss eliminates at that round", () => {
   assert.equal(getTeamTournamentStatus([ko(KNOCKOUT_STAGE_NAMES.R16, 1, 1)]), null);
 });
 
-test("a knockout WIN leaves the team alive (no concluded status)", () => {
-  assert.equal(getTeamTournamentStatus([ko(KNOCKOUT_STAGE_NAMES.R32, 2, 0)]), null);
-  // Winning on penalties also just advances.
-  assert.equal(getTeamTournamentStatus([ko(KNOCKOUT_STAGE_NAMES.QF, 1, 1, [5, 4])]), null);
+test("a knockout WIN names the round the team qualified for", () => {
+  // Canada won the R32 → classified for the Oitavas.
+  assert.deepEqual(getTeamTournamentStatus([ko(KNOCKOUT_STAGE_NAMES.R32, 2, 0)]), {
+    label: "Classificado para oitavas de final",
+    tone: "advanced",
+  });
+  assert.deepEqual(getTeamTournamentStatus([ko(KNOCKOUT_STAGE_NAMES.R16, 1, 0)]), {
+    label: "Classificado para quartas de final",
+    tone: "advanced",
+  });
+  // Winning on penalties also advances.
+  assert.deepEqual(getTeamTournamentStatus([ko(KNOCKOUT_STAGE_NAMES.QF, 1, 1, [5, 4])]), {
+    label: "Classificado para semifinal",
+    tone: "advanced",
+  });
+  // A Semifinal win reaches the Final.
+  assert.deepEqual(getTeamTournamentStatus([ko(KNOCKOUT_STAGE_NAMES.SF, 2, 1)]), {
+    label: "Classificado para final",
+    tone: "advanced",
+  });
 });
 
 test("losing a Semifinal is not elimination (drops to the 3rd-place match)", () => {
