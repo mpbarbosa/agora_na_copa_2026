@@ -10,9 +10,12 @@ import type {
 import { FlagIcon } from "./FlagIcon";
 import { TeamPitchBoard } from "./TeamPitchBoard";
 import { PlayerOverlayCard } from "./PlayerOverlayCard";
+import { CoachCard } from "./CoachCard";
 import { getPositionLabel } from "../utils/playerDisplay";
 import { getTeamTournamentStatus } from "../utils/teamTournamentStatus";
+import { coachRecord } from "../utils/coachRecord";
 import { parseNoteSections } from "../utils/noteSections";
+import COACH_NOTES from "../data/coachNotes.json";
 import { formatAnalysisTimestamp } from "../utils/dateFormat";
 import { AnalysisFreshnessBadge } from "./AnalysisFreshnessBadge";
 import { TeamInstagramHighlights } from "./TeamInstagramHighlights";
@@ -774,6 +777,13 @@ export const TeamLineupView: React.FC<TeamLineupViewProps> = ({ team, theme, onB
     ? getTeamTournamentStatus(teamView.matchHistory, teamView.groupStageComplete)
     : null;
 
+  // Coach header card: the team's record under its coach (group + knockout, from real
+  // results), the same tournament-status pill, and an optional authored note. Opened from
+  // the "Técnico" line in the header.
+  const [coachCardOpen, setCoachCardOpen] = useState(false);
+  const coachTournamentRecord = coachRecord(teamView?.matchHistory);
+  const coachNote = (COACH_NOTES as Record<string, string>)[team.code];
+
   return (
     <div className="mx-auto mt-8 max-w-7xl px-4 2xl:max-w-[1600px]" id="team-lineup-view">
       <button
@@ -827,12 +837,16 @@ export const TeamLineupView: React.FC<TeamLineupViewProps> = ({ team, theme, onB
                 </p>
               )}
               {coach && (
-                <p
-                  className={`mt-1 font-mono text-[11px] uppercase tracking-wider ${mutedClasses}`}
+                <button
+                  type="button"
                   id="team-lineup-coach"
+                  onClick={() => setCoachCardOpen(true)}
+                  className={`mt-1 inline-flex items-center gap-1 rounded font-mono text-[11px] uppercase tracking-wider transition hover:opacity-70 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-400 ${mutedClasses}`}
+                  aria-label={`Abrir card do treinador ${coach}`}
                 >
                   <span className="opacity-60">Técnico</span> {coach}
-                </p>
+                  <span aria-hidden="true" className="opacity-40">›</span>
+                </button>
               )}
               {countryInfo?.description && (
                 <p className={`mt-0.5 font-archivo text-xs opacity-60 ${mutedClasses}`}>
@@ -1217,6 +1231,21 @@ export const TeamLineupView: React.FC<TeamLineupViewProps> = ({ team, theme, onB
             },
           ]}
           onClose={() => setSelectedPlayer(null)}
+        />
+      )}
+
+      {coach && coachCardOpen && (
+        <CoachCard
+          id="team-view-coach-card"
+          theme={theme}
+          coachName={coach}
+          teamName={teamView?.team.name ?? team.name}
+          flagSvg={team.flagSvg}
+          primaryColor={team.primaryColor}
+          record={coachTournamentRecord}
+          status={tournamentStatus}
+          note={coachNote}
+          onClose={() => setCoachCardOpen(false)}
         />
       )}
     </div>

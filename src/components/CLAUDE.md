@@ -29,6 +29,7 @@ Each maps to one `NAV_ITEMS` entry in `src/navigation.ts` and is mounted by `src
 | `TeamPitchBoard.tsx` | Team-focused pitch board used by `TeamLineupView` |
 | `TeamLineupView.tsx` | Full team lineup panel (690 lines — standalone modal/panel) |
 | `PlayerOverlayCard.tsx` | Overlay card for individual player detail (443 lines) |
+| `CoachCard.tsx` | Coach analogue of `PlayerOverlayCard` — opened from the `Técnico` line in `TeamLineupView`'s header. Same visual shell (accent bar, header, editorial-block record tiles, swipeable note) but driven only by data we have/derive: the coach name (`TEAM_COACHES`), the team, the team's tournament record (`src/utils/coachRecord.ts`, computed from real results), the same tournament-status pill the team header shows, and an optional authored note (`src/data/coachNotes.json`). No photo — coaches have none in our data — so the avatar is the coach's initials. |
 | `PlayerVideoRail.tsx` | Horizontal YouTube video carousel in the player card, keyed by FIFA id from `src/data/playerVideos.json` |
 | `PlayerNoteFreshness.tsx` | Atualizada/Desatualizada badge + "Atualizado em …" line for a player's `worldCupNote`, vs the team's last finished match (live `/api/match-states` overlay) |
 | `AnalysisFreshnessBadge.tsx` | Shared Atualizada/Desatualizada pill used by the group (StandingsView), team (TeamLineupView) and player analyses |

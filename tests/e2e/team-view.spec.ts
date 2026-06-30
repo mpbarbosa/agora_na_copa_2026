@@ -641,6 +641,34 @@ test.describe("Team view", () => {
     await expect(page.locator("#team-lineup-coach")).toContainText("Walid Regragui");
   });
 
+  test("opens the coach card from the header with the derived record and authored note", async ({ page }) => {
+    await mockTeamView(page);
+
+    await page.goto("/");
+    await page.click("#btn-nav-grupos");
+    await page.click("#standings-row-bra button[aria-label^='Ver escalação']");
+    await expect(page.locator("#team-lineup-view")).toBeVisible();
+
+    // The coach line is now a button that opens the coach card.
+    await page.click("#team-lineup-coach");
+    const card = page.locator("#team-view-coach-card");
+    await expect(card).toBeVisible();
+    await expect(card).toContainText("Card do treinador");
+    await expect(card).toContainText("Carlo Ancelotti");
+
+    // Record derived from the mocked match history: one finished win (the LIVE game is ignored).
+    const record = page.locator("#team-view-coach-card-record");
+    await expect(record).toContainText("Jogos");
+    await expect(record).toContainText("Vitórias");
+
+    // The authored "Leitura do treinador" note (seeded for BRA) renders.
+    await expect(card).toContainText("Leitura");
+
+    // Closes from the Fechar button.
+    await page.click("#btn-close-team-view-coach-card");
+    await expect(card).toBeHidden();
+  });
+
   test("opens the full team page from the venue hosted matches list", async ({ page }) => {
     await mockTeamView(page);
 
