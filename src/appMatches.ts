@@ -173,6 +173,7 @@ const buildKnockoutMatch = (km: KnockoutMatch): Match => {
     kickoffTimestamp,
     status: result?.status ?? "PRE_GAME",
     score: result?.score,
+    penaltyScore: result?.penaltyScore,
     matchTime: result?.matchTime,
     countdownTargetSeconds: Math.max(0, Math.floor((kickoffMs - Date.now()) / 1000)),
     broadcasters: [],

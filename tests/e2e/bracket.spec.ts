@@ -11,10 +11,10 @@ import { stubLiveApis } from "./fixtures/aoVivo";
 test.describe("Bracket view (Chaveamento)", () => {
   test.beforeEach(async ({ page }) => {
     // Stub the live overlay empty so the bracket resolves only from the static
-    // seed (group standings + KNOCKOUT_RESULTS). Otherwise a finished tie that
-    // the prod fallback reports — e.g. #74 decided on penalties — would resolve
-    // its winner-ref slot ("Vencedor #74" → the team that advanced), making the
-    // "undecided slot" and feeder assertions race the live data.
+    // seed (group standings + KNOCKOUT_RESULTS). The feeders used here (#79/#80)
+    // are still-unplayed ties; were the prod fallback to report one finished it
+    // would resolve its winner-ref slot ("Vencedor #79" → the team that advanced,
+    // a clickable team link), making the feeder/undecided assertions race live data.
     await stubLiveApis(page);
     await page.addInitScript(() => localStorage.setItem("feature-tour-seen", "1"));
   });
@@ -43,10 +43,11 @@ test.describe("Bracket view (Chaveamento)", () => {
     await page.click("#btn-nav-chaveamento");
     await expect(page.locator("#bracket-view")).toBeVisible();
 
-    // R16 #89 is fed by the winners of R32 #74 and #77 — deterministic official refs.
-    const r16 = page.locator("#bracket-match-89");
-    await expect(r16.locator("#bracket-slot-89-a")).toContainText("Vencedor #74");
-    await expect(r16.locator("#bracket-slot-89-b")).toContainText("Vencedor #77");
+    // R16 #92 is fed by the winners of R32 #79 and #80 — still-unplayed ties, so both
+    // slots stay official winner-refs (deterministic, independent of any seeded result).
+    const r16 = page.locator("#bracket-match-92");
+    await expect(r16.locator("#bracket-slot-92-a")).toContainText("Vencedor #79");
+    await expect(r16.locator("#bracket-slot-92-b")).toContainText("Vencedor #80");
 
     // The 3rd-place match (#103, TP) is fed by the two semifinal losers.
     const thirdPlace = page.locator("#bracket-stage-tp #bracket-match-103");
@@ -72,8 +73,8 @@ test.describe("Bracket view (Chaveamento)", () => {
     await expect(canadaSlot).toContainText(/canad/i);
     expect(await canadaSlot.evaluate((el) => el.tagName)).toBe("BUTTON");
     // …while an undecided winner-ref slot is a plain, non-clickable label.
-    const labelSlot = page.locator("#bracket-slot-89-a");
-    await expect(labelSlot).toContainText("Vencedor #74");
+    const labelSlot = page.locator("#bracket-slot-92-a");
+    await expect(labelSlot).toContainText("Vencedor #79");
     expect(await labelSlot.evaluate((el) => el.tagName)).toBe("DIV");
 
     // Clicking the resolved slot opens that national team's page.
@@ -158,10 +159,10 @@ test.describe("Bracket feeder spotlight on touch (two-stage tap)", () => {
 
   test.beforeEach(async ({ page }) => {
     // Stub the live overlay empty so the bracket resolves only from the static
-    // seed (group standings + KNOCKOUT_RESULTS). Otherwise a finished tie that
-    // the prod fallback reports — e.g. #74 decided on penalties — would resolve
-    // its winner-ref slot ("Vencedor #74" → the team that advanced), making the
-    // "undecided slot" and feeder assertions race the live data.
+    // seed (group standings + KNOCKOUT_RESULTS). The feeders used here (#79/#80)
+    // are still-unplayed ties; were the prod fallback to report one finished it
+    // would resolve its winner-ref slot ("Vencedor #79" → the team that advanced,
+    // a clickable team link), making the feeder/undecided assertions race live data.
     await stubLiveApis(page);
     await page.addInitScript(() => localStorage.setItem("feature-tour-seen", "1"));
   });
@@ -171,10 +172,10 @@ test.describe("Bracket feeder spotlight on touch (two-stage tap)", () => {
     await page.click("#btn-nav-chaveamento");
     await expect(page.locator("#bracket-view")).toBeVisible();
 
-    const oitavas = page.locator("#bracket-stage-r16 #bracket-match-89");
-    const feederA = page.locator("#bracket-stage-r32 #bracket-match-74");
-    const feederB = page.locator("#bracket-stage-r32 #bracket-match-77");
-    const unrelated = page.locator("#bracket-stage-r32 #bracket-match-73");
+    const oitavas = page.locator("#bracket-stage-r16 #bracket-match-92");
+    const feederA = page.locator("#bracket-stage-r32 #bracket-match-79");
+    const feederB = page.locator("#bracket-stage-r32 #bracket-match-80");
+    const unrelated = page.locator("#bracket-stage-r32 #bracket-match-77");
 
     // First tap spotlights the feeders WITHOUT leaving the bracket.
     await oitavas.tap();
@@ -210,10 +211,10 @@ test.describe("Bracket feeder spotlight on mobile (collapses the columns)", () =
 
   test.beforeEach(async ({ page }) => {
     // Stub the live overlay empty so the bracket resolves only from the static
-    // seed (group standings + KNOCKOUT_RESULTS). Otherwise a finished tie that
-    // the prod fallback reports — e.g. #74 decided on penalties — would resolve
-    // its winner-ref slot ("Vencedor #74" → the team that advanced), making the
-    // "undecided slot" and feeder assertions race the live data.
+    // seed (group standings + KNOCKOUT_RESULTS). The feeders used here (#79/#80)
+    // are still-unplayed ties; were the prod fallback to report one finished it
+    // would resolve its winner-ref slot ("Vencedor #79" → the team that advanced,
+    // a clickable team link), making the feeder/undecided assertions race live data.
     await stubLiveApis(page);
     await page.addInitScript(() => localStorage.setItem("feature-tour-seen", "1"));
   });
@@ -223,11 +224,11 @@ test.describe("Bracket feeder spotlight on mobile (collapses the columns)", () =
     await page.click("#btn-nav-chaveamento");
     await expect(page.locator("#bracket-view")).toBeVisible();
 
-    const selected = page.locator("#bracket-stage-r16 #bracket-match-89");
-    const sibling = page.locator("#bracket-stage-r16 #bracket-match-90"); // another Oitavas tie
-    const feederA = page.locator("#bracket-stage-r32 #bracket-match-74");
-    const feederB = page.locator("#bracket-stage-r32 #bracket-match-77");
-    const unrelated = page.locator("#bracket-stage-r32 #bracket-match-73");
+    const selected = page.locator("#bracket-stage-r16 #bracket-match-92");
+    const sibling = page.locator("#bracket-stage-r16 #bracket-match-93"); // another Oitavas tie
+    const feederA = page.locator("#bracket-stage-r32 #bracket-match-79");
+    const feederB = page.locator("#bracket-stage-r32 #bracket-match-80");
+    const unrelated = page.locator("#bracket-stage-r32 #bracket-match-77");
     // The visible (mobile) count in each column's subheading.
     const r16Count = page.locator("#bracket-stage-r16-summary span:visible");
     const r32Count = page.locator("#bracket-stage-r32-summary span:visible");

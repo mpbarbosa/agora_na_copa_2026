@@ -19,13 +19,21 @@
  * This seed LAGS reality — reconcile against production before trusting it:
  *   python3 scripts/fetch-match-incidents.py ko-<n>-2026
  *
- * Penalty shoot-outs are not modelled: a tie decided on penalties must NOT be seeded as a
- * draw, since the app deliberately never invents who advanced (see `finishedSideResult`
- * / `knockoutWinnerSlot`). Seed only ties with a decisive scoreline.
+ * Penalty shoot-outs: a tie level after regular/extra time carries the real `penaltyScore`
+ * so the bracket resolves who advanced (`knockoutWinnerSlot` reads it) — the penalty tally
+ * is real data, not an invented winner. A 1–1 tie seeds `score: { 1, 1 }` (its two open-play
+ * goals still count toward `aggregateGoalsByPhase`) plus `penaltyScore`. Never seed a level
+ * tie WITHOUT a `penaltyScore`: without the tally the app can't tell who advanced and must
+ * not guess (the slot stays "Vencedor #NN" until the live overlay supplies it).
  */
 export interface KnockoutResultSeed {
   status: "LIVE" | "FINISHED";
   score: { teamA: number; teamB: number };
+  /**
+   * Penalty shoot-out tally, set only when a tie was level after regular/extra time and
+   * decided on penalties. The side with the higher `penaltyScore` advanced.
+   */
+  penaltyScore?: { teamA: number; teamB: number };
   /** Optional FIFA period/clock label for a LIVE tie (e.g. "2º tempo", "44'"). */
   matchTime?: string;
 }
@@ -34,6 +42,12 @@ export const KNOCKOUT_RESULTS: Record<number, KnockoutResultSeed> = {
   // #73 · 16-avos · Los Angeles Stadium · 28/06/2026 — África do Sul 0×1 Canadá
   // (Stephen Eustáquio aos 90+2'). Canadá classificado; alimenta a Oitavas #90 (slot W73).
   73: { status: "FINISHED", score: { teamA: 0, teamB: 1 } },
+  // #74 · 16-avos · Alemanha 1×1 Paraguai (Havertz 54' p/ ALE; Enciso 42' p/ PAR), Paraguai
+  // 4×3 nos pênaltis. Paraguai classificado; alimenta a Oitavas #90 (slot W74).
+  74: { status: "FINISHED", score: { teamA: 1, teamB: 1 }, penaltyScore: { teamA: 3, teamB: 4 } },
+  // #75 · 16-avos · Holanda 1×1 Marrocos (Gakpo 72' p/ HOL; Issa Diop 90+1' p/ MAR), Marrocos
+  // 3×2 nos pênaltis. Marrocos classificado; alimenta a Oitavas #91 (slot W75).
+  75: { status: "FINISHED", score: { teamA: 1, teamB: 1 }, penaltyScore: { teamA: 2, teamB: 3 } },
   // #76 · 16-avos · 29/06/2026 — Brasil 2×1 Japão (Sano 29' p/ JPN; Casemiro 56' e
   // Gabriel Martinelli 90+5' p/ BRA). Brasil classificado; alimenta a Oitavas #91 (slot W76).
   76: { status: "FINISHED", score: { teamA: 2, teamB: 1 } },

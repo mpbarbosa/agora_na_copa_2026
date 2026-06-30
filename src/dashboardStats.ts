@@ -128,10 +128,11 @@ export function roundOf32TeamCodes(): string[] {
 }
 
 /**
- * The confirmed Round-of-16 (oitavas) qualifiers: the decisive winners of finished R32 ties,
- * read from the seeded `KNOCKOUT_RESULTS` (the same source the bracket resolves from). Ties
- * drawn in normal time are settled on penalties the app does not model, so they yield no
- * winner here — we never invent who advanced (mirrors `knockoutWinnerSlot`).
+ * The confirmed Round-of-16 (oitavas) qualifiers: the winners of finished R32 ties, read from
+ * the seeded `KNOCKOUT_RESULTS` (the same source the bracket resolves from). A tie level after
+ * regular/extra time is decided by its real `penaltyScore` when seeded (mirrors
+ * `knockoutWinnerSlot`); a level tie with no penalty tally yields no winner — we never invent
+ * who advanced.
  */
 export function roundOf16TeamCodes(): string[] {
   const codes: string[] = [];
@@ -140,8 +141,15 @@ export function roundOf16TeamCodes(): string[] {
     const result = KNOCKOUT_RESULTS[match.matchNumber];
     if (!result || result.status !== "FINISHED") continue;
     const { teamA, teamB } = result.score;
-    if (teamA === teamB) continue; // decided on penalties — winner unknown to the app
-    codes.push(teamA > teamB ? match.teamA.code : match.teamB.code);
+    let winnerIsA: boolean;
+    if (teamA !== teamB) {
+      winnerIsA = teamA > teamB;
+    } else if (result.penaltyScore && result.penaltyScore.teamA !== result.penaltyScore.teamB) {
+      winnerIsA = result.penaltyScore.teamA > result.penaltyScore.teamB;
+    } else {
+      continue; // level with no shootout tally — winner unknown to the app
+    }
+    codes.push(winnerIsA ? match.teamA.code : match.teamB.code);
   }
   return codes;
 }
