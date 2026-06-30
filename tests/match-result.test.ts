@@ -8,6 +8,8 @@ import { KNOCKOUT_STAGE_NAMES } from "../src/utils/knockoutSlots";
 const m = (over: Partial<Match>): Match => ({ status: "FINISHED", ...over }) as unknown as Match;
 const finished = (stageName: string, a: number, b: number): Match =>
   m({ stageName, score: { teamA: a, teamB: b } } as Partial<Match>);
+const finishedPen = (stageName: string, a: number, b: number, pa: number, pb: number): Match =>
+  m({ stageName, score: { teamA: a, teamB: b }, penaltyScore: { teamA: pa, teamB: pb } } as Partial<Match>);
 
 test("matchPoints / ptLabel: 3-1-0 and pt-BR labels", () => {
   assert.deepEqual(matchPoints(2, 0), { a: 3, b: 0 });
@@ -40,17 +42,33 @@ test("final and third-place play-off get their own labels", () => {
   assert.deepEqual(finishedSideResult(tp, "b"), { label: "3º lugar", tone: "win" });
 });
 
-test("a drawn knockout score shows nothing (penalties not modeled), and so do non-finished/no-score", () => {
+test("a level knockout score with no shootout data shows nothing, and so do non-finished/no-score", () => {
   assert.equal(finishedSideResult(finished(KNOCKOUT_STAGE_NAMES.R16, 1, 1), "a"), null);
   assert.equal(finishedSideResult(m({ status: "PRE_GAME" }), "a"), null);
   assert.equal(finishedSideResult(m({ status: "FINISHED", score: undefined }), "b"), null);
 });
 
+test("a level knockout tie is resolved from the penalty-shootout tally", () => {
+  // Germany 1-1 Paraguay, 3-4 on penalties — Paraguay advances.
+  const ko = finishedPen(KNOCKOUT_STAGE_NAMES.R32, 1, 1, 3, 4);
+  assert.deepEqual(finishedSideResult(ko, "a"), { label: "Eliminado", tone: "loss" });
+  assert.deepEqual(finishedSideResult(ko, "b"), { label: "Classificado", tone: "win" });
+  // A Final decided on penalties yields Campeão / Vice.
+  const fin = finishedPen(KNOCKOUT_STAGE_NAMES.F, 0, 0, 5, 4);
+  assert.deepEqual(finishedSideResult(fin, "a"), { label: "Campeão", tone: "win" });
+  assert.deepEqual(finishedSideResult(fin, "b"), { label: "Vice", tone: "loss" });
+});
+
 test("knockoutWinnerSlot picks the winning side, null for undecided/drawn/group", () => {
   assert.equal(knockoutWinnerSlot(finished(KNOCKOUT_STAGE_NAMES.R32, 0, 1)), "B"); // RSA 0 x 1 Canada
   assert.equal(knockoutWinnerSlot(finished(KNOCKOUT_STAGE_NAMES.QF, 2, 1)), "A");
-  assert.equal(knockoutWinnerSlot(finished(KNOCKOUT_STAGE_NAMES.R16, 1, 1)), null); // penalties — unknown
+  assert.equal(knockoutWinnerSlot(finished(KNOCKOUT_STAGE_NAMES.R16, 1, 1)), null); // level, no shootout data
   assert.equal(knockoutWinnerSlot(finished("Group Stage", 3, 0)), null); // group has no bracket winner
   assert.equal(knockoutWinnerSlot(m({ status: "PRE_GAME" })), null);
   assert.equal(knockoutWinnerSlot(m({ status: "FINISHED", score: undefined })), null);
+});
+
+test("knockoutWinnerSlot resolves a level tie from the penalty tally", () => {
+  assert.equal(knockoutWinnerSlot(finishedPen(KNOCKOUT_STAGE_NAMES.R32, 1, 1, 3, 4)), "B"); // PAR wins 4-3
+  assert.equal(knockoutWinnerSlot(finishedPen(KNOCKOUT_STAGE_NAMES.R16, 0, 0, 5, 3)), "A");
 });

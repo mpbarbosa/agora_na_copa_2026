@@ -1,5 +1,6 @@
 import { test, expect } from "@playwright/test";
 import { collectAppConsoleErrors } from "./fixtures/consoleErrors";
+import { stubLiveApis } from "./fixtures/aoVivo";
 
 // The Chaveamento view renders the OFFICIAL FIFA knockout bracket from
 // src/data/knockoutBracket.json — read-only. R32 group slots ("2A") resolve
@@ -9,6 +10,12 @@ import { collectAppConsoleErrors } from "./fixtures/consoleErrors";
 // team resolution.
 test.describe("Bracket view (Chaveamento)", () => {
   test.beforeEach(async ({ page }) => {
+    // Stub the live overlay empty so the bracket resolves only from the static
+    // seed (group standings + KNOCKOUT_RESULTS). Otherwise a finished tie that
+    // the prod fallback reports — e.g. #74 decided on penalties — would resolve
+    // its winner-ref slot ("Vencedor #74" → the team that advanced), making the
+    // "undecided slot" and feeder assertions race the live data.
+    await stubLiveApis(page);
     await page.addInitScript(() => localStorage.setItem("feature-tour-seen", "1"));
   });
 
@@ -150,6 +157,12 @@ test.describe("Bracket feeder spotlight on touch (two-stage tap)", () => {
   test.use({ hasTouch: true });
 
   test.beforeEach(async ({ page }) => {
+    // Stub the live overlay empty so the bracket resolves only from the static
+    // seed (group standings + KNOCKOUT_RESULTS). Otherwise a finished tie that
+    // the prod fallback reports — e.g. #74 decided on penalties — would resolve
+    // its winner-ref slot ("Vencedor #74" → the team that advanced), making the
+    // "undecided slot" and feeder assertions race the live data.
+    await stubLiveApis(page);
     await page.addInitScript(() => localStorage.setItem("feature-tour-seen", "1"));
   });
 
@@ -196,6 +209,12 @@ test.describe("Bracket feeder spotlight on mobile (collapses the columns)", () =
   test.use({ hasTouch: true, viewport: { width: 390, height: 844 } });
 
   test.beforeEach(async ({ page }) => {
+    // Stub the live overlay empty so the bracket resolves only from the static
+    // seed (group standings + KNOCKOUT_RESULTS). Otherwise a finished tie that
+    // the prod fallback reports — e.g. #74 decided on penalties — would resolve
+    // its winner-ref slot ("Vencedor #74" → the team that advanced), making the
+    // "undecided slot" and feeder assertions race the live data.
+    await stubLiveApis(page);
     await page.addInitScript(() => localStorage.setItem("feature-tour-seen", "1"));
   });
 

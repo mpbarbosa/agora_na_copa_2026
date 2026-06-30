@@ -23,9 +23,10 @@ export type ResultTone = "win" | "draw" | "loss";
 /**
  * The per-team line for a FINISHED match. Group stage → points won; knockout →
  * the outcome (Campeão/Vice in the Final, 3º/4º lugar in the play-off, otherwise
- * Classificado/Eliminado). Returns null when there is nothing to show — a non-finished
- * match, or a drawn knockout score (settled on penalties the app does not model, so we
- * never invent who advanced).
+ * Classificado/Eliminado). A knockout tie level on the scoreline is resolved from
+ * the real penalty-shootout tally when present. Returns null when there is nothing
+ * to show — a non-finished match, or a level knockout score with no shootout data
+ * (we never invent who advanced).
  */
 export function finishedSideResult(
   match: Match,
@@ -37,8 +38,9 @@ export function finishedSideResult(
     const pts = side === "a" ? matchPoints(teamA, teamB).a : matchPoints(teamA, teamB).b;
     return { label: ptLabel(pts), tone: pts === 3 ? "win" : pts === 1 ? "draw" : "loss" };
   }
-  if (teamA === teamB) return null; // decided on penalties — unknown to the app, don't invent
-  const advanced = side === "a" ? teamA > teamB : teamB > teamA;
+  const advancedSlot = knockoutWinnerSlot(match);
+  if (!advancedSlot) return null; // level with no shootout data — don't invent
+  const advanced = advancedSlot === (side === "a" ? "A" : "B");
   const label =
     match.stageName === KNOCKOUT_STAGE_NAMES.F
       ? advanced ? "Campeão" : "Vice"
@@ -50,12 +52,15 @@ export function finishedSideResult(
 
 /**
  * Which slot ("A" = home, "B" = away) won a knockout tie, for the bracket's winner/loser
- * markers. Null when the tie isn't a decided knockout: a non-finished or scoreless match, a
- * group-stage fixture, or a draw (settled on penalties the app doesn't model — never guess).
+ * markers. A level scoreline is resolved from the real penalty-shootout tally when present.
+ * Null when the tie isn't a decided knockout: a non-finished or scoreless match, a
+ * group-stage fixture, or a level score with no shootout data (never guess).
  */
 export function knockoutWinnerSlot(match: Match): "A" | "B" | null {
   if (match.status !== "FINISHED" || !match.score || match.stageName === "Group Stage") return null;
   const { teamA, teamB } = match.score;
-  if (teamA === teamB) return null;
-  return teamA > teamB ? "A" : "B";
+  if (teamA !== teamB) return teamA > teamB ? "A" : "B";
+  // Level after regular/extra time → decided on penalties when we have the tally.
+  if (!match.penaltyScore || match.penaltyScore.teamA === match.penaltyScore.teamB) return null;
+  return match.penaltyScore.teamA > match.penaltyScore.teamB ? "A" : "B";
 }
