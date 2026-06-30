@@ -10,12 +10,13 @@ import type {
 import { FlagIcon } from "./FlagIcon";
 import { TeamPitchBoard } from "./TeamPitchBoard";
 import { PlayerOverlayCard } from "./PlayerOverlayCard";
-import { CoachCard } from "./CoachCard";
+import { CoachCard, type CoachPhotoCredit } from "./CoachCard";
 import { getPositionLabel } from "../utils/playerDisplay";
 import { getTeamTournamentStatus } from "../utils/teamTournamentStatus";
 import { coachRecord } from "../utils/coachRecord";
 import { parseNoteSections } from "../utils/noteSections";
 import COACH_NOTES from "../data/coachNotes.json";
+import COACH_IMAGES from "../data/coachImages.json";
 import { formatAnalysisTimestamp } from "../utils/dateFormat";
 import { AnalysisFreshnessBadge } from "./AnalysisFreshnessBadge";
 import { TeamInstagramHighlights } from "./TeamInstagramHighlights";
@@ -783,6 +784,9 @@ export const TeamLineupView: React.FC<TeamLineupViewProps> = ({ team, theme, onB
   const [coachCardOpen, setCoachCardOpen] = useState(false);
   const coachTournamentRecord = coachRecord(teamView?.matchHistory);
   const coachNote = (COACH_NOTES as Record<string, string>)[team.code];
+  const coachImage = (
+    COACH_IMAGES as Record<string, { pictureUrl: string; credit: CoachPhotoCredit }>
+  )[team.code];
 
   return (
     <div className="mx-auto mt-8 max-w-7xl px-4 2xl:max-w-[1600px]" id="team-lineup-view">
@@ -1245,6 +1249,8 @@ export const TeamLineupView: React.FC<TeamLineupViewProps> = ({ team, theme, onB
           record={coachTournamentRecord}
           status={tournamentStatus}
           note={coachNote}
+          pictureUrl={coachImage?.pictureUrl}
+          photoCredit={coachImage?.credit}
           onClose={() => setCoachCardOpen(false)}
         />
       )}

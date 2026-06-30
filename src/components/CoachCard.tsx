@@ -4,6 +4,14 @@ import { useEscapeKey } from "../hooks/useEscapeKey";
 import type { CoachRecord } from "../utils/coachRecord";
 import type { TeamTournamentStatus } from "../utils/teamTournamentStatus";
 
+/** Attribution for a coach photo sourced under a Creative Commons (or similar) licence. */
+export interface CoachPhotoCredit {
+  author: string;
+  sourceUrl: string;
+  license: string;
+  licenseUrl: string;
+}
+
 interface CoachCardProps {
   theme: "classic-light" | "stadium-dark";
   coachName: string;
@@ -16,6 +24,10 @@ interface CoachCardProps {
   status: TeamTournamentStatus | null;
   /** Optional editorial "Leitura do treinador" note (`## Section` markdown). Omitted when absent. */
   note?: string;
+  /** Optional coach photo. When absent, the avatar falls back to the coach's initials. */
+  pictureUrl?: string;
+  /** Attribution for `pictureUrl`; required by the photo's licence, rendered as a credit line. */
+  photoCredit?: CoachPhotoCredit;
   onClose: () => void;
   id?: string;
 }
@@ -35,8 +47,9 @@ function coachInitials(name: string): string {
  * (accent bar, header, editorial-block stat tiles, swipeable note) but is driven only by data
  * the app actually has or can derive: the coach's name, the team, the team's tournament record
  * (computed from real results), the same tournament-status pill the team header shows, and an
- * optional authored note. No photo — coaches have none in our data — so the avatar is the
- * coach's initials (the player card uses the same no-photo fallback shape).
+ * optional authored note. The avatar shows a licensed coach photo when one is available
+ * (`pictureUrl` + `photoCredit`, rendered with an attribution line), otherwise it falls back to
+ * the coach's initials — the same no-photo shape the player card uses.
  */
 export function CoachCard({
   theme,
@@ -47,6 +60,8 @@ export function CoachCard({
   record,
   status,
   note,
+  pictureUrl,
+  photoCredit,
   onClose,
   id,
 }: CoachCardProps) {
@@ -112,13 +127,23 @@ export function CoachCard({
           </p>
 
           <div className="mt-2 flex items-center gap-3 pr-16 sm:pr-20">
-            <div
-              className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full font-anton text-lg leading-none sm:h-14 sm:w-14 sm:text-xl"
-              style={{ background: `${accent}1f`, color: accent, border: `2px solid ${accent}55` }}
-              aria-hidden="true"
-            >
-              {coachInitials(coachName)}
-            </div>
+            {pictureUrl ? (
+              <img
+                src={pictureUrl}
+                alt={coachName}
+                loading="lazy"
+                className="h-12 w-12 shrink-0 rounded-full object-cover object-top sm:h-14 sm:w-14"
+                style={{ border: `2px solid ${accent}55` }}
+              />
+            ) : (
+              <div
+                className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full font-anton text-lg leading-none sm:h-14 sm:w-14 sm:text-xl"
+                style={{ background: `${accent}1f`, color: accent, border: `2px solid ${accent}55` }}
+                aria-hidden="true"
+              >
+                {coachInitials(coachName)}
+              </div>
+            )}
             <div className="min-w-0">
               <h4 className="font-anton text-2xl uppercase leading-none tracking-wide sm:text-4xl">
                 {coachName}
@@ -194,6 +219,33 @@ export function CoachCard({
                 id={id ? `${id}-leitura` : undefined}
               />
             </div>
+          )}
+
+          {/* Photo attribution — required by the image licence (e.g. CC BY-SA) */}
+          {pictureUrl && photoCredit && (
+            <p
+              id={id ? `${id}-photo-credit` : undefined}
+              className={`mt-5 font-mono text-[9px] leading-relaxed ${mutedClasses}`}
+            >
+              Foto:{" "}
+              <a
+                href={photoCredit.sourceUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline underline-offset-2"
+              >
+                {photoCredit.author}
+              </a>{" "}
+              / Wikimedia Commons ·{" "}
+              <a
+                href={photoCredit.licenseUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline underline-offset-2"
+              >
+                {photoCredit.license}
+              </a>
+            </p>
           )}
         </div>
       </div>
