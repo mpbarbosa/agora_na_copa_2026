@@ -37,6 +37,7 @@ land. **Last updated: 2026-06-22.**
 ## 🔵 Content / data gaps
 
 - [ ] **Player `pictureUrl` coverage** — 46 of 374 players missing (per [[project_picture_url_coverage]]).
+- [ ] **Refresh stale coach notes after the oitavas are played** — `src/data/coachNotes.json` now has a "Leitura do treinador" note for all 48 coaches (rendered in `CoachCard`), but several reference the live bracket state (e.g. "encara o Brasil nas oitavas", "aguarda o vencedor de França x Suécia") and the alive teams' records freeze at their last finished match. Once the oitavas are played, re-ground the affected coaches' notes from the real results — same staleness pattern as `update-stale-team-analyses`; a "refresh-stale-coach-notes" pass could automate it.
 - [ ] **`analyze-match` sentence length** — generate shorter sentences for readability (from the Prévia readability assessment).
 - [x] **Star notes for Pépé (CIV `402261`) & Sané (GER `404353`)** — ✅ done 2026-06-25. Both round-3 games finished; notes shipped grounded in final incidents/standings. Pépé scored a decisive brace (CIV 2-0, 2nd place); Sané scored GER's opener in a 2-1 loss (GER still topped the group). Detail in `docs/roadmap.md` (Follow-up 2026-06-25). **Rule reaffirmed:** never write match/group/player editorial during a LIVE match — wait for FINISHED.
 
