@@ -21,6 +21,7 @@ import { buildGroupPositionMap } from "../standings";
 import { resolveTeamDisplay } from "../utils/resolveTeamDisplay";
 import MATCH_VIDEOS from "../data/matchVideos.json";
 import MATCH_ANALYSIS from "../data/matchAnalysis.json";
+import MATCH_INSTAGRAM from "../data/matchInstagram.json";
 import { parseNoteSections } from "../utils/noteSections";
 import { resolveVenueTimeZone } from "../utils/venueCoordinates";
 import type { TeamLineupsMap } from "../utils/teamLineup";
@@ -31,6 +32,9 @@ import { getPositionLabel, toTitleCasePtBr } from "../utils/playerDisplay";
 import { PitchLineup } from "./PitchLineup";
 import { MatchChatPanel } from "./MatchChatPanel";
 import { AffiliateProducts } from "./AffiliateProducts";
+import { InstagramEmbed } from "./InstagramEmbed";
+import { InstagramBrandIcon } from "./InstagramBrandIcon";
+import { resolveInstagramPostUrls } from "../utils/instagram";
 import { renderAnalysisWithMentions } from "./PlayerMention";
 import { MatchWeatherChip } from "./MatchWeatherChip";
 import { RefereeChip } from "./RefereeChip";
@@ -608,7 +612,7 @@ export function MatchDetailView({
   const [liveViewMode, setLiveViewMode] = useState<"overview" | "focus">(
     initialMatchId ? "focus" : "overview",
   );
-  const [activeTab, setActiveTab] = useState<"broadcast" | "lineup" | "pregame">(
+  const [activeTab, setActiveTab] = useState<"broadcast" | "lineup" | "pregame" | "instagram">(
     "broadcast",
   );
   // Custom interactive test parameters for custom mock simulations
@@ -665,6 +669,11 @@ export function MatchDetailView({
   const currentOverlay = matchOverlays[currentMatch.id];
   const currentLineupEntry = teamLineups[currentMatch.id];
   const matchAnalysisText = (MATCH_ANALYSIS as Record<string, string>)[currentMatch.id];
+  const matchInstagramUrls = resolveInstagramPostUrls(
+    (MATCH_INSTAGRAM as Record<string, string[]>)[currentMatch.id],
+    undefined,
+  );
+  const hasMatchInstagram = matchInstagramUrls.length > 0;
   const visibleBroadcasters = currentMatch.broadcasters;
   const currentIncidents =
     currentSimulatedState?.incidents || currentOverlay?.matchState.incidents || [];
@@ -2155,6 +2164,23 @@ export function MatchDetailView({
               {currentMatch.status === "FINISHED" ? "Pós-jogo" : "Pré-jogo"}
             </button>
           )}
+          {hasMatchInstagram && (
+            <button
+              id="btn-tab-instagram"
+              onClick={() => setActiveTab("instagram")}
+              className={`px-3.5 py-2 min-h-11 rounded-md text-[13px] md:text-sm leading-none font-anton transition-all uppercase tracking-wide ${
+                activeTab === "instagram"
+                  ? theme === "classic-light"
+                    ? "bg-white text-slate-950 shadow-sm font-semibold"
+                    : "bg-[#171a1c] text-[#ffd84d] shadow-sm font-semibold"
+                  : theme === "classic-light"
+                    ? "text-slate-700 hover:bg-white hover:text-slate-950"
+                    : "text-slate-100 hover:bg-white/10 hover:text-white"
+              }`}
+            >
+              Instagram
+            </button>
+          )}
         </div>
 
         {/* TAB 1: ONDE ASSISTIR BROADCAST GUIDE */}
@@ -2633,6 +2659,48 @@ export function MatchDetailView({
                   >
                     {renderAnalysisWithMentions(section.body, theme)}
                   </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* TAB: INSTAGRAM POST(S) FOR THIS MATCH */}
+        {activeTab === "instagram" && hasMatchInstagram && (
+          <div
+            className={`rounded-2xl border px-4 py-4 ${
+              theme === "classic-light"
+                ? "bg-slate-50 border-slate-200"
+                : "bg-[#121414]/70 border-white/10"
+            }`}
+            id="match-instagram-panel"
+            data-testid="match-instagram"
+          >
+            <p
+              className={`mb-3 font-anton text-base uppercase tracking-wide ${
+                theme === "classic-light" ? "text-slate-900" : "text-white"
+              }`}
+            >
+              No Instagram
+            </p>
+            <div className="mx-auto max-w-md space-y-5">
+              {matchInstagramUrls.map((postUrl, index) => (
+                <div key={postUrl} className="space-y-3">
+                  <InstagramEmbed permalink={postUrl} id={`match-instagram-embed-${index}`} />
+                  <a
+                    href={postUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    id={`match-instagram-open-${index}`}
+                    className={`inline-flex w-full items-center justify-center gap-2 rounded-xl border py-2.5 font-mono text-[10px] font-bold uppercase tracking-wider transition ${
+                      theme === "classic-light"
+                        ? "border-slate-200 text-slate-700 hover:bg-white"
+                        : "border-white/15 text-slate-100 hover:bg-white/10"
+                    }`}
+                  >
+                    <InstagramBrandIcon size={14} />
+                    Abrir no Instagram
+                  </a>
                 </div>
               ))}
             </div>
