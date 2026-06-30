@@ -92,6 +92,14 @@ const DEFAULT_PORT = Number(process.env.PORT || 3000);
 const HOST = "0.0.0.0";
 const STRICT_PORT = process.env.STRICT_PORT === "true";
 const FIFA_API_BASE_URL = "https://api.fifa.com/api/v3";
+// Production mirror exposing a FIFA passthrough proxy (`/api/fifa-proxy`, see
+// the route below) that returns the identical raw api.fifa.com/api/v3 JSON from
+// a host that can reach FIFA. Used only as a fallback when the direct FIFA API
+// is unreachable from this instance (e.g. a dev/preview network). Must work
+// when unset — the production `.env` is not updated on deploy, so the in-code
+// default has to be safe; an empty value disables the fallback entirely.
+const FIFA_FALLBACK_BASE_URL =
+  process.env.FIFA_FALLBACK_BASE_URL ?? "https://copa2026.mpbarbosa.com/api/fifa-proxy";
 const FIFA_COMPETITION_ID = "17";
 const FIFA_SEASON_ID = "285023";
 const DEFAULT_BROADCAST_COUNTRY = "BR";
@@ -926,10 +934,7 @@ const recordFailureState = (
 // live matches; unset in production, so real FIFA sync runs as usual.
 const FIFA_SYNC_DISABLED = process.env.DISABLE_FIFA_SYNC === "true";
 
-const fetchJson = async <T,>(url: string): Promise<T> => {
-  if (FIFA_SYNC_DISABLED) {
-    throw new Error("FIFA sync disabled (DISABLE_FIFA_SYNC) — serving fallback data");
-  }
+const fetchJsonFrom = async <T,>(url: string): Promise<T> => {
   const response = await fetch(url, {
     headers: {
       "User-Agent": "agora-na-copa-2026/1.0",
@@ -942,6 +947,50 @@ const fetchJson = async <T,>(url: string): Promise<T> => {
   }
 
   return (await response.json()) as T;
+};
+
+// Maps a direct FIFA API URL to the equivalent on the fallback mirror's
+// passthrough proxy (same path, different host). Returns null when there is no
+// usable fallback: the fallback base is unset, the URL is not a FIFA v3 URL, or
+// the mapping would point back at FIFA itself (which would just loop).
+const toFifaFallbackUrl = (url: string): string | null => {
+  const fifaPrefix = `${FIFA_API_BASE_URL}/`;
+  if (!FIFA_FALLBACK_BASE_URL || !url.startsWith(fifaPrefix)) {
+    return null;
+  }
+  const candidate = `${FIFA_FALLBACK_BASE_URL}/${url.slice(fifaPrefix.length)}`;
+  return candidate.startsWith(fifaPrefix) ? null : candidate;
+};
+
+const fetchJson = async <T,>(url: string): Promise<T> => {
+  if (FIFA_SYNC_DISABLED) {
+    throw new Error("FIFA sync disabled (DISABLE_FIFA_SYNC) — serving fallback data");
+  }
+
+  try {
+    return await fetchJsonFrom<T>(url);
+  } catch (primaryError) {
+    // When the direct FIFA API is unreachable (network error or non-2xx),
+    // retry the SAME path against the production mirror's passthrough proxy,
+    // which serves identical raw FIFA JSON from a host that can reach FIFA.
+    const fallbackUrl = toFifaFallbackUrl(url);
+    if (!fallbackUrl) {
+      throw primaryError;
+    }
+    try {
+      const payload = await fetchJsonFrom<T>(fallbackUrl);
+      console.warn(`FIFA direct fetch failed for ${url}; served from fallback ${fallbackUrl}.`);
+      return payload;
+    } catch (fallbackError) {
+      // Surface the original FIFA error (the meaningful one) but record that
+      // the fallback was tried and also failed, so diagnostics aren't blamed
+      // solely on the mirror.
+      throw new Error(
+        `FIFA API unreachable and fallback failed for ${url}: ` +
+          `${(primaryError as Error).message} | fallback: ${(fallbackError as Error).message}`,
+      );
+    }
+  }
 };
 
 const fetchCalendarMatches = async (language: string) => {
@@ -2371,6 +2420,65 @@ app.get("/api/fifa-sync-status", (_req, res) => {
       activeLiveMatchIds: fifaSyncDiagnostics.matchStates.activeLiveMatchIds,
     },
   });
+});
+
+// FIFA passthrough proxy: mirrors api.fifa.com/api/v3/<path> so an instance
+// whose own network can't reach FIFA (a dev box, a preview build, a deploy
+// behind a restrictive egress) can borrow this host's FIFA connectivity as a
+// fallback (see `toFifaFallbackUrl`). It returns the raw FIFA JSON (or mirrors
+// the upstream failure status) so callers parse it exactly as a direct FIFA
+// response. Host-locked to FIFA's v3 API and allowlisted to the handful of
+// path roots we actually consume — it is NOT a general-purpose open proxy.
+const FIFA_PROXY_CACHE_TTL_MS = 30 * 1000;
+const FIFA_PROXY_ALLOWED_ROOTS = ["calendar/", "live/", "watch/"];
+const fifaProxyCache = new Map<string, { expiresAt: number; status: number; body: string }>();
+
+app.get("/api/fifa-proxy/*", async (req, res) => {
+  if (FIFA_SYNC_DISABLED) {
+    res.status(503).json({ error: "FIFA proxy disabled (DISABLE_FIFA_SYNC)" });
+    return;
+  }
+
+  const subPath = (req.params as { 0?: string })[0] ?? "";
+  if (!FIFA_PROXY_ALLOWED_ROOTS.some((root) => subPath.startsWith(root))) {
+    res.status(404).json({ error: "Unsupported FIFA proxy path" });
+    return;
+  }
+
+  // Forward only the query string; the host and v3 base are fixed, so the
+  // SSRF surface is limited to FIFA's own API.
+  const queryIndex = req.originalUrl.indexOf("?");
+  const query = queryIndex >= 0 ? req.originalUrl.slice(queryIndex) : "";
+  const target = `${FIFA_API_BASE_URL}/${subPath}${query}`;
+
+  const cached = fifaProxyCache.get(target);
+  if (cached && cached.expiresAt > Date.now()) {
+    res.status(cached.status).type("application/json").send(cached.body);
+    return;
+  }
+
+  try {
+    const upstream = await fetch(target, {
+      headers: {
+        "User-Agent": "agora-na-copa-2026/1.0",
+        Accept: "application/json",
+      },
+    });
+    const body = await upstream.text();
+    if (upstream.ok) {
+      fifaProxyCache.set(target, {
+        expiresAt: Date.now() + FIFA_PROXY_CACHE_TTL_MS,
+        status: upstream.status,
+        body,
+      });
+    }
+    res.status(upstream.status).type("application/json").send(body);
+  } catch (error) {
+    res.status(502).json({
+      error: "FIFA upstream unreachable via proxy",
+      detail: (error as Error).message,
+    });
+  }
 });
 
 app.get("/api/questions", (_req, res) => {
