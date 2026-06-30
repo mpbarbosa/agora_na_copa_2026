@@ -122,6 +122,12 @@ const getMatchCenterDisplay = (match: Match) => {
     };
   }
 
+  // A knockout tie decided on penalties is level on the scoreline, so the
+  // shootout tally replaces the plain "Final" label to show who advanced.
+  const finishedLabel = match.penaltyScore
+    ? `Pên. ${match.penaltyScore.teamA} x ${match.penaltyScore.teamB}`
+    : "Final";
+
   return {
     top: `${match.score?.teamA ?? 0} x ${match.score?.teamB ?? 0}`,
     bottom:
@@ -129,7 +135,7 @@ const getMatchCenterDisplay = (match: Match) => {
         ? match.matchTime || "Em jogo"
         : match.status === "SUSPENDED"
           ? "Paralisado"
-          : "Final",
+          : finishedLabel,
   };
 };
 
