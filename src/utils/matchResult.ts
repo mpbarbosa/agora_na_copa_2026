@@ -51,16 +51,26 @@ export function finishedSideResult(
 }
 
 /**
+ * Which slot ("A" = home, "B" = away) a decided scoreline favours. A level score is broken
+ * by the real penalty-shootout tally when present; null when level with no (or a tied)
+ * shootout — the app never guesses who advanced. Pure over the two tallies so both the live
+ * `knockoutWinnerSlot` (a Match) and the static bracket seed (`KnockoutResultSeed`) share it.
+ */
+export function decisiveSlot(
+  score: { teamA: number; teamB: number },
+  penaltyScore?: { teamA: number; teamB: number },
+): "A" | "B" | null {
+  if (score.teamA !== score.teamB) return score.teamA > score.teamB ? "A" : "B";
+  if (!penaltyScore || penaltyScore.teamA === penaltyScore.teamB) return null;
+  return penaltyScore.teamA > penaltyScore.teamB ? "A" : "B";
+}
+
+/**
  * Which slot ("A" = home, "B" = away) won a knockout tie, for the bracket's winner/loser
- * markers. A level scoreline is resolved from the real penalty-shootout tally when present.
- * Null when the tie isn't a decided knockout: a non-finished or scoreless match, a
+ * markers. Null when the tie isn't a decided knockout: a non-finished or scoreless match, a
  * group-stage fixture, or a level score with no shootout data (never guess).
  */
 export function knockoutWinnerSlot(match: Match): "A" | "B" | null {
   if (match.status !== "FINISHED" || !match.score || match.stageName === "Group Stage") return null;
-  const { teamA, teamB } = match.score;
-  if (teamA !== teamB) return teamA > teamB ? "A" : "B";
-  // Level after regular/extra time → decided on penalties when we have the tally.
-  if (!match.penaltyScore || match.penaltyScore.teamA === match.penaltyScore.teamB) return null;
-  return match.penaltyScore.teamA > match.penaltyScore.teamB ? "A" : "B";
+  return decisiveSlot(match.score, match.penaltyScore);
 }

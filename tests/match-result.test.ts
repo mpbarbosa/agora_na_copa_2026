@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import type { Match } from "../src/types";
-import { finishedSideResult, knockoutWinnerSlot, matchPoints, ptLabel } from "../src/utils/matchResult";
+import { decisiveSlot, finishedSideResult, knockoutWinnerSlot, matchPoints, ptLabel } from "../src/utils/matchResult";
 import { KNOCKOUT_STAGE_NAMES } from "../src/utils/knockoutSlots";
 
 // finishedSideResult only reads status/score/stageName, so a tiny partial is enough.
@@ -71,4 +71,13 @@ test("knockoutWinnerSlot picks the winning side, null for undecided/drawn/group"
 test("knockoutWinnerSlot resolves a level tie from the penalty tally", () => {
   assert.equal(knockoutWinnerSlot(finishedPen(KNOCKOUT_STAGE_NAMES.R32, 1, 1, 3, 4)), "B"); // PAR wins 4-3
   assert.equal(knockoutWinnerSlot(finishedPen(KNOCKOUT_STAGE_NAMES.R16, 0, 0, 5, 3)), "A");
+});
+
+test("decisiveSlot favours the higher score, then the penalty tally, else null", () => {
+  assert.equal(decisiveSlot({ teamA: 2, teamB: 1 }), "A");
+  assert.equal(decisiveSlot({ teamA: 0, teamB: 1 }), "B");
+  assert.equal(decisiveSlot({ teamA: 1, teamB: 1 }), null); // level, no shootout
+  assert.equal(decisiveSlot({ teamA: 1, teamB: 1 }, { teamA: 4, teamB: 3 }), "A"); // pens
+  assert.equal(decisiveSlot({ teamA: 1, teamB: 1 }, { teamA: 2, teamB: 3 }), "B");
+  assert.equal(decisiveSlot({ teamA: 0, teamB: 0 }, { teamA: 3, teamB: 3 }), null); // tied pens (never real)
 });

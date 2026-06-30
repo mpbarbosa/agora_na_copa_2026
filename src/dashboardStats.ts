@@ -3,6 +3,7 @@ import { stadiums } from "./data/tournament";
 import { APP_MATCHES } from "./appMatches";
 import { KNOCKOUT_MATCHES } from "./data/knockoutBracket";
 import { KNOCKOUT_RESULTS } from "./data/knockoutResults";
+import { decisiveSlot } from "./utils/matchResult";
 import teamsByContinent from "./data/teamsByContinent.json";
 import goalTimeline from "./data/goalTimeline.json";
 
@@ -141,16 +142,9 @@ export function roundOf16TeamCodes(): string[] {
     if (match.stage !== "R32" || !match.teamA || !match.teamB) continue;
     const result = KNOCKOUT_RESULTS[match.matchNumber];
     if (!result || result.status !== "FINISHED") continue;
-    const { teamA, teamB } = result.score;
-    let winnerIsA: boolean;
-    if (teamA !== teamB) {
-      winnerIsA = teamA > teamB;
-    } else if (result.penaltyScore && result.penaltyScore.teamA !== result.penaltyScore.teamB) {
-      winnerIsA = result.penaltyScore.teamA > result.penaltyScore.teamB;
-    } else {
-      continue; // level with no shootout tally — winner unknown to the app
-    }
-    codes.push(winnerIsA ? match.teamA.code : match.teamB.code);
+    const winningSlot = decisiveSlot(result.score, result.penaltyScore);
+    if (!winningSlot) continue; // level with no shootout tally — winner unknown to the app
+    codes.push(winningSlot === "A" ? match.teamA.code : match.teamB.code);
   }
   return codes;
 }

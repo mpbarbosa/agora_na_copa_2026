@@ -4,8 +4,9 @@ import { FIFA_SCHEDULED_MATCHES, type FifaScheduledMatchSeed } from "./data/fifa
 import { standings as seedStandings } from "./data/tournament";
 import { resolvePlayerEntry } from "./data/playerRegistry";
 import { KNOCKOUT_MATCHES } from "./data/knockoutBracket";
-import { KNOCKOUT_RESULTS } from "./data/knockoutResults";
+import { KNOCKOUT_RESULTS, type KnockoutResultSeed } from "./data/knockoutResults";
 import { humanizeSlot, KNOCKOUT_STAGE_NAMES } from "./utils/knockoutSlots";
+import { decisiveSlot } from "./utils/matchResult";
 import type { Match, KnockoutMatch, KnockoutTeamRef } from "./types";
 
 const PT_MONTHS = [
@@ -150,21 +151,60 @@ const buildKnockoutTeamEntry = (ref: KnockoutTeamRef | null, slot: string): Matc
   return { name: humanizeSlot(slot), code: slot, flagSvg: "", ...NEUTRAL_TEAM_STYLE, group: "", lineup: [] };
 };
 
-// Official knockout fixture → a Match for the scheduled list: real date, venue and
-// stage; TBD sides show the official slot label. Stable matchNumber-based id so a
-// fixture updates in place once its teams resolve. stageName is intentionally NOT
-// "Group Stage", so standings/group computations ignore these (see standings.ts).
-// A seeded result (KNOCKOUT_RESULTS) marks the fixture LIVE/FINISHED with its score so
-// the bracket resolves the tie's winner on a cold visit, before the live overlay loads;
-// unseeded ties stay PRE_GAME.
+const KNOCKOUT_BY_NUMBER = new Map(KNOCKOUT_MATCHES.map((km) => [km.matchNumber, km]));
+
+/**
+ * Resolve a later-round slot to the concrete team once its feeder tie is decided in
+ * KNOCKOUT_RESULTS: "W76" → the winner of #76, "RU101"/"L101" → its loser. Recurses so a
+ * chain resolves (a QF's "W91" → #91's winner → that tie's own resolved slot). Returns null
+ * while the feeder is undecided, drawn with no shootout tally, or the slot is a group/
+ * best-third ref ("2A", "3ABCDF") — the fixture then keeps its "Vencedor #NN" placeholder.
+ * Pure over its inputs so it is unit-tested; the winner side reuses `decisiveSlot`.
+ */
+export function resolveFeederSlot(
+  slot: string,
+  knockoutByNumber: Map<number, KnockoutMatch>,
+  results: Record<number, KnockoutResultSeed>,
+  seen: Set<number> = new Set(),
+): KnockoutTeamRef | null {
+  const parsed = /^(W|RU|L)(\d+)$/.exec(slot);
+  if (!parsed) return null;
+  const feederNumber = Number(parsed[2]);
+  if (seen.has(feederNumber)) return null; // defensive: never loop on a malformed bracket
+  seen.add(feederNumber);
+  const feeder = knockoutByNumber.get(feederNumber);
+  const result = results[feederNumber];
+  if (!feeder || !result || result.status !== "FINISHED") return null;
+  const winningSlot = decisiveSlot(result.score, result.penaltyScore);
+  if (!winningSlot) return null; // level with no shootout tally — winner unknown, never guess
+  const wantWinner = parsed[1] === "W";
+  const targetSlot = wantWinner ? winningSlot : winningSlot === "A" ? "B" : "A";
+  const directRef = targetSlot === "A" ? feeder.teamA : feeder.teamB;
+  if (directRef) return directRef;
+  // The target side is itself a feeder ref (a deeper round) — resolve it recursively.
+  const nestedSlot = targetSlot === "A" ? feeder.slotA : feeder.slotB;
+  return resolveFeederSlot(nestedSlot, knockoutByNumber, results, seen);
+};
+
+// Official knockout fixture → a Match for the scheduled list: real date, venue and stage.
+// A side is the real team when the bracket already names it (R32 group qualifiers) or once
+// its feeder tie is decided (resolveFeederSlot, e.g. "Vencedor #76" → Brasil the moment #76
+// ends); otherwise it keeps the official slot label. Resolving here — not just in the bracket
+// view — keeps the Ao Vivo / Partidas scoreboards consistent on a cold visit / fallback.
+// Stable matchNumber-based id so a fixture updates in place once its teams resolve. stageName
+// is intentionally NOT "Group Stage", so standings/group computations ignore these.
+// A seeded result (KNOCKOUT_RESULTS) marks the fixture LIVE/FINISHED with its score; unseeded
+// ties stay PRE_GAME.
 const buildKnockoutMatch = (km: KnockoutMatch): Match => {
   const kickoffTimestamp = toBrasiliaTimestamp(km.dateUtc);
   const kickoffMs = new Date(km.dateUtc).getTime();
   const result = KNOCKOUT_RESULTS[km.matchNumber];
+  const teamARef = km.teamA ?? resolveFeederSlot(km.slotA, KNOCKOUT_BY_NUMBER, KNOCKOUT_RESULTS);
+  const teamBRef = km.teamB ?? resolveFeederSlot(km.slotB, KNOCKOUT_BY_NUMBER, KNOCKOUT_RESULTS);
   return {
     id: `ko-${km.matchNumber}-2026`,
-    teamA: buildKnockoutTeamEntry(km.teamA, km.slotA),
-    teamB: buildKnockoutTeamEntry(km.teamB, km.slotB),
+    teamA: buildKnockoutTeamEntry(teamARef, km.slotA),
+    teamB: buildKnockoutTeamEntry(teamBRef, km.slotB),
     stadiumName: km.stadium,
     city: km.city,
     stageName: KNOCKOUT_STAGE_NAMES[km.stage],
