@@ -20,6 +20,9 @@ const ko = (
 
 const group = (team: number, opponent: number): TeamViewMatchSummary =>
   ({ status: "FINISHED", stageName: "Group Stage", score: { team, opponent } }) as unknown as TeamViewMatchSummary;
+// A scheduled knockout fixture the bracket placed the team in (no score yet).
+const koScheduled = (stageName: string): TeamViewMatchSummary =>
+  ({ status: "PRE_GAME", stageName, score: undefined }) as unknown as TeamViewMatchSummary;
 
 test("a 16-avos loss reads 'Eliminado em 16 avos de final'", () => {
   // South Africa: three group games, then lost the R32 tie to Canada 0-1.
@@ -85,7 +88,16 @@ test("Final and 3rd-place play-off get their own labels", () => {
   });
 });
 
-test("no finished knockout match yields no status (group phase / not yet played)", () => {
+test("a group qualifier with a scheduled 16-avos tie is 'Classificado para 16 avos de final'", () => {
+  // Mexico: won its group, R32 tie vs Ecuador scheduled but not played.
+  const history = [group(2, 0), group(1, 0), group(3, 0), koScheduled(KNOCKOUT_STAGE_NAMES.R32)];
+  assert.deepEqual(getTeamTournamentStatus(history), {
+    label: "Classificado para 16 avos de final",
+    tone: "advanced",
+  });
+});
+
+test("no knockout fixture at all yields no status (group phase / not placed)", () => {
   assert.equal(getTeamTournamentStatus([group(2, 0), group(1, 1)]), null);
   assert.equal(getTeamTournamentStatus([]), null);
 });
