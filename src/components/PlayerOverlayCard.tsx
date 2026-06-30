@@ -9,6 +9,19 @@ import { PlayerVideoRail } from "./PlayerVideoRail";
 import { PlayerNoteFreshness } from "./PlayerNoteFreshness";
 import { InstagramPostFrame } from "./InstagramPostFrame";
 import { resolveInstagramPostUrls } from "../utils/instagram";
+import PLAYER_SIGNATURES from "../data/playerSignatures.json";
+
+// Commons signature permalink (Special:FilePath → upload.wikimedia.org CDN),
+// the same hotlink pattern FlagIcon and the federation crests use. Keyed by
+// FIFA player id; only hand-curated, free-to-reuse (PD-signature) assets live
+// in playerSignatures.json, so a player without an entry simply has none.
+const SIGNATURES_BY_FIFA_ID: Record<string, string> = PLAYER_SIGNATURES;
+const signatureUrlFor = (fifaId: string | undefined): string | undefined => {
+  const file = fifaId ? SIGNATURES_BY_FIFA_ID[fifaId] : undefined;
+  return file
+    ? `https://commons.wikimedia.org/wiki/Special:FilePath/${encodeURIComponent(file)}`
+    : undefined;
+};
 
 export const getPlayerAge = (dateOfBirth: string): number =>
   Math.floor((Date.now() - new Date(dateOfBirth).getTime()) / (365.25 * 24 * 3600 * 1000));
@@ -125,6 +138,10 @@ export interface PlayerPortraitProps {
   showNumberBadge?: boolean;
   numberBadgeClassName?: string;
   numberBadgeStyle?: React.CSSProperties;
+  /** Optional autograph overlaid on the bottom-left of the photo (only when a real photo shows). */
+  signatureUrl?: string;
+  /** Theme-aware contrast classes (halo/invert) for the signature image. */
+  signatureClassName?: string;
 }
 
 export function PlayerPortrait({
@@ -138,6 +155,8 @@ export function PlayerPortrait({
   showNumberBadge = false,
   numberBadgeClassName = "",
   numberBadgeStyle,
+  signatureUrl,
+  signatureClassName = "",
 }: PlayerPortraitProps) {
   const [failedUrl, setFailedUrl] = useState<string | undefined>(undefined);
   const showImage = Boolean(player.pictureUrl) && player.pictureUrl !== failedUrl;
@@ -164,6 +183,15 @@ export function PlayerPortrait({
       )}
       {showImage && showNumberBadge && (
         <span className={numberBadgeClassName} style={numberBadgeStyle}>{player.number}</span>
+      )}
+      {showImage && signatureUrl && (
+        <img
+          src={signatureUrl}
+          alt={`Assinatura de ${player.name}`}
+          className={`pointer-events-none absolute bottom-3 left-3 h-9 w-auto max-w-[45%] select-none ${signatureClassName}`}
+          loading="lazy"
+          decoding="async"
+        />
       )}
     </div>
   );
@@ -284,6 +312,15 @@ export function PlayerOverlayCard({
     : "border-white/15 bg-white/5 text-slate-200 hover:bg-white/10";
   const photoBg = isLight ? `${accent}12` : "#111314";
 
+  // Optional autograph overlaid on the portrait. The signature is black strokes
+  // on a transparent background, so it gets a light halo on the light theme and
+  // is inverted (to white) with a dark halo on the dark theme to stay legible
+  // over any part of the photo.
+  const signatureUrl = signatureUrlFor(player.fifaId);
+  const signatureClassName = isLight
+    ? "drop-shadow-[0_1px_1px_rgba(255,255,255,0.75)]"
+    : "invert drop-shadow-[0_1px_1px_rgba(0,0,0,0.7)]";
+
   const socials = getPlayerSocialEntries(player.socials);
   const instagramPostUrls = resolveInstagramPostUrls(
     player.instagramPostUrls,
@@ -401,6 +438,8 @@ export function PlayerOverlayCard({
                 showNumberBadge
                 numberBadgeClassName="absolute bottom-3 right-3 rounded-sm px-2.5 py-1 font-mono text-xs font-black text-white"
                 numberBadgeStyle={{ background: accent }}
+                signatureUrl={signatureUrl}
+                signatureClassName={signatureClassName}
               />
             </div>
 
