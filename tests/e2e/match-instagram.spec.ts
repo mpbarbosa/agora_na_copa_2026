@@ -3,20 +3,21 @@ import { test, expect } from "@playwright/test";
 // The per-match "Instagram" tab on the Ao Vivo match page. A match with a
 // configured Instagram post (src/data/matchInstagram.json) gains an extra tab to
 // the right of the Pré-jogo/Pós-jogo tab; opening it shows the embedded post.
-// We assert on OUR markup (the tab button + the blockquote.instagram-media
-// permalink + the "Abrir no Instagram" link), never on Instagram's
-// network-loaded iframe, which is third-party and offline-fragile.
+// We assert on OUR markup (the tab button + the iframe to Instagram's /embed/
+// endpoint + the "Abrir no Instagram" link), never on Instagram's network-loaded
+// iframe content, which is third-party and offline-fragile.
 test.describe("Match Instagram tab (Ao Vivo)", () => {
   // GER x PAR (16-avos) — the match seeded with an Instagram post.
   const MATCH_ID = "ko-74-2026";
-  const PERMALINK = "https://www.instagram.com/p/DaME26jDuIC/";
+  const PERMALINK = "https://www.instagram.com/reel/DZzEaFXO2YZ/";
+  const EMBED_URL = "https://www.instagram.com/reel/DZzEaFXO2YZ/embed/";
 
   test.beforeEach(async ({ page }) => {
     await page.addInitScript(() => localStorage.setItem("feature-tour-seen", "1"));
-    // Stub embed.js to a no-op so the as-authored blockquote stays in the DOM and
-    // the assertions are deterministic with or without network access.
-    await page.route(/embed\.js/, (route) =>
-      route.fulfill({ contentType: "application/javascript", body: "" }),
+    // Stub the Instagram /embed/ page so the iframe never reaches out to the real
+    // network — keeps the assertions deterministic with or without connectivity.
+    await page.route(/instagram\.com\/.*\/embed\/?$/, (route) =>
+      route.fulfill({ contentType: "text/html", body: "<!doctype html><title>stub</title>" }),
     );
   });
 
@@ -36,10 +37,7 @@ test.describe("Match Instagram tab (Ao Vivo)", () => {
 
     const panel = page.getByTestId("match-instagram");
     await expect(panel).toBeVisible();
-    await expect(panel.locator("blockquote.instagram-media")).toHaveAttribute(
-      "data-instgrm-permalink",
-      PERMALINK,
-    );
+    await expect(page.locator("#match-instagram-embed-0")).toHaveAttribute("src", EMBED_URL);
 
     const openLink = page.locator("#match-instagram-open-0");
     await expect(openLink).toHaveAttribute("href", PERMALINK);

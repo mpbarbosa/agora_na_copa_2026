@@ -39,6 +39,7 @@ Each maps to one `NAV_ITEMS` entry in `src/navigation.ts` and is mounted by `src
 | `FlagIcon.tsx` | Renders hand-drawn SVG flags from `src/components/flags/` |
 | `InstagramBrandIcon.tsx` | Instagram brand icon SVG |
 | `InstagramEmbed.tsx` | Shared Instagram post/reel embed (official `<blockquote class="instagram-media">` + `embed.js`, see `docs/adr/0001`). Owns the `window.instgrm` type + one-time script injection; safety check in `src/utils/instagram.ts`. Mounting loads embed.js, so callers render it only when the embed should appear (lazily). Used by `PlayerOverlayCard`, the FIFA reel in `SocialMediasView`, and `InstagramHighlightsFeed` |
+| `InstagramPostFrame.tsx` | Script-free Instagram post embed via a direct `<iframe>` to Instagram's `/embed/` endpoint (`toInstagramEmbedUrl` in `src/utils/instagram.ts`) — the blocker-resilient alternative to `InstagramEmbed` (embed.js is a common content-blocker target; see the `docs/adr/0001` addendum). Auto-sizes to the post via Instagram's `MEASURE` postMessage. Used by the per-match "Instagram" tab in `MatchDetailView` (fed by `src/data/matchInstagram.json`) |
 | `InstagramHighlightsFeed.tsx` | "Destaques no Instagram" feed on the Redes Sociais tab — real player highlights from `src/data/instagramHighlights.ts` (`getInstagramHighlights`). One card per player (flag + name + team + position); only the first is expanded by default, the rest mount their `InstagramEmbed` on tap. Renders nothing when no player has a highlight |
 
 ## Size cautions

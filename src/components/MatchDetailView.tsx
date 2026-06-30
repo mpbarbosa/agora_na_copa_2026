@@ -32,7 +32,7 @@ import { getPositionLabel, toTitleCasePtBr } from "../utils/playerDisplay";
 import { PitchLineup } from "./PitchLineup";
 import { MatchChatPanel } from "./MatchChatPanel";
 import { AffiliateProducts } from "./AffiliateProducts";
-import { InstagramEmbed } from "./InstagramEmbed";
+import { InstagramPostFrame } from "./InstagramPostFrame";
 import { InstagramBrandIcon } from "./InstagramBrandIcon";
 import { resolveInstagramPostUrls } from "../utils/instagram";
 import { renderAnalysisWithMentions } from "./PlayerMention";
@@ -2686,7 +2686,7 @@ export function MatchDetailView({
             <div className="mx-auto max-w-md space-y-5">
               {matchInstagramUrls.map((postUrl, index) => (
                 <div key={postUrl} className="space-y-3">
-                  <InstagramEmbed permalink={postUrl} id={`match-instagram-embed-${index}`} />
+                  <InstagramPostFrame permalink={postUrl} id={`match-instagram-embed-${index}`} />
                   <a
                     href={postUrl}
                     target="_blank"

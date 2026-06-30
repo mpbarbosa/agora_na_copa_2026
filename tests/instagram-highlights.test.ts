@@ -2,7 +2,11 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import { getInstagramHighlights } from "../src/data/instagramHighlights";
-import { isSafeInstagramUrl, resolveInstagramPostUrls } from "../src/utils/instagram";
+import {
+  isSafeInstagramUrl,
+  resolveInstagramPostUrls,
+  toInstagramEmbedUrl,
+} from "../src/utils/instagram";
 
 test("getInstagramHighlights returns the players with a highlight", () => {
   const highlights = getInstagramHighlights();
@@ -74,4 +78,25 @@ test("resolveInstagramPostUrls returns an empty list when nothing is safe", () =
   assert.deepEqual(resolveInstagramPostUrls(["https://evil.example.com/x"], undefined), []);
   assert.deepEqual(resolveInstagramPostUrls(undefined, "http://www.instagram.com/p/a/"), []);
   assert.deepEqual(resolveInstagramPostUrls(undefined, undefined), []);
+});
+
+test("toInstagramEmbedUrl appends /embed/ and strips query, hash and trailing slash", () => {
+  assert.equal(
+    toInstagramEmbedUrl("https://www.instagram.com/p/DaME26jDuIC/"),
+    "https://www.instagram.com/p/DaME26jDuIC/embed/",
+  );
+  assert.equal(
+    toInstagramEmbedUrl("https://www.instagram.com/p/DaME26jDuIC/?utm_source=ig_web_copy_link&igsh=x"),
+    "https://www.instagram.com/p/DaME26jDuIC/embed/",
+  );
+  assert.equal(
+    toInstagramEmbedUrl("https://www.instagram.com/reel/AbC123/#frag"),
+    "https://www.instagram.com/reel/AbC123/embed/",
+  );
+});
+
+test("toInstagramEmbedUrl rejects unsafe or bare-origin urls", () => {
+  assert.equal(toInstagramEmbedUrl("https://evil.example.com/p/x/"), null);
+  assert.equal(toInstagramEmbedUrl("http://www.instagram.com/p/x/"), null);
+  assert.equal(toInstagramEmbedUrl("https://www.instagram.com/"), null);
 });
