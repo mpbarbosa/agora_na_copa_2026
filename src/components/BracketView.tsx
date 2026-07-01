@@ -471,6 +471,15 @@ function BracketMatchCard({ match, theme, teamMeta, groupPositions, matchId, win
     >
       <div className={`flex flex-wrap items-center gap-x-3 gap-y-1 font-mono text-[10px] uppercase tracking-wider ${subtleClasses}`}>
         <span className="font-bold">#{match.matchNumber}</span>
+        {/* Round label on each card, so a match stays self-describing when scrolled away
+            from its column heading (mirrors the full bracket's per-column labels). */}
+        <span
+          className={`rounded-sm border px-1.5 py-0.5 text-[9px] font-bold tracking-wider ${
+            isLight ? "border-slate-200 bg-white text-slate-500" : "border-white/10 bg-white/5 text-slate-300"
+          }`}
+        >
+          {STAGE_LABELS[match.stage]}
+        </span>
         <span className="inline-flex items-center gap-1">
           <CalendarDays size={11} /> {formatKickoff(match.dateUtc)}
         </span>
