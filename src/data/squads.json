@@ -449,7 +449,8 @@
     "dateOfBirth": "1992-10-02",
     "height": 193,
     "worldCupNote": "## Leitura\nSegurança nas traves rumo às oitavas. Alisson foi vazado uma vez, mas viu o Brasil reagir e vencer o Japão por 2 a 1 nos 16-avos. O goleiro segue como o seguro de vida de uma Seleção que avançou no mata-mata.\n## Desempenho\nFechou a fase de grupos com dois clean sheets e a liderança do Grupo C. Nos 16-avos, foi vazado por Kaishu Sano aos 29 contra o Japão, mas o Brasil virou com Casemiro (56') e Gabriel Martinelli (90+5'), garantindo a vaga nas oitavas. Sem cartões.\n## Números\nJ4 · 2 gols sofridos no Mundial · classificado às oitavas de final. O Brasil, 1º do Grupo C, venceu o Japão por 2 a 1 nos 16-avos.",
-    "worldCupNoteUpdatedAt": "2026-06-29T17:00:00.000Z"
+    "worldCupNoteUpdatedAt": "2026-06-29T17:00:00.000Z",
+    "instagramPostUrl": "https://www.instagram.com/p/DaL65g6yWCY/"
   },
   "308386": {
     "fifaId": "308386",
@@ -4983,7 +4984,10 @@
       "instagram": "zionsuzuki",
       "wikipedia": "https://pt.wikipedia.org/wiki/Zion_Suzuki"
     },
-    "instagramPostUrl": "https://www.instagram.com/p/DaCe1z0ER3Y/"
+    "instagramPostUrls": [
+      "https://www.instagram.com/p/DaCe1z0ER3Y/",
+      "https://www.instagram.com/p/DaL65g6yWCY/"
+    ]
   },
   "405545": {
     "fifaId": "405545",
@@ -13659,7 +13663,8 @@
     "socials": {
       "instagram": "nusaantonio",
       "wikipedia": "https://pt.wikipedia.org/wiki/Antonio_Nusa"
-    }
+    },
+    "instagramPostUrl": "https://www.instagram.com/p/DaOxjrMjB_9/"
   },
   "483471": {
     "fifaId": "483471",
