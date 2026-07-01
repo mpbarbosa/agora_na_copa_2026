@@ -5046,7 +5046,10 @@
     "position": "FW",
     "club": "Real Madrid",
     "pictureUrl": "https://digitalhub.fifa.com/transform/1c2722c3-a70b-49d8-bdb4-77109161f533/VINICIUS-JUNIOR_405742",
-    "instagramPostUrl": "https://www.instagram.com/p/DZjBZ9UjVG6/",
+    "instagramPostUrls": [
+      "https://www.instagram.com/p/DZjBZ9UjVG6/",
+      "https://www.instagram.com/p/DZzgqBDCBSS/"
+    ],
     "worldCupNote": "## Leitura\nSem balançar as redes, mas nas oitavas. Vinícius Júnior não marcou no 2 a 1 sobre o Japão, mas viu o Brasil garantir a vaga no mata-mata. Artilheiro da Seleção na fase de grupos com 4 gols, o atacante segue como referência ofensiva rumo às oitavas.\n## Desempenho\nBrilhou na fase de grupos, com gols sobre Marrocos, Haiti e dois sobre a Escócia (4 no total). Nos 16-avos contra o Japão, titular, passou em branco, mas o Brasil virou com Casemiro (56') e Martinelli (90+5') após o gol de Sano (29'). Sem cartões.\n## Números\nJ4 · 4 gols · 0 cartões · artilheiro do Brasil. A Seleção, 1ª do Grupo C, venceu o Japão por 2 a 1 nos 16-avos e está nas oitavas de final.",
     "worldCupNoteUpdatedAt": "2026-06-29T17:00:00.000Z",
     "dateOfBirth": "2000-07-12",
