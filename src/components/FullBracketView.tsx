@@ -33,6 +33,16 @@ const LEFT_SF = 101;
 const RIGHT_SF = 102;
 const FINAL = 104;
 
+// Short pt-BR round label per stage, for the column headers along the top of the bracket.
+const STAGE_SHORT: Record<KnockoutMatch["stage"], string> = {
+  R32: "16-avos",
+  R16: "Oitavas",
+  QF: "Quartas",
+  SF: "Semis",
+  TP: "3º lugar",
+  F: "Final",
+};
+
 // Rounds of one half, OUTER (R32, 8 ties) → INNER (SF, 1), by walking the feeder tree down
 // from the half's semifinal. Bottoms out at R32 (feederNumbersOf returns [] there).
 function halfRoundsOuterToInner(sfNumber: number): number[][] {
@@ -101,7 +111,7 @@ export function FullBracketView({
 
   // One flag cell (a single knockout slot). Blank slots render a dashed placeholder box.
   const SlotCell = ({ d }: { d: SlotDisplay }) => {
-    const base = `flex h-7 w-11 items-center justify-center rounded-md border p-0.5 transition ${d.blank ? blankBg : cellBg} ${d.lost ? "opacity-40" : ""}`;
+    const base = `flex h-7 w-11 xl:h-8 xl:w-[52px] items-center justify-center rounded-md border p-0.5 transition ${d.blank ? blankBg : cellBg} ${d.lost ? "opacity-40" : ""}`;
     if (d.blank || !d.ref) return <div className={base} aria-hidden="true" />;
     const team = d.ref;
     return (
@@ -147,18 +157,27 @@ export function FullBracketView({
     );
   };
 
-  // One round column for a half. `dir` is the side the connector points (toward center).
-  const renderRound = (round: number[], key: string, isInnermost: boolean, dir: "right" | "left") => (
-    <div key={key} className="flex flex-col justify-around">
-      {round.map((matchNumber, index) => (
-        <div key={matchNumber} className="flex flex-1 items-center">
-          {dir === "left" && <Connector index={index} single={isInnermost} dir="left" />}
-          <MatchBox matchNumber={matchNumber} />
-          {dir === "right" && <Connector index={index} single={isInnermost} dir="right" />}
+  const headerClasses = `mb-2 text-center font-mono text-[9px] uppercase tracking-widest ${mutedClasses}`;
+
+  // One round column for a half: a stage header, then the match boxes filling the height.
+  // `dir` is the side the connector points (toward center).
+  const renderRound = (round: number[], key: string, isInnermost: boolean, dir: "right" | "left") => {
+    const stage = byNumber.get(round[0])?.stage;
+    return (
+      <div key={key} className="flex flex-col">
+        <p className={headerClasses}>{stage ? STAGE_SHORT[stage] : ""}</p>
+        <div className="flex flex-1 flex-col justify-around">
+          {round.map((matchNumber, index) => (
+            <div key={matchNumber} className="flex flex-1 items-center">
+              {dir === "left" && <Connector index={index} single={isInnermost} dir="left" />}
+              <MatchBox matchNumber={matchNumber} />
+              {dir === "right" && <Connector index={index} single={isInnermost} dir="right" />}
+            </div>
+          ))}
         </div>
-      ))}
-    </div>
-  );
+      </div>
+    );
+  };
 
   return (
     <div id="bracket-full">
@@ -179,10 +198,12 @@ export function FullBracketView({
           {leftRounds.map((round, i) => renderRound(round, `l${i}`, i === leftRounds.length - 1, "right"))}
 
           {/* Center: the final + trophy. */}
-          <div className="flex flex-col items-center justify-center gap-3 px-2">
-            <MatchBox matchNumber={FINAL} />
-            <Trophy size={40} className={isLight ? "text-amber-500" : "text-amber-300"} />
-            <span className={`font-mono text-[9px] uppercase tracking-widest ${mutedClasses}`}>Final</span>
+          <div className="flex flex-col px-2">
+            <p className={headerClasses}>{STAGE_SHORT.F}</p>
+            <div className="flex flex-1 flex-col items-center justify-center gap-3">
+              <MatchBox matchNumber={FINAL} />
+              <Trophy size={40} className={isLight ? "text-amber-500" : "text-amber-300"} />
+            </div>
           </div>
 
           {[...rightRounds].reverse().map((round, i) => renderRound(round, `r${i}`, i === 0, "left"))}
