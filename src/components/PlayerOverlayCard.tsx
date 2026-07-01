@@ -188,7 +188,7 @@ export function PlayerPortrait({
         <img
           src={signatureUrl}
           alt={`Assinatura de ${player.name}`}
-          className={`pointer-events-none absolute bottom-3 left-3 h-9 w-auto max-w-[45%] select-none ${signatureClassName}`}
+          className={`pointer-events-none absolute bottom-3 left-3 h-16 w-auto max-w-[60%] select-none ${signatureClassName}`}
           loading="lazy"
           decoding="async"
         />
