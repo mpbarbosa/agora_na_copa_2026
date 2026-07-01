@@ -8,6 +8,7 @@ import type { QualificationStatus, ProvisionalSlot } from "../standings";
 import { humanizeSlot, describeBestThirdSlot, bestThirdGroups } from "../utils/knockoutSlots";
 import { buildWinnerSlotByNumber, buildFeederTeamBySlot, feederMatchupCodes } from "../utils/knockoutFeeders";
 import { FlagIcon } from "./FlagIcon";
+import { FullBracketView } from "./FullBracketView";
 import { BracketPredictorPanel } from "./BracketPredictorPanel";
 import type { PredictableFixture, ResolvedSlotTeam } from "./BracketPredictorPanel";
 
@@ -612,6 +613,9 @@ export function BracketView({ theme, matches, onSelectTeamLineup, onSelectMatch 
     return grouped;
   }, []);
 
+  // "Colunas" (the per-stage card columns) vs "Chave completa" (the symmetric flag bracket).
+  const [viewMode, setViewMode] = useState<"columns" | "full">("columns");
+
   // Hovering a card spotlights the fixtures that feed it in the previous column
   // (e.g. an Oitavas tie highlights its two 16-avos feeders, hiding the rest).
   const [hoveredMatch, setHoveredMatch] = useState<number | null>(null);
@@ -710,6 +714,31 @@ export function BracketView({ theme, matches, onSelectTeamLineup, onSelectMatch 
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
+            {/* View toggle: per-stage columns vs the symmetric full bracket. */}
+            <div
+              className={`inline-flex overflow-hidden rounded-full border ${isLight ? "border-slate-200" : "border-white/10"}`}
+              id="bracket-view-toggle"
+              role="group"
+              aria-label="Modo de visualização do mata-mata"
+            >
+              {(["columns", "full"] as const).map((mode) => {
+                const active = viewMode === mode;
+                const activeClasses = isLight ? "bg-[#009c3b] text-white" : "bg-[#00e476] text-[#0c0d0e]";
+                const idleClasses = isLight ? "text-slate-600 hover:bg-slate-50" : "text-slate-300 hover:bg-white/5";
+                return (
+                  <button
+                    key={mode}
+                    type="button"
+                    id={`bracket-view-toggle-${mode}`}
+                    aria-pressed={active}
+                    onClick={() => setViewMode(mode)}
+                    className={`px-3 py-1 font-mono text-[10px] uppercase tracking-wider transition ${active ? activeClasses : idleClasses}`}
+                  >
+                    {mode === "columns" ? "Colunas" : "Chave completa"}
+                  </button>
+                );
+              })}
+            </div>
             <span
               className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 font-mono text-[10px] uppercase tracking-wider ${
                 isLight
@@ -749,28 +778,41 @@ export function BracketView({ theme, matches, onSelectTeamLineup, onSelectMatch 
           </div>
         </div>
 
-        <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-6 2xl:gap-5" id="bracket-stage-grid">
-          {STAGE_ORDER.map((stage) => (
-            <div key={stage}>
-              <BracketStageColumn
-                stage={stage}
-                matches={matchesByStage.get(stage) ?? []}
-                winnerSlotByNumber={winnerSlotByNumber}
-                feederTeamBySlot={feederTeamBySlot}
-                theme={theme}
-                teamMeta={teamMeta}
-                groupPositions={groupPositions}
-                matchIdByNumber={matchIdByNumber}
-                feederHighlight={feederHighlight}
-                hoveredMatch={hoveredMatch}
-                feederShifts={feederShifts}
-                onHoverMatch={setHoveredMatch}
-                onSelectTeamLineup={onSelectTeamLineup}
-                onSelectMatch={onSelectMatch}
-              />
-            </div>
-          ))}
-        </div>
+        {viewMode === "columns" ? (
+          <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-6 2xl:gap-5" id="bracket-stage-grid">
+            {STAGE_ORDER.map((stage) => (
+              <div key={stage}>
+                <BracketStageColumn
+                  stage={stage}
+                  matches={matchesByStage.get(stage) ?? []}
+                  winnerSlotByNumber={winnerSlotByNumber}
+                  feederTeamBySlot={feederTeamBySlot}
+                  theme={theme}
+                  teamMeta={teamMeta}
+                  groupPositions={groupPositions}
+                  matchIdByNumber={matchIdByNumber}
+                  feederHighlight={feederHighlight}
+                  hoveredMatch={hoveredMatch}
+                  feederShifts={feederShifts}
+                  onHoverMatch={setHoveredMatch}
+                  onSelectTeamLineup={onSelectTeamLineup}
+                  onSelectMatch={onSelectMatch}
+                />
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="mt-6">
+            <FullBracketView
+              theme={theme}
+              teamMeta={teamMeta}
+              feederTeamBySlot={feederTeamBySlot}
+              groupPositions={groupPositions}
+              winnerSlotByNumber={winnerSlotByNumber}
+              onSelectTeamLineup={onSelectTeamLineup}
+            />
+          </div>
+        )}
       </div>
 
       <BracketPredictorPanel theme={theme} fixtures={predictableFixtures} />

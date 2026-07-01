@@ -25,6 +25,7 @@ Each maps to one `NAV_ITEMS` entry in `src/navigation.ts` and is mounted by `src
 | Component | Purpose |
 |-----------|---------|
 | `BracketPredictorPanel.tsx` | "Palpite do confronto" panel at the bottom of `BracketView`: pick a knockout tie whose both sides are resolved (confirmed or provisional) and auto-forecast it via `/api/predict` — the same deterministic Dixon-Coles Poisson "palpite simulado" the Fan Zone uses. Fixtures are built by `buildPredictableFixtures()` in `BracketView` |
+| `FullBracketView.tsx` | The "Chave completa" symmetric flag bracket — an alternative to `BracketView`'s per-stage columns, toggled via `#bracket-view-toggle` inside Chaveamento. Both halves of the draw (the two SF subtrees feeding the final) fan inward to a central trophy; each slot is a `FlagIcon` resolved from the same maps `BracketView` builds (`teamMeta` / `feederTeamBySlot` / `groupPositions` / `winnerSlotByNumber`), with elbow connectors drawn via border pseudo-elements and losers dimmed. Too wide for a phone, so on mobile-portrait it hides the bracket and shows a rotate-to-landscape hint (`#bracket-full-rotate-hint`). Tree walking + slot helpers live in `src/utils/knockoutFeeders.ts`. |
 | `PitchLineup.tsx` | Visual pitch with player `x`/`y` positions from `matches.json` |
 | `TeamPitchBoard.tsx` | Team-focused pitch board used by `TeamLineupView` |
 | `TeamLineupView.tsx` | Full team lineup panel (690 lines — standalone modal/panel) |

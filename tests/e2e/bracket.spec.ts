@@ -255,3 +255,42 @@ test.describe("Bracket feeder spotlight on mobile (collapses the columns)", () =
     await expect(page.locator("#match-detail-view")).toBeVisible();
   });
 });
+
+// The "Chave completa" toggle swaps the per-stage columns for the symmetric flag
+// bracket (FullBracketView); on a portrait phone it asks the user to rotate.
+test.describe("Bracket view — full-bracket toggle", () => {
+  test.beforeEach(async ({ page }) => {
+    await page.addInitScript(() => localStorage.setItem("feature-tour-seen", "1"));
+  });
+
+  test("toggles between the columns view and the full symmetric bracket", async ({ page }) => {
+    await page.goto("/");
+    await page.click("#btn-nav-chaveamento");
+    await expect(page.locator("#bracket-view")).toBeVisible();
+
+    // Default is the per-stage columns.
+    await expect(page.locator("#bracket-stage-grid")).toBeVisible();
+    await expect(page.locator("#bracket-full")).toHaveCount(0);
+
+    // Switch to the full bracket: the columns go away, the symmetric bracket + final appear.
+    await page.click("#bracket-view-toggle-full");
+    await expect(page.locator("#bracket-full")).toBeVisible();
+    await expect(page.locator("#bracket-stage-grid")).toHaveCount(0);
+    await expect(page.locator("#bracket-full")).toContainText("Final");
+
+    // Switch back.
+    await page.click("#bracket-view-toggle-columns");
+    await expect(page.locator("#bracket-stage-grid")).toBeVisible();
+    await expect(page.locator("#bracket-full")).toHaveCount(0);
+  });
+
+  test("prompts to rotate on a portrait phone", async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 780 });
+    await page.goto("/");
+    await page.click("#btn-nav-chaveamento");
+    await page.click("#bracket-view-toggle-full");
+    const hint = page.locator("#bracket-full-rotate-hint");
+    await expect(hint).toBeVisible();
+    await expect(hint).toContainText("Gire o celular");
+  });
+});

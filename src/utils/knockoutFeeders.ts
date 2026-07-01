@@ -37,6 +37,19 @@ export function buildFeederTeamBySlot(
   return map;
 }
 
+// The two feeder fixtures of a knockout match, by number ("W89"/"W90" → [89, 90]). Empty for
+// R32 (fed by group/best-third slots) — so walking feeders from any match bottoms out at R32.
+export function feederNumbersOf(matchNumber: number): number[] {
+  const km = KNOCKOUT_MATCHES.find((m) => m.matchNumber === matchNumber);
+  if (!km) return [];
+  const nums: number[] = [];
+  for (const slot of [km.slotA, km.slotB]) {
+    const parsed = /^(?:W|RU|L)(\d+)$/.exec(slot);
+    if (parsed) nums.push(Number(parsed[1]));
+  }
+  return nums;
+}
+
 // The matchup a "W##"/"RU##"/"L##" slot points at, as team codes ("MEX x ECU"), so a still-
 // unresolved feeder slot reads "Vencedor #79 MEX x ECU" — telling you which tie decides it.
 // Each side is the R32 group-draw team when the bracket already names it, else its own
