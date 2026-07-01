@@ -3,6 +3,7 @@ import type { Match, MatchStatus, TeamRef } from "../types";
 import { buildGroupPositionMap } from "../standings";
 import type { QualificationStatus } from "../standings";
 import { resolveTeamDisplay as resolveKnockoutTeamDisplay } from "../utils/resolveTeamDisplay";
+import { buildFeederTeamBySlot, feederMatchupCodes } from "../utils/knockoutFeeders";
 import { finishedSideResult, type ResultTone } from "../utils/matchResult";
 import { FlagIcon } from "./FlagIcon";
 
@@ -218,6 +219,8 @@ export function PartidasView({ matches, theme, onSelectTeamLineup, onSelectMatch
   // Chaveamento bracket — so both views show the same provisional teams
   // ("BRASIL prov.") instead of raw labels. Combo/winner refs stay as labels.
   const groupPositionMap = useMemo(() => buildGroupPositionMap(matches), [matches]);
+  // Resolve "Vencedor #79" feeder slots to their matchup ("MEX x ECU"), like the bracket.
+  const feederTeamBySlot = useMemo(() => buildFeederTeamBySlot(matches), [matches]);
 
   const resolveTeamDisplay = (match: Match, team: Match["teamA"]) =>
     resolveKnockoutTeamDisplay(match, team, groupPositionMap);
@@ -265,6 +268,10 @@ export function PartidasView({ matches, theme, onSelectTeamLineup, onSelectMatch
           const centerDisplay = getMatchCenterDisplay(match);
           const dispA = resolveTeamDisplay(match, match.teamA);
           const dispB = resolveTeamDisplay(match, match.teamB);
+          // For an unresolved winner-ref slot, show its feeder matchup ("MEX x ECU") in
+          // place of the redundant raw code ("W79"); null for real teams (keeps the code).
+          const matchupA = feederMatchupCodes(dispA.code, feederTeamBySlot);
+          const matchupB = feederMatchupCodes(dispB.code, feederTeamBySlot);
 
           return (
             <article
@@ -320,7 +327,7 @@ export function PartidasView({ matches, theme, onSelectTeamLineup, onSelectMatch
                       {provBadge(dispA.prov)}
                     </p>
                     <p className={`font-mono text-[10px] uppercase tracking-[0.22em] ${softMutedClasses}`}>
-                      {dispA.code}
+                      {matchupA ?? dispA.code}
                     </p>
                     {(() => {
                       const result = finishedSideResult(match, "a");
@@ -377,7 +384,7 @@ export function PartidasView({ matches, theme, onSelectTeamLineup, onSelectMatch
                       <span className="truncate">{dispB.name}</span>
                     </p>
                     <p className={`font-mono text-[10px] uppercase tracking-[0.22em] ${softMutedClasses}`}>
-                      {dispB.code}
+                      {matchupB ?? dispB.code}
                     </p>
                     {(() => {
                       const result = finishedSideResult(match, "b");
