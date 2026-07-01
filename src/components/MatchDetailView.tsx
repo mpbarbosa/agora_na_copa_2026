@@ -40,6 +40,8 @@ import { MatchWeatherChip } from "./MatchWeatherChip";
 import { RefereeChip } from "./RefereeChip";
 import { SimultaneousLiveMatches } from "./SimultaneousLiveMatches";
 import { WeatherSuspensionNotice } from "./WeatherSuspensionNotice";
+import { MatchAdvisoryNotice } from "./MatchAdvisoryNotice";
+import MATCH_ADVISORIES from "../data/matchAdvisories.json";
 import { MatchSpeechToggle } from "./MatchSpeechToggle";
 import { useMatchSpeech } from "../hooks/useMatchSpeech";
 import { runDirectSpeechTest } from "../utils/speech/catasSpeech";
@@ -674,6 +676,10 @@ export function MatchDetailView({
     undefined,
   );
   const hasMatchInstagram = matchInstagramUrls.length > 0;
+  // Per-match schedule advisory (e.g. a weather kickoff delay the live feed
+  // doesn't carry). Hidden once the match is FINISHED so it never lingers.
+  const matchAdvisory = (MATCH_ADVISORIES as Record<string, string>)[currentMatch.id];
+  const showMatchAdvisory = Boolean(matchAdvisory) && currentMatch.status !== "FINISHED";
   const visibleBroadcasters = currentMatch.broadcasters;
   const currentIncidents =
     currentSimulatedState?.incidents || currentOverlay?.matchState.incidents || [];
@@ -1992,6 +1998,13 @@ export function MatchDetailView({
           {currentMatch.status === "SUSPENDED" && (
             <div className="mt-5 flex justify-center">
               <WeatherSuspensionNotice theme={theme} />
+            </div>
+          )}
+
+          {/* Per-match schedule advisory (e.g. weather kickoff delay) */}
+          {showMatchAdvisory && (
+            <div className="mt-5 flex justify-center">
+              <MatchAdvisoryNotice message={matchAdvisory} theme={theme} />
             </div>
           )}
 
