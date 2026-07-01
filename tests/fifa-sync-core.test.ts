@@ -105,6 +105,17 @@ test("getMatchStatusFromFifa maps FIFA status codes into local match statuses", 
     "PRE_GAME",
   );
 
+  // Delayed kickoff (10, FIFA "Atrasado") is pre-match — a held kickoff hasn't
+  // started, so it must not fall through the numeric fallback into LIVE.
+  assert.equal(
+    getMatchStatusFromFifa(localMatch, {
+      IdMatch: "1",
+      Date: "2026-07-01T02:00:00Z",
+      MatchStatus: 10,
+    }),
+    "PRE_GAME",
+  );
+
   // Interrupted matches: suspended (99), abandoned (4), postponed (7),
   // cancelled (8) all collapse to SUSPENDED.
   for (const code of [99, 4, 7, 8]) {
@@ -134,6 +145,8 @@ test("getOfficialFifaStatusLabel prefers the live period, then the status", () =
   assert.equal(getOfficialFifaStatusLabel(99, 5), "Paralisado");
   assert.equal(getOfficialFifaStatusLabel(4, 5), "Abandonado");
   assert.equal(getOfficialFifaStatusLabel(7, 1), "Adiado");
+  // Delayed kickoff (10) surfaces the "Atrasado" pill even with an unknown period.
+  assert.equal(getOfficialFifaStatusLabel(10, 0), "Atrasado");
 
   // Status-only fallbacks and the unknown case.
   assert.equal(getOfficialFifaStatusLabel(12, 0), "Escalações divulgadas");

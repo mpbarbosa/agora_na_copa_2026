@@ -298,6 +298,7 @@ export const FIFA_MATCH_STATUS = {
   ABANDONED: 4,
   POSTPONED: 7,
   CANCELLED: 8,
+  DELAYED: 10, // kickoff delayed (e.g. weather) but still expected — FIFA renders "Atrasado"
   LINE_UPS: 12, // line-ups published (still pre-match)
   SUSPENDED: 99, // stopped mid-match (e.g. weather), may resume
 } as const;
@@ -311,6 +312,7 @@ export const getMatchStatusFromFifa = (
       return "FINISHED";
     case FIFA_MATCH_STATUS.FUTURE:
     case FIFA_MATCH_STATUS.LINE_UPS:
+    case FIFA_MATCH_STATUS.DELAYED:
       return "PRE_GAME";
     case FIFA_MATCH_STATUS.LIVE:
       return "LIVE";
@@ -382,6 +384,7 @@ const FIFA_STATUS_LABELS: Record<number, string> = {
   [FIFA_MATCH_STATUS.ABANDONED]: "Abandonado",
   [FIFA_MATCH_STATUS.POSTPONED]: "Adiado",
   [FIFA_MATCH_STATUS.CANCELLED]: "Cancelado",
+  [FIFA_MATCH_STATUS.DELAYED]: "Atrasado",
   [FIFA_MATCH_STATUS.SUSPENDED]: "Paralisado",
 };
 
@@ -392,6 +395,7 @@ const TERMINAL_OR_ABNORMAL_STATUS = new Set<number>([
   FIFA_MATCH_STATUS.ABANDONED,
   FIFA_MATCH_STATUS.POSTPONED,
   FIFA_MATCH_STATUS.CANCELLED,
+  FIFA_MATCH_STATUS.DELAYED,
 ]);
 
 /**
