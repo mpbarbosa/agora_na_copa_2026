@@ -57,4 +57,8 @@ export const KNOCKOUT_RESULTS: Record<number, KnockoutResultSeed> = {
   // #78 · 16-avos · Costa do Marfim 1×2 Noruega (Amad Diallo 74' p/ CIV; Antonio Nusa 39' e
   // Erling Haaland 86' p/ NOR). Noruega classificada; alimenta a Oitavas #91 (slot W78).
   78: { status: "FINISHED", score: { teamA: 1, teamB: 2 } },
+  // #79 · 16-avos · 30/06/2026 (início adiado para as 23h por chuva) — México 2×0 Equador
+  // (Julian Quiñones 22', Raúl Jiménez 31'; Piero Hincapié expulso aos 90+5' p/ EQU).
+  // México classificado; alimenta a Oitavas #92 (slot W79).
+  79: { status: "FINISHED", score: { teamA: 2, teamB: 0 } },
 };
