@@ -304,6 +304,44 @@ function startGroupHistoryTour(theme: Theme, onEnd?: () => void): void {
   );
 }
 
+/** "A chave completa" — Chaveamento → toggle "Chave completa" → the symmetric poster bracket. */
+function startFullBracketTour(theme: Theme, onEnd?: () => void): void {
+  runActionTour(
+    theme,
+    [
+      {
+        element: "#btn-nav-chaveamento",
+        title: "Toda a chave numa tela só 🏆",
+        description:
+          'Dá para ver o mata-mata inteiro como um pôster, dos 16 avos à final. Abra a aba Mata-mata no "Próximo".',
+        side: "bottom",
+        align: "start",
+        act: () => document.getElementById("btn-nav-chaveamento")?.click(),
+        waitFor: "#bracket-view-toggle",
+      },
+      {
+        element: "#bracket-view-toggle",
+        title: 'Ative a "Chave completa"',
+        description:
+          'Este botão troca as colunas pela chave completa — a tabela simétrica com todas as seleções e a taça no centro. No "Próximo" eu ativo para você.',
+        side: "bottom",
+        align: "end",
+        act: () => document.getElementById("bracket-view-toggle-full")?.click(),
+        waitFor: "#bracket-full",
+      },
+      {
+        element: "#bracket-full",
+        title: "A chave completa ✓",
+        description:
+          "Pronto! As seleções convergem das laterais até a taça no centro: as bandeiras acesas mostram quem avançou e as caixas vazias esperam os próximos jogos. No celular, gire a tela para o modo horizontal.",
+        side: "top",
+        align: "center",
+      },
+    ],
+    onEnd,
+  );
+}
+
 // One self-contained guided walkthrough that can be played per session.
 export interface TipTour {
   id: string;
@@ -320,4 +358,5 @@ export const TIP_TOURS: TipTour[] = [
   { id: "bracket", start: startBracketTour },
   { id: "group-history", start: startGroupHistoryTour },
   { id: "bracket-feeder", start: startBracketFeederTour },
+  { id: "full-bracket", start: startFullBracketTour },
 ];
