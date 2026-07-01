@@ -51,6 +51,9 @@ export const KNOCKOUT_RESULTS: Record<number, KnockoutResultSeed> = {
   // #76 · 16-avos · 29/06/2026 — Brasil 2×1 Japão (Sano 29' p/ JPN; Casemiro 56' e
   // Gabriel Martinelli 90+5' p/ BRA). Brasil classificado; alimenta a Oitavas #91 (slot W76).
   76: { status: "FINISHED", score: { teamA: 2, teamB: 1 } },
+  // #77 · 16-avos · França 3×0 Suécia (Kylian Mbappé 45' e 74', Bradley Barcola 53').
+  // França classificada; alimenta a Oitavas #89 (slot W77).
+  77: { status: "FINISHED", score: { teamA: 3, teamB: 0 } },
   // #78 · 16-avos · Costa do Marfim 1×2 Noruega (Amad Diallo 74' p/ CIV; Antonio Nusa 39' e
   // Erling Haaland 86' p/ NOR). Noruega classificada; alimenta a Oitavas #91 (slot W78).
   78: { status: "FINISHED", score: { teamA: 1, teamB: 2 } },
