@@ -8,15 +8,16 @@ const ROTATION_KEY = "tip-tour-rotation"; // localStorage: index of the NEXT tip
 const SHOWN_THIS_SESSION = "tip-tour-shown"; // sessionStorage: one tip per browser session
 
 // Picks which tip plays this session and advances the rotation pointer. The first
-// eligible session starts at a RANDOM tip; each later session moves to the next one,
-// so a visitor cycles through all of them carousel-style. Persists the next index.
+// eligible session starts at index 0 (TIP_TOURS[0] leads, promoting the newest view);
+// each later session moves to the next one, so a visitor cycles through all of them
+// carousel-style. Persists the next index.
 function pickTipIndex(): number {
   const count = TIP_TOURS.length;
   try {
     const stored = localStorage.getItem(ROTATION_KEY);
     const index =
       stored === null
-        ? Math.floor(Math.random() * count) // random entry point on the first eligible session
+        ? 0 // first eligible session starts at the leading tip
         : ((Number(stored) % count) + count) % count;
     localStorage.setItem(ROTATION_KEY, String((index + 1) % count));
     return index;

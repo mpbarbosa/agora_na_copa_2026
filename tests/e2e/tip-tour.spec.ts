@@ -145,6 +145,22 @@ test.describe("Tip tour rotation (one guided walkthrough per session)", () => {
     expect(await page.evaluate(() => localStorage.getItem("tip-tour-rotation"))).toBe("1");
   });
 
+  test("the first eligible session starts at the leading tip (index 0), not a random one", async ({ page }) => {
+    await page.addInitScript(() => {
+      localStorage.setItem("feature-tour-seen", "1");
+      localStorage.setItem("agora-session-count", "1"); // → becomes 2 on this load
+      // no tip-tour-rotation set → first eligible session picks index 0 (full-bracket).
+    });
+    await page.goto("/");
+    await page.click("#btn-consent-accept").catch(() => {});
+
+    const pop = page.locator(".driver-popover");
+    await expect(pop).toBeVisible({ timeout: 6000 });
+    await expect(pop).toContainText("chave"); // the full-bracket tip (index 0) leads
+    // …and the rotation pointer advanced to the next tip for the following session.
+    expect(await page.evaluate(() => localStorage.getItem("tip-tour-rotation"))).toBe("1");
+  });
+
   test("stays dormant on the very first session", async ({ page }) => {
     await page.addInitScript(() => {
       localStorage.setItem("feature-tour-seen", "1"); // suppress the general tour
