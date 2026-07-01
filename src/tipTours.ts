@@ -350,13 +350,14 @@ export interface TipTour {
 
 // The rotating set of tip walkthroughs. One plays per eligible session, advancing
 // through this list carousel-style from a random starting point (see useTipTour).
-// Keep `messi-card` first so existing gating/tests that pin index 0 stay stable.
+// `full-bracket` leads the rotation to promote the newest view; index pins in the
+// tip-tour / messi-tour e2e specs follow this order.
 export const TIP_TOURS: TipTour[] = [
+  { id: "full-bracket", start: startFullBracketTour },
   { id: "messi-card", start: startMessiTour },
   { id: "team-lineup", start: startTeamLineupTour },
   { id: "best-thirds", start: startBestThirdsTour },
   { id: "bracket", start: startBracketTour },
   { id: "group-history", start: startGroupHistoryTour },
   { id: "bracket-feeder", start: startBracketFeederTour },
-  { id: "full-bracket", start: startFullBracketTour },
 ];

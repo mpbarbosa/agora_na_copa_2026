@@ -15,7 +15,7 @@ test.describe("Messi tour (gated to the 2nd session onward)", () => {
     await page.addInitScript(() => {
       localStorage.setItem("feature-tour-seen", "1");
       localStorage.setItem("agora-session-count", "1"); // → becomes 2 on this load
-      localStorage.setItem("tip-tour-rotation", "0"); // pin the rotation to the Messi tip (index 0)
+      localStorage.setItem("tip-tour-rotation", "1"); // pin the rotation to the Messi tip (index 1)
     });
     await page.goto("/");
     await page.click("#btn-consent-accept").catch(() => {});

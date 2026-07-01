@@ -27,7 +27,7 @@ Playwright end-to-end specs for "Agora na Copa 26". The suite boots the dev serv
 | `consent-privacy.spec.ts` | LGPD cookie-consent banner (show/accept/persist), dormant AdSlot + GA4, footer privacy link, privacidade.html + ads.txt served | 2.1 KB |
 | `feature-tour.spec.ts` | Feature-discovery guided tour (Driver.js): "?" button starts it, advances, and closes | 1.0 KB |
 | `share-button.spec.ts` | Header share button: Web Share API with copy-link fallback + "Link copiado!" confirmation | 0.9 KB |
-| `messi-tour.spec.ts` | Messi card walkthrough (Driver.js): dormant on session 1, runs on session 2+ when the rotation is pinned to it (`tip-tour-rotation=0`) and walks Jogadores → Messi → open card | 1.3 KB |
+| `messi-tour.spec.ts` | Messi card walkthrough (Driver.js): dormant on session 1, runs on session 2+ when the rotation is pinned to it (`tip-tour-rotation=1`) and walks Jogadores → Messi → open card | 1.3 KB |
 | `tip-tour.spec.ts` | Tip-tour rotation (`useTipTour`): one guided walkthrough per session, rotating through `TIP_TOURS` from a random start. Pins `tip-tour-rotation` to assert the team-lineup tip plays, the best-thirds tip walks Grupos → scroll → the "Melhores 3º colocados" table, the group-history tip opens a group card's "Histórico de jogos", the bracket-feeder tip walks Mata-mata → spotlights an Oitavas tie's 16-avos feeders (and clears it on close), the per-session guard + pointer advance, and first-session dormancy | 3.0 KB |
 | `player-mention.spec.ts` | "Messi" in a match analysis links to a hover/tap compact player-card preview (portaled card shows club + ★ Craque) | 0.9 KB |
 | `match-weather.spec.ts` | `/api/match-weather` endpoint contract: resilience shape for valid coords, 400 + fallback for invalid (offline-safe) | 0.9 KB |

@@ -1,16 +1,16 @@
 import { test, expect } from "@playwright/test";
 
 // The tip walkthroughs rotate one per session (TIP_TOURS order:
-// 0 messi-card, 1 team-lineup, 2 best-thirds, 3 bracket, 4 group-history,
-// 5 bracket-feeder, 6 full-bracket). Pinning `tip-tour-rotation` makes which
+// 0 full-bracket, 1 messi-card, 2 team-lineup, 3 best-thirds, 4 bracket,
+// 5 group-history, 6 bracket-feeder). Pinning `tip-tour-rotation` makes which
 // one plays deterministic for tests.
 
 test.describe("Tip tour rotation (one guided walkthrough per session)", () => {
-  test("plays the rotated tip — index 1 walks Seleções → team card → lineup", async ({ page }) => {
+  test("plays the rotated tip — index 2 walks Seleções → team card → lineup", async ({ page }) => {
     await page.addInitScript(() => {
       localStorage.setItem("feature-tour-seen", "1");
       localStorage.setItem("agora-session-count", "1"); // → becomes 2 on this load
-      localStorage.setItem("tip-tour-rotation", "1"); // pin to the team-lineup tip
+      localStorage.setItem("tip-tour-rotation", "2"); // pin to the team-lineup tip
     });
     await page.goto("/");
     await page.click("#btn-consent-accept").catch(() => {});
@@ -28,14 +28,14 @@ test.describe("Tip tour rotation (one guided walkthrough per session)", () => {
     await expect(pop).toContainText("Elenco completo");
 
     // The rotation pointer advanced to the next tip for the following session.
-    expect(await page.evaluate(() => localStorage.getItem("tip-tour-rotation"))).toBe("2");
+    expect(await page.evaluate(() => localStorage.getItem("tip-tour-rotation"))).toBe("3");
   });
 
   test("best-thirds tip walks Grupos → scroll → 'Melhores 3º colocados', then locks the session", async ({ page }) => {
     await page.addInitScript(() => {
       localStorage.setItem("feature-tour-seen", "1");
       localStorage.setItem("agora-session-count", "1"); // → becomes 2 on this load
-      localStorage.setItem("tip-tour-rotation", "2"); // pin to the best-thirds tip
+      localStorage.setItem("tip-tour-rotation", "3"); // pin to the best-thirds tip
     });
     await page.goto("/");
     await page.click("#btn-consent-accept").catch(() => {});
@@ -56,14 +56,14 @@ test.describe("Tip tour rotation (one guided walkthrough per session)", () => {
     // session takes the early-return path and never plays a second tip.
     expect(await page.evaluate(() => sessionStorage.getItem("tip-tour-shown"))).toBe("1");
     // …and the rotation pointer advanced to the next tip for the following session.
-    expect(await page.evaluate(() => localStorage.getItem("tip-tour-rotation"))).toBe("3");
+    expect(await page.evaluate(() => localStorage.getItem("tip-tour-rotation"))).toBe("4");
   });
 
   test("group-history tip walks Grupos and opens a group's 'Histórico de jogos'", async ({ page }) => {
     await page.addInitScript(() => {
       localStorage.setItem("feature-tour-seen", "1");
       localStorage.setItem("agora-session-count", "1"); // → becomes 2 on this load
-      localStorage.setItem("tip-tour-rotation", "4"); // pin to the group-history tip
+      localStorage.setItem("tip-tour-rotation", "5"); // pin to the group-history tip
     });
     await page.goto("/");
     await page.click("#btn-consent-accept").catch(() => {});
@@ -88,7 +88,7 @@ test.describe("Tip tour rotation (one guided walkthrough per session)", () => {
     await page.addInitScript(() => {
       localStorage.setItem("feature-tour-seen", "1");
       localStorage.setItem("agora-session-count", "1"); // → becomes 2 on this load
-      localStorage.setItem("tip-tour-rotation", "5"); // pin to the bracket-feeder tip
+      localStorage.setItem("tip-tour-rotation", "6"); // pin to the bracket-feeder tip
     });
     await page.goto("/");
     await page.click("#btn-consent-accept").catch(() => {});
@@ -116,15 +116,15 @@ test.describe("Tip tour rotation (one guided walkthrough per session)", () => {
       timeout: 6000,
     });
 
-    // The rotation pointer advanced to the next tip (full-bracket) for the following session.
-    expect(await page.evaluate(() => localStorage.getItem("tip-tour-rotation"))).toBe("6");
+    // The rotation pointer wrapped back to the first tip (full-bracket) for the following session.
+    expect(await page.evaluate(() => localStorage.getItem("tip-tour-rotation"))).toBe("0");
   });
 
   test("full-bracket tip walks Mata-mata → toggles 'Chave completa' → the poster bracket", async ({ page }) => {
     await page.addInitScript(() => {
       localStorage.setItem("feature-tour-seen", "1");
       localStorage.setItem("agora-session-count", "1"); // → becomes 2 on this load
-      localStorage.setItem("tip-tour-rotation", "6"); // pin to the full-bracket tip
+      localStorage.setItem("tip-tour-rotation", "0"); // pin to the full-bracket tip
     });
     await page.goto("/");
     await page.click("#btn-consent-accept").catch(() => {});
@@ -141,8 +141,8 @@ test.describe("Tip tour rotation (one guided walkthrough per session)", () => {
     await expect(page.locator("#bracket-full")).toBeVisible({ timeout: 6000 });
     await expect(pop).toContainText("taça no centro");
 
-    // The rotation pointer wrapped back to the first tip for the following session.
-    expect(await page.evaluate(() => localStorage.getItem("tip-tour-rotation"))).toBe("0");
+    // The rotation pointer advanced to the next tip (messi-card) for the following session.
+    expect(await page.evaluate(() => localStorage.getItem("tip-tour-rotation"))).toBe("1");
   });
 
   test("stays dormant on the very first session", async ({ page }) => {
