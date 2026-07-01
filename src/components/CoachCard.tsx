@@ -1,5 +1,8 @@
+import { useState } from "react";
 import { FlagIcon } from "./FlagIcon";
 import { WorldCupNoteCarousel } from "./WorldCupNoteCarousel";
+import { InstagramBrandIcon } from "./InstagramBrandIcon";
+import { InstagramPostFrame } from "./InstagramPostFrame";
 import { useEscapeKey } from "../hooks/useEscapeKey";
 import type { CoachRecord } from "../utils/coachRecord";
 import type { TeamTournamentStatus } from "../utils/teamTournamentStatus";
@@ -28,6 +31,8 @@ interface CoachCardProps {
   pictureUrl?: string;
   /** Attribution for `pictureUrl`; required by the photo's licence, rendered as a credit line. */
   photoCredit?: CoachPhotoCredit;
+  /** Optional Instagram highlight permalinks — rendered as a collapsible "Destaque(s) no Instagram" embed, mirroring the player card. */
+  instagramPostUrls?: string[];
   onClose: () => void;
   id?: string;
 }
@@ -62,10 +67,14 @@ export function CoachCard({
   note,
   pictureUrl,
   photoCredit,
+  instagramPostUrls,
   onClose,
   id,
 }: CoachCardProps) {
   useEscapeKey(onClose);
+  const [igExpanded, setIgExpanded] = useState(false);
+  const igPosts = instagramPostUrls ?? [];
+  const hasInstagramHighlights = igPosts.length > 0;
 
   const accent = primaryColor ?? "#00e476";
   const isLight = theme === "classic-light";
@@ -218,6 +227,59 @@ export function CoachCard({
                 mutedClasses={mutedClasses}
                 id={id ? `${id}-leitura` : undefined}
               />
+            </div>
+          )}
+
+          {/* Destaque(s) no Instagram — collapsible embed, mirroring the player card */}
+          {hasInstagramHighlights && (
+            <div className="mt-5" id={id ? `${id}-ig-highlight` : undefined}>
+              <button
+                type="button"
+                onClick={() => setIgExpanded((open) => !open)}
+                className={`flex w-full items-center justify-between rounded-xl border px-3 py-2.5 transition ${
+                  isLight
+                    ? "border-slate-200 bg-slate-50 hover:bg-slate-100"
+                    : "border-white/10 bg-white/5 hover:bg-white/10"
+                }`}
+                aria-expanded={igExpanded}
+                id={id ? `${id}-ig-toggle` : undefined}
+              >
+                <span className="flex items-center gap-2">
+                  <InstagramBrandIcon size={16} />
+                  <span className="font-mono text-[10px] font-bold uppercase tracking-wider">
+                    {igPosts.length > 1 ? "Destaques no Instagram" : "Destaque no Instagram"}
+                  </span>
+                </span>
+                <span
+                  className={`font-mono text-[10px] transition-transform duration-200 ${igExpanded ? "rotate-180" : ""} ${mutedClasses}`}
+                >
+                  ▾
+                </span>
+              </button>
+
+              {igExpanded && (
+                <div className="mt-3 space-y-5" id={id ? `${id}-ig-panel` : undefined}>
+                  {igPosts.map((postUrl, index) => (
+                    <div key={postUrl} className="space-y-3">
+                      <InstagramPostFrame
+                        permalink={postUrl}
+                        id={id ? `${id}-ig-embed-${index}` : undefined}
+                      />
+                      <a
+                        href={postUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        id={id ? `${id}-ig-open-${index}` : undefined}
+                        className={`inline-flex w-full items-center justify-center gap-2 rounded-xl border py-2.5 font-mono text-[10px] font-bold uppercase tracking-wider transition ${closeClasses}`}
+                        style={{ borderColor: `${accent}40` }}
+                      >
+                        <InstagramBrandIcon size={14} />
+                        Abrir no Instagram
+                      </a>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 
