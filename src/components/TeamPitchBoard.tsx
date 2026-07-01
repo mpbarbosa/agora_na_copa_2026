@@ -8,7 +8,7 @@ import {
   formatBirthDate,
   renderSocialPlatformLabel,
 } from "./PlayerOverlayCard";
-import { getPlayerSocialEntries, getPositionLabel, toTitleCasePtBr } from "../utils/playerDisplay";
+import { getPlayerSocialEntries, getPositionLabel, toTitleCasePtBr, buildPlayerSearchUrls } from "../utils/playerDisplay";
 import { usePlayerStats } from "../hooks/usePlayerStats";
 
 interface TeamPitchBoardProps {
@@ -50,6 +50,9 @@ export const TeamPitchBoard: FC<TeamPitchBoardProps> = ({
   const [featuredPlayer, setFeaturedPlayer] = useState<Player | null>(null);
   const featuredPlayerStats = usePlayerStats(team.code, featuredPlayer?.name);
   const selectedPlayerSocials = selectedPlayer ? getPlayerSocialEntries(selectedPlayer.socials) : [];
+  const selectedPlayerSearch = selectedPlayer
+    ? buildPlayerSearchUrls(selectedPlayer.fullName ?? selectedPlayer.name, team.name)
+    : null;
 
   useEffect(() => {
     setSelectedPlayer((current) => {
@@ -248,6 +251,34 @@ export const TeamPitchBoard: FC<TeamPitchBoardProps> = ({
                           {renderSocialPlatformLabel(platform)}
                         </a>
                       ))}
+                    </div>
+                  </div>
+                )}
+
+                {selectedPlayerSearch && (
+                  <div className="mt-4" id="player-web-search">
+                    <p className="text-white/65 font-mono text-[10px] uppercase tracking-wider">
+                      Pesquisar na web
+                    </p>
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      <a
+                        id="player-web-search-google"
+                        href={selectedPlayerSearch.google}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 font-mono text-[10px] font-bold uppercase tracking-wider text-white transition hover:border-[#ffd700]/40 hover:text-[#ffd700]"
+                      >
+                        <span aria-hidden="true">🔎</span> Google
+                      </a>
+                      <a
+                        id="player-web-search-news"
+                        href={selectedPlayerSearch.news}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 font-mono text-[10px] font-bold uppercase tracking-wider text-white transition hover:border-[#ffd700]/40 hover:text-[#ffd700]"
+                      >
+                        <span aria-hidden="true">📰</span> Notícias
+                      </a>
                     </div>
                   </div>
                 )}

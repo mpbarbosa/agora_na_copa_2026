@@ -23,6 +23,15 @@ export function toTitleCasePtBr(text: string): string {
     );
 }
 
+// Web-search links for a player's overlay card. Derived purely from the player's
+// name (+ team + "futebol" to disambiguate common names, e.g. the several "Suzuki"s)
+// — no stored data, so it works for every player. Localized to pt-BR / Brazil results.
+export function buildPlayerSearchUrls(playerName: string, teamName: string) {
+  const query = `"${playerName}" ${toTitleCasePtBr(teamName)} futebol`;
+  const base = `https://www.google.com/search?q=${encodeURIComponent(query)}&hl=pt-BR&gl=BR`;
+  return { google: base, news: `${base}&tbm=nws` };
+}
+
 export function getPlayerSocialEntries(socials: PlayerSocials | undefined) {
   return (
     Object.entries(socials ?? {}) as Array<[keyof PlayerSocials, string | undefined]>

@@ -3,7 +3,7 @@ import { Position, type Player, type PlayerSocials } from "../types";
 import { InstagramBrandIcon } from "./InstagramBrandIcon";
 import { FlagIcon } from "./FlagIcon";
 import { useEscapeKey } from "../hooks/useEscapeKey";
-import { getPlayerSocialEntries } from "../utils/playerDisplay";
+import { getPlayerSocialEntries, buildPlayerSearchUrls } from "../utils/playerDisplay";
 import { WorldCupNoteCarousel } from "./WorldCupNoteCarousel";
 import { PlayerVideoRail } from "./PlayerVideoRail";
 import { PlayerNoteFreshness } from "./PlayerNoteFreshness";
@@ -327,6 +327,7 @@ export function PlayerOverlayCard({
     player.instagramPostUrl,
   );
   const hasInstagramHighlights = instagramPostUrls.length > 0;
+  const searchUrls = buildPlayerSearchUrls(player.fullName ?? player.name, teamName);
 
   const handleToggleIg = () => setIgExpanded((prev) => !prev);
 
@@ -477,6 +478,35 @@ export function PlayerOverlayCard({
                 </div>
               </div>
             )}
+
+            {/* Pesquisar na web — derived search links, always present (every player has a name) */}
+            <div className="mt-3" id={id ? `${id}-web-search` : undefined}>
+              <p className={`font-mono text-[10px] uppercase tracking-wider ${mutedClasses}`}>
+                Pesquisar na web
+              </p>
+              <div className="mt-2 flex flex-wrap gap-2">
+                <a
+                  id={id ? `${id}-web-search-google` : undefined}
+                  href={searchUrls.google}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={`inline-flex items-center gap-1.5 rounded border px-3 py-1.5 font-mono text-[10px] font-bold uppercase tracking-wider transition ${closeClasses}`}
+                  style={{ borderColor: `${accent}40` }}
+                >
+                  <span aria-hidden="true">🔎</span> Google
+                </a>
+                <a
+                  id={id ? `${id}-web-search-news` : undefined}
+                  href={searchUrls.news}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={`inline-flex items-center gap-1.5 rounded border px-3 py-1.5 font-mono text-[10px] font-bold uppercase tracking-wider transition ${closeClasses}`}
+                  style={{ borderColor: `${accent}40` }}
+                >
+                  <span aria-hidden="true">📰</span> Notícias
+                </a>
+              </div>
+            </div>
 
             {/* Destaque(s) no Instagram — grouped with the official Instagram link above */}
             {hasInstagramHighlights && (

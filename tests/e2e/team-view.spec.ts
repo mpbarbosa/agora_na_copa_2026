@@ -715,6 +715,17 @@ test.describe("Team view", () => {
       "href",
       "https://x.com/atacanteteste",
     );
+
+    // Derived "Pesquisar na web" links — always present, localized to pt-BR/Brazil.
+    await expect(page.locator("#player-web-search")).toBeVisible();
+    await expect(page.locator("#player-web-search-google")).toHaveAttribute(
+      "href",
+      /google\.com\/search\?q=.*futebol.*hl=pt-BR&gl=BR$/,
+    );
+    await expect(page.locator("#player-web-search-news")).toHaveAttribute(
+      "href",
+      /tbm=nws$/,
+    );
   });
 
   test("shows metadata-supplemented socials in the regular player card", async ({
