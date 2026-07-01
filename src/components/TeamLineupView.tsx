@@ -845,11 +845,14 @@ export const TeamLineupView: React.FC<TeamLineupViewProps> = ({ team, theme, onB
                   type="button"
                   id="team-lineup-coach"
                   onClick={() => setCoachCardOpen(true)}
-                  className={`mt-1 inline-flex items-center gap-1 rounded font-mono text-[11px] uppercase tracking-wider transition hover:opacity-70 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-400 ${mutedClasses}`}
+                  className={`mt-1 inline-flex items-center gap-1 rounded font-mono text-[11px] uppercase tracking-wider transition hover:opacity-80 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-400 ${mutedClasses}`}
                   aria-label={`Abrir card do treinador ${coach}`}
                 >
-                  <span className="opacity-60">Técnico</span> {coach}
-                  <span aria-hidden="true" className="opacity-40">›</span>
+                  <span className="opacity-60">Técnico</span>
+                  <span className={`underline decoration-dotted underline-offset-2 ${theme === "classic-light" ? "text-[#009c3b]" : "text-[#00e476]"}`}>
+                    {coach}
+                  </span>
+                  <span aria-hidden="true" className={theme === "classic-light" ? "text-[#009c3b]" : "text-[#00e476]"}>›</span>
                 </button>
               )}
               {countryInfo?.description && (
