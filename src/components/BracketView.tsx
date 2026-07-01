@@ -119,6 +119,26 @@ function buildFeederTeamBySlot(matches: Match[]): Map<string, NonNullable<Knocko
   return map;
 }
 
+// The matchup a "W##"/"RU##"/"L##" slot points at, as team codes ("MEX x ECU"), so a still-
+// unresolved feeder slot reads "Vencedor #79 MEX x ECU" — telling you which tie decides it.
+// Each side is the R32 group-draw team when the bracket already names it, else its own
+// feeder's resolved winner (feederTeamBySlot). Null when either side isn't a concrete team
+// yet (a deeper, undecided feeder), so the label stays a bare "Vencedor #NN".
+function feederMatchupCodes(
+  rawSlot: string,
+  feederTeamBySlot: Map<string, NonNullable<KnockoutMatch["teamA"]>>,
+): string | null {
+  const ref = /^(?:W|RU|L)(\d+)$/.exec(rawSlot);
+  if (!ref) return null;
+  const feeder = KNOCKOUT_MATCHES.find((km) => km.matchNumber === Number(ref[1]));
+  if (!feeder) return null;
+  const sideCode = (team: KnockoutMatch["teamA"], slot: string): string | null =>
+    team?.code ?? feederTeamBySlot.get(slot)?.code ?? null;
+  const a = sideCode(feeder.teamA, feeder.slotA);
+  const b = sideCode(feeder.teamB, feeder.slotB);
+  return a && b ? `${a} x ${b}` : null;
+}
+
 // A later-round slot references its feeder fixture by number — "W74" (winner of #74),
 // "RU101" (runner-up / loser of #101). Parse those out so hovering a card can highlight
 // the matches that feed it. Group / best-third slots ("2A", "3ABCDF") have no feeder.
@@ -230,6 +250,8 @@ interface BracketSlotRowProps {
   provisional: ProvisionalSlot | null;
   /** Result of this side once its tie finished: won (advanced), lost (out), or null. */
   outcome: SlotOutcome;
+  /** For an unresolved winner/loser-ref slot, the feeder tie's matchup ("MEX x ECU"). */
+  feederMatchup: string | null;
   theme: "classic-light" | "stadium-dark";
   onSelectTeamLineup: (team: TeamRef) => void;
 }
@@ -241,6 +263,7 @@ function BracketSlotRow({
   confirmed,
   provisional,
   outcome,
+  feederMatchup,
   theme,
   onSelectTeamLineup,
 }: BracketSlotRowProps) {
@@ -323,6 +346,7 @@ function BracketSlotRow({
       const label = (
         <span className="whitespace-normal break-words leading-tight font-mono text-[11px] uppercase tracking-wider opacity-80">
           {humanizeSlot(rawSlot)}
+          {feederMatchup && <span className="opacity-60"> {feederMatchup}</span>}
         </span>
       );
       // A best-third combo slot gets a bronze medal badge so it reads as a
@@ -513,6 +537,7 @@ function BracketMatchCard({ match, theme, teamMeta, groupPositions, matchId, win
           confirmed={confirmedA}
           provisional={resolveProvisional(match.slotA, confirmedA)}
           outcome={slotOutcome("A")}
+          feederMatchup={confirmedA ? null : feederMatchupCodes(match.slotA, feederTeamBySlot)}
           theme={theme}
           onSelectTeamLineup={onSelectTeamLineup}
         />
@@ -523,6 +548,7 @@ function BracketMatchCard({ match, theme, teamMeta, groupPositions, matchId, win
           confirmed={confirmedB}
           provisional={resolveProvisional(match.slotB, confirmedB)}
           outcome={slotOutcome("B")}
+          feederMatchup={confirmedB ? null : feederMatchupCodes(match.slotB, feederTeamBySlot)}
           theme={theme}
           onSelectTeamLineup={onSelectTeamLineup}
         />
