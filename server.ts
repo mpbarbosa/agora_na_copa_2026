@@ -20,6 +20,14 @@ import type {
 } from "./fifa-sync-core";
 import { GOOGLE_TRENDS_BATCH_URL, buildGoogleTrendsRequestBody, parseGoogleTrendsBatch } from "./trends-core";
 import { buildOpenMeteoUrl, parseOpenMeteoCurrent } from "./weather-core";
+import {
+  buildRedditTokenRequest,
+  parseRedditToken,
+  buildRedditInfoUrl,
+  mergeRedditListing,
+  REDDIT_OAUTH_BASE,
+  REDDIT_USER_AGENT,
+} from "./reddit-core";
 import { type PresenceStore, recordHeartbeat, countOnline } from "./presence-core";
 import {
   type ChatStore,
@@ -73,7 +81,10 @@ import {
   type GoogleTrendsResponse,
   type WeatherResponse,
   type ChatResponse,
+  type RedditPost,
+  type RedditResponse,
 } from "./src/types";
+import REDDIT_SEED_POSTS from "./src/data/redditPosts.json";
 
 dotenv.config();
 
@@ -2272,6 +2283,130 @@ app.get("/api/google-trends", (_req, res) => {
 
 // Warm the cache at startup so the first visitor gets real data when possible.
 void refreshGoogleTrendsCache();
+
+// "Repercussão no Reddit" feed — curated posts (src/data/redditPosts.json)
+// enriched with live data via the Reddit OAuth API. Follows the resilience
+// shape: degrades to the curated seed (source "fallback") whenever the
+// credentials are unset or Reddit is unreachable, so the feed never breaks.
+// New env vars, safe when unset (the prod .env is not auto-updated on deploy).
+const REDDIT_CLIENT_ID = process.env.REDDIT_CLIENT_ID;
+const REDDIT_CLIENT_SECRET = process.env.REDDIT_CLIENT_SECRET;
+const REDDIT_CACHE_TTL_MS = 15 * 60 * 1000;
+const REDDIT_FETCH_TIMEOUT_MS = 6000;
+const REDDIT_SEEDS = REDDIT_SEED_POSTS as RedditPost[];
+
+const redditFallback = (note: string): RedditResponse => ({
+  source: "fallback",
+  note,
+  updatedAt: new Date().toISOString(),
+  posts: REDDIT_SEEDS,
+});
+
+let redditCache: { payload: RedditResponse; expiresAt: number } | null = null;
+let redditToken: { accessToken: string; expiresAt: number } | null = null;
+
+// App-only (client_credentials) token, cached until a minute before Reddit's
+// stated expiry. Returns null when credentials are unset.
+const fetchRedditToken = async (): Promise<string | null> => {
+  if (redditToken && redditToken.expiresAt > Date.now()) return redditToken.accessToken;
+  const request = buildRedditTokenRequest(REDDIT_CLIENT_ID, REDDIT_CLIENT_SECRET);
+  if (!request) return null;
+
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), REDDIT_FETCH_TIMEOUT_MS);
+  try {
+    const response = await fetch(request.url, {
+      method: request.method,
+      headers: request.headers,
+      body: request.body,
+      signal: controller.signal,
+    });
+    if (!response.ok) throw new Error(`Reddit token request failed (${response.status})`);
+    const token = parseRedditToken(await response.json());
+    if (!token) throw new Error("Reddit token response malformed");
+    redditToken = {
+      accessToken: token.accessToken,
+      expiresAt: Date.now() + Math.max(0, token.expiresInSec - 60) * 1000,
+    };
+    return token.accessToken;
+  } finally {
+    clearTimeout(timeout);
+  }
+};
+
+const fetchReddit = async (): Promise<RedditResponse> => {
+  const accessToken = await fetchRedditToken();
+  if (!accessToken) throw new Error("Reddit credentials unset");
+  const infoUrl = buildRedditInfoUrl(REDDIT_SEEDS.map((post) => post.id));
+  if (!infoUrl) throw new Error("No curated Reddit posts to hydrate");
+
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), REDDIT_FETCH_TIMEOUT_MS);
+  let response: Response;
+  try {
+    response = await fetch(infoUrl, {
+      signal: controller.signal,
+      headers: { Authorization: `Bearer ${accessToken}`, "User-Agent": REDDIT_USER_AGENT },
+    });
+  } finally {
+    clearTimeout(timeout);
+  }
+  if (!response.ok) throw new Error(`Reddit info request failed (${response.status})`);
+
+  return {
+    source: "reddit",
+    note: "Repercussão da Copa no Reddit",
+    updatedAt: new Date().toISOString(),
+    posts: mergeRedditListing(REDDIT_SEEDS, await response.json()),
+  };
+};
+
+// Refreshes the Reddit cache in the background; never throws, never blocks a
+// request (same posture as Google Trends).
+let redditRefreshing = false;
+const refreshRedditCache = async (): Promise<void> => {
+  if (redditRefreshing) return;
+  redditRefreshing = true;
+  try {
+    redditCache = { payload: await fetchReddit(), expiresAt: Date.now() + REDDIT_CACHE_TTL_MS };
+  } catch (error) {
+    console.error("Reddit background refresh failed:", error);
+  } finally {
+    redditRefreshing = false;
+  }
+};
+
+app.get("/api/reddit", (_req, res) => {
+  if (redditCache && redditCache.expiresAt > Date.now()) {
+    res.set("Cache-Control", "public, max-age=600");
+    res.json(redditCache.payload);
+    return;
+  }
+
+  // Only attempt a live refresh when credentials exist — otherwise every
+  // request would kick off a guaranteed-failing fetch and spam the logs.
+  const hasCreds = Boolean(REDDIT_CLIENT_ID && REDDIT_CLIENT_SECRET);
+  if (hasCreds) void refreshRedditCache();
+
+  if (redditCache) {
+    res.set("Cache-Control", "public, max-age=60");
+    res.json(redditCache.payload);
+    return;
+  }
+
+  res.set("Cache-Control", "public, max-age=60");
+  res.json(
+    redditFallback(
+      hasCreds
+        ? "Atualizando posts do Reddit…"
+        : "Posts em destaque (Reddit ao vivo indisponível).",
+    ),
+  );
+});
+
+// Warm the cache at startup only when credentials exist — otherwise every
+// instance without a Reddit app would log a guaranteed-failed fetch.
+if (REDDIT_CLIENT_ID && REDDIT_CLIENT_SECRET) void refreshRedditCache();
 
 // Current weather at a match venue, used by the live scoreboard. Keyed by
 // rounded coordinates so nearby requests share a cache entry. Free, key-less

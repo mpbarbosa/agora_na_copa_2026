@@ -14,6 +14,7 @@ import type { GoogleTrendTopic, GoogleTrendsResponse } from "../types";
 import { InstagramBrandIcon } from "./InstagramBrandIcon";
 import { InstagramEmbed } from "./InstagramEmbed";
 import { InstagramHighlightsFeed } from "./InstagramHighlightsFeed";
+import { RedditPostsFeed } from "./RedditPostsFeed";
 
 interface SocialMediasViewProps {
   theme: "classic-light" | "stadium-dark";
@@ -328,6 +329,9 @@ export function SocialMediasView({ theme }: SocialMediasViewProps) {
 
       {/* Destaques de jogadores no Instagram (dados reais de squads.json) */}
       <InstagramHighlightsFeed theme={theme} />
+
+      {/* Repercussão no Reddit (posts curados enriquecidos via /api/reddit) */}
+      <RedditPostsFeed theme={theme} />
 
       {/* Google Trends card */}
       {trendsStatus !== "empty" && (

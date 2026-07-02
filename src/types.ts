@@ -567,6 +567,44 @@ export interface GoogleTrendsResponse {
   topics: GoogleTrendTopic[];
 }
 
+/**
+ * A curated real Reddit post surfaced in the "Repercussão no Reddit" feed on the
+ * Redes Sociais tab (hand-maintained in src/data/redditPosts.json). We only store
+ * the canonical permalink plus the display metadata we can attribute — never
+ * invented engagement numbers. Rendered as an outbound link card (no embed).
+ */
+export interface RedditPost {
+  /** Reddit base-36 post id (the code in /comments/<id>/), used as the React key. */
+  id: string;
+  /** Canonical post permalink (tracking params stripped). */
+  url: string;
+  /** Subreddit in "r/Name" form. */
+  subreddit: string;
+  /** Post title, pt-BR. Live from the Reddit API; the curated seed carries a fallback. */
+  title: string;
+  /** Optional team code (e.g. "BRA") when the post is about a specific selection. */
+  teamCode?: string;
+  /** Author handle without the "u/" prefix. Present only on live (API) posts. */
+  author?: string;
+  /** Net upvotes. Present only on live (API) posts. */
+  score?: number;
+  /** Comment count. Present only on live (API) posts. */
+  numComments?: number;
+}
+
+/**
+ * `/api/reddit` payload — the "Repercussão no Reddit" feed. Follows the FIFA
+ * resilience shape: `source: "reddit"` when the live OAuth fetch enriched the
+ * curated posts, `"fallback"` when Reddit was unreachable or credentials are
+ * unset (posts then carry only the curated seed metadata).
+ */
+export interface RedditResponse {
+  source: "reddit" | "fallback";
+  note: string;
+  updatedAt: string;
+  posts: RedditPost[];
+}
+
 /** Current weather reading at a match venue (from Open-Meteo). */
 export interface WeatherSnapshot {
   /** Air temperature, °C (rounded). */
