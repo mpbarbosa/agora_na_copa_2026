@@ -11,31 +11,67 @@ type Theme = "classic-light" | "stadium-dark";
 export function RefereeChip({
   referee,
   theme,
+  onClick,
 }: {
   referee: MatchReferee | undefined;
   theme: Theme;
+  /** When provided, the chip becomes a button that opens the referee card. */
+  onClick?: () => void;
 }) {
   if (!referee?.name) return null;
 
   const isLight = theme === "classic-light";
+  const baseClasses = `inline-flex items-center gap-2 rounded-full border px-3 py-1 ${
+    isLight
+      ? "border-slate-200 bg-slate-100 text-slate-700"
+      : "border-white/10 bg-white/5 text-slate-100"
+  }`;
+  const title = referee.country
+    ? `Árbitro da partida: ${referee.name} (${referee.country})`
+    : `Árbitro da partida: ${referee.name}`;
+  const label = referee.country
+    ? `Árbitro: ${referee.name}, ${referee.country}`
+    : `Árbitro: ${referee.name}`;
+
+  if (onClick) {
+    return (
+      <button
+        type="button"
+        id="match-referee-chip"
+        onClick={onClick}
+        aria-haspopup="dialog"
+        className={`${baseClasses} cursor-pointer transition hover:brightness-95 ${
+          isLight ? "hover:bg-slate-200" : "hover:bg-white/10"
+        }`}
+        title={title}
+        aria-label={`${label} — abrir card do árbitro`}
+      >
+        <span className="text-base leading-none" aria-hidden="true">
+          🧑‍⚖️
+        </span>
+        <span
+          className={`font-archivo text-[11px] font-semibold uppercase tracking-wide ${
+            isLight ? "text-slate-500" : "text-slate-300"
+          }`}
+        >
+          Árbitro
+        </span>
+        <span className="font-archivo text-sm font-bold leading-none">{referee.name}</span>
+        {referee.country && (
+          <span className="font-mono text-[11px] font-bold leading-none opacity-70">
+            {referee.country}
+          </span>
+        )}
+      </button>
+    );
+  }
+
   return (
     <span
       id="match-referee-chip"
-      className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 ${
-        isLight
-          ? "border-slate-200 bg-slate-100 text-slate-700"
-          : "border-white/10 bg-white/5 text-slate-100"
-      }`}
-      title={
-        referee.country
-          ? `Árbitro da partida: ${referee.name} (${referee.country})`
-          : `Árbitro da partida: ${referee.name}`
-      }
-      aria-label={
-        referee.country
-          ? `Árbitro: ${referee.name}, ${referee.country}`
-          : `Árbitro: ${referee.name}`
-      }
+      className={baseClasses}
+      title={title}
+      aria-label={label}
     >
       <span className="text-base leading-none" aria-hidden="true">
         🧑‍⚖️

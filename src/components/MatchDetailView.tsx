@@ -38,6 +38,8 @@ import { resolveInstagramPostUrls } from "../utils/instagram";
 import { renderAnalysisWithMentions } from "./PlayerMention";
 import { MatchWeatherChip } from "./MatchWeatherChip";
 import { RefereeChip } from "./RefereeChip";
+import { RefereeCard } from "./RefereeCard";
+import { resolveRefereeInstagram } from "../utils/refereeIdentity";
 import { SimultaneousLiveMatches } from "./SimultaneousLiveMatches";
 import { WeatherSuspensionNotice } from "./WeatherSuspensionNotice";
 import { MatchAdvisoryNotice } from "./MatchAdvisoryNotice";
@@ -619,6 +621,7 @@ export function MatchDetailView({
   );
   // Custom interactive test parameters for custom mock simulations
   const [showConfig, setShowConfig] = useState(false);
+  const [refereeCardOpen, setRefereeCardOpen] = useState(false);
   const [speechTestStatus, setSpeechTestStatus] = useState<string | null>(null);
   // "Mudar Relógio" now lives in the global header; it toggles this match
   // clock-config drawer via a window event (no-op on non-match tabs).
@@ -1500,6 +1503,16 @@ export function MatchDetailView({
       </div>
 
       {/* QUICK MATCH EDITOR PREVIEW DRAWER (Only shows when clicked) */}
+      {refereeCardOpen && currentMatchReferee && (
+        <RefereeCard
+          theme={theme}
+          referee={currentMatchReferee}
+          instagramPostUrls={resolveRefereeInstagram(currentMatchReferee)}
+          onClose={() => setRefereeCardOpen(false)}
+          id="referee-card"
+        />
+      )}
+
       {showConfig && (
         <div
           className="max-w-3xl mx-auto mt-4 mx-4 p-4 rounded-xl border bg-white dark:bg-[#121414] border-[#ffd700]/30 shadow-lg"
@@ -2096,7 +2109,11 @@ export function MatchDetailView({
                   match (assigned a day or two before kickoff). */}
               {currentMatchReferee && (
                 <div className="mt-3">
-                  <RefereeChip referee={currentMatchReferee} theme={theme} />
+                  <RefereeChip
+                    referee={currentMatchReferee}
+                    theme={theme}
+                    onClick={() => setRefereeCardOpen(true)}
+                  />
                 </div>
               )}
 
