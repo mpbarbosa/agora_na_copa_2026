@@ -727,6 +727,10 @@
     {
       "embedUrl": "https://www.youtube.com/embed/8t7YDJ3hLYQ",
       "title": "França x Suécia — Copa do Mundo 2026"
+    },
+    {
+      "embedUrl": "https://www.youtube.com/embed/OHG8Kt9RLJA",
+      "title": "Melhores Momentos: França x Suécia — Copa do Mundo 2026"
     }
   ],
   "ko-78-2026": [
@@ -739,18 +743,36 @@
     {
       "embedUrl": "https://www.youtube.com/embed/HhcZqI_NqBs",
       "title": "México x Equador — Copa do Mundo 2026"
+    },
+    {
+      "embedUrl": "https://www.youtube.com/embed/MRcjGT85OXY",
+      "title": "Melhores Momentos: México x Equador — Copa do Mundo 2026"
     }
   ],
   "ko-80-2026": [
     {
       "embedUrl": "https://www.youtube.com/embed/aSXLerQStXA",
       "title": "Inglaterra x RD Congo — Copa do Mundo 2026"
+    },
+    {
+      "embedUrl": "https://www.youtube.com/embed/A3jqrkkmt6I",
+      "title": "Melhores Momentos: Inglaterra x RD Congo — Copa do Mundo 2026"
     }
   ],
   "ko-81-2026": [
     {
       "embedUrl": "https://www.youtube.com/embed/ohgVDlwpC4A",
       "title": "Estados Unidos x Bósnia e Herzegovina — Copa do Mundo 2026"
+    },
+    {
+      "embedUrl": "https://www.youtube.com/embed/yeH-ENCbEqA",
+      "title": "Melhores Momentos: Estados Unidos x Bósnia e Herzegovina — Copa do Mundo 2026"
+    }
+  ],
+  "ko-82-2026": [
+    {
+      "embedUrl": "https://www.youtube.com/embed/ERlzXntH-9E",
+      "title": "Melhores Momentos: Bélgica x Senegal — Copa do Mundo 2026"
     }
   ]
 }
