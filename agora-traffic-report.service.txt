@@ -1,0 +1,18 @@
+× agora-traffic-report.service - Agora na Copa — traffic report (git pull + traffic-report.sh)
+     Loaded: loaded (/etc/systemd/system/agora-traffic-report.service; static)
+     Active: failed (Result: exit-code) since Fri 2026-07-03 03:23:27 UTC; 1min 48s ago
+TriggeredBy: ● agora-traffic-report.timer
+    Process: 2579490 ExecStart=/usr/bin/env bash /home/ubuntu/Documents/GitHub/agora_na_copa_2026/scripts/traffic-report-scheduled.sh (code=exited, status=2)
+   Main PID: 2579490 (code=exited, status=2)
+        CPU: 1.404s
+
+Jul 03 03:23:27 ip-172-31-7-80 env[2579506]:     724 /api/player-stats/URU/Agustin%20Canobbio
+Jul 03 03:23:27 ip-172-31-7-80 env[2579506]:     724 /api/player-stats/ARG/Leo%20Messi
+Jul 03 03:23:27 ip-172-31-7-80 env[2579506]:     701 /api/player-stats/IRN/Ramin%20Rezaeian
+Jul 03 03:23:27 ip-172-31-7-80 env[2579506]:     682 /api/chat/ko-84-2026?since=0
+Jul 03 03:23:27 ip-172-31-7-80 env[2579506]:     651 /api/chat/nor-fra-2026?since=0
+Jul 03 03:23:27 ip-172-31-7-80 env[2579527]: sort: write error
+Jul 03 03:23:27 ip-172-31-7-80 systemd[1]: agora-traffic-report.service: Main process exited, code=exited, status=2/INVALIDARGUMENT
+Jul 03 03:23:27 ip-172-31-7-80 systemd[1]: agora-traffic-report.service: Failed with result 'exit-code'.
+Jul 03 03:23:27 ip-172-31-7-80 systemd[1]: Failed to start agora-traffic-report.service - Agora na Copa — traffic report (git pull + traffic-report.sh).
+Jul 03 03:23:27 ip-172-31-7-80 systemd[1]: agora-traffic-report.service: Consumed 1.404s CPU time.
