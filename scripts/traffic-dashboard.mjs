@@ -21,6 +21,10 @@
 // The reports are cumulative totals over the whole nginx log window, so the
 // "requests over time" curve is a rising cumulative line; the per-snapshot
 // deltas (derived here) approximate the request rate between snapshots.
+//
+// Geo: renders "Top countries" (by visitor + by request volume) and, when the
+// report host runs a GeoLite2-City db, "Top cities" plus a "Top city movers"
+// delta. Country-only reports show a "no city data" note in those cards.
 
 import { createServer } from "node:http";
 import { readdirSync, readFileSync, statSync } from "node:fs";
@@ -58,6 +62,28 @@ function parseCountRows(lines) {
   return rows;
 }
 
+// Parse a geo section ("Top countries" / "Top cities") — one section holding a
+// "Geo source:" line plus two labelled sub-blocks ("by unique visitor" / "by
+// request volume") — into structured buckets. Country-level reports render the
+// city section as a "(Geo db is Country-level …)" hint with no numeric rows, so
+// both buckets simply come back empty and the caller shows a "no data" note.
+function parseGeoSection(lines) {
+  const byVisitor = [];
+  const byVolume = [];
+  let bucket = null;
+  let geoSource = null;
+  for (const line of lines || []) {
+    if (/Geo source:/.test(line)) geoSource = line.replace(/.*Geo source:\s*/, "").trim();
+    else if (/by unique visitor/.test(line)) bucket = byVisitor;
+    else if (/by request volume/.test(line)) bucket = byVolume;
+    else {
+      const m = line.match(/^\s*(\d+)\s+(.+?)\s*$/);
+      if (m && bucket) bucket.push({ label: m[2], count: Number(m[1]) });
+    }
+  }
+  return { geoSource, byVisitor, byVolume };
+}
+
 function parseSummary(text, file) {
   const s = splitSections(text);
   const head = (s["__head__"] || []).join("\n");
@@ -74,21 +100,12 @@ function parseSummary(text, file) {
   const uniqueIps = Number(grab(/Unique IPs:\s*(\d+)/, totals)) || null;
   const dateRange = grab(/Date range:\s*(.+)/, totals);
 
-  // Top countries has two labelled sub-blocks in one section.
-  const countryLines = s["Top countries"] || [];
-  const byVisitor = [];
-  const byVolume = [];
-  let bucket = null;
-  let geoSource = null;
-  for (const line of countryLines) {
-    if (/Geo source:/.test(line)) geoSource = line.replace(/.*Geo source:\s*/, "").trim();
-    else if (/by unique visitor/.test(line)) bucket = byVisitor;
-    else if (/by request volume/.test(line)) bucket = byVolume;
-    else {
-      const m = line.match(/^\s*(\d+)\s+(.+?)\s*$/);
-      if (m && bucket) bucket.push({ label: m[2], count: Number(m[1]) });
-    }
-  }
+  // Top countries and Top cities each hold two labelled sub-blocks in one section.
+  const countries = parseGeoSection(s["Top countries"]);
+  const cities = parseGeoSection(s["Top cities"]);
+  // Header geo-source label: prefer whichever section carried it (the City db,
+  // when active, stamps both; a Country-only report stamps just the country one).
+  const geoSource = countries.geoSource || cities.geoSource;
 
   const bots = Number(grab(/Bot-ish hits:\s*(\d+)/, (s["Bot / crawler share"] || []).join("\n")));
   const suspectLines = s["Suspect / synthetic paths (e2e test fixtures)"] || [];
@@ -102,12 +119,30 @@ function parseSummary(text, file) {
   }
 
   // Newer reports also embed a "Delta vs. previous snapshot" section with the
-  // top per-path movers already computed on the host: "path prev cur delta d/min".
+  // top movers already computed on the host: "<key> prev cur delta d/min". City
+  // support split it into two sub-blocks ("-- top path movers --" and "-- top
+  // city movers --"); older reports have a single unlabeled "-- top movers --".
+  // We must scope by sub-header because (a) city labels contain spaces so they
+  // need a greedy-label regex, and (b) "(unknown)" is a lone token that would
+  // otherwise match the single-token path regex and pollute the path movers.
   const movers = [];
+  const cityMovers = [];
+  let mb = null; // which sub-block we're in: null/"path" (default) or "city"
   for (const line of s["Delta vs. previous snapshot"] || []) {
-    const m = line.match(/^(\S+)\s+(\d+)\s+(\d+)\s+([+-]?\d+)\s+([+-]?[\d.]+)\s*$/);
-    if (m && m[1] !== "path") {
-      movers.push({ path: m[1], prev: Number(m[2]), cur: Number(m[3]), delta: Number(m[4]), perMin: Number(m[5]) });
+    if (/city movers/.test(line)) { mb = "city"; continue; }
+    if (/movers/.test(line)) { mb = "path"; continue; } // "top movers" (old) or "top path movers" (new)
+    if (mb === "city") {
+      const m = line.match(/^(.+?)\s+(\d+)\s+(\d+)\s+([+-]?\d+)\s+([+-]?[\d.]+)\s*$/);
+      if (m && m[1].trim() !== "city") {
+        cityMovers.push({ city: m[1].trim(), prev: Number(m[2]), cur: Number(m[3]), delta: Number(m[4]), perMin: Number(m[5]) });
+      }
+    } else {
+      // Path bucket. Single-token key; also the pre-marker default so a legacy
+      // report whose rows precede any recognizable marker still parses.
+      const m = line.match(/^(\S+)\s+(\d+)\s+(\d+)\s+([+-]?\d+)\s+([+-]?[\d.]+)\s*$/);
+      if (m && m[1] !== "path") {
+        movers.push({ path: m[1], prev: Number(m[2]), cur: Number(m[3]), delta: Number(m[4]), perMin: Number(m[5]) });
+      }
     }
   }
 
@@ -129,14 +164,17 @@ function parseSummary(text, file) {
     topPaths: parseCountRows(s["Top 20 requested paths"] || []),
     statusCodes: parseCountRows(s["HTTP status codes"] || []),
     referrers: parseCountRows(s["Top 20 referrers"] || []),
-    countriesByVisitor: byVisitor,
-    countriesByVolume: byVolume,
+    countriesByVisitor: countries.byVisitor,
+    countriesByVolume: countries.byVolume,
+    citiesByVisitor: cities.byVisitor,
+    citiesByVolume: cities.byVolume,
     byHour,
     byDay: parseCountRows(s["Requests by day"] || []),
     bots: Number.isFinite(bots) ? bots : null,
     suspect: Number.isFinite(suspect) ? suspect : null,
     suspectSources,
     movers,
+    cityMovers,
   };
 }
 
@@ -413,6 +451,23 @@ function renderPage(data) {
         .join("")}</tbody></table>`
     : `<p class="muted">No per-snapshot delta in this report.</p>`;
 
+  // City movers (host-computed delta vs. the previous snapshot, by request
+  // volume). Only present once a GeoLite2-City db is active on the report host.
+  const cityMoverRows = latest.cityMovers
+    .filter((m) => m.delta !== 0)
+    .sort((a, b) => Math.abs(b.delta) - Math.abs(a.delta))
+    .slice(0, 12);
+  const cityMoversBody = cityMoverRows.length
+    ? `<table><thead><tr><th>City</th><th class="n">Now</th><th class="n">Δ</th><th class="n">/min</th></tr></thead><tbody>${cityMoverRows
+        .map(
+          (m) =>
+            `<tr><td>${esc(m.city)}</td><td class="n">${fmt(m.cur)}</td><td class="n">${m.delta > 0 ? "+" : ""}${fmt(
+              m.delta
+            )}</td><td class="n">${m.perMin.toFixed(1)}</td></tr>`
+        )
+        .join("")}</tbody></table>`
+    : `<p class="muted">No city delta in this report.</p>`;
+
   // Synthetic-traffic sources (e2e fixtures / 404 probes) by IP.
   const suspectBody = latest.suspectSources.length
     ? `<table><thead><tr><th>Source IP</th><th>Status</th><th>User-agent</th><th class="n">Hits</th></tr></thead><tbody>${latest.suspectSources
@@ -534,6 +589,23 @@ function renderPage(data) {
 
   <div class="grid2">
     ${card(
+      "Top cities (unique visitors)",
+      latest.citiesByVisitor.length
+        ? barList(latest.citiesByVisitor, { max: 10, color: (r) => (/Brazil/.test(r.label) ? PALETTE[4] : PALETTE[1]) })
+        : `<p class="muted">No city data in this snapshot — needs a GeoLite2-City db on the report host.</p>`,
+      "less precise than country · large (unknown) bucket expected"
+    )}
+    ${card(
+      "Top cities (request volume)",
+      latest.citiesByVolume.length
+        ? barList(latest.citiesByVolume, { max: 10, color: (r) => (/Brazil/.test(r.label) ? PALETTE[4] : PALETTE[6]) })
+        : `<p class="muted">No city data in this snapshot — needs a GeoLite2-City db on the report host.</p>`,
+      "less precise than country · large (unknown) bucket expected"
+    )}
+  </div>
+
+  <div class="grid2">
+    ${card(
       "Requests by day",
       barList(
         latest.byDay.slice().sort((a, b) => Date.parse(a.label.replace(/(\d+)\/(\w+)\/(\d+)/, "$2 $1 $3")) - Date.parse(b.label.replace(/(\d+)\/(\w+)\/(\d+)/, "$2 $1 $3"))),
@@ -552,9 +624,15 @@ function renderPage(data) {
   </div>
 
   <div class="grid2">
-    ${card("Top movers since last snapshot", moversBody, latest.movers.length ? "host-computed Δ · per-minute rate" : "")}
+    ${card("Top path movers since last snapshot", moversBody, latest.movers.length ? "host-computed Δ · per-minute rate" : "")}
     ${card("Synthetic traffic sources", suspectBody, "e2e fixtures · 404/499 probes")}
   </div>
+
+  ${
+    latest.cityMovers.length
+      ? card("Top city movers since last snapshot", cityMoversBody, "host-computed Δ · per-minute rate · by request volume")
+      : ""
+  }
 
   ${card(
     "Snapshot history",
