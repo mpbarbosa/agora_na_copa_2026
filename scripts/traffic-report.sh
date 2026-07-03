@@ -97,6 +97,26 @@ reader > "$TMP_LOG"
   BOTS="$(grep -iEc 'bot|crawl|spider|slurp|bytespider|facebookexternalhit|WhatsApp' "$TMP_LOG" || true)"
   echo "== Bot / crawler share =="
   printf "Bot-ish hits:   %s of %s\n" "$BOTS" "$TOTAL"
+  echo
+
+  # Players/clubs that exist ONLY in the Playwright e2e specs (tests/e2e/), never
+  # in prod data — so every hit is a synthetic driver (a monitor or an e2e run)
+  # pointed at the live site, not a real user, and every one 404s. They inflate
+  # the /api/player-stats counts in the "Top paths" section above, so surface and
+  # attribute them here. Keep this pattern in sync with the fixtures in
+  # tests/e2e/{team-view,navigation,leaders}.spec.ts.
+  echo "== Suspect / synthetic paths (e2e test fixtures) =="
+  SUSPECT_RE='Atacante%20Teste|Goleiro%20Teste|Abdulilah%20Alamri|Clube%20Teste'
+  SUSPECT_HITS="$(grep -aEc "$SUSPECT_RE" "$TMP_LOG" || true)"
+  printf "Suspect hits:   %s of %s\n" "$SUSPECT_HITS" "$TOTAL"
+  if [[ "${SUSPECT_HITS:-0}" -gt 0 ]]; then
+    echo "-- by source (count · ip · status · user-agent) --"
+    grep -aE "$SUSPECT_RE" "$TMP_LOG" \
+      | awk '{ ip=$1; st=$8;
+               ua=$0; sub(/.*" [0-9]+ [0-9]+ "[^"]*" "/, "", ua); sub(/" rt=.*/, "", ua);
+               print ip, st, ua }' \
+      | sort | uniq -c | sort -rn | head -10
+  fi
 } | tee "$TXT_OUT"
 
 echo
