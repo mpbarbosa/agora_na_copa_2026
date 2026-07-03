@@ -1,0 +1,161 @@
+Agora na Copa 26 — traffic baseline (Phase 0)
+Generated: 2026-07-03T16:07:02+00:00
+Source:    /var/log/nginx/agora-na-copa.access.log* (471334 log lines)
+
+== Totals ==
+Requests:       471334
+Unique IPs:     2476
+Date range:     03/Jul/2026:00:03:01  ->  24/Jun/2026:23:59:58
+
+== Top 20 requested paths ==
+ 168272 /api/team-lineups
+ 134889 /api/match-overlays
+  54140 /api/match-states
+  14772 /api/presence
+  10995 /api/health
+   6582 /
+   1957 /api/chat/ko-74-2026?since=0
+   1568 /api/tournament-leaders
+   1472 /api/player-stats/KSA/Abdulilah%20Alamri
+   1424 /api/player-stats/BRA/Atacante%20Teste
+   1200 /api/team-view/BRA
+    974 /api/chat/ko-88-2026?since=0
+    937 /api/chat/ko-75-2026?since=0
+    886 /api/team-view/CAN
+    833 /api/chat/ko-73-2026?since=0
+    798 /api/chat/ko-76-2026?since=0
+    740 /api/player-stats/ARG/Leo%20Messi
+    739 /api/player-stats/URU/Agustin%20Canobbio
+    716 /api/player-stats/IRN/Ramin%20Rezaeian
+    682 /api/chat/ko-84-2026?since=0
+
+== HTTP status codes ==
+ 463221 200
+   3732 304
+   3211 404
+    453 502
+    299 400
+    170 499
+    104 "-"
+     52 429
+     43 504
+     37 206
+      8 166
+      2 SP1
+      1 301
+      1 201
+
+== Top 20 referrers ==
+ 396064 "-"
+  74614 "https://copa2026.mpbarbosa.com/"
+    230 "https://copa2026.mpbarbosa.com/health"
+     81 "http://copa2026.mpbarbosa.com"
+     59 "https://copa2026.mpbarbosa.com/?fbclid=IwY2xjawSqj9pleHRuA2FlbQIxMQBzcnRjBmFwcF9pZAwzNTA2ODU1MzE3MjgAAR6WHt_2gfKFXL0edz2fOztVycHe2xAt68mJ6zAlfx2WA3kh0xSQ2-2UOvFFvQ_aem_pz34qcnoon2iL7HVaH5V-w"
+     44 "https://copa2026.mpbarbosa.com/?gtm_latency=1"
+     19 "https://www.linkedin.com/"
+     14 rt=0.000
+     14 "https://copa2026.mpbarbosa.com/?fbclid=IwY2xjawSmtRpleHRuA2FlbQIxMQBzcnRjBmFwcF9pZAwzNTA2ODU1MzE3MjgAAR4cq3YUw2PvUjvrtU0k9Kn47FpZtNODhT0kpYTFNKBxk6FmdjQk-qcqz5K0Tg_aem_7CdwleyQSxv4vcPEfmw0IQ"
+     10 "https://www.reddit.com/"
+     10 "https://copa2026.mpbarbosa.com/?gclid=1299855694"
+      8 "https://copa2026.mpbarbosa.com/?fbclid=IwY2xjawSnXOdleHRuA2FlbQIxMQBzcnRjBmFwcF9pZAwzNTA2ODU1MzE3MjgAAR5E5UkImHIqAxwXeHnyKojWUKLGSBEoyNGC9f2yuoYQGoU5AKnMI-yfCsv5_A_aem_MbaWrct2GLKZ5mn81SJ3WA"
+      8 "https://18.229.20.196/"
+      7 rt=0.114
+      6 rt=9.879
+      6 "android-app://com.linkedin.android/"
+      5 "https://copa2026.mpbarbosa.com/?fbclid=IwZXh0bgNhZW0CMTEAc3J0YwZhcHBfaWQMMjU2MjgxMDQwNTU4AAEeEP7TdbZmiVl-d6v-2B6QUGTvvgAGtdLFanRPD-QbfkhyTZGQoMCR2pW0VaY_aem_-WN7RFdZEWmgEfF9G2WLXQ"
+      5 "https://copa2026.mpbarbosa.com/?fbclid=IwZXh0bgNhZW0CMTEAc3J0YwZhcHBfaWQMMjU2MjgxMDQwNTU4AAEeE96m-nJqS3RoDtvngwidblmE7sxBqHXVNUKKF2GKjMQg2xQeOG6NIUgKwzA_aem_kALaECPNiH87ag1h_ejsPw"
+      4 rt=9.881
+      4 rt=0.187
+
+== Top countries ==
+(GeoIP unavailable — need a GeoLite2 mmdb + mmdblookup. Install with
+ 'sudo apt-get install -y mmdb-bin' and place GeoLite2-Country.mmdb in
+ /var/lib/GeoIP/, or set GEO_DB=/path/to/db.mmdb, then re-run.)
+
+== Requests by hour of day ==
+  34522 00
+  60679 01
+  45446 02
+  61169 03
+  46606 04
+  17788 05
+   2132 06
+   1255 07
+   1584 08
+   1342 09
+   3910 10
+  12738 11
+   7506 12
+   2230 13
+   3119 14
+   7072 15
+  14921 16
+  17460 17
+  15109 18
+  23312 19
+  21801 20
+  19280 21
+  21405 22
+  28948 23
+
+== Requests by day ==
+  69136 01/Jul/2026
+  21811 02/Jul/2026
+  23867 03/Jul/2026
+    733 18/Jun/2026
+   3086 19/Jun/2026
+   5838 20/Jun/2026
+  21148 21/Jun/2026
+   4902 22/Jun/2026
+   7371 23/Jun/2026
+   7415 24/Jun/2026
+  91104 25/Jun/2026
+  46643 26/Jun/2026
+  42539 27/Jun/2026
+  37976 28/Jun/2026
+  29109 29/Jun/2026
+  58656 30/Jun/2026
+
+== Bot / crawler share ==
+Bot-ish hits:   817 of 471334
+
+== Suspect / synthetic paths (e2e test fixtures) ==
+Suspect hits:   2896 of 471334
+-- by source (count · ip · status · user-agent) --
+   1647 177.60.79.191 404 agora-na-copa-2026/1.0
+    163 191.204.170.29 404 agora-na-copa-2026/1.0
+     32 177.60.79.191 499 agora-na-copa-2026/1.0
+      8 172.215.217.66 404 agora-na-copa-2026/1.0
+      8 172.178.118.82 404 agora-na-copa-2026/1.0
+      8 135.232.225.19 404 agora-na-copa-2026/1.0
+      8 135.232.177.197 404 agora-na-copa-2026/1.0
+      7 20.161.45.113 404 agora-na-copa-2026/1.0
+      4 74.235.151.3 404 agora-na-copa-2026/1.0
+      4 74.235.127.169 404 agora-na-copa-2026/1.0
+
+== Delta vs. previous snapshot ==
+Previous: traffic-reports/summary-20260703-150702.txt (2026-07-03T15:07:02+00:00)
+Current:  traffic-reports/summary-20260703-160702.txt (2026-07-03T16:07:02+00:00)
+Elapsed:  3600s (60.0 min)
+-- top movers by |delta| (prev · cur · delta · per-minute) --
+path                                                 prev        cur    delta     d/min
+/api/chat/ko-88-2026?since=0                            0        974     +974     +16.2
+/api/chat/nor-fra-2026?since=0                        651          0     -651     -10.8
+/api/presence                                       14626      14772     +146      +2.4
+/api/match-overlays                                134775     134889     +114      +1.9
+/api/health                                         10959      10995      +36      +0.6
+/                                                    6568       6582      +14      +0.2
+/api/team-lineups                                  168260     168272      +12      +0.2
+/api/chat/ko-76-2026?since=0                          798        798       +0      +0.0
+/api/tournament-leaders                              1568       1568       +0      +0.0
+/api/player-stats/ARG/Leo%20Messi                     740        740       +0      +0.0
+/api/team-view/BRA                                   1200       1200       +0      +0.0
+/api/player-stats/IRN/Ramin%20Rezaeian                716        716       +0      +0.0
+/api/player-stats/BRA/Atacante%20Teste               1424       1424       +0      +0.0
+/api/player-stats/URU/Agustin%20Canobbio              739        739       +0      +0.0
+/api/chat/ko-74-2026?since=0                         1957       1957       +0      +0.0
+/api/team-view/CAN                                    886        886       +0      +0.0
+/api/chat/ko-84-2026?since=0                          682        682       +0      +0.0
+/api/match-states                                   54140      54140       +0      +0.0
+/api/player-stats/KSA/Abdulilah%20Alamri             1472       1472       +0      +0.0
+/api/chat/ko-75-2026?since=0                          937        937       +0      +0.0
