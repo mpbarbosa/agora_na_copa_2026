@@ -94,6 +94,13 @@ if [[ -n "$GEO_DB" ]] && command -v mmdblookup >/dev/null 2>&1; then
   done > "$GEO_MAP"
 fi
 
+# NOTE: the "top N" tallies below end in `awk 'NR<=N'`, not `head -N`, on purpose.
+# `head` closes the pipe after N lines; on a large log the upstream `sort` then
+# dies with EPIPE ("sort: write error"), and under `set -euo pipefail` that aborts
+# the whole script right after the first tally — which is exactly why every report
+# was truncated to ~30 lines (Totals + Top-paths) on the 450k-line prod log.
+# `awk 'NR<=N'` drains the stream (prints the first N, discards the rest), so the
+# upstream sort never SIGPIPEs. Do NOT swap it back to `head`.
 {
   echo "Agora na Copa 26 — traffic baseline (Phase 0)"
   echo "Generated: $(date --iso-8601=seconds)"
@@ -109,7 +116,7 @@ fi
   echo
 
   echo "== Top 20 requested paths =="
-  awk '{print $6}' "$TMP_LOG" | sort | uniq -c | sort -rn | head -20
+  awk '{print $6}' "$TMP_LOG" | sort | uniq -c | sort -rn | awk 'NR<=20'
   echo
 
   echo "== HTTP status codes =="
@@ -117,19 +124,19 @@ fi
   echo
 
   echo "== Top 20 referrers =="
-  awk '{print $10}' "$TMP_LOG" | sort | uniq -c | sort -rn | head -20
+  awk '{print $10}' "$TMP_LOG" | sort | uniq -c | sort -rn | awk 'NR<=20'
   echo
 
   echo "== Top countries =="
   if [[ -n "$GEO_MAP" ]]; then
     echo "Geo source: $GEO_DB"
     echo "-- by unique visitor (top 20) --"
-    cut -f2 "$GEO_MAP" | sort | uniq -c | sort -rn | head -20
+    cut -f2 "$GEO_MAP" | sort | uniq -c | sort -rn | awk 'NR<=20'
     echo "-- by request volume (top 20) --"
     # Join each log line's IP ($1) to its country via the tab-separated GEO_MAP.
     awk 'FNR==NR { split($0, a, "\t"); c[a[1]] = a[2]; next }
          { print ($1 in c ? c[$1] : "(unknown)") }' "$GEO_MAP" "$TMP_LOG" \
-      | sort | uniq -c | sort -rn | head -20
+      | sort | uniq -c | sort -rn | awk 'NR<=20'
   else
     echo "(GeoIP unavailable — need a GeoLite2 mmdb + mmdblookup. Install with"
     echo " 'sudo apt-get install -y mmdb-bin' and place GeoLite2-Country.mmdb in"
@@ -167,7 +174,7 @@ fi
       | awk '{ ip=$1; st=$8;
                ua=$0; sub(/.*" [0-9]+ [0-9]+ "[^"]*" "/, "", ua); sub(/" rt=.*/, "", ua);
                print ip, st, ua }' \
-      | sort | uniq -c | sort -rn | head -10
+      | sort | uniq -c | sort -rn | awk 'NR<=10'
   fi
 } | tee "$TXT_OUT"
 
