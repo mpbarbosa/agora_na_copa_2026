@@ -15,10 +15,12 @@
 # GEO (opt-in, fully local — no user IP ever leaves the host):
 #   If a MaxMind GeoLite2 mmdb is present AND `mmdblookup` is installed, the text
 #   summary gains "Top countries" tallies (by unique visitor and by request
-#   volume), and GoAccess (if present) gets a Geo Location panel. Resolve order:
+#   volume), and GoAccess (if present) gets a Geo Location panel. Resolve order
+#   (City preferred over Country when both exist — a City db is a superset that
+#   also drives the country tallies, so it loses nothing and adds the cities):
 #     1) $GEO_DB env var, if set and readable
-#     2) /var/lib/GeoIP/GeoLite2-{Country,City}.mmdb
-#     3) /usr/share/GeoIP/GeoLite2-{Country,City}.mmdb
+#     2) /var/lib/GeoIP/GeoLite2-{City,Country}.mmdb
+#     3) /usr/share/GeoIP/GeoLite2-{City,Country}.mmdb
 #   If the resolved db is a *City* db (detected via its metadata database_type),
 #   the summary ALSO gains a "Top cities" tally. A Country db still only yields
 #   the country tallies — the city section then just prints a hint to install the
@@ -83,11 +85,14 @@ trap 'rm -f "$TMP_LOG" "$GEO_MAP"' EXIT
 reader > "$TMP_LOG"
 
 # ── Resolve a local GeoLite2 mmdb (no user IP leaves the host) ─────────────────
+# Prefer City over Country when both are present: a City db is a superset that
+# also drives the country tallies, so picking it loses nothing and unlocks the
+# "Top cities" section. $GEO_DB (if set) still wins outright.
 GEO_DB="${GEO_DB:-}"
 GEO_HAS_CITY=0
 for cand in "$GEO_DB" \
-  /var/lib/GeoIP/GeoLite2-Country.mmdb /var/lib/GeoIP/GeoLite2-City.mmdb \
-  /usr/share/GeoIP/GeoLite2-Country.mmdb /usr/share/GeoIP/GeoLite2-City.mmdb; do
+  /var/lib/GeoIP/GeoLite2-City.mmdb /var/lib/GeoIP/GeoLite2-Country.mmdb \
+  /usr/share/GeoIP/GeoLite2-City.mmdb /usr/share/GeoIP/GeoLite2-Country.mmdb; do
   if [[ -n "$cand" && -r "$cand" ]]; then GEO_DB="$cand"; break; fi
 done
 
