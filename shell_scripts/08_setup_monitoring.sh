@@ -24,6 +24,15 @@
 #      format is already configured. Safe to run after certbot (script 05) has
 #      modified the config with SSL directives.
 #   3. Tests and reloads nginx.
+#   4. Installs a systemd timer (agora-traffic-report.{service,timer}) that runs
+#      scripts/traffic-report-scheduled.sh hourly — it `git pull --ff-only`s the
+#      checkout, then generates the traffic report, so the box always reports from
+#      the CURRENT committed script rather than a stale checkout. Idempotent (unit
+#      files are rewritten deterministically; enable is a no-op when already on).
+#      Skip this step with SKIP_REPORT_TIMER=1.
+#
+# Idempotent: safe to re-run. Step 1 rewrites the same snippet; step 2 skips when
+# already injected; step 4 re-applies the same units. Nothing is duplicated.
 #
 # After running:
 #   Tail live access logs:
@@ -132,6 +141,68 @@ sudo nginx -t
 echo "==> Reloading nginx..."
 sudo systemctl reload nginx
 
+# ── 4. Hourly traffic-report timer (git pull + traffic-report.sh) ─────────────
+# Keeps the prod checkout current and regenerates the traffic report every hour
+# from the CURRENT committed script (fixing the "stale checkout produces a
+# 2-section report" failure). Fully idempotent — re-running rewrites the same
+# unit files and re-enables an already-enabled timer (both no-ops). Opt out with
+# SKIP_REPORT_TIMER=1.
+
+if [[ "${SKIP_REPORT_TIMER:-0}" == "1" ]]; then
+    echo "==> SKIP_REPORT_TIMER=1 — skipping the traffic-report timer."
+else
+    REPORT_USER="${SUDO_USER:-$(id -un)}"
+    REPORT_REPO="$(cd "$SCRIPT_DIR/.." && pwd)"
+    REPORT_WRAPPER="$REPORT_REPO/scripts/traffic-report-scheduled.sh"
+
+    if [[ ! -f "$REPORT_WRAPPER" ]]; then
+        echo "==> Warning: $REPORT_WRAPPER not found (stale checkout?)." >&2
+        echo "    Installing the timer anyway; it starts working once a 'git pull'" >&2
+        echo "    brings the wrapper in (the wrapper itself pulls, so it self-heals)." >&2
+    fi
+
+    # The nginx logs are owned by group 'adm'; add the report user to it so the
+    # unattended service reads them directly, never falling back to an
+    # interactive sudo that would hang under systemd. Idempotent.
+    if getent group adm >/dev/null 2>&1; then
+        echo "==> Ensuring $REPORT_USER is in the 'adm' group (nginx log read access)..."
+        sudo usermod -aG adm "$REPORT_USER"
+    fi
+
+    echo "==> Installing systemd units agora-traffic-report.{service,timer} (requires sudo)..."
+    sudo tee /etc/systemd/system/agora-traffic-report.service > /dev/null <<EOF
+[Unit]
+Description=Agora na Copa — traffic report (git pull + traffic-report.sh)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=${REPORT_USER}
+WorkingDirectory=${REPORT_REPO}
+ExecStart=/usr/bin/env bash ${REPORT_WRAPPER}
+Nice=10
+EOF
+
+    sudo tee /etc/systemd/system/agora-traffic-report.timer > /dev/null <<'EOF'
+[Unit]
+Description=Run the Agora traffic report hourly
+
+[Timer]
+# 7 min past each hour, to avoid the top-of-hour cron/timer thundering herd.
+OnCalendar=*:07
+Persistent=true
+
+[Install]
+WantedBy=timers.target
+EOF
+
+    echo "==> Reloading systemd and enabling the timer..."
+    sudo systemctl daemon-reload
+    sudo systemctl enable --now agora-traffic-report.timer
+    echo "==> Traffic-report timer enabled (next run at :07 past the hour)."
+fi
+
 echo ""
 echo "✓ Timed access logging enabled."
 printf "  Log file : %s\n" "$ACCESS_LOG"
@@ -144,3 +215,11 @@ printf "               goaccess %s \\\\\n" "$ACCESS_LOG"
 echo "                 --log-format='%h - [%d:%t %z] \"%r\" %s %b \"%R\" \"%u\" rt=%T urt=%^' \\"
 echo "                 --date-format='%d/%b/%Y' --time-format='%H:%M:%S' -o /tmp/report.html"
 printf "  Health API : curl -s https://%s/api/health | jq .\n" "$DOMAIN"
+if [[ "${SKIP_REPORT_TIMER:-0}" != "1" ]]; then
+    echo ""
+    echo "✓ Hourly traffic-report timer enabled (git pull + report)."
+    echo "  Status     : systemctl list-timers agora-traffic-report.timer"
+    echo "  Run now    : sudo systemctl start agora-traffic-report.service"
+    echo "  Last report: ls -t traffic-reports/summary-*.txt | head -1"
+    echo "  Disable    : sudo systemctl disable --now agora-traffic-report.timer"
+fi

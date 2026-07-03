@@ -25,7 +25,9 @@
 #     # /var/lib/GeoIP/  — or point GEO_DB at it.
 #   Country lookups run once per UNIQUE IP (not per log line), so it stays cheap.
 #
-# Outputs land in ./traffic-reports/ (gitignored):
+# Outputs land in ./traffic-reports/ (tracked in git — the summary-*.txt files
+# are committed by hand when a snapshot is worth sharing; new runs just show up
+# as untracked files until then):
 #   summary-<stamp>.txt   always
 #   report-<stamp>.html   if goaccess present
 #   report-<stamp>.json   if goaccess present
