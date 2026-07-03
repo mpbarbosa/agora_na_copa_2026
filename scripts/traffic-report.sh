@@ -113,12 +113,18 @@ fi
 if [[ -n "$GEO_DB" ]] && command -v mmdblookup >/dev/null 2>&1; then
   GEO_MAP="$(mktemp)"
   awk '{print $1}' "$TMP_LOG" | sort -u | while read -r ip; do
+    # mmdblookup exits non-zero (5) when the lookup PATH is absent from an
+    # otherwise-present record — routine for `city` (many City-db records have no
+    # city node) and possible for `country`. Under `set -euo pipefail` that would
+    # abort the whole run, so tolerate it with `|| true` and let the empty value
+    # fall through to "(unknown)". (Harmless on a Country db, where every record
+    # carries a country and the path always resolves.)
     country="$(mmdblookup --file "$GEO_DB" --ip "$ip" country names en 2>/dev/null \
-      | awk -F'"' 'NF>1 {print $2; exit}')"
+      | awk -F'"' 'NF>1 {print $2; exit}' || true)"
     city_label=""
     if [[ "$GEO_HAS_CITY" == 1 ]]; then
       city="$(mmdblookup --file "$GEO_DB" --ip "$ip" city names en 2>/dev/null \
-        | awk -F'"' 'NF>1 {print $2; exit}')"
+        | awk -F'"' 'NF>1 {print $2; exit}' || true)"
       # Qualify the city with its country so same-named cities across countries
       # don't collapse into one bucket. Leave empty when the db has no city.
       [[ -n "$city" ]] && city_label="$city, ${country:-?}"
