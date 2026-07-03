@@ -994,8 +994,6 @@ export const TeamLineupView: React.FC<TeamLineupViewProps> = ({ team, theme, onB
               </section>
             )}
 
-            <TeamInstagramHighlights teamCode={team.code} theme={theme} />
-
             <section className={`rounded-3xl border p-4 md:p-6 ${cardClasses}`} id="team-lineup-board-card">
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
@@ -1038,6 +1036,8 @@ export const TeamLineupView: React.FC<TeamLineupViewProps> = ({ team, theme, onB
                 </div>
               )}
             </section>
+
+            <TeamInstagramHighlights teamCode={team.code} theme={theme} />
           </div>
 
           <div className="space-y-6">
