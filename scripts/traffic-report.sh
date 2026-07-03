@@ -19,11 +19,18 @@
 #     1) $GEO_DB env var, if set and readable
 #     2) /var/lib/GeoIP/GeoLite2-{Country,City}.mmdb
 #     3) /usr/share/GeoIP/GeoLite2-{Country,City}.mmdb
+#   If the resolved db is a *City* db (detected via its metadata database_type),
+#   the summary ALSO gains a "Top cities" tally. A Country db still only yields
+#   the country tallies — the city section then just prints a hint to install the
+#   City db. City-level geolocation is materially less precise than country
+#   (esp. mobile/CGNAT IPs), so expect a larger "(unknown)" bucket there.
 #   One-time prod setup:
 #     sudo apt-get install -y mmdb-bin        # provides mmdblookup
-#     # download GeoLite2-Country.mmdb (free MaxMind account/license key) to
-#     # /var/lib/GeoIP/  — or point GEO_DB at it.
-#   Country lookups run once per UNIQUE IP (not per log line), so it stays cheap.
+#     # download GeoLite2-Country.mmdb (or GeoLite2-City.mmdb — a superset that
+#     # also drives the country tallies) with a free MaxMind account/license key
+#     # to /var/lib/GeoIP/  — or point GEO_DB at it.
+#   Lookups run once per UNIQUE IP (not per log line), so it stays cheap (a City
+#   db adds one extra lookup per unique IP for the city name).
 #
 # Outputs land in ./traffic-reports/ (tracked in git — the summary-*.txt files
 # are committed by hand when a snapshot is worth sharing; new runs just show up
@@ -77,20 +84,46 @@ reader > "$TMP_LOG"
 
 # ── Resolve a local GeoLite2 mmdb (no user IP leaves the host) ─────────────────
 GEO_DB="${GEO_DB:-}"
+GEO_HAS_CITY=0
 for cand in "$GEO_DB" \
   /var/lib/GeoIP/GeoLite2-Country.mmdb /var/lib/GeoIP/GeoLite2-City.mmdb \
   /usr/share/GeoIP/GeoLite2-Country.mmdb /usr/share/GeoIP/GeoLite2-City.mmdb; do
   if [[ -n "$cand" && -r "$cand" ]]; then GEO_DB="$cand"; break; fi
 done
 
-# Build an ip<TAB>country map once, over UNIQUE IPs only, when both the db and the
-# lookup tool are available. Reused by both country tallies below.
+# Does the resolved db carry city records? Probe its metadata: `mmdblookup
+# --verbose` prints a header whose `Type:` line is e.g. "GeoLite2-City" vs
+# "GeoLite2-Country" (the type is independent of the probe IP; 8.8.8.8 is just a
+# well-formed address to satisfy the required --ip). Matching the type — not the
+# filename — so a $GEO_DB that points at a renamed City db is still detected.
+if [[ -n "$GEO_DB" ]] && command -v mmdblookup >/dev/null 2>&1; then
+  if mmdblookup --file "$GEO_DB" --ip 8.8.8.8 --verbose 2>/dev/null \
+       | grep -iE '^[[:space:]]*Type:' | grep -qi 'city'; then
+    GEO_HAS_CITY=1
+  fi
+fi
+
+# Build a per-UNIQUE-IP map once, when both the db and the lookup tool are
+# available. Columns (tab-separated): ip <TAB> country <TAB> cityLabel.
+#   - country  drives the "Top countries" tallies (always populated).
+#   - cityLabel drives "Top cities" and is "<City>, <Country>" (empty when the
+#     db has no city record for the ip, or the db is Country-level).
+# Reused by every geo tally below. Backward-compatible: the country tallies read
+# field 2 exactly as before.
 if [[ -n "$GEO_DB" ]] && command -v mmdblookup >/dev/null 2>&1; then
   GEO_MAP="$(mktemp)"
   awk '{print $1}' "$TMP_LOG" | sort -u | while read -r ip; do
     country="$(mmdblookup --file "$GEO_DB" --ip "$ip" country names en 2>/dev/null \
       | awk -F'"' 'NF>1 {print $2; exit}')"
-    printf '%s\t%s\n' "$ip" "${country:-(unknown)}"
+    city_label=""
+    if [[ "$GEO_HAS_CITY" == 1 ]]; then
+      city="$(mmdblookup --file "$GEO_DB" --ip "$ip" city names en 2>/dev/null \
+        | awk -F'"' 'NF>1 {print $2; exit}')"
+      # Qualify the city with its country so same-named cities across countries
+      # don't collapse into one bucket. Leave empty when the db has no city.
+      [[ -n "$city" ]] && city_label="$city, ${country:-?}"
+    fi
+    printf '%s\t%s\t%s\n' "$ip" "${country:-(unknown)}" "$city_label"
   done > "$GEO_MAP"
 fi
 
@@ -141,6 +174,28 @@ fi
     echo "(GeoIP unavailable — need a GeoLite2 mmdb + mmdblookup. Install with"
     echo " 'sudo apt-get install -y mmdb-bin' and place GeoLite2-Country.mmdb in"
     echo " /var/lib/GeoIP/, or set GEO_DB=/path/to/db.mmdb, then re-run.)"
+  fi
+  echo
+
+  echo "== Top cities =="
+  if [[ -n "$GEO_MAP" && "$GEO_HAS_CITY" == 1 ]]; then
+    echo "Geo source: $GEO_DB"
+    echo "Note: city-level geolocation is far less precise than country; expect a"
+    echo "      sizable (unknown) bucket, especially for mobile/CGNAT IPs."
+    echo "-- by unique visitor (top 20) --"
+    # Field 3 is the "<City>, <Country>" label (empty when the db had no city
+    # for that ip); render the empties as (unknown) so they tally into one bucket.
+    cut -f3 "$GEO_MAP" | sed 's/^$/(unknown)/' | sort | uniq -c | sort -rn | awk 'NR<=20'
+    echo "-- by request volume (top 20) --"
+    # Join each log line's IP ($1) to its city label (map field 3) via GEO_MAP.
+    awk 'FNR==NR { split($0, a, "\t"); c[a[1]] = a[3]; next }
+         { print (($1 in c) && c[$1] != "" ? c[$1] : "(unknown)") }' "$GEO_MAP" "$TMP_LOG" \
+      | sort | uniq -c | sort -rn | awk 'NR<=20'
+  elif [[ -n "$GEO_MAP" ]]; then
+    echo "(Geo db is Country-level — install GeoLite2-City.mmdb for city tallies,"
+    echo " then re-run. See the GEO note at the top of this script.)"
+  else
+    echo "(GeoIP unavailable — see the note under Top countries.)"
   fi
   echo
 
@@ -260,6 +315,61 @@ if [[ -n "${PREV_TXT:-}" && -r "$PREV_TXT" ]]; then
     }
   ' "$PREV_TXT" "$TXT_OUT")"
 
+  # City movers — same |delta| treatment as paths, but scoped to the "by request
+  # volume" sub-block INSIDE the "== Top cities ==" section (the country section
+  # carries an identically-named "-- by request volume --" marker, so we gate on
+  # being inside Top-cities first). The city label "<City>, <Country>" contains
+  # spaces, so we key on the whole line after the leading count, not $2. Only
+  # computed when this run emitted a city section (a City db was loaded); an older
+  # prior snapshot without the section simply yields all-new (+) rows.
+  city_delta_table=""
+  if [[ "$GEO_HAS_CITY" == 1 ]]; then
+    city_delta_table="$(awk -v elapsed="$elapsed" '
+      # First file (previous snapshot): capture Top-cities request-volume rows.
+      FNR==NR {
+        if ($0 ~ /^== Top cities ==/)            { inp=1; rvp=0; next }
+        if (inp && $0 ~ /^== /)                  { inp=0; rvp=0 }
+        if (inp && $0 ~ /^-- by request volume/) { rvp=1; next }
+        else if (inp && rvp && $0 ~ /^-- /)      { rvp=0 }
+        if (inp && rvp && $1 ~ /^[0-9]+$/ && NF>=2) {
+          lab=$0; sub(/^[[:space:]]*[0-9]+[[:space:]]+/, "", lab); prev[lab]=$1
+        }
+        next
+      }
+      # Second file (current snapshot): same capture.
+      {
+        if ($0 ~ /^== Top cities ==/)            { inc=1; rvc=0; next }
+        if (inc && $0 ~ /^== /)                  { inc=0; rvc=0 }
+        if (inc && $0 ~ /^-- by request volume/) { rvc=1; next }
+        else if (inc && rvc && $0 ~ /^-- /)      { rvc=0 }
+        if (inc && rvc && $1 ~ /^[0-9]+$/ && NF>=2) {
+          lab=$0; sub(/^[[:space:]]*[0-9]+[[:space:]]+/, "", lab); cur[lab]=$1; seen[lab]=1
+        }
+      }
+      END {
+        for (p in prev) seen[p]=1
+        n=0
+        for (p in seen) {
+          c=(p in cur)?cur[p]:0; v=(p in prev)?prev[p]:0
+          n++; city[n]=p; C[n]=c; V[n]=v; D[n]=c-v
+        }
+        if (n==0) exit
+        # Rank by magnitude of change (insertion sort; n is small).
+        for (i=1;i<=n;i++) for (j=i+1;j<=n;j++) {
+          ai=D[i]<0?-D[i]:D[i]; aj=D[j]<0?-D[j]:D[j]
+          if (aj>ai) {
+            t=city[i];city[i]=city[j];city[j]=t;
+            t=C[i];C[i]=C[j];C[j]=t; t=V[i];V[i]=V[j];V[j]=t; t=D[i];D[i]=D[j];D[j]=t }
+        }
+        printf "%-40s %10s %10s %8s %9s\n","city","prev","cur","delta","d/min"
+        for (i=1;i<=n && i<=20;i++) {
+          rate=(elapsed>0)? D[i]*60.0/elapsed : 0
+          printf "%-40s %10d %10d %+8d %+9.1f\n", city[i], V[i], C[i], D[i], rate
+        }
+      }
+    ' "$PREV_TXT" "$TXT_OUT")"
+  fi
+
   {
     echo
     echo "== Delta vs. previous snapshot =="
@@ -270,7 +380,12 @@ if [[ -n "${PREV_TXT:-}" && -r "$PREV_TXT" ]]; then
     else
       echo "Elapsed:  (unknown — could not parse both timestamps; rates shown as 0)"
     fi
-    echo "-- top movers by |delta| (prev · cur · delta · per-minute) --"
+    echo "-- top path movers by |delta| (prev · cur · delta · per-minute) --"
     echo "$delta_table"
+    if [[ -n "${city_delta_table:-}" ]]; then
+      echo
+      echo "-- top city movers by |delta| (request volume; prev · cur · delta · per-minute) --"
+      echo "$city_delta_table"
+    fi
   } | tee -a "$TXT_OUT"
 fi
