@@ -65,4 +65,19 @@ export const KNOCKOUT_RESULTS: Record<number, KnockoutResultSeed> = {
   // p/ COD; Harry Kane 75' e 86' p/ ING). Inglaterra virou e se classificou; alimenta a
   // Oitavas #92 (slot W80).
   80: { status: "FINISHED", score: { teamA: 2, teamB: 1 } },
+  // #81 · 16-avos · 01/07/2026 — Estados Unidos 2×0 Bósnia e Herzegovina (Folarin Balogun 45',
+  // expulso aos 64'; Malik Tillman 82'). EUA classificados mesmo com um a menos; alimentam a
+  // Oitavas #94 (slot W81).
+  81: { status: "FINISHED", score: { teamA: 2, teamB: 0 } },
+  // #82 · 16-avos · 01/07/2026 — Bélgica 3×2 Senegal na prorrogação (Habib Diarra 24' e Ismaila
+  // Sarr 51' p/ SEN; Romelu Lukaku 86', Youri Tielemans 89' e 120+5' p/ BEL). Bélgica virou de
+  // 0×2 e se classificou; alimenta a Oitavas #94 (slot W82).
+  82: { status: "FINISHED", score: { teamA: 3, teamB: 2 } },
+  // #83 · 16-avos · 02/07/2026 — Portugal 2×1 Croácia (Ivan Perisic 53' p/ CRO; Cristiano
+  // Ronaldo 68' de pênalti e Gonçalo Ramos 90+4' p/ POR). Portugal virou nos acréscimos;
+  // alimenta a Oitavas #93 (slot W83).
+  83: { status: "FINISHED", score: { teamA: 2, teamB: 1 } },
+  // #84 · 16-avos · 02/07/2026 — Espanha 3×0 Áustria (Mikel Oyarzabal 36' e 89', Pedro Porro
+  // 66'). Espanha classificada com autoridade; alimenta a Oitavas #93 (slot W84).
+  84: { status: "FINISHED", score: { teamA: 3, teamB: 0 } },
 };
