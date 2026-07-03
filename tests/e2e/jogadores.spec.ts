@@ -134,13 +134,16 @@ test.describe("Jogadores view — player overlay stats", () => {
     await page.click("#btn-nav-jogadores");
     await expect(page.locator("#jogadores-view")).toBeVisible();
 
-    // Vozinha (CPV GK, fifaId 364752) has instagramPostUrl in squads.json
+    // Vozinha (CPV GK, fifaId 364752) has a highlight in squads.json. His entry
+    // may carry one (instagramPostUrl) or several (instagramPostUrls) — the
+    // toggle label switches singular/plural accordingly — so match either; the
+    // embed-0/open-0 assertions below pin the FIRST highlight (DZno5Zsxo6V).
     await page.click("#jogador-card-364752");
     await expect(page.locator("#jogadores-player-overlay")).toBeVisible();
 
     const toggle = page.locator("#jogadores-player-overlay-ig-toggle");
     await expect(toggle).toBeVisible();
-    await expect(toggle).toContainText("Destaque no Instagram");
+    await expect(toggle).toContainText(/Destaques? no Instagram/);
     await expect(toggle).toHaveAttribute("aria-expanded", "false");
 
     await toggle.click();

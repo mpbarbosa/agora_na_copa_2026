@@ -50,7 +50,8 @@
       "https://www.instagram.com/p/DaT2GPUD40W/",
       "https://www.instagram.com/p/DaT53MSFjn5/",
       "https://www.instagram.com/p/DaT-EMHjYiD/",
-      "https://www.instagram.com/p/DaUFHrIjDha/"
+      "https://www.instagram.com/p/DaUFHrIjDha/",
+      "https://www.instagram.com/reel/DZ-pxQZSaSR/"
     ]
   },
   "215285": {
@@ -468,7 +469,8 @@
     "worldCupNoteUpdatedAt": "2026-06-29T17:00:00.000Z",
     "instagramPostUrls": [
       "https://www.instagram.com/p/DaL65g6yWCY/",
-      "https://www.instagram.com/p/DaRNtKpG7g0/"
+      "https://www.instagram.com/p/DaRNtKpG7g0/",
+      "https://www.instagram.com/p/DaOFrcyjxy4/"
     ]
   },
   "308386": {
@@ -726,7 +728,8 @@
       "wikipedia": "https://pt.wikipedia.org/wiki/Marcos_Ao%C3%A1s_Corr%C3%AAa"
     },
     "dateOfBirth": "1994-05-14",
-    "height": 183
+    "height": 183,
+    "instagramPostUrl": "https://www.instagram.com/p/DaJkLWqltlU/"
   },
   "335656": {
     "fifaId": "335656",
@@ -1516,7 +1519,10 @@
       "instagram": "vozinha1",
       "wikipedia": "https://pt.wikipedia.org/wiki/Vozinha"
     },
-    "instagramPostUrl": "https://www.instagram.com/reel/DZno5Zsxo6V/",
+    "instagramPostUrls": [
+      "https://www.instagram.com/reel/DZno5Zsxo6V/",
+      "https://www.instagram.com/p/DaOg9MyDtVw/"
+    ],
     "worldCupNote": "## Leitura\nAos 40 anos, o veterano Josimar Dias — o Vozinha — é o símbolo da campanha histórica de Cabo Verde, classificado pela primeira vez às oitavas de uma Copa do Mundo. Dono absoluto da camisa 1 e muralha da seleção, virou ídolo nacional e fenômeno mundial — e foi o esteio do feito inédito.\n## Desempenho\nContra a Espanha, foi gigante: sete defesas, 0 a 0 e prêmio de craque da partida no primeiro ponto cabo-verdiano em Copas. Diante do Uruguai, sofreu dois gols (Maxi Araújo aos 44 e Canobbio aos 45+6), mas Cabo Verde reagiu e arrancou um valioso 2 a 2. No 0 a 0 com a Arábia Saudita, voltou a fechar o gol e selou a classificação inédita. Duas redes intactas em três jogos.\n## Números\nJ3 · 2 clean sheets · 2 gols sofridos · 3 pontos. Cabo Verde terminou em 2º no Grupo H e está classificado às oitavas pela primeira vez na história — e Vozinha foi decisivo na muralha que escreveu o feito.",
     "worldCupNoteUpdatedAt": "2026-06-27T00:00:00.000Z",
     "dateOfBirth": "1986-06-03",
@@ -3155,7 +3161,8 @@
     "socials": {
       "instagram": "fabinho",
       "wikipedia": "https://pt.wikipedia.org/wiki/Fabinho_(futebolista,_1993)"
-    }
+    },
+    "instagramPostUrl": "https://www.instagram.com/p/DaLz2cDGOxP/"
   },
   "394824": {
     "fifaId": "394824",
@@ -5081,7 +5088,8 @@
     "socials": {
       "instagram": "vinijr",
       "wikipedia": "https://pt.wikipedia.org/wiki/Vin%C3%ADcius_J%C3%BAnior"
-    }
+    },
+    "instagramPostUrl": "https://www.instagram.com/p/DZkzbG7DsbZ/"
   },
   "405841": {
     "fifaId": "405841",
@@ -10973,7 +10981,8 @@
     "socials": {
       "instagram": "mike_maignan16",
       "wikipedia": "https://pt.wikipedia.org/wiki/Mike_Maignan"
-    }
+    },
+    "instagramPostUrl": "https://www.instagram.com/p/DaQCW1HlaPs/"
   },
   "448341": {
     "fifaId": "448341",
