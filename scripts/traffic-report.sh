@@ -197,3 +197,71 @@ else
   echo "   sudo apt-get update && sudo apt-get install -y goaccess"
   echo " then re-run this script.)"
 fi
+
+# ── Snapshot-to-snapshot delta (vs. the previous summary) ─────────────────────
+# Diff this run's top-paths against the most recent PRIOR summary-*.txt in
+# OUT_DIR and print per-path deltas plus a per-minute rate derived from the two
+# "Generated:" timestamps. Turns the manual 30-min comparisons into a built-in
+# section: a synthetic driver shows up as a path climbing at a steady Δ/min.
+# Purely additive and read-only against the prior file; skips on the first run.
+PREV_TXT="$(ls -1t "$OUT_DIR"/summary-*.txt 2>/dev/null | grep -vxF "$TXT_OUT" | head -1 || true)"
+if [[ -n "${PREV_TXT:-}" && -r "$PREV_TXT" ]]; then
+  # Elapsed wall-clock between the two snapshots, from their Generated: stamps.
+  gen_prev="$(awk '/^Generated:/{print $2; exit}' "$PREV_TXT")"
+  gen_cur="$(awk '/^Generated:/{print $2; exit}' "$TXT_OUT")"
+  elapsed=0
+  if s_prev="$(date -d "$gen_prev" +%s 2>/dev/null)" \
+     && s_cur="$(date -d "$gen_cur" +%s 2>/dev/null)"; then
+    elapsed=$(( s_cur - s_prev ))
+  fi
+  # Compute the table off the pristine files BEFORE we append anything to TXT_OUT.
+  delta_table="$(awk -v elapsed="$elapsed" '
+    # First file (previous snapshot): capture its top-paths block.
+    FNR==NR {
+      if ($0 ~ /^== Top 20 requested paths ==/) { inp=1; next }
+      if (inp && $0 ~ /^== /) inp=0
+      if (inp && $1 ~ /^[0-9]+$/ && NF>=2) prev[$2]=$1
+      next
+    }
+    # Second file (current snapshot): capture its top-paths block.
+    {
+      if ($0 ~ /^== Top 20 requested paths ==/) { inc=1; next }
+      if (inc && $0 ~ /^== /) inc=0
+      if (inc && $1 ~ /^[0-9]+$/ && NF>=2) { cur[$2]=$1; seen[$2]=1 }
+    }
+    END {
+      for (p in prev) seen[p]=1
+      n=0
+      for (p in seen) {
+        c=(p in cur)?cur[p]:0; v=(p in prev)?prev[p]:0
+        n++; path[n]=p; C[n]=c; V[n]=v; D[n]=c-v
+      }
+      # Rank by magnitude of change (insertion sort; n is small).
+      for (i=1;i<=n;i++) for (j=i+1;j<=n;j++) {
+        ai=D[i]<0?-D[i]:D[i]; aj=D[j]<0?-D[j]:D[j]
+        if (aj>ai) {
+          t=path[i];path[i]=path[j];path[j]=t;
+          t=C[i];C[i]=C[j];C[j]=t; t=V[i];V[i]=V[j];V[j]=t; t=D[i];D[i]=D[j];D[j]=t }
+      }
+      printf "%-46s %10s %10s %8s %9s\n","path","prev","cur","delta","d/min"
+      for (i=1;i<=n && i<=20;i++) {
+        rate=(elapsed>0)? D[i]*60.0/elapsed : 0
+        printf "%-46s %10d %10d %+8d %+9.1f\n", path[i], V[i], C[i], D[i], rate
+      }
+    }
+  ' "$PREV_TXT" "$TXT_OUT")"
+
+  {
+    echo
+    echo "== Delta vs. previous snapshot =="
+    printf "Previous: %s (%s)\n" "$PREV_TXT" "$gen_prev"
+    printf "Current:  %s (%s)\n" "$TXT_OUT" "$gen_cur"
+    if [[ "$elapsed" -gt 0 ]]; then
+      printf "Elapsed:  %ss (%s min)\n" "$elapsed" "$(awk -v e="$elapsed" 'BEGIN{printf "%.1f", e/60}')"
+    else
+      echo "Elapsed:  (unknown — could not parse both timestamps; rates shown as 0)"
+    fi
+    echo "-- top movers by |delta| (prev · cur · delta · per-minute) --"
+    echo "$delta_table"
+  } | tee -a "$TXT_OUT"
+fi
