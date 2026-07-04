@@ -48,6 +48,20 @@ export const bannersCatalog: CatalogModule = {
 
     // AdSlot
     "banners.ads.label": "Publicidade",
+
+    // TeamCountdownBadge (followed-team next-match countdown)
+    "banners.teamCountdown.next": "Próximo jogo",
+    "banners.teamCountdown.live": "{team} ao vivo",
+    "banners.teamCountdown.onPitch": "Em campo",
+    "banners.teamCountdown.probable": "Confronto provável",
+    "banners.teamCountdown.change": "Trocar seleção",
+    "banners.teamCountdown.choose": "Escolha sua seleção",
+    "banners.teamCountdown.chooseHint": "Acompanhe o próximo jogo da sua seleção",
+    "banners.teamCountdown.noNextMatch": "Sem próximo jogo",
+    "banners.teamCountdown.noNextMatchHint": "Escolha outra seleção para acompanhar",
+    "banners.teamCountdown.selectAria": "Escolha a seleção para acompanhar",
+    "banners.teamCountdown.closeAria": "Fechar o acompanhamento da seleção",
+    "banners.teamCountdown.countdownAria": "Faltam {time} para o próximo jogo",
   },
   es: {
     // DonationPix
@@ -92,5 +106,19 @@ export const bannersCatalog: CatalogModule = {
 
     // AdSlot
     "banners.ads.label": "Publicidad",
+
+    // TeamCountdownBadge (followed-team next-match countdown)
+    "banners.teamCountdown.next": "Próximo partido",
+    "banners.teamCountdown.live": "{team} en vivo",
+    "banners.teamCountdown.onPitch": "En cancha",
+    "banners.teamCountdown.probable": "Cruce probable",
+    "banners.teamCountdown.change": "Cambiar selección",
+    "banners.teamCountdown.choose": "Elige tu selección",
+    "banners.teamCountdown.chooseHint": "Sigue el próximo partido de tu selección",
+    "banners.teamCountdown.noNextMatch": "Sin próximo partido",
+    "banners.teamCountdown.noNextMatchHint": "Elige otra selección para seguir",
+    "banners.teamCountdown.selectAria": "Elige la selección a seguir",
+    "banners.teamCountdown.closeAria": "Cerrar el seguimiento de la selección",
+    "banners.teamCountdown.countdownAria": "Faltan {time} para el próximo partido",
   },
 };

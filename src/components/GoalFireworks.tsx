@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import { buildFireworksPalette } from "../utils/teamCountdown";
 
 const VERT_SRC = `
 attribute vec2 a_pos;
@@ -90,22 +91,6 @@ const ORIGINS: [number, number][] = [
   [0.62, 0.80], [0.25, 0.46], [0.75, 0.48],
 ];
 
-// Brazilian palette: yellow (#FFD84D) and green (#009C3B), warm white accent
-const COLORS: [number, number, number][] = [
-  [1.00, 0.847, 0.302],
-  [0.00, 0.612, 0.231],
-  [1.00, 0.847, 0.302],
-  [0.00, 0.612, 0.231],
-  [1.00, 1.00, 0.90],
-  [1.00, 0.847, 0.302],
-  [0.00, 0.612, 0.231],
-  [1.00, 1.00, 0.90],
-  [1.00, 0.847, 0.302],
-  [0.00, 0.612, 0.231],
-  [1.00, 1.00, 0.90],
-  [1.00, 0.847, 0.302],
-];
-
 // Stagger each burst 0.55s apart; last burst at 6.05s, fades by ~10.65s.
 const START_TIMES = [
   0.0, 0.55, 1.1, 1.65, 2.2, 2.75, 3.3, 3.85, 4.4, 4.95, 5.5, 6.05,
@@ -125,9 +110,13 @@ function compileShader(gl: WebGLRenderingContext, type: number, src: string): We
 
 interface Props {
   active: boolean;
+  // The scoring team's colours — the fireworks palette is built from them. Defaults to the
+  // Brazilian green/yellow when unset (no team chosen / colours unavailable).
+  primaryColor?: string;
+  secondaryColor?: string;
 }
 
-export function BrazilGoalFireworks({ active }: Props) {
+export function GoalFireworks({ active, primaryColor, secondaryColor }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
@@ -179,10 +168,11 @@ export function BrazilGoalFireworks({ active }: Props) {
     gl.enableVertexAttribArray(aPos);
     gl.vertexAttribPointer(aPos, 2, gl.FLOAT, false, 0, 0);
 
-    // Set constant uniforms once
+    // Set constant uniforms once — palette derived from the scoring team's colours.
+    const palette = buildFireworksPalette(primaryColor, secondaryColor);
     gl.uniform2fv(gl.getUniformLocation(prog, "u_orig[0]"), new Float32Array(ORIGINS.flat()));
     gl.uniform1fv(gl.getUniformLocation(prog, "u_t0[0]"), new Float32Array(START_TIMES));
-    gl.uniform3fv(gl.getUniformLocation(prog, "u_col[0]"), new Float32Array(COLORS.flat()));
+    gl.uniform3fv(gl.getUniformLocation(prog, "u_col[0]"), new Float32Array(palette.flat()));
 
     const uRes = gl.getUniformLocation(prog, "u_res");
     const uTime = gl.getUniformLocation(prog, "u_time");
@@ -212,7 +202,7 @@ export function BrazilGoalFireworks({ active }: Props) {
       gl.deleteProgram(prog);
       gl.deleteBuffer(quad);
     };
-  }, [active]);
+  }, [active, primaryColor, secondaryColor]);
 
   if (!active) return null;
 
@@ -221,7 +211,7 @@ export function BrazilGoalFireworks({ active }: Props) {
       ref={canvasRef}
       className="fixed inset-0 pointer-events-none"
       style={{ zIndex: 9998 }}
-      data-testid="brazil-goal-fireworks"
+      data-testid="goal-fireworks"
     />
   );
 }

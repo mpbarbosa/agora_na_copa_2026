@@ -1,6 +1,7 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import packageInfo from "../package.json";
 import { APP_MATCHES } from "./appMatches";
+import { buildTeamMetaMap } from "./utils/teamCountdown";
 import type { Match, TeamRef } from "./types";
 import { MatchDetailView } from "./components/MatchDetailView";
 import { StandingsView } from "./components/StandingsView";
@@ -15,8 +16,8 @@ import { JogadoresView } from "./components/JogadoresView";
 import { TeamLineupView } from "./components/TeamLineupView";
 import { PartidasView } from "./components/PartidasView";
 import { DashboardView } from "./components/DashboardView";
-import { BrazilCountdownBadge } from "./components/BrazilCountdownBadge";
-import { BrazilGoalFireworks } from "./components/BrazilGoalFireworks";
+import { TeamCountdownBadge } from "./components/TeamCountdownBadge";
+import { GoalFireworks } from "./components/GoalFireworks";
 import { CookieConsentBanner } from "./components/CookieConsentBanner";
 import { AdSlot } from "./components/AdSlot";
 import { useTeamLineups } from "./hooks/useTeamLineups";
@@ -24,6 +25,7 @@ import { useVersionCheck } from "./hooks/useVersionCheck";
 import { VersionCheckTimer } from "./components/VersionCheckTimer";
 import { useAnalytics } from "./hooks/useAnalytics";
 import { useFeatureTour } from "./hooks/useFeatureTour";
+import { useFavoriteTeam } from "./hooks/useFavoriteTeam";
 import { useTipTour } from "./hooks/useTipTour";
 import { DonationPix } from "./components/DonationPix";
 import { ShareButton } from "./components/ShareButton";
@@ -42,6 +44,20 @@ export default function App() {
     "classic-light",
   );
   const [matches, setMatches] = useState<Match[]>(() => APP_MATCHES);
+  // The national team the supporter follows in the countdown badge. Locale-aware default:
+  // pt → Brazil; es (LATAM) → none, so the badge invites the visitor to pick their team.
+  const [favoriteTeam, selectFavoriteTeam] = useFavoriteTeam(
+    locale === "pt" ? "BRA" : null,
+  );
+  const favoriteTeamColors = useMemo(() => {
+    const meta = favoriteTeam
+      ? buildTeamMetaMap(matches).get(favoriteTeam)
+      : undefined;
+    return {
+      primary: meta?.primaryColor,
+      secondary: meta?.secondaryColor,
+    };
+  }, [matches, favoriteTeam]);
   const [activeNavId, setActiveNavId] = useState<string>("ao-vivo");
   const [lineupTeam, setLineupTeam] = useState<TeamRef | null>(null);
   const [standingsFocusGroupSlug, setStandingsFocusGroupSlug] = useState<string | null>(null);
@@ -52,30 +68,37 @@ export default function App() {
   const versionCheck = useVersionCheck(APP_VERSION);
   const newVersionAvailable = versionCheck.updateAvailable;
 
-  // Fireworks when Brazil scores during a live match
+  // Fireworks when the followed team scores during a live match
   const [fireworksActive, setFireworksActive] = useState(false);
-  const brazilMatchRef = useRef<{ matchId: string; score: number } | null>(null);
+  const favoriteMatchRef = useRef<{ matchId: string; score: number } | null>(null);
   const fireworksTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   useEffect(() => {
-    const braMatch = matches.find(
-      (m) => m.status === "LIVE" && (m.teamA.code === "BRA" || m.teamB.code === "BRA"),
-    );
-
-    if (!braMatch) {
-      brazilMatchRef.current = null;
+    if (!favoriteTeam) {
+      favoriteMatchRef.current = null;
       return;
     }
 
-    const braScore =
-      braMatch.teamA.code === "BRA"
-        ? (braMatch.score?.teamA ?? 0)
-        : (braMatch.score?.teamB ?? 0);
+    const liveMatch = matches.find(
+      (m) =>
+        m.status === "LIVE" &&
+        (m.teamA.code === favoriteTeam || m.teamB.code === favoriteTeam),
+    );
 
-    const prev = brazilMatchRef.current;
-    const sameMatch = prev?.matchId === braMatch.id;
+    if (!liveMatch) {
+      favoriteMatchRef.current = null;
+      return;
+    }
 
-    if (sameMatch && prev !== null && braScore > prev.score) {
+    const favoriteScore =
+      liveMatch.teamA.code === favoriteTeam
+        ? (liveMatch.score?.teamA ?? 0)
+        : (liveMatch.score?.teamB ?? 0);
+
+    const prev = favoriteMatchRef.current;
+    const sameMatch = prev?.matchId === liveMatch.id;
+
+    if (sameMatch && prev !== null && favoriteScore > prev.score) {
       setFireworksActive(true);
       clearTimeout(fireworksTimerRef.current);
       // 11s matches the shader duration: 12 bursts, the last starting at 6.05s and
@@ -83,8 +106,8 @@ export default function App() {
       fireworksTimerRef.current = setTimeout(() => setFireworksActive(false), 11000);
     }
 
-    brazilMatchRef.current = { matchId: braMatch.id, score: braScore };
-  }, [matches]);
+    favoriteMatchRef.current = { matchId: liveMatch.id, score: favoriteScore };
+  }, [matches, favoriteTeam]);
 
   useEffect(() => {
     return () => clearTimeout(fireworksTimerRef.current);
@@ -400,8 +423,16 @@ export default function App() {
         )}
       </main>
 
-      <BrazilCountdownBadge matches={matches} />
-      <BrazilGoalFireworks active={fireworksActive} />
+      <TeamCountdownBadge
+        matches={matches}
+        favoriteTeam={favoriteTeam}
+        onSelectTeam={selectFavoriteTeam}
+      />
+      <GoalFireworks
+        active={fireworksActive}
+        primaryColor={favoriteTeamColors.primary}
+        secondaryColor={favoriteTeamColors.secondary}
+      />
 
       {/* Responsive AdSense unit — dormant until a real publisher id + ads consent. */}
       <AdSlot theme={theme} />
