@@ -657,6 +657,20 @@
       "yellowAndDirectRed": 0
     }
   },
+  "ko-87-2026": {
+    "teamA": {
+      "yellow": 2,
+      "secondYellow": 0,
+      "directRed": 0,
+      "yellowAndDirectRed": 0
+    },
+    "teamB": {
+      "yellow": 3,
+      "secondYellow": 0,
+      "directRed": 0,
+      "yellowAndDirectRed": 0
+    }
+  },
   "ko-88-2026": {
     "teamA": {
       "yellow": 0,
