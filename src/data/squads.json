@@ -4309,7 +4309,10 @@
       "instagram": "agus_cano7",
       "wikipedia": "https://pt.wikipedia.org/wiki/Agust%C3%ADn_Canobbio"
     },
-    "instagramPostUrl": "https://www.instagram.com/reel/DZ2ZDoSIGay/"
+    "instagramPostUrls": [
+      "https://www.instagram.com/reel/DZ2ZDoSIGay/",
+      "https://www.instagram.com/p/DZ32ycliNzr/"
+    ]
   },
   "402884": {
     "fifaId": "402884",
