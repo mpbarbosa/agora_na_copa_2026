@@ -1,15 +1,18 @@
 import { test, expect } from "@playwright/test";
 
 // The Partidas "Agendadas" list mixes group-stage and knockout fixtures, so it
-// prints a phase header ("Fase de Grupos", "16 Avos de Final", …) to separate the
-// rounds. The knockout fixtures are static, so at least the knockout phases — and
-// thus multiple phase headers — are always present regardless of live data.
+// prints a phase header ("Fase de Grupos", "Oitavas de Final", …) to separate the
+// rounds. Several knockout rounds are still scheduled at once, so more than one
+// phase header is present — but which specific rounds remain shifts as the
+// tournament advances (early on it is "16 Avos de Final", later "Oitavas", …),
+// so this asserts on the first *knockout* header generically rather than a fixed
+// round name that goes stale once that round finishes.
 test.describe("Partidas list — phase separators", () => {
   test.beforeEach(async ({ page }) => {
     await page.addInitScript(() => localStorage.setItem("feature-tour-seen", "1"));
   });
 
-  test("separates the scheduled list by phase, with a 16 Avos de Final header", async ({ page }) => {
+  test("separates the scheduled list by phase, with a knockout-round header", async ({ page }) => {
     await page.goto("/");
     await page.click("#btn-consent-accept").catch(() => {});
     await page.click("#btn-nav-partidas");
@@ -17,15 +20,18 @@ test.describe("Partidas list — phase separators", () => {
 
     await expect(page.locator("#partidas-view")).toBeVisible();
 
-    // The knockout fixtures span several phases → more than one phase header.
+    // The scheduled fixtures span several phases → more than one phase header.
     const phaseHeaders = page.getByTestId("partidas-phase-header");
     await expect(phaseHeaders.first()).toBeVisible();
     expect(await phaseHeaders.count()).toBeGreaterThan(1);
 
-    // The "16 Avos de Final" separator is present and sits above the first R32 card.
-    const koHeader = page.locator("#partidas-phase-pre_game-16-avos-de-final");
+    // The first knockout separator — the next scheduled round, whatever it is
+    // (16 Avos / Oitavas / Quartas / …) — sits above its first match card.
+    const koHeader = phaseHeaders
+      .filter({ hasNotText: /Fase de Grupos/i })
+      .first();
     await expect(koHeader).toBeVisible();
-    await expect(koHeader).toContainText(/16 avos de final/i);
+    await expect(koHeader).toContainText(/avos|oitavas|quartas|semifinais|final/i);
 
     // Collapsed by default, with a visible hint that its matches are hidden.
     const koDetails = koHeader.locator("xpath=ancestor::details[1]");
