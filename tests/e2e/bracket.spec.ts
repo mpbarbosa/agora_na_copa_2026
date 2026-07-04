@@ -11,10 +11,12 @@ import { stubLiveApis } from "./fixtures/aoVivo";
 test.describe("Bracket view (Chaveamento)", () => {
   test.beforeEach(async ({ page }) => {
     // Stub the live overlay empty so the bracket resolves only from the static
-    // seed (group standings + KNOCKOUT_RESULTS). The feeders used here (#86/#88)
-    // are still-unplayed ties; were the prod fallback to report one finished it
-    // would resolve its winner-ref slot ("Vencedor #86" → the team that advanced,
-    // a clickable team link), making the feeder/undecided assertions race live data.
+    // seed (group standings + KNOCKOUT_RESULTS). The undecided ties asserted here
+    // (R16 #89/#90, feeding QF #97) are still unplayed; were the prod fallback to
+    // report one finished it would resolve its winner-ref slot ("Vencedor #89" →
+    // the team that advanced, a clickable team link), racing the assertions. The
+    // whole Round of 32 is finished in the seed, so those slots pick the next
+    // still-open round (oitavas) for the deterministic winner-ref checks.
     await stubLiveApis(page);
     await page.addInitScript(() => localStorage.setItem("feature-tour-seen", "1"));
   });
@@ -43,11 +45,11 @@ test.describe("Bracket view (Chaveamento)", () => {
     await page.click("#btn-nav-chaveamento");
     await expect(page.locator("#bracket-view")).toBeVisible();
 
-    // R16 #95 is fed by the winners of R32 #86 and #88 — still-unplayed ties, so both
+    // QF #97 is fed by the winners of R16 #89 and #90 — still-unplayed ties, so both
     // slots stay official winner-refs (deterministic, independent of any seeded result).
-    const r16 = page.locator("#bracket-match-95");
-    await expect(r16.locator("#bracket-slot-95-a")).toContainText("Vencedor #86");
-    await expect(r16.locator("#bracket-slot-95-b")).toContainText("Vencedor #88");
+    const qf = page.locator("#bracket-match-97");
+    await expect(qf.locator("#bracket-slot-97-a")).toContainText("Vencedor #89");
+    await expect(qf.locator("#bracket-slot-97-b")).toContainText("Vencedor #90");
 
     // The 3rd-place match (#103, TP) is fed by the two semifinal losers.
     const thirdPlace = page.locator("#bracket-stage-tp #bracket-match-103");
@@ -73,8 +75,8 @@ test.describe("Bracket view (Chaveamento)", () => {
     await expect(canadaSlot).toContainText(/canad/i);
     expect(await canadaSlot.evaluate((el) => el.tagName)).toBe("BUTTON");
     // …while an undecided winner-ref slot is a plain, non-clickable label.
-    const labelSlot = page.locator("#bracket-slot-95-a");
-    await expect(labelSlot).toContainText("Vencedor #86");
+    const labelSlot = page.locator("#bracket-slot-97-a");
+    await expect(labelSlot).toContainText("Vencedor #89");
     expect(await labelSlot.evaluate((el) => el.tagName)).toBe("DIV");
 
     // Clicking the resolved slot opens that national team's page.
@@ -159,33 +161,35 @@ test.describe("Bracket feeder spotlight on touch (two-stage tap)", () => {
 
   test.beforeEach(async ({ page }) => {
     // Stub the live overlay empty so the bracket resolves only from the static
-    // seed (group standings + KNOCKOUT_RESULTS). The feeders used here (#86/#88)
+    // seed (group standings + KNOCKOUT_RESULTS). The feeders used here (R16 #89/#90)
     // are still-unplayed ties; were the prod fallback to report one finished it
-    // would resolve its winner-ref slot ("Vencedor #86" → the team that advanced,
+    // would resolve its winner-ref slot ("Vencedor #89" → the team that advanced,
     // a clickable team link), making the feeder/undecided assertions race live data.
+    // (The whole Round of 32 is finished in the seed, so the still-open oitavas
+    // feed the quartas card exercised here.)
     await stubLiveApis(page);
     await page.addInitScript(() => localStorage.setItem("feature-tour-seen", "1"));
   });
 
-  test("first tap previews the 16-avos feeders, second tap opens the match", async ({ page }) => {
+  test("first tap previews the oitavas feeders, second tap opens the match", async ({ page }) => {
     await page.goto("/");
     await page.click("#btn-nav-chaveamento");
     await expect(page.locator("#bracket-view")).toBeVisible();
 
-    const oitavas = page.locator("#bracket-stage-r16 #bracket-match-95");
-    const feederA = page.locator("#bracket-stage-r32 #bracket-match-86");
-    const feederB = page.locator("#bracket-stage-r32 #bracket-match-88");
-    const unrelated = page.locator("#bracket-stage-r32 #bracket-match-77");
+    const quartas = page.locator("#bracket-stage-qf #bracket-match-97");
+    const feederA = page.locator("#bracket-stage-r16 #bracket-match-89");
+    const feederB = page.locator("#bracket-stage-r16 #bracket-match-90");
+    const unrelated = page.locator("#bracket-stage-r16 #bracket-match-91");
 
     // First tap spotlights the feeders WITHOUT leaving the bracket.
-    await oitavas.tap();
+    await quartas.tap();
     await expect(feederA).toHaveAttribute("data-feeder-highlight", "feeder");
     await expect(feederB).toHaveAttribute("data-feeder-highlight", "feeder");
     await expect(unrelated).toHaveAttribute("data-feeder-highlight", "hidden");
     await expect(page.locator("#bracket-view")).toBeVisible();
 
     // Second tap on the same card opens its match page.
-    await oitavas.tap();
+    await quartas.tap();
     await expect(page.locator("#match-detail-view")).toBeVisible();
   });
 
@@ -211,33 +215,35 @@ test.describe("Bracket feeder spotlight on mobile (collapses the columns)", () =
 
   test.beforeEach(async ({ page }) => {
     // Stub the live overlay empty so the bracket resolves only from the static
-    // seed (group standings + KNOCKOUT_RESULTS). The feeders used here (#86/#88)
+    // seed (group standings + KNOCKOUT_RESULTS). The feeders used here (R16 #89/#90)
     // are still-unplayed ties; were the prod fallback to report one finished it
-    // would resolve its winner-ref slot ("Vencedor #86" → the team that advanced,
+    // would resolve its winner-ref slot ("Vencedor #89" → the team that advanced,
     // a clickable team link), making the feeder/undecided assertions race live data.
+    // (The whole Round of 32 is finished in the seed, so the still-open oitavas
+    // feed the quartas card exercised here.)
     await stubLiveApis(page);
     await page.addInitScript(() => localStorage.setItem("feature-tour-seen", "1"));
   });
 
-  test("selecting an Oitavas tie hides its siblings and the unrelated 16-avos cards", async ({ page }) => {
+  test("selecting a Quartas tie hides its siblings and the unrelated Oitavas cards", async ({ page }) => {
     await page.goto("/");
     await page.click("#btn-nav-chaveamento");
     await expect(page.locator("#bracket-view")).toBeVisible();
 
-    const selected = page.locator("#bracket-stage-r16 #bracket-match-95");
-    const sibling = page.locator("#bracket-stage-r16 #bracket-match-96"); // another Oitavas tie
-    const feederA = page.locator("#bracket-stage-r32 #bracket-match-86");
-    const feederB = page.locator("#bracket-stage-r32 #bracket-match-88");
-    const unrelated = page.locator("#bracket-stage-r32 #bracket-match-77");
+    const selected = page.locator("#bracket-stage-qf #bracket-match-97");
+    const sibling = page.locator("#bracket-stage-qf #bracket-match-98"); // another Quartas tie
+    const feederA = page.locator("#bracket-stage-r16 #bracket-match-89");
+    const feederB = page.locator("#bracket-stage-r16 #bracket-match-90");
+    const unrelated = page.locator("#bracket-stage-r16 #bracket-match-91");
     // The visible (mobile) count in each column's subheading.
+    const qfCount = page.locator("#bracket-stage-qf-summary span:visible");
     const r16Count = page.locator("#bracket-stage-r16-summary span:visible");
-    const r32Count = page.locator("#bracket-stage-r32-summary span:visible");
 
     // Idle: the whole column is visible, full tally shown.
     await expect(sibling).toBeVisible();
     await expect(unrelated).toBeVisible();
+    await expect(qfCount).toHaveText("4 confrontos");
     await expect(r16Count).toHaveText("8 confrontos");
-    await expect(r32Count).toHaveText("16 confrontos");
 
     // First tap collapses everything but the selected tie and its two feeders.
     await selected.tap();
@@ -247,8 +253,8 @@ test.describe("Bracket feeder spotlight on mobile (collapses the columns)", () =
     await expect(sibling).toBeHidden(); // display:none — out of the flow
     await expect(unrelated).toBeHidden();
     // …and the subheadings follow the collapse: just the tie, just its two feeders.
-    await expect(r16Count).toHaveText("1 confronto");
-    await expect(r32Count).toHaveText("2 confrontos");
+    await expect(qfCount).toHaveText("1 confronto");
+    await expect(r16Count).toHaveText("2 confrontos");
 
     // Second tap on the selected card still opens its match page.
     await selected.tap();

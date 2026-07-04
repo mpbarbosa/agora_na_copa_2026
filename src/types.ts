@@ -7,6 +7,13 @@ export enum Position {
 
 export interface PlayerSocials {
   instagram?: string;
+  /**
+   * Approximate Instagram follower count (rounded), shown next to the Instagram icon in the
+   * player card (e.g. 1_000_000 → "1 mi seguidores"). Hand-curated and verified from a real
+   * source — there is no live Instagram API — so it is intentionally a rounded estimate, not a
+   * live figure. Only meaningful alongside `instagram`.
+   */
+  instagramFollowers?: number;
   x?: string;
   tiktok?: string;
   youtube?: string;

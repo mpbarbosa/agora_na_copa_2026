@@ -3,7 +3,7 @@ import { Position, type Player, type PlayerSocials } from "../types";
 import { InstagramBrandIcon } from "./InstagramBrandIcon";
 import { FlagIcon } from "./FlagIcon";
 import { useEscapeKey } from "../hooks/useEscapeKey";
-import { getPlayerSocialEntries, buildPlayerSearchUrls } from "../utils/playerDisplay";
+import { getPlayerSocialEntries, buildPlayerSearchUrls, formatFollowerCount } from "../utils/playerDisplay";
 import { WorldCupNoteCarousel } from "./WorldCupNoteCarousel";
 import { PlayerVideoRail } from "./PlayerVideoRail";
 import { PlayerNoteFreshness } from "./PlayerNoteFreshness";
@@ -88,7 +88,9 @@ export function buildPlayerStatCells(
   ];
 }
 
-const SOCIAL_PLATFORM_LABELS: Record<keyof PlayerSocials, string> = {
+// `instagramFollowers` is metadata for the Instagram chip, not a linkable platform, so it is
+// excluded here (and never surfaces from `getPlayerSocialEntries`).
+const SOCIAL_PLATFORM_LABELS: Record<Exclude<keyof PlayerSocials, "instagramFollowers">, string> = {
   instagram: "Instagram",
   x: "X",
   tiktok: "TikTok",
@@ -113,12 +115,22 @@ function getSocialUrl(platform: keyof PlayerSocials, value: string): string {
   return `${base}${value}`;
 }
 
-export function renderSocialPlatformLabel(platform: keyof PlayerSocials) {
+export function renderSocialPlatformLabel(
+  platform: keyof PlayerSocials,
+  instagramFollowers?: number,
+) {
   if (platform === "instagram") {
+    const followersLabel =
+      instagramFollowers != null ? formatFollowerCount(instagramFollowers) : "";
     return (
       <>
         <InstagramBrandIcon size={16} />
         <span className="sr-only">{SOCIAL_PLATFORM_LABELS[platform]}</span>
+        {followersLabel && (
+          <span className="ml-1.5 normal-case" aria-label={`${followersLabel} seguidores`}>
+            {followersLabel}
+          </span>
+        )}
       </>
     );
   }
@@ -472,7 +484,7 @@ export function PlayerOverlayCard({
                       className={`inline-flex items-center justify-center rounded border px-3 py-1.5 font-mono text-[10px] font-bold uppercase tracking-wider transition ${closeClasses}`}
                       style={{ borderColor: `${accent}40` }}
                     >
-                      {renderSocialPlatformLabel(platform)}
+                      {renderSocialPlatformLabel(platform, player.socials?.instagramFollowers)}
                     </a>
                   ))}
                 </div>

@@ -32,8 +32,33 @@ export function buildPlayerSearchUrls(playerName: string, teamName: string) {
   return { google: base, news: `${base}&tbm=nws` };
 }
 
+// Keys of PlayerSocials that are NOT outbound links, so they must be skipped when building the
+// list of social buttons (e.g. `instagramFollowers` is metadata for the Instagram link, not a URL).
+const NON_LINK_SOCIAL_KEYS = new Set<keyof PlayerSocials>(["instagramFollowers"]);
+
 export function getPlayerSocialEntries(socials: PlayerSocials | undefined) {
   return (
-    Object.entries(socials ?? {}) as Array<[keyof PlayerSocials, string | undefined]>
-  ).filter((entry): entry is [keyof PlayerSocials, string] => Boolean(entry[1]));
+    Object.entries(socials ?? {}) as Array<[keyof PlayerSocials, unknown]>
+  ).filter(
+    (entry): entry is [keyof PlayerSocials, string] =>
+      !NON_LINK_SOCIAL_KEYS.has(entry[0]) && typeof entry[1] === "string" && entry[1].length > 0,
+  );
+}
+
+/**
+ * Compact pt-BR rendering of an (approximate) follower count for the player card's Instagram chip:
+ * 1_000_000 → "1 mi", 1_200_000 → "1,2 mi", 850_000 → "850 mil", 12_400 → "12 mil". Values below
+ * 1_000 render as-is. Returns "" for non-positive/non-finite input so callers can skip rendering.
+ */
+export function formatFollowerCount(count: number): string {
+  if (!Number.isFinite(count) || count <= 0) return "";
+  if (count >= 1_000_000) {
+    const millions = count / 1_000_000;
+    const rounded = millions >= 10 ? Math.round(millions) : Math.round(millions * 10) / 10;
+    return `${rounded.toLocaleString("pt-BR")} mi`;
+  }
+  if (count >= 1_000) {
+    return `${Math.round(count / 1_000).toLocaleString("pt-BR")} mil`;
+  }
+  return count.toLocaleString("pt-BR");
 }

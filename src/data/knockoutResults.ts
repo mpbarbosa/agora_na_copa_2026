@@ -80,4 +80,20 @@ export const KNOCKOUT_RESULTS: Record<number, KnockoutResultSeed> = {
   // #84 · 16-avos · 02/07/2026 — Espanha 3×0 Áustria (Mikel Oyarzabal 36' e 89', Pedro Porro
   // 66'). Espanha classificada com autoridade; alimenta a Oitavas #93 (slot W84).
   84: { status: "FINISHED", score: { teamA: 3, teamB: 0 } },
+  // #85 · 16-avos · BC Place Vancouver · 03/07/2026 — Suíça 2×0 Argélia (Breel Embolo 10',
+  // Dan Ndoye 46'). Suíça classificada; alimenta a Oitavas #96 (slot W85).
+  85: { status: "FINISHED", score: { teamA: 2, teamB: 0 } },
+  // #86 · 16-avos · Miami Stadium · 03/07/2026 — Argentina 3×2 Cabo Verde na prorrogação
+  // (Lionel Messi 29', Lisandro Martínez 92' e gol contra de Diney Borges 111' p/ ARG; Deroy
+  // Duarte 59' e Sidny Lopes Cabral 103' p/ CPV). Argentina classificada; alimenta a Oitavas
+  // #95 (slot W86).
+  86: { status: "FINISHED", score: { teamA: 3, teamB: 2 } },
+  // #87 · 16-avos · Kansas City Stadium · 03/07/2026 — Colômbia 1×0 Gana (Jhon Arias 14').
+  // Colômbia classificada; alimenta a Oitavas #96 (slot W87).
+  87: { status: "FINISHED", score: { teamA: 1, teamB: 0 } },
+  // #88 · 16-avos · Dallas Stadium · 03/07/2026 — Austrália 1×1 Egito (gol contra de Mohamed
+  // Hany 55' p/ AUS; Emam Ashour 13' p/ EGY), Egito 4×2 nos pênaltis (Saber, Ramy Rabia,
+  // Mohamed Salah e Hossam Abdelmaguid; Irvine e Awer Mabil p/ AUS). Egito classificado;
+  // alimenta a Oitavas #95 (slot W88).
+  88: { status: "FINISHED", score: { teamA: 1, teamB: 1 }, penaltyScore: { teamA: 2, teamB: 4 } },
 };

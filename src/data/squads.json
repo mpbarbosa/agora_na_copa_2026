@@ -18182,7 +18182,11 @@
     "club": "",
     "pictureUrl": "https://digitalhub.fifa.com/transform/1449efe8-a491-4d19-8c7d-c6fb0b6e8d0f/ARIAS-Jhon_470760",
     "dateOfBirth": "1997-09-21",
-    "height": 168
+    "height": 168,
+    "socials": {
+      "instagram": "jhonariasa",
+      "instagramFollowers": 1000000
+    }
   },
   "360642": {
     "fifaId": "360642",
