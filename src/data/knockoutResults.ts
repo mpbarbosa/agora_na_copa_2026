@@ -96,4 +96,7 @@ export const KNOCKOUT_RESULTS: Record<number, KnockoutResultSeed> = {
   // Mohamed Salah e Hossam Abdelmaguid; Irvine e Awer Mabil p/ AUS). Egito classificado;
   // alimenta a Oitavas #95 (slot W88).
   88: { status: "FINISHED", score: { teamA: 1, teamB: 1 }, penaltyScore: { teamA: 2, teamB: 4 } },
+  // #90 · Oitavas · Houston Stadium · 04/07/2026 — Canadá 0×3 Marrocos (Azzedine Ounahi 50' e
+  // 82', Soufiane Rahimi 90+8' p/ MAR). Marrocos classificado às Quartas; alimenta a #97 (slot W90).
+  90: { status: "FINISHED", score: { teamA: 0, teamB: 3 } },
 };
