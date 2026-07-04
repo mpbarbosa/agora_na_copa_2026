@@ -2416,7 +2416,12 @@ if (REDDIT_CLIENT_ID && REDDIT_CLIENT_SECRET) void refreshRedditCache();
 // when the report dir is absent (e.g. a dev checkout without snapshots). The files
 // change only on deploy, so a short in-process cache is plenty. The public payload
 // (built by traffic-report-core) never carries per-source visitor IPs.
-const TRAFFIC_REPORTS_DIR = path.join(process.cwd(), "traffic-reports");
+// The report snapshots are generated + committed in the git checkout, but the app
+// service runs from the deploy dir (/var/www/…), which does NOT carry them. Allow
+// pointing at the checkout's traffic-reports/ via env; default to cwd for dev.
+const TRAFFIC_REPORTS_DIR = process.env.TRAFFIC_REPORTS_DIR
+  ? path.resolve(process.env.TRAFFIC_REPORTS_DIR)
+  : path.join(process.cwd(), "traffic-reports");
 const TRAFFIC_CACHE_TTL_MS = 5 * 60 * 1000;
 let trafficCache: { payload: TrafficDashboardResponse; expiresAt: number } | null = null;
 
