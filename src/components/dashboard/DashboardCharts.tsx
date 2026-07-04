@@ -235,6 +235,114 @@ export function VerticalBars({ theme, data, color }: VerticalBarsProps) {
   );
 }
 
+export interface LinePoint {
+  /** X value (here: epoch-ms of a traffic snapshot). */
+  x: number;
+  y: number;
+}
+
+export interface LineSeries {
+  name: string;
+  points: LinePoint[];
+  color?: string;
+}
+
+interface LineChartProps {
+  theme: Theme;
+  series: LineSeries[];
+  /** Formats a Y value for the axis ticks + point tooltips (defaults to pt-BR integer). */
+  formatValue?: (n: number) => string;
+  /** Formats an X value for the (3) axis labels (defaults to a UTC dd/MM HH:mm stamp). */
+  formatX?: (x: number) => string;
+}
+
+const ptInt = new Intl.NumberFormat("pt-BR");
+const defaultXLabel = (x: number): string => {
+  const d = new Date(x);
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${pad(d.getUTCDate())}/${pad(d.getUTCMonth() + 1)} ${pad(d.getUTCHours())}:${pad(d.getUTCMinutes())}`;
+};
+
+/**
+ * Dependency-free multi-series SVG line chart with a shared Y axis. Used by the
+ * "Tráfego" tab for the cumulative-requests and request-rate time series; feed it
+ * one series at a time to keep the axis readable. Needs ≥2 points to draw a trend.
+ */
+export function LineChart({ theme, series, formatValue = (n) => ptInt.format(n), formatX = defaultXLabel }: LineChartProps) {
+  const isLight = theme === "classic-light";
+  const gridColor = isLight ? "#e2e8f0" : "#334155";
+  const tickTextColor = isLight ? "#64748b" : "#94a3b8";
+  const palette = SERIES_PALETTE[theme];
+
+  const W = 720;
+  const H = 260;
+  const pad = { l: 56, r: 16, t: 16, b: 34 };
+  const iw = W - pad.l - pad.r;
+  const ih = H - pad.t - pad.b;
+
+  const allX = series[0]?.points.map((p) => p.x) ?? [];
+  if (allX.length < 2) {
+    const mutedClasses = isLight ? "text-slate-500" : "text-slate-400";
+    return (
+      <p className={`py-10 text-center font-mono text-xs uppercase tracking-wider ${mutedClasses}`}>
+        São necessários ao menos dois instantâneos para traçar a tendência
+      </p>
+    );
+  }
+
+  const xMin = Math.min(...allX);
+  const xMax = Math.max(...allX);
+  const yMax = Math.max(1, ...series.flatMap((s) => s.points.map((p) => p.y)));
+  const sx = (x: number) => pad.l + ((x - xMin) / (xMax - xMin || 1)) * iw;
+  const sy = (y: number) => pad.t + ih - (y / yMax) * ih;
+
+  const yTicks = 4;
+  const yLines = Array.from({ length: yTicks + 1 }, (_, i) => (yMax / yTicks) * i);
+  const xLabelIdx = [0, Math.floor((allX.length - 1) / 2), allX.length - 1];
+
+  return (
+    <div>
+      <div className="mb-1.5 flex flex-wrap gap-x-4 gap-y-1">
+        {series.map((s, i) => (
+          <span key={s.name} className={`inline-flex items-center gap-1.5 font-mono text-[11px] ${tickTextColor === "#64748b" ? "text-slate-600" : "text-slate-300"}`}>
+            <span className="inline-block h-2.5 w-2.5 rounded-sm" style={{ backgroundColor: s.color ?? palette[i % palette.length] }} />
+            {s.name}
+          </span>
+        ))}
+      </div>
+      <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="xMidYMid meet" className="w-full" role="img" aria-label={series.map((s) => s.name).join(", ")}>
+        {yLines.map((y) => (
+          <g key={`y${y}`}>
+            <line x1={pad.l} y1={sy(y)} x2={W - pad.r} y2={sy(y)} stroke={gridColor} strokeWidth={1} />
+            <text x={pad.l - 8} y={sy(y) + 4} textAnchor="end" fontSize={11} fill={tickTextColor} fontFamily="monospace">
+              {formatValue(Math.round(y))}
+            </text>
+          </g>
+        ))}
+        {series.map((s, i) => {
+          const c = s.color ?? palette[i % palette.length];
+          const d = s.points.map((p, j) => `${j ? "L" : "M"}${sx(p.x).toFixed(1)},${sy(p.y).toFixed(1)}`).join(" ");
+          return (
+            <g key={s.name}>
+              <path d={d} fill="none" stroke={c} strokeWidth={2} />
+              {s.points.map((p) => (
+                <circle key={p.x} cx={sx(p.x)} cy={sy(p.y)} r={2.5} fill={c}>
+                  <title>{`${s.name}: ${formatValue(p.y)}`}</title>
+                </circle>
+              ))}
+            </g>
+          );
+        })}
+        {xLabelIdx.map((idx) => (
+          <text key={`x${idx}`} x={sx(allX[idx])} y={H - 10} textAnchor="middle" fontSize={11} fill={tickTextColor} fontFamily="monospace">
+            {formatX(allX[idx])}
+          </text>
+        ))}
+      </svg>
+    </div>
+  );
+}
+
 export interface ScatterDatum {
   x: number;
   y: number;

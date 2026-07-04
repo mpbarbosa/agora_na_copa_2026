@@ -22,6 +22,14 @@ import {
   VerticalBars,
   type DonutSegment,
 } from "./dashboard/DashboardCharts";
+import { TrafficDashboardPanel } from "./dashboard/TrafficDashboardPanel";
+
+type DashboardTab = "panorama" | "trafego";
+
+const DASHBOARD_TABS: { id: DashboardTab; label: string }[] = [
+  { id: "panorama", label: "Panorama" },
+  { id: "trafego", label: "Tráfego" },
+];
 
 interface DashboardViewProps {
   theme: "classic-light" | "stadium-dark";
@@ -54,6 +62,8 @@ export function DashboardView({ theme, matches }: DashboardViewProps) {
   const isLight = theme === "classic-light";
   const headingClasses = isLight ? "text-slate-900" : "text-white";
   const mutedClasses = isLight ? "text-slate-600" : "text-slate-300";
+
+  const [tab, setTab] = useState<DashboardTab>("panorama");
 
   const {
     totals,
@@ -140,10 +150,44 @@ export function DashboardView({ theme, matches }: DashboardViewProps) {
           Dashboard
         </h2>
         <p className={`mt-1 font-mono text-[11px] uppercase tracking-wider ${mutedClasses}`}>
-          Panorama da Copa do Mundo FIFA 2026 em números
+          {tab === "panorama"
+            ? "Panorama da Copa do Mundo FIFA 2026 em números"
+            : "Bastidores da audiência do site em números"}
         </p>
       </div>
 
+      {/* Tabs */}
+      <div className="mt-5 flex gap-2" role="tablist" aria-label="Seções do dashboard">
+        {DASHBOARD_TABS.map((t) => {
+          const active = tab === t.id;
+          return (
+            <button
+              key={t.id}
+              type="button"
+              role="tab"
+              aria-selected={active}
+              id={`dashboard-tab-${t.id}`}
+              onClick={() => setTab(t.id)}
+              className={`rounded-full border px-4 py-1.5 font-mono text-[11px] uppercase tracking-wider transition ${
+                active
+                  ? isLight
+                    ? "border-slate-900 bg-slate-900 text-white"
+                    : "border-white/80 bg-white text-slate-900"
+                  : isLight
+                    ? "border-slate-200 bg-white text-slate-600 hover:border-slate-300"
+                    : "border-white/10 bg-[#1a1d1d] text-slate-300 hover:border-white/25"
+              }`}
+            >
+              {t.label}
+            </button>
+          );
+        })}
+      </div>
+
+      {tab === "trafego" && <TrafficDashboardPanel theme={theme} />}
+
+      {tab === "panorama" && (
+        <>
       {/* KPI tiles */}
       <div className="mt-6 grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-6">
         <StatCard theme={theme} label="Seleções" value={integer(totals.teams)} hint="6 continentes" />
@@ -285,6 +329,8 @@ export function DashboardView({ theme, matches }: DashboardViewProps) {
           )}
         </ChartCard>
       </div>
+        </>
+      )}
     </div>
   );
 }

@@ -2,7 +2,7 @@ import express from "express";
 import os from "node:os";
 import { createServer as createHttpServer } from "node:http";
 import { createServer as createNetServer } from "node:net";
-import { readFileSync } from "node:fs";
+import { readFileSync, readdirSync } from "node:fs";
 import path from "path";
 import { createServer as createViteServer } from "vite";
 import dotenv from "dotenv";
@@ -20,6 +20,7 @@ import type {
 } from "./fifa-sync-core";
 import { GOOGLE_TRENDS_BATCH_URL, buildGoogleTrendsRequestBody, parseGoogleTrendsBatch } from "./trends-core";
 import { buildOpenMeteoUrl, parseOpenMeteoCurrent } from "./weather-core";
+import { buildTrafficDashboard } from "./traffic-report-core";
 import {
   buildRedditTokenRequest,
   parseRedditToken,
@@ -83,6 +84,7 @@ import {
   type ChatResponse,
   type RedditPost,
   type RedditResponse,
+  type TrafficDashboardResponse,
 } from "./src/types";
 import REDDIT_SEED_POSTS from "./src/data/redditPosts.json";
 
@@ -2407,6 +2409,45 @@ app.get("/api/reddit", (_req, res) => {
 // Warm the cache at startup only when credentials exist — otherwise every
 // instance without a Reddit app would log a guaranteed-failed fetch.
 if (REDDIT_CLIENT_ID && REDDIT_CLIENT_SECRET) void refreshRedditCache();
+
+// Traffic dashboard — parses the committed traffic-reports/summary-*.txt snapshots
+// (produced by scripts/traffic-report.sh on the prod host) into the "Tráfego" tab
+// payload. Not FIFA-sourced but follows the resilience shape; falls back cleanly
+// when the report dir is absent (e.g. a dev checkout without snapshots). The files
+// change only on deploy, so a short in-process cache is plenty. The public payload
+// (built by traffic-report-core) never carries per-source visitor IPs.
+const TRAFFIC_REPORTS_DIR = path.join(process.cwd(), "traffic-reports");
+const TRAFFIC_CACHE_TTL_MS = 5 * 60 * 1000;
+let trafficCache: { payload: TrafficDashboardResponse; expiresAt: number } | null = null;
+
+const buildTrafficPayload = (): TrafficDashboardResponse => {
+  const updatedAt = new Date().toISOString();
+  let files: { file: string; text: string }[];
+  try {
+    files = readdirSync(TRAFFIC_REPORTS_DIR)
+      .filter((f) => /^summary-.*\.txt$/.test(f))
+      .map((file) => ({ file, text: readFileSync(path.join(TRAFFIC_REPORTS_DIR, file), "utf8") }));
+  } catch {
+    return {
+      source: "fallback",
+      note: "Relatórios de tráfego indisponíveis nesta instância.",
+      updatedAt,
+      snapshotCount: 0,
+      windowRatePerMin: null,
+      timeline: [],
+      latest: null,
+    };
+  }
+  return buildTrafficDashboard(files, updatedAt);
+};
+
+app.get("/api/traffic-dashboard", (_req, res) => {
+  if (!trafficCache || trafficCache.expiresAt <= Date.now()) {
+    trafficCache = { payload: buildTrafficPayload(), expiresAt: Date.now() + TRAFFIC_CACHE_TTL_MS };
+  }
+  res.set("Cache-Control", "public, max-age=300");
+  res.json(trafficCache.payload);
+});
 
 // Current weather at a match venue, used by the live scoreboard. Keyed by
 // rounded coordinates so nearby requests share a cache entry. Free, key-less

@@ -659,3 +659,86 @@ export interface ChatResponse {
   messages: ChatMessage[];
   updatedAt: string;
 }
+
+/** A "<count> <label>" row from a traffic snapshot (top paths, countries, status codes…). */
+export interface TrafficCountRow {
+  label: string;
+  count: number;
+}
+
+/** One point on the cross-snapshot time series (cumulative requests / unique IPs). */
+export interface TrafficTimelinePoint {
+  /** Epoch-ms the snapshot was generated. */
+  t: number;
+  /** Cumulative request count in the log window at that snapshot. */
+  requests: number;
+  /** Cumulative unique-IP count at that snapshot. */
+  uniqueIps: number;
+  /** Requests/min between this snapshot and the previous one (null on the first). */
+  ratePerMin: number | null;
+}
+
+/**
+ * The latest traffic snapshot, projected for public display. Deliberately omits
+ * the per-source visitor-IP breakdown (`suspectSources`) present in the raw
+ * report — only aggregate counts are exposed.
+ */
+export interface TrafficSnapshotLatest {
+  /** Snapshot filename (e.g. "summary-20260703-230702.txt"). */
+  file: string;
+  /** ISO timestamp the snapshot was generated on the prod host. */
+  generated: string | null;
+  /** Total requests in the log window (cumulative). */
+  requests: number | null;
+  /** Unique IPs in the log window. */
+  uniqueIps: number | null;
+  /** Raw nginx log-line count the snapshot summarised. */
+  logLines: number | null;
+  /** Human date range of the log window. */
+  dateRange: string | null;
+  /** GeoIP db label backing the country/city tallies, when present. */
+  geoSource: string | null;
+  /** Bot/crawler hit count. */
+  bots: number | null;
+  /** Synthetic (e2e-fixture) hit count. */
+  suspect: number | null;
+  /** Top requested paths (e2e-synthetic paths filtered out for display). */
+  topPaths: TrafficCountRow[];
+  /** HTTP status codes with their hit counts. */
+  statusCodes: TrafficCountRow[];
+  /** Referrers, "-" and non-URL noise filtered out. */
+  referrers: TrafficCountRow[];
+  /** Top countries by unique visitor. */
+  countriesByVisitor: TrafficCountRow[];
+  /** Top countries by request volume. */
+  countriesByVolume: TrafficCountRow[];
+  /** Top cities by unique visitor (empty on a country-only report). */
+  citiesByVisitor: TrafficCountRow[];
+  /** Top cities by request volume (empty on a country-only report). */
+  citiesByVolume: TrafficCountRow[];
+  /** Requests bucketed by hour of day (UTC), keyed "00".."23". */
+  byHour: Record<string, number>;
+  /** Requests bucketed by calendar day (label "DD/Mon/YYYY"). */
+  byDay: TrafficCountRow[];
+}
+
+/**
+ * `/api/traffic-dashboard` payload — the "Tráfego" tab of the Dashboard page,
+ * parsed from the committed `traffic-reports/summary-*.txt` snapshots. Not
+ * FIFA-sourced, but follows the resilience shape: `source: "traffic-log"` when
+ * at least one snapshot parsed, `"fallback"` when the report dir is absent or
+ * unreadable (then `latest` is null and `timeline` is empty).
+ */
+export interface TrafficDashboardResponse {
+  source: "traffic-log" | "fallback";
+  note: string;
+  updatedAt: string;
+  /** How many snapshots were parsed. */
+  snapshotCount: number;
+  /** Average requests/min across the whole snapshot window (null with <2 snapshots). */
+  windowRatePerMin: number | null;
+  /** Cross-snapshot time series, oldest first. */
+  timeline: TrafficTimelinePoint[];
+  /** The most recent snapshot, or null in the fallback case. */
+  latest: TrafficSnapshotLatest | null;
+}
