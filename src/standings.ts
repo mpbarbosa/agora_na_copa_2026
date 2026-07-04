@@ -2,6 +2,7 @@ import type { Match, StandingsRow } from "./types";
 import { standings as seedStandings } from "./data/tournament";
 import { APP_MATCHES } from "./appMatches";
 import { fairPlayPointsForSide } from "./disciplinary";
+import { localizeTeamName } from "./i18n/teamNames";
 
 const POINTS_FOR_WIN = 3;
 const POINTS_FOR_DRAW = 1;
@@ -64,6 +65,8 @@ export function getCanonicalSeedStandings(
       row.code,
       {
         ...row,
+        // Localize the display name for the active UI locale (pt → unchanged).
+        name: localizeTeamName(row.name, row.code),
       } satisfies StandingsRow,
     ]),
   );

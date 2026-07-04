@@ -7,6 +7,8 @@ import { KNOCKOUT_MATCHES } from "./data/knockoutBracket";
 import { KNOCKOUT_RESULTS, type KnockoutResultSeed } from "./data/knockoutResults";
 import { humanizeSlot, KNOCKOUT_STAGE_NAMES } from "./utils/knockoutSlots";
 import { decisiveSlot } from "./utils/matchResult";
+import { getActiveLocale } from "./i18n/locale";
+import { localizeTeamName } from "./i18n/teamNames";
 import type { Match, KnockoutMatch, KnockoutTeamRef } from "./types";
 
 const PT_MONTHS = [
@@ -82,11 +84,43 @@ const PT_WEEKDAYS = [
   "sábado",
 ];
 
+const ES_MONTHS = [
+  "Enero",
+  "Febrero",
+  "Marzo",
+  "Abril",
+  "Mayo",
+  "Junio",
+  "Julio",
+  "Agosto",
+  "Septiembre",
+  "Octubre",
+  "Noviembre",
+  "Diciembre",
+];
+
+const ES_WEEKDAYS = [
+  "domingo",
+  "lunes",
+  "martes",
+  "miércoles",
+  "jueves",
+  "viernes",
+  "sábado",
+];
+
+// pt-BR is the native format ("4 Julho 2026 (sábado)"); es renders the LATAM
+// month/weekday names ("4 Julio 2026 (sábado)"). APP_MATCHES is built once at
+// module load, so this reads the boot locale — correct for the es. subdomain,
+// the primary Spanish delivery path.
 const formatKickoffDate = (kickoffTimestamp: string) => {
   const [datePart] = kickoffTimestamp.split("T");
   const [year, month, day] = datePart.split("-").map(Number);
-  const weekday = PT_WEEKDAYS[new Date(Date.UTC(year, month - 1, day)).getUTCDay()];
-  return `${day} ${PT_MONTHS[month - 1]} ${year} (${weekday})`;
+  const es = getActiveLocale() === "es";
+  const months = es ? ES_MONTHS : PT_MONTHS;
+  const weekdays = es ? ES_WEEKDAYS : PT_WEEKDAYS;
+  const weekday = weekdays[new Date(Date.UTC(year, month - 1, day)).getUTCDay()];
+  return `${day} ${months[month - 1]} ${year} (${weekday})`;
 };
 
 const formatKickoffTime = (kickoffTimestamp: string) => kickoffTimestamp.slice(11, 16);
@@ -230,14 +264,20 @@ export const APP_MATCHES: Match[] = [
   // Normalize the display date for every match (including the static base
   // fixtures) so they all share the "29 Junho 2026 (segunda-feira)" format.
   const kickoffDate = formatKickoffDate(match.kickoffTimestamp);
+  // Localize the display team names for the active UI locale (pt → unchanged;
+  // es → "MARROCOS" becomes "MARRUECOS"). Codes stay the identity key.
+  const teamA = { ...match.teamA, name: localizeTeamName(match.teamA.name, match.teamA.code) };
+  const teamB = { ...match.teamB, name: localizeTeamName(match.teamB.name, match.teamB.code) };
   const officialVenue = FIFA_MATCH_VENUES[match.id];
   if (!officialVenue) {
-    return { ...match, kickoffDate };
+    return { ...match, kickoffDate, teamA, teamB };
   }
 
   return {
     ...match,
     kickoffDate,
+    teamA,
+    teamB,
     stadiumName: officialVenue.stadiumName.trim(),
     city: officialVenue.city.trim(),
   };

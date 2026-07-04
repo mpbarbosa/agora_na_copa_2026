@@ -20,6 +20,7 @@ import { APP_MATCHES } from "../appMatches";
 import { apiUrl, useT, useLocale, localeToIntlTag, getActiveLocale } from "../i18n";
 import { buildGroupPositionMap } from "../standings";
 import { localizedStageName } from "../utils/knockoutSlots";
+import { localizeOfficialFifaStatus } from "../i18n/matchStatus";
 import { resolveTeamDisplay } from "../utils/resolveTeamDisplay";
 import MATCH_VIDEOS from "../data/matchVideos.json";
 import MATCH_ANALYSIS from "../data/matchAnalysis.json";
@@ -951,7 +952,7 @@ export function MatchDetailView({
           }`}
           title={t("aoVivo.status.officialFifaTitle")}
         >
-          <span>{currentOfficialFifaStatus}</span>
+          <span>{localizeOfficialFifaStatus(currentOfficialFifaStatus, locale)}</span>
         </div>
       )}
     </div>
@@ -2023,7 +2024,7 @@ export function MatchDetailView({
                   }`}
                   id="scoreboard-stage-label"
                 >
-                  {currentMatchStageLabel}
+                  {localizedStageName(currentMatchStageLabel)}
                 </span>
               )}
 
