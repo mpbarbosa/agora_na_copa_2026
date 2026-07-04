@@ -162,6 +162,16 @@ rsyncs to `/var/www`, runs `npm ci --omit=dev`, and restarts the
   live — you skipped/forgot the bump (Stage 2), or the bump wasn't pushed. Fix and
   re-run (or, only for a deliberate same-version redeploy, prefix
   `AGORA_FORCE_GO_LIVE=1`).
+- **If the prod `git pull` aborts with `untracked working tree files would be
+  overwritten` under `traffic-reports/`:** you committed a traffic snapshot that
+  also exists as an untracked file in the prod checkout (it was generated there by
+  `traffic-report.sh`). The committed and untracked copies are byte-identical (the
+  commit came from that same prod-generated file), so it's safe to `rm` the named
+  untracked files on prod, then re-run `git pull --ff-only && npm run go-live`:
+  ```bash
+  plink -batch -i ~/Downloads/web_server.ppk ubuntu@18.229.20.196 \
+    "bash -lc 'cd ~/Documents/GitHub/agora_na_copa_2026 && rm -f traffic-reports/summary-<STAMP>.txt && git pull --ff-only && npm run go-live'"
+  ```
 
 **Verify** (wait a few seconds for the restart):
 
