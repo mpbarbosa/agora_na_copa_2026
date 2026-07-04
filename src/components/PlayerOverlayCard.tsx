@@ -9,7 +9,11 @@ import { PlayerVideoRail } from "./PlayerVideoRail";
 import { PlayerNoteFreshness } from "./PlayerNoteFreshness";
 import { InstagramPostFrame } from "./InstagramPostFrame";
 import { resolveInstagramPostUrls } from "../utils/instagram";
+import { useT, useLocale } from "../i18n";
 import PLAYER_SIGNATURES from "../data/playerSignatures.json";
+
+/** Translate function shape from `useT()`; threaded into helpers that build display text. */
+type TFn = (key: string, params?: Record<string, string | number>) => string;
 
 // Commons signature permalink (Special:FilePath → upload.wikimedia.org CDN),
 // the same hotlink pattern FlagIcon and the federation crests use. Keyed by
@@ -27,13 +31,17 @@ export const getPlayerAge = (dateOfBirth: string): number =>
   Math.floor((Date.now() - new Date(dateOfBirth).getTime()) / (365.25 * 24 * 3600 * 1000));
 
 const PT_MONTHS_SHORT = ["jan.", "fev.", "mar.", "abr.", "mai.", "jun.", "jul.", "ago.", "set.", "out.", "nov.", "dez."];
+const MONTH_KEYS = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
 
-// Formats "1993-07-28" → "28 jul. 1993" without timezone shift risk
-export function formatBirthDate(isoDate: string): string {
+// Formats "1993-07-28" → "28 jul. 1993" without timezone shift risk. Pass `t`
+// to localize the month abbreviation; without it, pt is used (callers that
+// haven't been threaded still render Portuguese).
+export function formatBirthDate(isoDate: string, t?: TFn): string {
   const [yearStr, monthStr, dayStr] = isoDate.split("-");
   const month = parseInt(monthStr, 10);
   const day = parseInt(dayStr, 10);
-  return `${day} ${PT_MONTHS_SHORT[month - 1]} ${yearStr}`;
+  const monthLabel = t ? t(`playerCard.month.${MONTH_KEYS[month - 1]}`) : PT_MONTHS_SHORT[month - 1];
+  return `${day} ${monthLabel} ${yearStr}`;
 }
 
 interface TournamentStats {
@@ -46,24 +54,26 @@ interface TournamentStats {
 export function buildTournamentStatCells(
   stats: TournamentStats | null | undefined,
   theme: "classic-light" | "stadium-dark",
+  t?: TFn,
 ) {
   if (!stats) return [];
+  const label = (key: string, pt: string) => (t ? t(key) : pt);
   const cells = [];
   if (stats.goals > 0)
     cells.push({
-      label: "Gols",
+      label: label("playerCard.stat.goals", "Gols"),
       value: stats.goals,
       accent: theme === "classic-light" ? "text-[#065f2c]" : "text-[#00e476]",
     });
   if (stats.yellowCards > 0)
     cells.push({
-      label: "Amarelos",
+      label: label("playerCard.stat.yellows", "Amarelos"),
       value: stats.yellowCards,
       accent: theme === "classic-light" ? "text-[#9a6700]" : "text-[#ffd84d]",
     });
   if (stats.redCards > 0)
     cells.push({
-      label: "Vermelhos",
+      label: label("playerCard.stat.reds", "Vermelhos"),
       value: stats.redCards,
       accent: theme === "classic-light" ? "text-[#9f1239]" : "text-[#ff879d]",
     });
@@ -79,12 +89,14 @@ export function buildPlayerStatCells(
   player: { number?: number; dateOfBirth?: string; height?: number },
   tournamentStats: TournamentStats | null | undefined,
   theme: "classic-light" | "stadium-dark",
+  t?: TFn,
 ) {
+  const label = (key: string, pt: string) => (t ? t(key) : pt);
   return [
-    ...(player.number != null ? [{ label: "Camisa", value: player.number }] : []),
-    ...(player.dateOfBirth ? [{ label: "Idade", value: getPlayerAge(player.dateOfBirth) }] : []),
-    ...(player.height ? [{ label: "Altura", value: `${player.height} cm` }] : []),
-    ...buildTournamentStatCells(tournamentStats, theme),
+    ...(player.number != null ? [{ label: label("playerCard.stat.shirt", "Camisa"), value: player.number }] : []),
+    ...(player.dateOfBirth ? [{ label: label("playerCard.stat.age", "Idade"), value: getPlayerAge(player.dateOfBirth) }] : []),
+    ...(player.height ? [{ label: label("playerCard.stat.height", "Altura"), value: `${player.height} cm` }] : []),
+    ...buildTournamentStatCells(tournamentStats, theme, t),
   ];
 }
 
@@ -115,9 +127,19 @@ function getSocialUrl(platform: keyof PlayerSocials, value: string): string {
   return `${base}${value}`;
 }
 
+// Localizable labels for the non-brand platforms; brand names (Instagram, X, …)
+// stay verbatim. Pass `t` to translate; without it, pt is used.
+function socialPlatformLabel(platform: keyof PlayerSocials, t?: TFn): string {
+  if (!t) return SOCIAL_PLATFORM_LABELS[platform];
+  if (platform === "site") return t("playerCard.social.site");
+  if (platform === "wikipedia") return t("playerCard.social.wikipedia");
+  return SOCIAL_PLATFORM_LABELS[platform];
+}
+
 export function renderSocialPlatformLabel(
   platform: keyof PlayerSocials,
   instagramFollowers?: number,
+  t?: TFn,
 ) {
   if (platform === "instagram") {
     const followersLabel =
@@ -125,16 +147,19 @@ export function renderSocialPlatformLabel(
     return (
       <>
         <InstagramBrandIcon size={16} />
-        <span className="sr-only">{SOCIAL_PLATFORM_LABELS[platform]}</span>
+        <span className="sr-only">{socialPlatformLabel(platform, t)}</span>
         {followersLabel && (
-          <span className="ml-1.5 normal-case" aria-label={`${followersLabel} seguidores`}>
+          <span
+            className="ml-1.5 normal-case"
+            aria-label={`${followersLabel} ${t ? t("playerCard.social.followers") : "seguidores"}`}
+          >
             {followersLabel}
           </span>
         )}
       </>
     );
   }
-  return SOCIAL_PLATFORM_LABELS[platform];
+  return socialPlatformLabel(platform, t);
 }
 
 // ─── PlayerPortrait ───────────────────────────────────────────────────────────
@@ -170,6 +195,7 @@ export function PlayerPortrait({
   signatureUrl,
   signatureClassName = "",
 }: PlayerPortraitProps) {
+  const t = useT();
   const [failedUrl, setFailedUrl] = useState<string | undefined>(undefined);
   const showImage = Boolean(player.pictureUrl) && player.pictureUrl !== failedUrl;
 
@@ -178,7 +204,7 @@ export function PlayerPortrait({
       {showImage ? (
         <img
           src={player.pictureUrl}
-          alt={`Foto de ${player.name}`}
+          alt={t("playerCard.photoAlt", { name: player.name })}
           id={imgId}
           className={imageClassName}
           loading="lazy"
@@ -199,7 +225,7 @@ export function PlayerPortrait({
       {showImage && signatureUrl && (
         <img
           src={signatureUrl}
-          alt={`Assinatura de ${player.name}`}
+          alt={t("playerCard.signatureAlt", { name: player.name })}
           className={`pointer-events-none absolute bottom-3 left-3 h-16 w-auto max-w-[60%] select-none ${signatureClassName}`}
           loading="lazy"
           decoding="async"
@@ -218,6 +244,7 @@ interface PlayerPictureOverlayProps {
 }
 
 export function PlayerPictureOverlay({ player, onClose, id }: PlayerPictureOverlayProps) {
+  const t = useT();
   useEscapeKey(onClose);
 
   if (!player.pictureUrl) return null;
@@ -238,11 +265,11 @@ export function PlayerPictureOverlay({ player, onClose, id }: PlayerPictureOverl
           onClick={onClose}
           className="absolute right-3 top-3 rounded-full border border-white/10 bg-black/70 px-3 py-1 font-mono text-[10px] font-bold uppercase tracking-wider text-white transition hover:bg-black/90"
         >
-          Fechar
+          {t("playerCard.close")}
         </button>
         <img
           src={player.pictureUrl}
-          alt={`Foto ampliada de ${player.name}`}
+          alt={t("playerCard.zoomedPhotoAlt", { name: player.name })}
           className="block h-auto max-h-[calc(92vh-1.5rem)] w-auto max-w-[calc(92vw-1.5rem)] rounded-xl object-contain"
         />
       </div>
@@ -310,6 +337,7 @@ export function PlayerOverlayCard({
   openPictureButtonId,
   id,
 }: PlayerOverlayCardProps) {
+  const { t, locale } = useLocale();
   useEscapeKey(onClose);
   const [igExpanded, setIgExpanded] = useState(false);
 
@@ -377,11 +405,11 @@ export function PlayerOverlayCard({
             onClick={onClose}
             className={`absolute right-4 top-4 z-10 rounded border px-3 py-1 font-mono text-[10px] font-bold uppercase tracking-wider transition ${closeClasses}`}
           >
-            Fechar
+            {t("playerCard.close")}
           </button>
 
           <p className={`font-mono text-[10px] uppercase tracking-[0.25em] ${mutedClasses}`}>
-            Card completo do jogador
+            {t("playerCard.eyebrow")}
           </p>
 
           <div className="mt-2 flex items-center gap-3 pr-16 sm:pr-20">
@@ -390,7 +418,7 @@ export function PlayerOverlayCard({
                 type="button"
                 onClick={onOpenTeamView}
                 className="shrink-0 transition hover:scale-[1.03] focus:outline-none focus:ring-2 focus:ring-white/30"
-                aria-label={`Abrir painel completo de ${teamName}`}
+                aria-label={t("playerCard.openTeamPanel", { team: teamName })}
               >
                 <FlagIcon flag={flagSvg} className="h-6 w-9 shrink-0" />
               </button>
@@ -463,7 +491,7 @@ export function PlayerOverlayCard({
                 onClick={onOpenPicture}
                 className={`mt-3 inline-flex rounded border px-3 py-1.5 font-mono text-[10px] font-bold uppercase tracking-wider transition ${closeClasses}`}
               >
-                Abrir foto em tamanho real
+                {t("playerCard.openFullPhoto")}
               </button>
             )}
 
@@ -471,7 +499,7 @@ export function PlayerOverlayCard({
             {socials.length > 0 && (
               <div className="mt-3" id={id ? `${id}-social-links` : undefined}>
                 <p className={`font-mono text-[10px] uppercase tracking-wider ${mutedClasses}`}>
-                  Redes oficiais
+                  {t("playerCard.officialSocials")}
                 </p>
                 <div className="mt-2 flex flex-wrap gap-2">
                   {socials.map(([platform, url]) => (
@@ -484,7 +512,7 @@ export function PlayerOverlayCard({
                       className={`inline-flex items-center justify-center rounded border px-3 py-1.5 font-mono text-[10px] font-bold uppercase tracking-wider transition ${closeClasses}`}
                       style={{ borderColor: `${accent}40` }}
                     >
-                      {renderSocialPlatformLabel(platform, player.socials?.instagramFollowers)}
+                      {renderSocialPlatformLabel(platform, player.socials?.instagramFollowers, t)}
                     </a>
                   ))}
                 </div>
@@ -494,7 +522,7 @@ export function PlayerOverlayCard({
             {/* Pesquisar na web — derived search links, always present (every player has a name) */}
             <div className="mt-3" id={id ? `${id}-web-search` : undefined}>
               <p className={`font-mono text-[10px] uppercase tracking-wider ${mutedClasses}`}>
-                Pesquisar na web
+                {t("playerCard.webSearch")}
               </p>
               <div className="mt-2 flex flex-wrap gap-2">
                 <a
@@ -515,7 +543,7 @@ export function PlayerOverlayCard({
                   className={`inline-flex items-center gap-1.5 rounded border px-3 py-1.5 font-mono text-[10px] font-bold uppercase tracking-wider transition ${closeClasses}`}
                   style={{ borderColor: `${accent}40` }}
                 >
-                  <span aria-hidden="true">📰</span> Notícias
+                  <span aria-hidden="true">📰</span> {t("playerCard.news")}
                 </a>
               </div>
             </div>
@@ -538,8 +566,8 @@ export function PlayerOverlayCard({
                     <InstagramBrandIcon size={16} />
                     <span className="font-mono text-[10px] font-bold uppercase tracking-wider">
                       {instagramPostUrls.length > 1
-                        ? "Destaques no Instagram"
-                        : "Destaque no Instagram"}
+                        ? t("playerCard.instagramHighlightMany")
+                        : t("playerCard.instagramHighlightOne")}
                     </span>
                   </span>
                   <span
@@ -566,7 +594,7 @@ export function PlayerOverlayCard({
                           style={{ borderColor: `${accent}40` }}
                         >
                           <InstagramBrandIcon size={14} />
-                          Abrir no Instagram
+                          {t("playerCard.openInstagram")}
                         </a>
                       </div>
                     ))}
@@ -642,8 +670,8 @@ export function PlayerOverlayCard({
               </div>
             )}
 
-            {/* Editorial World Cup note — swipeable section carousel */}
-            {player.worldCupNote && (
+            {/* Editorial World Cup note — swipeable section carousel; HIDDEN in the Spanish (LATAM) thin shell. */}
+            {locale !== "es" && player.worldCupNote && (
               <>
                 <WorldCupNoteCarousel
                   note={player.worldCupNote}

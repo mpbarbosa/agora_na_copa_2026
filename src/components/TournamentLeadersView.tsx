@@ -1,4 +1,5 @@
 import { useEffect, useState, type ReactNode } from "react";
+import { apiUrl, useLocale, useT } from "../i18n";
 import { FlagIcon } from "./FlagIcon";
 import { PlayerOverlayCard } from "./PlayerOverlayCard";
 import { getPositionLabel } from "../utils/playerDisplay";
@@ -17,18 +18,22 @@ interface TournamentLeadersViewProps {
 
 type LoadStatus = "loading" | "ready" | "error";
 
-const formatUpdatedAt = (value: string) => {
+type TranslateFn = (key: string, params?: Record<string, string | number>) => string;
+
+const formatUpdatedAt = (value: string, t: TranslateFn, intlTag: string) => {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) {
-    return "Atualização indisponível";
+    return t("lideres.updateUnavailable");
   }
 
-  return `Atualizado ${date.toLocaleTimeString("pt-BR", {
-    timeZone: "America/Sao_Paulo",
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-  })}`;
+  return t("lideres.updatedAt", {
+    time: date.toLocaleTimeString(intlTag, {
+      timeZone: "America/Sao_Paulo",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+    }),
+  });
 };
 
 const getPlayerFallbackLabel = (name: string) =>
@@ -105,8 +110,9 @@ function PlayerLeaderList({
   onSelectPlayer,
   onOpenTeamView,
 }: PlayerLeaderListProps) {
+  const t = useT();
   if (entries.length === 0) {
-    return <EmptyState theme={theme} text="A FIFA ainda não registrou ocorrências suficientes para este ranking." />;
+    return <EmptyState theme={theme} text={t("lideres.playerEmpty")} />;
   }
 
   const rowClasses =
@@ -138,7 +144,7 @@ function PlayerLeaderList({
           {entry.pictureUrl ? (
             <img
               src={entry.pictureUrl}
-              alt={`Foto de ${entry.name}`}
+              alt={t("lideres.photoAlt", { name: entry.name })}
               className="h-12 w-12 shrink-0 rounded-2xl border border-white/10 bg-black/20 object-contain p-1"
               loading="lazy"
             />
@@ -155,7 +161,7 @@ function PlayerLeaderList({
                 id={`btn-open-player-team-view-${entry.id}`}
                 onClick={() => onOpenTeamView(entry)}
                 className="shrink-0 rounded transition hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-[#ffd84d]/70"
-                aria-label={`Abrir painel completo de ${entry.teamName}`}
+                aria-label={t("lideres.openTeamPanel", { team: entry.teamName })}
               >
                 <FlagIcon flag={entry.teamFlagSvg} className="h-4 w-6 shrink-0" />
               </button>
@@ -185,7 +191,7 @@ function PlayerLeaderList({
               >
                 {entry.teamName}
               </button>
-              {typeof entry.shirtNumber === "number" ? ` • Camisa ${entry.shirtNumber}` : ""}
+              {typeof entry.shirtNumber === "number" ? ` • ${t("lideres.shirt", { number: entry.shirtNumber })}` : ""}
             </p>
           </div>
 
@@ -213,8 +219,9 @@ function TeamLeaderList({
   detailFor,
   onOpenTeamView,
 }: TeamLeaderListProps) {
+  const t = useT();
   if (entries.length === 0) {
-    return <EmptyState theme={theme} text="Ainda não há partidas suficientes para montar este ranking coletivo." />;
+    return <EmptyState theme={theme} text={t("lideres.teamEmpty")} />;
   }
 
   const rowClasses =
@@ -249,7 +256,7 @@ function TeamLeaderList({
               id={`btn-open-team-view-${entry.id}`}
               onClick={() => onOpenTeamView(entry)}
               className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-white p-2 transition hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-[#ffd84d]/70"
-              aria-label={`Abrir painel completo de ${entry.teamName}`}
+              aria-label={t("lideres.openTeamPanel", { team: entry.teamName })}
             >
               <FlagIcon flag={entry.teamFlagSvg} className="h-full w-full object-contain" />
             </button>
@@ -291,6 +298,8 @@ const toLeaderTeamRef = (
   });
 
 export function TournamentLeadersView({ theme, onSelectTeamLineup }: TournamentLeadersViewProps) {
+  const t = useT();
+  const { intlTag } = useLocale();
   const [leaders, setLeaders] = useState<TournamentLeadersResponse | null>(null);
   const [status, setStatus] = useState<LoadStatus>("loading");
   const [selectedPlayer, setSelectedPlayer] = useState<TournamentPlayerLeader | null>(null);
@@ -299,7 +308,7 @@ export function TournamentLeadersView({ theme, onSelectTeamLineup }: TournamentL
 
     const loadLeaders = async () => {
       try {
-        const response = await fetch("/api/tournament-leaders");
+        const response = await fetch(apiUrl("/api/tournament-leaders"));
         if (!response.ok) {
           throw new Error("Falha ao carregar os líderes da Copa.");
         }
@@ -335,25 +344,25 @@ export function TournamentLeadersView({ theme, onSelectTeamLineup }: TournamentL
       <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div>
           <h2 className={`font-anton text-2xl md:text-3xl uppercase tracking-wider ${headingClasses}`}>
-            Líderes do Torneio
+            {t("lideres.title")}
           </h2>
           <p className={`mt-1 font-mono text-[11px] uppercase tracking-wider ${mutedClasses}`}>
-            Artilharia, disciplina e destaques coletivos da Copa
+            {t("lideres.subtitle")}
           </p>
         </div>
 
         <div className={`inline-flex rounded-full border px-3 py-1 font-mono text-[10px] uppercase tracking-wider ${badgeClasses}`}>
-          {leaders ? formatUpdatedAt(leaders.updatedAt) : "Atualização pendente"}
+          {leaders ? formatUpdatedAt(leaders.updatedAt, t, intlTag) : t("lideres.updatePending")}
         </div>
       </div>
 
       {status === "loading" ? (
         <p className={`mt-6 font-archivo text-sm leading-6 ${mutedClasses}`}>
-          Carregando o radar de líderes oficiais da competição...
+          {t("lideres.loading")}
         </p>
       ) : status === "error" || !leaders ? (
         <p className={`mt-6 font-archivo text-sm leading-6 ${mutedClasses}`}>
-          Não foi possível carregar os líderes do torneio agora.
+          {t("lideres.error")}
         </p>
       ) : (
         <>
@@ -366,33 +375,33 @@ export function TournamentLeadersView({ theme, onSelectTeamLineup }: TournamentL
           </div>
 
           <div className="mt-6 grid grid-cols-1 gap-5 xl:grid-cols-3">
-            <LeaderCard theme={theme} title="Artilharia" subtitle="Quem mais balançou as redes">
+            <LeaderCard theme={theme} title={t("lideres.topScorersTitle")} subtitle={t("lideres.topScorersSubtitle")}>
               <PlayerLeaderList
                 theme={theme}
                 entries={leaders.playerLeaders.topScorers}
-                valueFor={(entry) => `${entry.goals} gol${entry.goals === 1 ? "" : "s"}`}
+                valueFor={(entry) => t(entry.goals === 1 ? "lideres.goalsOne" : "lideres.goalsMany", { count: entry.goals })}
 
                 onSelectPlayer={setSelectedPlayer}
                 onOpenTeamView={(entry) => onSelectTeamLineup(toLeaderTeamRef(entry))}
               />
             </LeaderCard>
 
-            <LeaderCard theme={theme} title="Cartões Amarelos" subtitle="Mais advertidos do torneio">
+            <LeaderCard theme={theme} title={t("lideres.yellowCardsTitle")} subtitle={t("lideres.yellowCardsSubtitle")}>
               <PlayerLeaderList
                 theme={theme}
                 entries={leaders.playerLeaders.yellowCards}
-                valueFor={(entry) => `${entry.yellowCards} amarelo${entry.yellowCards === 1 ? "" : "s"}`}
+                valueFor={(entry) => t(entry.yellowCards === 1 ? "lideres.yellowsOne" : "lideres.yellowsMany", { count: entry.yellowCards })}
 
                 onSelectPlayer={setSelectedPlayer}
                 onOpenTeamView={(entry) => onSelectTeamLineup(toLeaderTeamRef(entry))}
               />
             </LeaderCard>
 
-            <LeaderCard theme={theme} title="Cartões Vermelhos" subtitle="Expulsões registradas">
+            <LeaderCard theme={theme} title={t("lideres.redCardsTitle")} subtitle={t("lideres.redCardsSubtitle")}>
               <PlayerLeaderList
                 theme={theme}
                 entries={leaders.playerLeaders.redCards}
-                valueFor={(entry) => `${entry.redCards} vermelho${entry.redCards === 1 ? "" : "s"}`}
+                valueFor={(entry) => t(entry.redCards === 1 ? "lideres.redsOne" : "lideres.redsMany", { count: entry.redCards })}
 
                 onSelectPlayer={setSelectedPlayer}
                 onOpenTeamView={(entry) => onSelectTeamLineup(toLeaderTeamRef(entry))}
@@ -401,32 +410,48 @@ export function TournamentLeadersView({ theme, onSelectTeamLineup }: TournamentL
           </div>
 
           <div className="mt-5 grid grid-cols-1 gap-5 xl:grid-cols-3">
-            <LeaderCard theme={theme} title="Melhores Ataques" subtitle="Mais gols marcados">
+            <LeaderCard theme={theme} title={t("lideres.bestAttackTitle")} subtitle={t("lideres.bestAttackSubtitle")}>
               <TeamLeaderList
                 theme={theme}
                 entries={leaders.teamLeaders.bestAttack}
-                valueFor={(entry) => `${entry.goalsFor} gol${entry.goalsFor === 1 ? "" : "s"}`}
-                detailFor={(entry) => `${entry.matchesPlayed} jogo${entry.matchesPlayed === 1 ? "" : "s"} • ${entry.wins} vitória${entry.wins === 1 ? "" : "s"}`}
+                valueFor={(entry) => t(entry.goalsFor === 1 ? "lideres.goalsOne" : "lideres.goalsMany", { count: entry.goalsFor })}
+                detailFor={(entry) =>
+                  t("lideres.attackDetail", {
+                    matches: t(entry.matchesPlayed === 1 ? "lideres.matchesOne" : "lideres.matchesMany", { count: entry.matchesPlayed }),
+                    wins: t(entry.wins === 1 ? "lideres.winsOne" : "lideres.winsMany", { count: entry.wins }),
+                  })
+                }
                 onOpenTeamView={(entry) => onSelectTeamLineup(toLeaderTeamRef(entry))}
               />
             </LeaderCard>
 
-            <LeaderCard theme={theme} title="Melhores Defesas" subtitle="Menos gols sofridos">
+            <LeaderCard theme={theme} title={t("lideres.bestDefenseTitle")} subtitle={t("lideres.bestDefenseSubtitle")}>
               <TeamLeaderList
                 theme={theme}
                 entries={leaders.teamLeaders.bestDefense}
-                valueFor={(entry) => `${entry.goalsAgainst} sofrido${entry.goalsAgainst === 1 ? "" : "s"}`}
-                detailFor={(entry) => `${entry.cleanSheets} clean sheet${entry.cleanSheets === 1 ? "" : "s"} • ${entry.matchesPlayed} jogo${entry.matchesPlayed === 1 ? "" : "s"}`}
+                valueFor={(entry) => t(entry.goalsAgainst === 1 ? "lideres.concededOne" : "lideres.concededMany", { count: entry.goalsAgainst })}
+                detailFor={(entry) =>
+                  t("lideres.defenseDetail", {
+                    cleanSheets: t(entry.cleanSheets === 1 ? "lideres.cleanSheetOne" : "lideres.cleanSheetMany", { count: entry.cleanSheets }),
+                    matches: t(entry.matchesPlayed === 1 ? "lideres.matchesOne" : "lideres.matchesMany", { count: entry.matchesPlayed }),
+                  })
+                }
                 onOpenTeamView={(entry) => onSelectTeamLineup(toLeaderTeamRef(entry))}
               />
             </LeaderCard>
 
-            <LeaderCard theme={theme} title="Clean Sheets" subtitle="Jogos sem sofrer gols">
+            <LeaderCard theme={theme} title={t("lideres.cleanSheetsTitle")} subtitle={t("lideres.cleanSheetsSubtitle")}>
               <TeamLeaderList
                 theme={theme}
                 entries={leaders.teamLeaders.cleanSheets}
-                valueFor={(entry) => `${entry.cleanSheets} clean sheet${entry.cleanSheets === 1 ? "" : "s"}`}
-                detailFor={(entry) => `${entry.goalsAgainst} gol${entry.goalsAgainst === 1 ? "" : "s"} sofrido${entry.goalsAgainst === 1 ? "" : "s"} • ${entry.matchesPlayed} jogo${entry.matchesPlayed === 1 ? "" : "s"}`}
+                valueFor={(entry) => t(entry.cleanSheets === 1 ? "lideres.cleanSheetOne" : "lideres.cleanSheetMany", { count: entry.cleanSheets })}
+                detailFor={(entry) =>
+                  t("lideres.cleanSheetsDetail", {
+                    goalsAgainst: t(entry.goalsAgainst === 1 ? "lideres.goalsOne" : "lideres.goalsMany", { count: entry.goalsAgainst }),
+                    plural: entry.goalsAgainst === 1 ? "" : "s",
+                    matches: t(entry.matchesPlayed === 1 ? "lideres.matchesOne" : "lideres.matchesMany", { count: entry.matchesPlayed }),
+                  })
+                }
                 onOpenTeamView={(entry) => onSelectTeamLineup(toLeaderTeamRef(entry))}
               />
             </LeaderCard>
@@ -458,30 +483,30 @@ export function TournamentLeadersView({ theme, onSelectTeamLineup }: TournamentL
           }}
           stats={[
             {
-              label: "Gols",
+              label: t("lideres.statGoals"),
               value: selectedPlayer.goals,
               accent: theme === "classic-light" ? "text-[#065f2c]" : "text-[#00e476]",
             },
             {
-              label: "Amarelos",
+              label: t("lideres.statYellows"),
               value: selectedPlayer.yellowCards,
               accent: theme === "classic-light" ? "text-[#9a6700]" : "text-[#ffd84d]",
             },
             {
-              label: "Vermelhos",
+              label: t("lideres.statReds"),
               value: selectedPlayer.redCards,
               accent: theme === "classic-light" ? "text-[#9f1239]" : "text-[#ff879d]",
             },
           ]}
           details={[
             ...(selectedPlayer.club
-              ? [{ label: "Clube atual", value: selectedPlayer.club }]
+              ? [{ label: t("lideres.detailClub"), value: selectedPlayer.club }]
               : []),
             ...(selectedPlayer.position
-              ? [{ label: "Posição", value: getPositionLabel(selectedPlayer.position) }]
+              ? [{ label: t("lideres.detailPosition"), value: getPositionLabel(selectedPlayer.position) }]
               : []),
             {
-              value: `Destaque oficial do torneio para ${selectedPlayer.teamName}.`,
+              value: t("lideres.officialHighlight", { team: selectedPlayer.teamName }),
               fullWidth: true,
             },
           ]}

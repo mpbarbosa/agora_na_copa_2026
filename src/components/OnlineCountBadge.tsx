@@ -1,5 +1,6 @@
 import { Users } from "lucide-react";
 import { useOnlineCount } from "../hooks/useOnlineCount";
+import { useT } from "../i18n";
 
 interface OnlineCountBadgeProps {
   theme: "classic-light" | "stadium-dark";
@@ -11,6 +12,7 @@ interface OnlineCountBadgeProps {
  * count arrives, so it never flashes a placeholder.
  */
 export function OnlineCountBadge({ theme }: OnlineCountBadgeProps) {
+  const t = useT();
   const count = useOnlineCount();
   if (count === null) return null;
 
@@ -20,7 +22,9 @@ export function OnlineCountBadge({ theme }: OnlineCountBadgeProps) {
     <span
       id="online-count-badge"
       data-testid="online-count-badge"
-      title={`${count} ${count === 1 ? "fã" : "fãs"} online agora`}
+      title={count === 1
+        ? t("banners.online.titleOne", { count })
+        : t("banners.online.titleMany", { count })}
       className={`inline-flex shrink-0 items-center gap-1 rounded-full border px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-wider ${
         isLight
           ? "border-[#009c3b]/30 bg-[#009c3b]/5 text-[#009c3b]"
@@ -33,7 +37,7 @@ export function OnlineCountBadge({ theme }: OnlineCountBadgeProps) {
       </span>
       <Users size={11} aria-hidden="true" />
       <span data-testid="online-count-value">{count}</span>
-      <span className="font-normal normal-case tracking-normal">online</span>
+      <span className="font-normal normal-case tracking-normal">{t("banners.online.label")}</span>
     </span>
   );
 }

@@ -1,5 +1,6 @@
 import { useRef, useState } from "react";
 import { parseNoteSections } from "../utils/noteSections";
+import { useLocale } from "../i18n";
 
 interface Props {
   note: string;
@@ -16,9 +17,13 @@ interface Props {
  * uses Inter (font-sans) at 15px for comfortable long-form reading.
  */
 export function WorldCupNoteCarousel({ note, isLight, mutedClasses, id }: Props) {
+  const { locale } = useLocale();
   const sections = parseNoteSections(note);
   const [active, setActive] = useState(0);
   const trackRef = useRef<HTMLDivElement>(null);
+
+  // Belt-and-suspenders: editorial pt-BR prose is HIDDEN in the Spanish (LATAM) thin shell.
+  if (locale === "es") return null;
 
   const wrap = `mt-5 rounded-xl border p-3 ${
     isLight ? "border-slate-200 bg-slate-50" : "border-white/10 bg-white/5"

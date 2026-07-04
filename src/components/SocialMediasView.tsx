@@ -11,6 +11,7 @@ import {
   TrendingUp,
 } from "lucide-react";
 import type { GoogleTrendTopic, GoogleTrendsResponse } from "../types";
+import { useLocale, useT } from "../i18n";
 import { InstagramBrandIcon } from "./InstagramBrandIcon";
 import { InstagramEmbed } from "./InstagramEmbed";
 import { InstagramHighlightsFeed } from "./InstagramHighlightsFeed";
@@ -47,17 +48,17 @@ interface SocialPost {
   comments: SocialComment[];
 }
 
-const FILTERS: { id: CategoryFilter; label: string }[] = [
-  { id: "tudo", label: "Tudo" },
-  { id: "foto", label: "Fotos" },
-  { id: "noticia", label: "Notícias" },
-  { id: "oficial", label: "Oficial" },
+const FILTERS: { id: CategoryFilter; labelKey: string }[] = [
+  { id: "tudo", labelKey: "fanSocial.filterAll" },
+  { id: "foto", labelKey: "fanSocial.filterPhotos" },
+  { id: "noticia", labelKey: "fanSocial.filterNews" },
+  { id: "oficial", labelKey: "fanSocial.filterOfficial" },
 ];
 
-const CATEGORY_META: Record<PostCategory, { label: string; Icon: typeof ImageIcon }> = {
-  foto: { label: "Foto", Icon: ImageIcon },
-  noticia: { label: "Notícia", Icon: Newspaper },
-  oficial: { label: "Oficial", Icon: BadgeCheck },
+const CATEGORY_META: Record<PostCategory, { labelKey: string; Icon: typeof ImageIcon }> = {
+  foto: { labelKey: "fanSocial.categoryPhoto", Icon: ImageIcon },
+  noticia: { labelKey: "fanSocial.categoryNews", Icon: Newspaper },
+  oficial: { labelKey: "fanSocial.categoryOfficial", Icon: BadgeCheck },
 };
 
 const SEED_POSTS: SocialPost[] = [
@@ -125,6 +126,8 @@ const SEED_POSTS: SocialPost[] = [
 let localCommentSeq = 0;
 
 export function SocialMediasView({ theme }: SocialMediasViewProps) {
+  const t = useT();
+  const { intlTag } = useLocale();
   const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>("tudo");
   const [tagFilter, setTagFilter] = useState<string | null>(null);
   const [likes, setLikes] = useState<Record<string, number>>(() =>
@@ -258,10 +261,10 @@ export function SocialMediasView({ theme }: SocialMediasViewProps) {
             className={`font-anton text-2xl md:text-3xl uppercase tracking-wider ${headingClasses}`}
             id="social-medias-title"
           >
-            Redes Sociais
+            {t("fanSocial.socialTitle")}
           </h2>
           <p className={`mt-1 font-mono text-[11px] uppercase tracking-wider ${mutedClasses}`}>
-            Mundo na Copa • feed social com filtros, curtidas e comentários em tempo real
+            {t("fanSocial.socialSubtitle")}
           </p>
         </div>
 
@@ -277,14 +280,14 @@ export function SocialMediasView({ theme }: SocialMediasViewProps) {
             <span className={`absolute inline-flex h-full w-full animate-ping rounded-full opacity-75 ${theme === "classic-light" ? "bg-[#009c3b]" : "bg-[#00e476]"}`} />
             <span className={`relative inline-flex h-2 w-2 rounded-full ${theme === "classic-light" ? "bg-[#009c3b]" : "bg-[#00e476]"}`} />
           </span>
-          Multiview ao vivo
+          {t("fanSocial.socialMultiview")}
         </span>
       </div>
 
       {/* Official FIFA World Cup profile card */}
       <section
         id="social-medias-fifa-profile-card"
-        aria-label="Card oficial da Copa do Mundo FIFA"
+        aria-label={t("fanSocial.fifaCardLabel")}
         className={`mt-6 rounded-3xl border p-5 ${shellClasses}`}
       >
         <a
@@ -293,7 +296,7 @@ export function SocialMediasView({ theme }: SocialMediasViewProps) {
           rel="noopener noreferrer"
           id="social-medias-fifa-profile"
           data-testid="social-fifa-profile"
-          aria-label="Perfil oficial da Copa do Mundo FIFA no Instagram"
+          aria-label={t("fanSocial.fifaProfileLabel")}
           className="flex items-center gap-4 transition hover:opacity-80"
         >
           <span className="shrink-0">
@@ -307,17 +310,17 @@ export function SocialMediasView({ theme }: SocialMediasViewProps) {
               <BadgeCheck size={16} className="shrink-0 text-[#3897f0]" />
             </span>
             <span className={`block font-mono text-[11px] uppercase tracking-wider ${subtleClasses}`}>
-              @fifaworldcup • Perfil oficial
+              {t("fanSocial.fifaOfficialProfile")}
             </span>
             <span className={`mt-1 block font-archivo text-sm leading-5 ${mutedClasses}`}>
-              Siga a conta oficial da Copa do Mundo FIFA 2026 e acompanhe tudo do Mundial em primeira mão.
+              {t("fanSocial.fifaFollowBlurb")}
             </span>
           </span>
           <span
             className={`hidden shrink-0 items-center gap-1.5 rounded-full border px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-wider sm:inline-flex ${activeChipClasses}`}
           >
             <InstagramBrandIcon size={14} />
-            Seguir
+            {t("fanSocial.fifaFollow")}
           </span>
         </a>
 
@@ -338,12 +341,12 @@ export function SocialMediasView({ theme }: SocialMediasViewProps) {
         <section
           className={`mt-6 rounded-3xl border p-5 ${shellClasses}`}
           id="social-medias-google-trends"
-          aria-label="Buscas em alta no Google"
+          aria-label={t("fanSocial.trendsLabel")}
         >
           <div className="flex flex-wrap items-center gap-2">
             <Flame size={16} className={accentText} />
             <p className={`font-anton text-lg uppercase tracking-wide ${headingClasses}`}>
-              Em alta no Google
+              {t("fanSocial.trendsTitle")}
             </p>
             {trendsStatus === "ready" && hasSportsTrends && (
               <button
@@ -355,21 +358,21 @@ export function SocialMediasView({ theme }: SocialMediasViewProps) {
                   sportsOnly ? activeChipClasses : idleChipClasses
                 }`}
               >
-                Só esportes
+                {t("fanSocial.trendsSportsOnly")}
               </button>
             )}
             <span className={`ml-auto font-mono text-[9px] uppercase tracking-wider ${subtleClasses}`}>
-              Google Trends • Brasil
+              {t("fanSocial.trendsSource")}
             </span>
           </div>
 
           {trendsStatus === "loading" ? (
             <p className={`mt-3 font-archivo text-sm leading-6 ${mutedClasses}`}>
-              Carregando buscas em alta…
+              {t("fanSocial.trendsLoading")}
             </p>
           ) : visibleTrends.length === 0 ? (
             <p className={`mt-3 font-archivo text-sm leading-6 ${mutedClasses}`} data-testid="social-trend-vazio">
-              Nenhuma busca de esportes em alta agora.
+              {t("fanSocial.trendsEmpty")}
             </p>
           ) : (
             <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-3">
@@ -394,7 +397,7 @@ export function SocialMediasView({ theme }: SocialMediasViewProps) {
                         {topic.title}
                       </span>
                       <span className={`mt-0.5 flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-wider ${subtleClasses}`}>
-                        {topic.traffic && <span>{topic.traffic} buscas</span>}
+                        {topic.traffic && <span>{t("fanSocial.trendsSearches", { traffic: topic.traffic })}</span>}
                         {topic.traffic && topic.news?.source && <span>•</span>}
                         {topic.news?.source && <span className="truncate">{topic.news.source}</span>}
                       </span>
@@ -408,7 +411,7 @@ export function SocialMediasView({ theme }: SocialMediasViewProps) {
       )}
 
       {/* Filter chips */}
-      <div className="mt-6 flex flex-wrap items-center gap-2" id="social-medias-filtros" role="tablist" aria-label="Filtrar publicações">
+      <div className="mt-6 flex flex-wrap items-center gap-2" id="social-medias-filtros" role="tablist" aria-label={t("fanSocial.filtersLabel")}>
         {FILTERS.map((filter) => {
           const isActive = categoryFilter === filter.id;
           return (
@@ -423,7 +426,7 @@ export function SocialMediasView({ theme }: SocialMediasViewProps) {
                 isActive ? activeChipClasses : idleChipClasses
               }`}
             >
-              {filter.label}
+              {t(filter.labelKey)}
             </button>
           );
         })}
@@ -443,17 +446,18 @@ export function SocialMediasView({ theme }: SocialMediasViewProps) {
 
       <div className="mt-6 grid grid-cols-1 gap-5 xl:grid-cols-[minmax(0,1fr)_minmax(0,320px)]">
         {/* Feed */}
-        <section className="flex flex-col gap-4" id="social-medias-feed" aria-label="Feed social">
+        <section className="flex flex-col gap-4" id="social-medias-feed" aria-label={t("fanSocial.feedLabel")}>
           {visiblePosts.length === 0 ? (
             <div className={`rounded-3xl border p-8 text-center ${shellClasses}`} data-testid="social-feed-vazio">
               <p className={`font-archivo text-sm leading-6 ${mutedClasses}`}>
-                Nenhuma publicação para esse filtro agora. Tente outra tag ou volte para{" "}
-                <span className={accentText}>Tudo</span>.
+                {t("fanSocial.feedEmptyPrefix")}
+                <span className={accentText}>{t("fanSocial.feedEmptyAll")}</span>
+                {t("fanSocial.feedEmptySuffix")}
               </p>
             </div>
           ) : (
             visiblePosts.map((post) => {
-              const { Icon: CategoryIcon, label: categoryLabel } = CATEGORY_META[post.category];
+              const { Icon: CategoryIcon, labelKey: categoryLabelKey } = CATEGORY_META[post.category];
               const isLiked = likedByUser[post.id] ?? false;
               const postComments = commentsByPost[post.id] ?? [];
               const commentsOpen = openComments[post.id] ?? false;
@@ -480,7 +484,7 @@ export function SocialMediasView({ theme }: SocialMediasViewProps) {
                           {post.author}
                         </p>
                         {post.category === "oficial" && (
-                          <BadgeCheck size={15} className={accentText} aria-label="Conta oficial" />
+                          <BadgeCheck size={15} className={accentText} aria-label={t("fanSocial.postOfficialAccount")} />
                         )}
                       </div>
                       <p className={`font-mono text-[10px] uppercase tracking-wider ${subtleClasses}`}>
@@ -491,7 +495,7 @@ export function SocialMediasView({ theme }: SocialMediasViewProps) {
                       className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-1 font-mono text-[9px] uppercase tracking-wider ${cardClasses} ${mutedClasses}`}
                     >
                       <CategoryIcon size={11} />
-                      {categoryLabel}
+                      {t(categoryLabelKey)}
                     </span>
                   </header>
 
@@ -546,7 +550,7 @@ export function SocialMediasView({ theme }: SocialMediasViewProps) {
                         className={`transition-transform ${isLiked ? "scale-110 fill-current" : ""}`}
                       />
                       <span data-testid={`social-curtidas-${post.id}`}>
-                        {(likes[post.id] ?? 0).toLocaleString("pt-BR")}
+                        {(likes[post.id] ?? 0).toLocaleString(intlTag)}
                       </span>
                     </button>
 
@@ -566,7 +570,7 @@ export function SocialMediasView({ theme }: SocialMediasViewProps) {
                     <div className="mt-3 flex flex-col gap-2" data-testid={`social-comentarios-${post.id}`}>
                       {postComments.length === 0 ? (
                         <p className={`font-archivo text-xs leading-5 ${subtleClasses}`}>
-                          Seja o primeiro a comentar essa publicação.
+                          {t("fanSocial.commentsEmpty")}
                         </p>
                       ) : (
                         postComments.map((comment) => (
@@ -594,7 +598,7 @@ export function SocialMediasView({ theme }: SocialMediasViewProps) {
                           onChange={(e) =>
                             setCommentDrafts((prev) => ({ ...prev, [post.id]: e.target.value }))
                           }
-                          placeholder="Manda a real…"
+                          placeholder={t("fanSocial.commentPlaceholder")}
                           data-testid={`social-comentario-input-${post.id}`}
                           className={`min-h-10 flex-1 rounded-full border px-4 font-archivo text-sm outline-none transition ${
                             theme === "classic-light"
@@ -604,7 +608,7 @@ export function SocialMediasView({ theme }: SocialMediasViewProps) {
                         />
                         <button
                           type="submit"
-                          aria-label="Enviar comentário"
+                          aria-label={t("fanSocial.commentSubmit")}
                           data-testid={`social-comentario-enviar-${post.id}`}
                           className={`inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border transition ${idleChipClasses}`}
                         >
@@ -625,11 +629,11 @@ export function SocialMediasView({ theme }: SocialMediasViewProps) {
             <div className="flex items-center gap-2">
               <TrendingUp size={16} className={accentText} />
               <p className={`font-anton text-lg uppercase tracking-wide ${headingClasses}`}>
-                Tendências
+                {t("fanSocial.trendingTitle")}
               </p>
             </div>
             <p className={`mt-1 font-mono text-[10px] uppercase tracking-wider ${mutedClasses}`}>
-              Toque numa hashtag para filtrar o feed
+              {t("fanSocial.trendingHint")}
             </p>
 
             <div className="mt-4 flex flex-col gap-2">
@@ -650,7 +654,7 @@ export function SocialMediasView({ theme }: SocialMediasViewProps) {
                       {tag}
                     </span>
                     <span className={`font-mono text-[10px] ${subtleClasses}`}>
-                      {count} {count === 1 ? "post" : "posts"}
+                      {count} {count === 1 ? t("fanSocial.postCountSingular") : t("fanSocial.postCountPlural")}
                     </span>
                   </button>
                 );

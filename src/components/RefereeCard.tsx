@@ -3,6 +3,7 @@ import { FlagIcon } from "./FlagIcon";
 import { InstagramBrandIcon } from "./InstagramBrandIcon";
 import { InstagramPostFrame } from "./InstagramPostFrame";
 import { useEscapeKey } from "../hooks/useEscapeKey";
+import { useT } from "../i18n";
 import { standings } from "../data/tournament";
 import type { MatchReferee } from "../types";
 
@@ -35,6 +36,7 @@ function refereeInitials(name: string): string {
  * "Destaque(s) no Instagram" embed. Opened from the now-clickable `RefereeChip`.
  */
 export function RefereeCard({ theme, referee, instagramPostUrls, onClose, id }: RefereeCardProps) {
+  const t = useT();
   useEscapeKey(onClose);
   const [igExpanded, setIgExpanded] = useState(false);
   const igPosts = instagramPostUrls ?? [];
@@ -73,11 +75,11 @@ export function RefereeCard({ theme, referee, instagramPostUrls, onClose, id }: 
             onClick={onClose}
             className={`absolute right-4 top-4 z-10 rounded border px-3 py-1 font-mono text-[10px] font-bold uppercase tracking-wider transition ${closeClasses}`}
           >
-            Fechar
+            {t("playerCard.close")}
           </button>
 
           <p className={`font-mono text-[10px] uppercase tracking-[0.25em] ${mutedClasses}`}>
-            Card do árbitro
+            {t("playerCard.refereeEyebrow")}
           </p>
 
           <div className="mt-2 flex items-center gap-3 pr-16 sm:pr-20">

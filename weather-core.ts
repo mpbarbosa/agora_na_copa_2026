@@ -8,6 +8,7 @@
 // the request and transforms the response.
 
 import type { WeatherSnapshot } from "./src/types";
+import type { Locale } from "./src/i18n/locale";
 
 export const OPEN_METEO_BASE_URL = "https://api.open-meteo.com/v1/forecast";
 
@@ -25,7 +26,10 @@ export function buildOpenMeteoUrl(lat: number, lng: number): string {
 }
 
 interface WmoLabel {
-  description: string;
+  /** pt-BR description. */
+  pt: string;
+  /** es-LATAM description. */
+  es: string;
   emoji: string;
   /** Optional night-time glyph for codes whose look differs after dark. */
   nightEmoji?: string;
@@ -33,46 +37,51 @@ interface WmoLabel {
 
 // WMO weather interpretation codes (Open-Meteo `weather_code`).
 const WMO_CODES: Record<number, WmoLabel> = {
-  0: { description: "Céu limpo", emoji: "☀️", nightEmoji: "🌙" },
-  1: { description: "Predominantemente limpo", emoji: "🌤️", nightEmoji: "🌙" },
-  2: { description: "Parcialmente nublado", emoji: "⛅", nightEmoji: "☁️" },
-  3: { description: "Nublado", emoji: "☁️" },
-  45: { description: "Névoa", emoji: "🌫️" },
-  48: { description: "Névoa com geada", emoji: "🌫️" },
-  51: { description: "Garoa leve", emoji: "🌦️" },
-  53: { description: "Garoa", emoji: "🌦️" },
-  55: { description: "Garoa intensa", emoji: "🌦️" },
-  56: { description: "Garoa congelante", emoji: "🌧️" },
-  57: { description: "Garoa congelante intensa", emoji: "🌧️" },
-  61: { description: "Chuva fraca", emoji: "🌦️" },
-  63: { description: "Chuva", emoji: "🌧️" },
-  65: { description: "Chuva forte", emoji: "🌧️" },
-  66: { description: "Chuva congelante", emoji: "🌧️" },
-  67: { description: "Chuva congelante forte", emoji: "🌧️" },
-  71: { description: "Neve fraca", emoji: "🌨️" },
-  73: { description: "Neve", emoji: "🌨️" },
-  75: { description: "Neve forte", emoji: "❄️" },
-  77: { description: "Grãos de neve", emoji: "🌨️" },
-  80: { description: "Pancadas de chuva", emoji: "🌦️" },
-  81: { description: "Pancadas de chuva", emoji: "🌧️" },
-  82: { description: "Pancadas de chuva fortes", emoji: "⛈️" },
-  85: { description: "Pancadas de neve", emoji: "🌨️" },
-  86: { description: "Pancadas de neve fortes", emoji: "❄️" },
-  95: { description: "Tempestade", emoji: "⛈️" },
-  96: { description: "Tempestade com granizo", emoji: "⛈️" },
-  99: { description: "Tempestade com granizo", emoji: "⛈️" },
+  0: { pt: "Céu limpo", es: "Cielo despejado", emoji: "☀️", nightEmoji: "🌙" },
+  1: { pt: "Predominantemente limpo", es: "Mayormente despejado", emoji: "🌤️", nightEmoji: "🌙" },
+  2: { pt: "Parcialmente nublado", es: "Parcialmente nublado", emoji: "⛅", nightEmoji: "☁️" },
+  3: { pt: "Nublado", es: "Nublado", emoji: "☁️" },
+  45: { pt: "Névoa", es: "Niebla", emoji: "🌫️" },
+  48: { pt: "Névoa com geada", es: "Niebla con escarcha", emoji: "🌫️" },
+  51: { pt: "Garoa leve", es: "Llovizna ligera", emoji: "🌦️" },
+  53: { pt: "Garoa", es: "Llovizna", emoji: "🌦️" },
+  55: { pt: "Garoa intensa", es: "Llovizna intensa", emoji: "🌦️" },
+  56: { pt: "Garoa congelante", es: "Llovizna helada", emoji: "🌧️" },
+  57: { pt: "Garoa congelante intensa", es: "Llovizna helada intensa", emoji: "🌧️" },
+  61: { pt: "Chuva fraca", es: "Lluvia débil", emoji: "🌦️" },
+  63: { pt: "Chuva", es: "Lluvia", emoji: "🌧️" },
+  65: { pt: "Chuva forte", es: "Lluvia fuerte", emoji: "🌧️" },
+  66: { pt: "Chuva congelante", es: "Lluvia helada", emoji: "🌧️" },
+  67: { pt: "Chuva congelante forte", es: "Lluvia helada fuerte", emoji: "🌧️" },
+  71: { pt: "Neve fraca", es: "Nieve débil", emoji: "🌨️" },
+  73: { pt: "Neve", es: "Nieve", emoji: "🌨️" },
+  75: { pt: "Neve forte", es: "Nieve fuerte", emoji: "❄️" },
+  77: { pt: "Grãos de neve", es: "Granos de nieve", emoji: "🌨️" },
+  80: { pt: "Pancadas de chuva", es: "Chubascos", emoji: "🌦️" },
+  81: { pt: "Pancadas de chuva", es: "Chubascos", emoji: "🌧️" },
+  82: { pt: "Pancadas de chuva fortes", es: "Chubascos fuertes", emoji: "⛈️" },
+  85: { pt: "Pancadas de neve", es: "Chubascos de nieve", emoji: "🌨️" },
+  86: { pt: "Pancadas de neve fortes", es: "Chubascos de nieve fuertes", emoji: "❄️" },
+  95: { pt: "Tempestade", es: "Tormenta", emoji: "⛈️" },
+  96: { pt: "Tempestade com granizo", es: "Tormenta con granizo", emoji: "⛈️" },
+  99: { pt: "Tempestade com granizo", es: "Tormenta con granizo", emoji: "⛈️" },
 };
 
-const UNKNOWN_LABEL: WmoLabel = { description: "Tempo instável", emoji: "🌡️" };
+const UNKNOWN_LABEL: WmoLabel = {
+  pt: "Tempo instável",
+  es: "Tiempo inestable",
+  emoji: "🌡️",
+};
 
-/** Maps a WMO weather code to a pt-BR description + emoji (day/night aware). */
+/** Maps a WMO weather code to a localized description + emoji (day/night aware). */
 export function describeWeatherCode(
   code: number,
   isDay: boolean,
+  locale: Locale = "pt",
 ): { description: string; emoji: string } {
   const label = WMO_CODES[code] ?? UNKNOWN_LABEL;
   const emoji = !isDay && label.nightEmoji ? label.nightEmoji : label.emoji;
-  return { description: label.description, emoji };
+  return { description: locale === "es" ? label.es : label.pt, emoji };
 }
 
 function toFiniteNumber(value: unknown): number | null {
@@ -84,7 +93,10 @@ function toFiniteNumber(value: unknown): number | null {
  * when the payload is missing the `current` block or its temperature reading,
  * so callers can fall back gracefully.
  */
-export function parseOpenMeteoCurrent(raw: unknown): WeatherSnapshot | null {
+export function parseOpenMeteoCurrent(
+  raw: unknown,
+  locale: Locale = "pt",
+): WeatherSnapshot | null {
   if (!raw || typeof raw !== "object") return null;
   const current = (raw as { current?: unknown }).current;
   if (!current || typeof current !== "object") return null;
@@ -95,7 +107,7 @@ export function parseOpenMeteoCurrent(raw: unknown): WeatherSnapshot | null {
 
   const weatherCode = toFiniteNumber(c.weather_code) ?? 0;
   const isDay = c.is_day === 1 || c.is_day === true;
-  const { description, emoji } = describeWeatherCode(weatherCode, isDay);
+  const { description, emoji } = describeWeatherCode(weatherCode, isDay, locale);
 
   return {
     temperatureC: Math.round(temperatureC),

@@ -7,6 +7,7 @@ import { PlayerPortrait, PlayerOverlayCard, PlayerPictureOverlay, buildPlayerSta
 import { InstagramBrandIcon } from "./InstagramBrandIcon";
 import { getPositionLabel } from "../utils/playerDisplay";
 import { usePlayerStats } from "../hooks/usePlayerStats";
+import { useT } from "../i18n";
 
 interface JogadoresViewProps {
   theme: "classic-light" | "stadium-dark";
@@ -112,6 +113,7 @@ interface PlayerCardProps {
 }
 
 const PlayerCard: React.FC<PlayerCardProps> = ({ player, primaryColor, secondaryColor, onClick }) => {
+  const t = useT();
   const posColor = POSITION_COLORS[player.position] ?? "#6b7280";
   const hasPhoto = Boolean(player.pictureUrl);
   const hasInstagram = Boolean(player.socials?.instagram);
@@ -128,7 +130,7 @@ const PlayerCard: React.FC<PlayerCardProps> = ({ player, primaryColor, secondary
         role="button"
         tabIndex={0}
         onKeyDown={(e) => e.key === "Enter" && onClick()}
-        aria-label={`Ver perfil de ${player.name}`}
+        aria-label={t("jogadores.viewProfileOf", { name: player.name })}
       >
         {/* Slot photo area */}
         <div
@@ -191,7 +193,7 @@ const PlayerCard: React.FC<PlayerCardProps> = ({ player, primaryColor, secondary
       role="button"
       tabIndex={0}
       onKeyDown={(e) => e.key === "Enter" && onClick()}
-      aria-label={`Ver perfil de ${player.name}`}
+      aria-label={t("jogadores.viewProfileOf", { name: player.name })}
     >
       {/* Photo area with sticker inner frame */}
       <div
@@ -247,7 +249,7 @@ const PlayerCard: React.FC<PlayerCardProps> = ({ player, primaryColor, secondary
           <div
             className="absolute top-2 left-2 w-5 h-5 flex items-center justify-center rounded-full bg-[#ffd700] text-[10px] leading-none"
             style={{ border: "1.5px solid #b8860b", boxShadow: "1px 1px 0 #b8860b" }}
-            title="Lenda"
+            title={t("jogadores.legendBadge")}
           >
             ★
           </div>
@@ -255,7 +257,7 @@ const PlayerCard: React.FC<PlayerCardProps> = ({ player, primaryColor, secondary
           <div
             className="absolute top-2 left-2 w-5 h-5 flex items-center justify-center border border-black bg-white rounded-full"
             style={{ boxShadow: "1px 1px 0 #000" }}
-            title="Instagram verificado"
+            title={t("jogadores.instagramVerified")}
           >
             <InstagramBrandIcon size={11} />
           </div>
@@ -299,6 +301,7 @@ interface TeamSectionProps {
 }
 
 const TeamSection: React.FC<TeamSectionProps> = ({ team, theme, onPlayerClick, onTeamClick }) => {
+  const t = useT();
   const players = sortedPlayers(team.players);
   const headingColor = theme === "classic-light" ? "text-slate-900" : "text-white";
   const sectionBg = theme === "classic-light" ? "bg-white border-slate-200" : "bg-[#0f1112] border-white/10";
@@ -324,12 +327,12 @@ const TeamSection: React.FC<TeamSectionProps> = ({ team, theme, onPlayerClick, o
             type="button"
             onClick={onTeamClick}
             className={`font-anton text-base uppercase tracking-wide leading-tight text-left hover:underline underline-offset-2 ${headingColor}`}
-            aria-label={`Ver escalação de ${team.name}`}
+            aria-label={t("jogadores.viewLineupOf", { name: team.name })}
           >
             {team.name}
           </button>
           <p className="font-mono text-[10px] uppercase tracking-wider text-slate-500 leading-tight">
-            {team.group} · {players.length} jogadores
+            {t("jogadores.teamPlayerCount", { group: team.group, count: players.length })}
           </p>
         </div>
         <span
@@ -359,6 +362,7 @@ const TeamSection: React.FC<TeamSectionProps> = ({ team, theme, onPlayerClick, o
 }
 
 export function JogadoresView({ theme, onSelectTeamLineup }: JogadoresViewProps) {
+  const t = useT();
   const teams = useMemo(() => extractTeams(), []);
   const [selected, setSelected] = useState<SelectedContext | null>(null);
   const [expandedPlayer, setExpandedPlayer] = useState<Player | null>(null);
@@ -414,8 +418,14 @@ export function JogadoresView({ theme, onSelectTeamLineup }: JogadoresViewProps)
   );
   const hasActiveFilter = Boolean(filterTeamCode || filterPlayerName.trim() || filterStarsOnly);
   const subtitleText = hasActiveFilter
-    ? `${totalDisplayed} atleta${totalDisplayed !== 1 ? "s" : ""} encontrado${totalDisplayed !== 1 ? "s" : ""}`
-    : `${teams.length} seleções · ${teams.reduce((n, t) => n + t.players.length, 0)} atletas`;
+    ? t("jogadores.subtitleFiltered", {
+        count: totalDisplayed,
+        plural: totalDisplayed !== 1 ? "s" : "",
+      })
+    : t("jogadores.subtitleAll", {
+        teams: teams.length,
+        players: teams.reduce((n, team) => n + team.players.length, 0),
+      });
 
   const toTeamRef = (team: TeamEntry): TeamRef => ({
     name: team.name,
@@ -432,7 +442,7 @@ export function JogadoresView({ theme, onSelectTeamLineup }: JogadoresViewProps)
       <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
         <div>
           <h1 className={`font-anton text-3xl uppercase tracking-wide ${headingColor}`}>
-            Jogadores
+            {t("jogadores.title")}
           </h1>
           <p className={`mt-1 font-mono text-xs uppercase tracking-wider ${mutedColor}`}>
             {subtitleText}
@@ -446,17 +456,17 @@ export function JogadoresView({ theme, onSelectTeamLineup }: JogadoresViewProps)
               type="search"
               value={filterPlayerName}
               onChange={(e) => setFilterPlayerName(e.target.value)}
-              placeholder="Buscar jogador..."
+              placeholder={t("jogadores.searchPlaceholder")}
               className={`border-2 border-black font-archivo text-xs px-3 py-1.5 pr-8 w-44 ${inputBg}`}
               style={{ boxShadow: "2px 2px 0 #000" }}
-              aria-label="Buscar jogador por nome"
+              aria-label={t("jogadores.searchAriaLabel")}
             />
             {filterPlayerName && (
               <button
                 type="button"
                 onClick={() => setFilterPlayerName("")}
                 className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 leading-none"
-                aria-label="Limpar busca"
+                aria-label={t("jogadores.clearSearch")}
               >
                 ×
               </button>
@@ -465,16 +475,16 @@ export function JogadoresView({ theme, onSelectTeamLineup }: JogadoresViewProps)
 
           {/* Team filter */}
           <span className={`font-mono text-xs uppercase tracking-wider shrink-0 ${mutedColor}`}>
-            Seleção
+            {t("jogadores.teamFilterLabel")}
           </span>
           <select
             value={filterTeamCode ?? ""}
             onChange={(e) => setFilterTeamCode(e.target.value || null)}
             className={`border-2 border-black font-mono text-xs uppercase px-3 py-1.5 cursor-pointer ${selectBg}`}
             style={{ boxShadow: "2px 2px 0 #000" }}
-            aria-label="Filtrar por seleção"
+            aria-label={t("jogadores.filterByTeam")}
           >
-            <option value="">Todas as seleções</option>
+            <option value="">{t("jogadores.allTeams")}</option>
             {allGroupedTeams.map(([group, groupTeams]) => (
               <optgroup key={group} label={group}>
                 {groupTeams.map((t) => (
@@ -500,9 +510,9 @@ export function JogadoresView({ theme, onSelectTeamLineup }: JogadoresViewProps)
                   : "bg-[#0f1112] text-white hover:bg-white/10"
             }`}
             style={{ boxShadow: "2px 2px 0 #000" }}
-            title="Mostrar só os craques da Copa"
+            title={t("jogadores.starsFilterTitle")}
           >
-            ★ Craques da Copa
+            {t("jogadores.starsFilter")}
           </button>
 
           {/* Clear all filters */}
@@ -513,7 +523,7 @@ export function JogadoresView({ theme, onSelectTeamLineup }: JogadoresViewProps)
               className="font-mono text-xs uppercase px-3 py-1.5 border-2 border-black bg-white text-black hover:bg-slate-100 transition-colors"
               style={{ boxShadow: "2px 2px 0 #000" }}
             >
-              Ver todas ×
+              {t("jogadores.clearAllFilters")}
             </button>
           )}
         </div>
@@ -523,10 +533,10 @@ export function JogadoresView({ theme, onSelectTeamLineup }: JogadoresViewProps)
       {displayedGroups.length === 0 && hasActiveFilter && (
         <div className="flex flex-col items-center justify-center py-20 gap-3">
           <p className={`font-anton text-xl uppercase tracking-wide ${headingColor}`}>
-            Nenhum jogador encontrado
+            {t("jogadores.emptyTitle")}
           </p>
           <p className={`font-mono text-xs uppercase tracking-wider ${mutedColor}`}>
-            Tente outro nome ou seleção
+            {t("jogadores.emptyHint")}
           </p>
         </div>
       )}
@@ -571,9 +581,9 @@ export function JogadoresView({ theme, onSelectTeamLineup }: JogadoresViewProps)
           flagSvg={selected.team.flagSvg}
           stats={buildPlayerStatCells(selected.player, selectedStats, theme)}
           details={[
-            { label: "Posição", value: getPositionLabel(selected.player.position) },
+            { label: t("jogadores.detailPosition"), value: getPositionLabel(selected.player.position) },
             ...(selected.player.dateOfBirth
-              ? [{ label: "Nascimento", value: formatBirthDate(selected.player.dateOfBirth) }]
+              ? [{ label: t("jogadores.detailBirth"), value: formatBirthDate(selected.player.dateOfBirth) }]
               : []),
           ]}
           onClose={() => setSelected(null)}

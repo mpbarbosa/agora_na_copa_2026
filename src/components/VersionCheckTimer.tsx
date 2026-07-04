@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { RefreshCw } from "lucide-react";
 import type { VersionCheckStatus } from "../hooks/useVersionCheck";
+import { useLocale, useT } from "../i18n";
 
 type Theme = "classic-light" | "stadium-dark";
 
@@ -26,6 +27,8 @@ export function VersionCheckTimer({
   onForceCheck: () => void;
   theme: Theme;
 }) {
+  const t = useT();
+  const { intlTag } = useLocale();
   const [now, setNow] = useState(() => Date.now());
   const [spinning, setSpinning] = useState(false);
   const spinTimer = useRef<number | undefined>(undefined);
@@ -56,8 +59,10 @@ export function VersionCheckTimer({
   };
 
   const lastLabel = status.lastCheckedAt
-    ? `última verificação às ${new Date(status.lastCheckedAt).toLocaleTimeString("pt-BR")}`
-    : "aguardando a primeira verificação";
+    ? t("banners.version.lastCheckAt", {
+        time: new Date(status.lastCheckedAt).toLocaleTimeString(intlTag),
+      })
+    : t("banners.version.awaitingFirst");
 
   return (
     <span className="flex items-center gap-1.5" id="version-check-cluster">
@@ -65,16 +70,19 @@ export function VersionCheckTimer({
         <span
           id="version-check-timer"
           className={`font-mono text-[10px] leading-none ${accent}`}
-          title="Nova versão disponível — recarregue para atualizar"
+          title={t("banners.version.updateTitle")}
         >
-          nova versão
+          {t("banners.version.newVersion")}
         </span>
       ) : (
         <span
           id="version-check-timer"
           className={`font-mono text-[10px] leading-none tabular-nums ${muted}`}
-          title={`Próxima verificação de nova versão em ${formatCountdown(status.nextCheckAt! - now)} • ${lastLabel}`}
-          aria-label="Tempo até a próxima verificação de nova versão"
+          title={t("banners.version.nextCheckTitle", {
+            countdown: formatCountdown(status.nextCheckAt! - now),
+            last: lastLabel,
+          })}
+          aria-label={t("banners.version.timerAria")}
         >
           {formatCountdown(status.nextCheckAt! - now)}
         </span>
@@ -83,8 +91,8 @@ export function VersionCheckTimer({
         type="button"
         id="btn-version-check-now"
         onClick={handleClick}
-        title={updateReady ? "Atualizar agora" : "Verificar atualização agora"}
-        aria-label={updateReady ? "Atualizar para a nova versão agora" : "Verificar atualização agora"}
+        title={updateReady ? t("banners.version.updateNow") : t("banners.version.checkNow")}
+        aria-label={updateReady ? t("banners.version.updateNowAria") : t("banners.version.checkNow")}
         className={`${updateReady ? accent : muted} ${hover} transition-colors`}
       >
         <RefreshCw size={11} className={spinning ? "animate-spin" : ""} aria-hidden="true" />

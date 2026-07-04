@@ -2,6 +2,7 @@ import { type FormEvent, useEffect, useRef, useState } from "react";
 import { MessageCircle, Send } from "lucide-react";
 
 import { useMatchChat } from "../hooks/useMatchChat";
+import { getActiveLocale, localeToIntlTag, useT } from "../i18n";
 
 const NICKNAME_KEY = "agora:nickname";
 
@@ -22,7 +23,7 @@ const storeNickname = (value: string): void => {
 };
 
 const formatTime = (epochMs: number): string =>
-  new Date(epochMs).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+  new Date(epochMs).toLocaleTimeString(localeToIntlTag(getActiveLocale()), { hour: "2-digit", minute: "2-digit" });
 
 interface MatchChatPanelProps {
   matchId: string;
@@ -39,6 +40,7 @@ interface MatchChatPanelProps {
  */
 export function MatchChatPanel({ matchId, theme }: MatchChatPanelProps) {
   const light = theme === "classic-light";
+  const t = useT();
   const { open, messages, ready, sending, error, send } = useMatchChat(matchId);
   const [nickname, setNickname] = useState(readStoredNickname);
   const [draft, setDraft] = useState("");
@@ -82,7 +84,7 @@ export function MatchChatPanel({ matchId, theme }: MatchChatPanelProps) {
       <div className="flex items-center gap-2">
         <MessageCircle size={16} className={accentText} />
         <h3 className={`font-anton text-lg uppercase tracking-wide ${headingClasses}`}>
-          Resenha ao vivo
+          {t("liveExtras.chat.heading")}
         </h3>
         {open && (
           <span
@@ -90,12 +92,12 @@ export function MatchChatPanel({ matchId, theme }: MatchChatPanelProps) {
             className="ml-1 inline-flex items-center gap-1 font-mono text-[10px] uppercase tracking-wider text-[#e4002b]"
           >
             <span className="h-2 w-2 animate-pulse rounded-full bg-[#e4002b]" />
-            Ao vivo
+            {t("liveExtras.chat.liveBadge")}
           </span>
         )}
       </div>
       <p className={`mt-1 font-mono text-[10px] uppercase tracking-wider ${mutedClasses}`}>
-        Bate-papo anônimo só durante a partida — as mensagens somem quando o jogo acaba.
+        {t("liveExtras.chat.subtitle")}
       </p>
 
       <div
@@ -106,7 +108,7 @@ export function MatchChatPanel({ matchId, theme }: MatchChatPanelProps) {
         {messages.length === 0 ? (
           open ? (
             <p className={`font-archivo text-sm ${mutedClasses}`}>
-              Seja o primeiro a mandar a real sobre o jogo.
+              {t("liveExtras.chat.empty")}
             </p>
           ) : null
         ) : (
@@ -136,9 +138,9 @@ export function MatchChatPanel({ matchId, theme }: MatchChatPanelProps) {
             type="text"
             value={nickname}
             onChange={(e) => setNickname(e.target.value)}
-            placeholder="Seu apelido"
+            placeholder={t("liveExtras.chat.nicknamePlaceholder")}
             maxLength={24}
-            aria-label="Apelido"
+            aria-label={t("liveExtras.chat.nicknameAria")}
             data-testid="match-chat-nickname"
             className={`min-h-10 rounded-full border px-4 font-archivo text-sm outline-none transition ${fieldClasses}`}
           />
@@ -147,16 +149,16 @@ export function MatchChatPanel({ matchId, theme }: MatchChatPanelProps) {
               type="text"
               value={draft}
               onChange={(e) => setDraft(e.target.value)}
-              placeholder="Manda a real…"
+              placeholder={t("liveExtras.chat.messagePlaceholder")}
               maxLength={280}
-              aria-label="Mensagem"
+              aria-label={t("liveExtras.chat.messageAria")}
               data-testid="match-chat-input"
               className={`min-h-10 flex-1 rounded-full border px-4 font-archivo text-sm outline-none transition ${fieldClasses}`}
             />
             <button
               type="submit"
               disabled={sending || !nickname.trim() || !draft.trim()}
-              aria-label="Enviar mensagem"
+              aria-label={t("liveExtras.chat.sendAria")}
               data-testid="match-chat-send"
               className={`inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border transition disabled:cursor-not-allowed disabled:opacity-40 ${sendButtonClasses}`}
             >
@@ -169,7 +171,7 @@ export function MatchChatPanel({ matchId, theme }: MatchChatPanelProps) {
           data-testid="match-chat-closed"
           className={`mt-4 font-archivo text-sm ${mutedClasses}`}
         >
-          O chat abre quando a partida começa. Volte no apito inicial!
+          {t("liveExtras.chat.closed")}
         </p>
       )}
     </section>

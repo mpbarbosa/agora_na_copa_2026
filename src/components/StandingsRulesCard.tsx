@@ -1,5 +1,6 @@
 import { X, ExternalLink } from "lucide-react";
 import { useEffect } from "react";
+import { useT } from "../i18n";
 
 const FIFA_REGULATIONS_URL =
   "https://digitalhub.fifa.com/m/636f5c9c6f29771f/original/FWC2026_regulations_EN.pdf";
@@ -10,6 +11,7 @@ interface Props {
 }
 
 export function StandingsRulesCard({ theme, onClose }: Props) {
+  const t = useT();
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
@@ -47,10 +49,10 @@ export function StandingsRulesCard({ theme, onClose }: Props) {
         <div className={`sticky top-0 z-10 flex items-start justify-between gap-4 p-5 border-b ${divider} ${isDark ? "bg-[#121414]/95" : "bg-white"}`}>
           <div>
             <h2 className="font-anton text-lg uppercase tracking-wider">
-              Critérios de Classificação
+              {t("standings.rules.title")}
             </h2>
             <p className={`mt-0.5 font-mono text-[10px] uppercase tracking-wider ${muted}`}>
-              Artigo 13 · Regulamento FIFA WC 2026
+              {t("standings.rules.subtitle")}
             </p>
           </div>
           <button
@@ -60,7 +62,7 @@ export function StandingsRulesCard({ theme, onClose }: Props) {
                 ? "text-slate-400 hover:text-white hover:bg-white/10"
                 : "text-slate-500 hover:text-slate-900 hover:bg-slate-100"
             }`}
-            aria-label="Fechar"
+            aria-label={t("standings.rules.close")}
           >
             <X size={16} />
           </button>
@@ -68,35 +70,34 @@ export function StandingsRulesCard({ theme, onClose }: Props) {
 
         <div className="p-5 space-y-4">
           <p className={`font-archivo text-sm ${muted}`}>
-            Quando duas ou mais seleções estão empatadas em pontos ao final da fase de grupos,
-            os critérios abaixo são aplicados em ordem.
+            {t("standings.rules.intro")}
           </p>
 
           {/* Step 1 */}
           <div className={`rounded-xl p-4 ${stepBg}`}>
             <div className="flex items-center gap-2 mb-3">
               <span className={`font-mono text-[10px] font-bold uppercase px-2 py-0.5 rounded ${badge}`}>
-                Passo 1
+                {t("standings.rules.step1")}
               </span>
               <span className={`font-anton text-sm uppercase tracking-wide ${stepLabel}`}>
-                Confronto direto
+                {t("standings.rules.step1Title")}
               </span>
             </div>
             <p className={`font-mono text-[10px] uppercase tracking-wider mb-2 ${muted}`}>
-              Apenas os jogos entre as seleções empatadas
+              {t("standings.rules.step1Desc")}
             </p>
             <ol className="space-y-1.5 font-archivo text-sm">
               <li className="flex gap-2">
                 <span className={`font-mono text-[10px] font-bold shrink-0 mt-0.5 ${stepLabel}`}>A</span>
-                <span>Maior número de pontos entre si</span>
+                <span>{t("standings.rules.step1A")}</span>
               </li>
               <li className="flex gap-2">
                 <span className={`font-mono text-[10px] font-bold shrink-0 mt-0.5 ${stepLabel}`}>B</span>
-                <span>Maior saldo de gols nos jogos entre si</span>
+                <span>{t("standings.rules.step1B")}</span>
               </li>
               <li className="flex gap-2">
                 <span className={`font-mono text-[10px] font-bold shrink-0 mt-0.5 ${stepLabel}`}>C</span>
-                <span>Maior número de gols marcados nos jogos entre si</span>
+                <span>{t("standings.rules.step1C")}</span>
               </li>
             </ol>
           </div>
@@ -105,45 +106,45 @@ export function StandingsRulesCard({ theme, onClose }: Props) {
           <div className={`rounded-xl p-4 ${stepBg}`}>
             <div className="flex items-center gap-2 mb-3">
               <span className={`font-mono text-[10px] font-bold uppercase px-2 py-0.5 rounded ${badge}`}>
-                Passo 2
+                {t("standings.rules.step2")}
               </span>
               <span className={`font-anton text-sm uppercase tracking-wide ${stepLabel}`}>
-                Se ainda empatadas
+                {t("standings.rules.step2Title")}
               </span>
             </div>
             <p className={`font-mono text-[10px] uppercase tracking-wider mb-2 ${muted}`}>
-              Critérios A–C reaplicados ao subgrupo restante; se ainda houver empate:
+              {t("standings.rules.step2Desc")}
             </p>
             <ol className="space-y-1.5 font-archivo text-sm mb-3" start={4}>
               <li className="flex gap-2">
                 <span className={`font-mono text-[10px] font-bold shrink-0 mt-0.5 ${stepLabel}`}>D</span>
-                <span>Maior saldo de gols em todos os jogos do grupo</span>
+                <span>{t("standings.rules.step2D")}</span>
               </li>
               <li className="flex gap-2">
                 <span className={`font-mono text-[10px] font-bold shrink-0 mt-0.5 ${stepLabel}`}>E</span>
-                <span>Maior número de gols marcados em todos os jogos do grupo</span>
+                <span>{t("standings.rules.step2E")}</span>
               </li>
               <li className="flex gap-2">
                 <span className={`font-mono text-[10px] font-bold shrink-0 mt-0.5 ${stepLabel}`}>F</span>
-                <span>Fair play — menor pontuação de infrações disciplinares:</span>
+                <span>{t("standings.rules.step2F")}</span>
               </li>
             </ol>
             <div className={`ml-5 rounded-lg border p-3 font-mono text-[11px] space-y-1 ${isDark ? "border-white/10 bg-black/20" : "border-slate-200 bg-white"}`}>
               <div className="flex justify-between gap-4">
-                <span className={muted}>Cartão amarelo</span>
-                <span className="font-bold text-amber-500">−1 pt</span>
+                <span className={muted}>{t("standings.rules.yellowCard")}</span>
+                <span className="font-bold text-amber-500">{t("standings.rules.yellowCardPts")}</span>
               </div>
               <div className="flex justify-between gap-4">
-                <span className={muted}>Vermelho indireto (2 amarelos)</span>
-                <span className="font-bold text-red-500">−3 pts</span>
+                <span className={muted}>{t("standings.rules.indirectRed")}</span>
+                <span className="font-bold text-red-500">{t("standings.rules.indirectRedPts")}</span>
               </div>
               <div className="flex justify-between gap-4">
-                <span className={muted}>Vermelho direto</span>
-                <span className="font-bold text-red-500">−4 pts</span>
+                <span className={muted}>{t("standings.rules.directRed")}</span>
+                <span className="font-bold text-red-500">{t("standings.rules.directRedPts")}</span>
               </div>
               <div className="flex justify-between gap-4">
-                <span className={muted}>Amarelo + vermelho direto</span>
-                <span className="font-bold text-red-500">−5 pts</span>
+                <span className={muted}>{t("standings.rules.yellowPlusRed")}</span>
+                <span className="font-bold text-red-500">{t("standings.rules.yellowPlusRedPts")}</span>
               </div>
             </div>
           </div>
@@ -152,20 +153,20 @@ export function StandingsRulesCard({ theme, onClose }: Props) {
           <div className={`rounded-xl p-4 ${stepBg}`}>
             <div className="flex items-center gap-2 mb-3">
               <span className={`font-mono text-[10px] font-bold uppercase px-2 py-0.5 rounded ${badge}`}>
-                Passo 3
+                {t("standings.rules.step3")}
               </span>
               <span className={`font-anton text-sm uppercase tracking-wide ${stepLabel}`}>
-                Última instância
+                {t("standings.rules.step3Title")}
               </span>
             </div>
             <ol className="space-y-1.5 font-archivo text-sm" start={7}>
               <li className="flex gap-2">
                 <span className={`font-mono text-[10px] font-bold shrink-0 mt-0.5 ${stepLabel}`}>G</span>
-                <span>Ranking FIFA/Coca-Cola Men's mais recente</span>
+                <span>{t("standings.rules.step3G")}</span>
               </li>
               <li className="flex gap-2">
                 <span className={`font-mono text-[10px] font-bold shrink-0 mt-0.5 ${stepLabel}`}>H</span>
-                <span>Edições anteriores do ranking, retroativamente, até haver decisão</span>
+                <span>{t("standings.rules.step3H")}</span>
               </li>
             </ol>
           </div>
@@ -173,13 +174,13 @@ export function StandingsRulesCard({ theme, onClose }: Props) {
           {/* Best 8 third-place teams */}
           <div className={`rounded-xl border p-4 ${isDark ? "border-white/10" : "border-slate-200"}`}>
             <p className={`font-anton text-[11px] uppercase tracking-wider mb-2 ${muted}`}>
-              Melhores 8 terceiros colocados
+              {t("standings.rules.best8Title")}
             </p>
             <p className={`font-archivo text-sm ${muted} mb-2`}>
-              Critério separado — sem confronto direto:
+              {t("standings.rules.best8Desc")}
             </p>
             <p className="font-mono text-[11px] tracking-wide">
-              Pontos → Saldo de gols → Gols marcados → Fair play → Ranking FIFA
+              {t("standings.rules.best8Order")}
             </p>
           </div>
 
@@ -192,7 +193,7 @@ export function StandingsRulesCard({ theme, onClose }: Props) {
               className={`inline-flex items-center gap-1.5 font-mono text-xs uppercase tracking-wider transition ${link}`}
             >
               <ExternalLink size={12} />
-              Ver regulamento oficial da FIFA
+              {t("standings.rules.officialLink")}
             </a>
           </div>
         </div>

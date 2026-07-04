@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Info } from "lucide-react";
 import type { Match, TeamRef } from "../types";
+import { apiUrl, useLocale } from "../i18n";
 import { computeStandings, groupStandings, computeQualificationNote, computeContentionNote, computeEliminationNote, rankBestThirds } from "../standings";
 import { FlagIcon } from "./FlagIcon";
 import { StandingsRulesCard } from "./StandingsRulesCard";
@@ -28,14 +29,14 @@ interface StandingsViewProps {
 }
 
 const COLUMNS = [
-  { key: "points",         label: "PTS" },
-  { key: "goalDifference", label: "SG"  },
-  { key: "played",         label: "J"   },
-  { key: "won",            label: "V"   },
-  { key: "drawn",          label: "E"   },
-  { key: "lost",           label: "D"   },
-  { key: "goalsFor",       label: "GF"  },
-  { key: "goalsAgainst",   label: "GA"  },
+  { key: "points",         labelKey: "standings.col.pts" },
+  { key: "goalDifference", labelKey: "standings.col.sg"  },
+  { key: "played",         labelKey: "standings.col.j"   },
+  { key: "won",            labelKey: "standings.col.v"   },
+  { key: "drawn",          labelKey: "standings.col.e"   },
+  { key: "lost",           labelKey: "standings.col.d"   },
+  { key: "goalsFor",       labelKey: "standings.col.gf"  },
+  { key: "goalsAgainst",   labelKey: "standings.col.ga"  },
 ] as const;
 
 const groupSlug = (group: string) => group.replace(/\s+/g, "-").toLowerCase();
@@ -60,6 +61,7 @@ export function StandingsView({
   onSelectMatch,
   focusGroupSlug = null,
 }: StandingsViewProps) {
+  const { t, locale } = useLocale();
   const [showRules, setShowRules] = useState(false);
   const [liveStates, setLiveStates] = useState<Record<string, LiveState>>({});
   const [openTooltip, setOpenTooltip] = useState<TooltipState | null>(null);
@@ -105,7 +107,7 @@ export function StandingsView({
 
     const poll = async () => {
       try {
-        const res = await fetch("/api/match-states");
+        const res = await fetch(apiUrl("/api/match-states"));
         if (!res.ok || !active) return;
         const data: { states: Record<string, LiveState>; refreshAfterMs?: number } = await res.json();
         if (active) setLiveStates(data.states ?? {});
@@ -208,15 +210,15 @@ export function StandingsView({
             className={`font-anton text-2xl md:text-3xl uppercase tracking-wider ${headingClasses}`}
             id="standings-title"
           >
-            Tabela de Classificação
+            {t("standings.title")}
           </h2>
           <p className={`mt-1 mb-6 font-mono text-[11px] uppercase tracking-wider ${mutedClasses}`}>
-            Fase de grupos • 12 chaves de 4 seleções
+            {t("standings.subtitle")}
           </p>
         </div>
         <button
           onClick={() => setShowRules(true)}
-          title="Critérios de classificação"
+          title={t("standings.criteriaButtonTitle")}
           className={`mt-1 shrink-0 flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg font-mono text-[10px] uppercase tracking-wider border transition ${
             theme === "classic-light"
               ? "border-[#009c3b]/35 text-[#009c3b] shadow-[0_0_0_1px_rgba(0,156,59,0.08),0_0_12px_rgba(0,156,59,0.18)] hover:shadow-[0_0_0_1px_rgba(0,156,59,0.15),0_0_18px_rgba(0,156,59,0.3)]"
@@ -235,7 +237,7 @@ export function StandingsView({
               }`} />
             </span>
           </span>
-          Critérios
+          {t("standings.criteria")}
         </button>
       </div>
 
@@ -253,15 +255,15 @@ export function StandingsView({
       >
         <Info size={13} className="mt-px shrink-0" />
         <p className="font-mono text-[10px] uppercase tracking-wider leading-relaxed">
-          Toque ou passe o cursor sobre o{" "}
+          {t("standings.legendPrefix")}{" "}
           <span className={`font-bold ${theme === "classic-light" ? "text-[#009c3b]" : "text-[#00e476]"}`}>✓</span>
-          {" "}(classificado),{" "}
+          {" "}{t("standings.legendQualified")}{" "}
           <span className="font-bold text-red-500">✕</span>
-          {" "}(eliminado), sobre o{" "}
-          <span className={`font-bold ${theme === "classic-light" ? "text-amber-600" : "text-amber-400"}`}>3º em destaque</span>
-          {" "}(aguardando a definição dos 8 melhores terceiros) ou sobre o{" "}
-          <span className={`font-bold ${theme === "classic-light" ? "text-slate-700" : "text-slate-200"}`}>nº de posição</span>
-          {" "}(1º/2º ainda em disputa) para ver a análise matemática da situação de cada seleção.
+          {" "}{t("standings.legendEliminated")}{" "}
+          <span className={`font-bold ${theme === "classic-light" ? "text-amber-600" : "text-amber-400"}`}>{t("standings.legendThirdHighlight")}</span>
+          {" "}{t("standings.legendThirdHint")}{" "}
+          <span className={`font-bold ${theme === "classic-light" ? "text-slate-700" : "text-slate-200"}`}>{t("standings.legendPosition")}</span>
+          {" "}{t("standings.legendPositionHint")}
         </p>
       </div>
 
@@ -310,7 +312,7 @@ export function StandingsView({
                 {hasLive && (
                   <span className={`inline-flex items-center gap-1 font-mono text-[9px] uppercase tracking-wider ${liveColor}`}>
                     <span className="inline-block w-1.5 h-1.5 rounded-full animate-pulse bg-current" />
-                    Ao Vivo
+                    {t("standings.live")}
                   </span>
                 )}
                 {groupFinished && (
@@ -322,7 +324,7 @@ export function StandingsView({
                     }`}
                     data-testid={`group-finished-${groupSlug(group)}`}
                   >
-                    Encerrado
+                    {t("standings.finished")}
                   </span>
                 )}
               </div>
@@ -338,17 +340,22 @@ export function StandingsView({
                       className={`font-mono text-[10px] uppercase tracking-wider ${liveColor}`}
                       data-testid={`live-match-${m.id}`}
                     >
-                      {m.teamA.code} {m.score?.teamA ?? 0}–{m.score?.teamB ?? 0} {m.teamB.code} · em andamento
+                      {t("standings.liveMatchLine", {
+                        teamA: m.teamA.code,
+                        scoreA: m.score?.teamA ?? 0,
+                        scoreB: m.score?.teamB ?? 0,
+                        teamB: m.teamB.code,
+                      })}
                     </p>
                   ))}
                 </div>
               ) : seedCount === rows.length ? (
                 <p className={`mt-1 mb-3 font-mono text-[10px] uppercase tracking-wider ${mutedClasses}`}>
-                  Resultados da fase de grupos ainda não disputados
+                  {t("standings.notPlayedYet")}
                 </p>
               ) : seedCount > 0 ? (
                 <p className={`mt-1 mb-3 font-mono text-[10px] uppercase tracking-wider ${mutedClasses}`}>
-                  Alguns confrontos deste grupo ainda não foram disputados
+                  {t("standings.somePending")}
                 </p>
               ) : (
                 <div className="mb-3" />
@@ -358,9 +365,9 @@ export function StandingsView({
                 <table className="w-full font-mono text-[11px] sm:text-xs">
                   <thead>
                     <tr className={`border-b ${rowBorderClasses}`}>
-                      <th className={`w-5 py-1.5 text-left font-normal uppercase tracking-wider ${headerCellClasses}`} aria-label="Posição" />
+                      <th className={`w-5 py-1.5 text-left font-normal uppercase tracking-wider ${headerCellClasses}`} aria-label={t("standings.col.position")} />
                       <th className={`py-1.5 text-left font-normal uppercase tracking-wider ${headerCellClasses}`}>
-                        Equipe
+                        {t("standings.col.team")}
                       </th>
                       {COLUMNS.map((col) => (
                         <th
@@ -371,7 +378,7 @@ export function StandingsView({
                               : headerCellClasses
                           }`}
                         >
-                          {col.label}
+                          {t(col.labelKey)}
                         </th>
                       ))}
                     </tr>
@@ -412,17 +419,17 @@ export function StandingsView({
                           : "border-l-2 border-l-transparent";
                       const rowTitle =
                         status === "qualified"
-                          ? "Classificado matematicamente para o mata-mata"
+                          ? t("standings.rowTitleQualified")
                           : status === "eliminated"
-                          ? "Eliminado da fase de grupos"
+                          ? t("standings.rowTitleEliminated")
                           : isAwaitingBestThird
-                          ? "Aguardando a definição dos 8 melhores terceiros colocados"
+                          ? t("standings.rowTitleAwaitingThird")
                           : undefined;
                       const note =
                         isResolvedBestThird
                           ? bestThird!.qualifies
-                            ? `Terminou em 3º no ${group} e avançou ao mata-mata como um dos 8 melhores terceiros colocados (${bestThird!.position}º entre os 12).`
-                            : `Terminou em 3º no ${group} e está eliminado — ficou fora dos 8 melhores terceiros colocados (${bestThird!.position}º entre os 12).`
+                            ? t("standings.noteThirdQualified", { group, position: bestThird!.position })
+                            : t("standings.noteThirdEliminated", { group, position: bestThird!.position })
                           : status === "qualified"
                           ? computeQualificationNote(row.code, rows, liveMatches)
                           : status === "eliminated"
@@ -430,13 +437,17 @@ export function StandingsView({
                           : index < 2 && status === "contention"
                           ? computeContentionNote(row.code, rows, liveMatches)
                           : isAwaitingBestThird
-                          ? `Terminou em 3º no ${group}. Os 8 melhores terceiros colocados avançam ao mata-mata — a definição só sai quando todos os grupos terminarem.${
-                              bestThird
-                                ? ` Posição provisória entre os 12 terceiros: ${bestThird.position}º — ${
-                                    bestThird.qualifies ? "dentro dos 8 que avançam." : "fora dos 8, por enquanto."
-                                  }`
-                                : ""
-                            }`
+                          ? t("standings.noteAwaitingThird", {
+                              group,
+                              suffix: bestThird
+                                ? t("standings.noteAwaitingThirdSuffix", {
+                                    position: bestThird.position,
+                                    status: bestThird.qualifies
+                                      ? t("standings.noteAwaitingThirdInside")
+                                      : t("standings.noteAwaitingThirdOutside"),
+                                  })
+                                : "",
+                            })
                           : null;
                       const tooltipKey = `${group}-${row.code}`;
                       const isTooltipOpen = openTooltip?.key === tooltipKey;
@@ -536,6 +547,8 @@ export function StandingsView({
               </div>
 
               {(() => {
+                // Editorial pt-BR prose is HIDDEN in the Spanish (LATAM) thin shell.
+                if (locale === "es") return null;
                 const letter = group.match(/Grupo ([A-L])/)?.[1];
                 const analysis = letter ? GROUP_ANALYSIS_BY_LETTER[letter] : undefined;
                 if (!analysis) return null;
@@ -553,7 +566,7 @@ export function StandingsView({
                       className={`flex cursor-pointer list-none items-center justify-between gap-2 font-anton text-sm uppercase tracking-wide ${headingClasses} [&::-webkit-details-marker]:hidden`}
                     >
                       <span className="flex items-center gap-2">
-                        Análise do grupo
+                        {t("standings.groupAnalysis")}
                         <AnalysisFreshnessBadge
                           upToDate={groupUpToDate}
                           theme={theme}

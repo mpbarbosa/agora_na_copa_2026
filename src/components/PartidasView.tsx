@@ -4,8 +4,12 @@ import { buildGroupPositionMap } from "../standings";
 import type { QualificationStatus } from "../standings";
 import { resolveTeamDisplay as resolveKnockoutTeamDisplay } from "../utils/resolveTeamDisplay";
 import { buildFeederTeamBySlot, feederMatchupCodes } from "../utils/knockoutFeeders";
+import { localizedStageName } from "../utils/knockoutSlots";
 import { finishedSideResult, type ResultTone } from "../utils/matchResult";
 import { FlagIcon } from "./FlagIcon";
+import { useT } from "../i18n";
+
+type Translate = (key: string, params?: Record<string, string | number>) => string;
 
 interface PartidasViewProps {
   matches: Match[];
@@ -25,53 +29,48 @@ interface MatchGroup {
   matches: Match[];
 }
 
-const FILTER_OPTIONS: MatchFilterOption[] = [
-  { id: "PRE_GAME", label: "Agendadas", shortLabel: "Agenda" },
-  { id: "LIVE", label: "Ao vivo", shortLabel: "Ao vivo" },
-  { id: "FINISHED", label: "Encerradas", shortLabel: "Resultados" },
+const buildFilterOptions = (t: Translate): MatchFilterOption[] => [
+  { id: "PRE_GAME", label: t("partidas.filterScheduled"), shortLabel: t("partidas.filterScheduledShort") },
+  { id: "LIVE", label: t("partidas.filterLive"), shortLabel: t("partidas.filterLiveShort") },
+  { id: "FINISHED", label: t("partidas.filterFinished"), shortLabel: t("partidas.filterFinishedShort") },
 ];
 
 // All group-stage matches share one phase; each knockout fixture's stageName
 // ("16 Avos de Final", "Oitavas de Final", … "Final") is its own phase. Used to
 // print a phase header in the list so the rounds are visually separated.
-const GROUP_STAGE_PHASE = "Fase de Grupos";
-const matchPhaseLabel = (match: Match): string =>
-  match.stageName === "Group Stage" ? GROUP_STAGE_PHASE : match.stageName;
+const matchPhaseLabel = (match: Match, t: Translate): string =>
+  match.stageName === "Group Stage"
+    ? t("partidas.groupStagePhase")
+    : localizedStageName(match.stageName);
 
-const STATUS_COPY: Record<
+// Class strips are theme-driven and language-agnostic; the labels come from `t`.
+const STATUS_STRIP: Record<
   MatchStatus,
-  {
-    compactLabel: string;
-    accessibleLabel: string;
-    stripLight: string;
-    stripDark: string;
-  }
+  { stripLight: string; stripDark: string }
 > = {
   PRE_GAME: {
-    compactLabel: "Agenda",
-    accessibleLabel: "Agendada",
     stripLight: "bg-sky-500/10 text-sky-700",
     stripDark: "bg-sky-400/10 text-sky-200",
   },
   LIVE: {
-    compactLabel: "Ao vivo",
-    accessibleLabel: "Ao vivo",
     stripLight: "bg-[#009c3b]/10 text-[#0b7a34]",
     stripDark: "bg-[#00e476]/10 text-[#8dffc3]",
   },
   SUSPENDED: {
-    compactLabel: "Paralisado",
-    accessibleLabel: "Jogo paralisado",
     stripLight: "bg-amber-500/10 text-amber-700",
     stripDark: "bg-amber-400/10 text-amber-200",
   },
   FINISHED: {
-    compactLabel: "FT",
-    accessibleLabel: "Encerrada",
     stripLight: "bg-slate-500/10 text-slate-700",
     stripDark: "bg-white/10 text-slate-200",
   },
 };
+
+const statusCompactLabel = (status: MatchStatus, t: Translate): string =>
+  t(`partidas.statusCompact.${status}`);
+
+const statusAccessibleLabel = (status: MatchStatus, t: Translate): string =>
+  t(`partidas.statusAccessible.${status}`);
 
 
 // Tailwind colour for a finished-result tone, branched by theme (no `dark:` utilities).
@@ -115,10 +114,10 @@ const buildMatchGroups = (status: MatchStatus, matches: Match[]): MatchGroup[] =
   }));
 };
 
-const getMatchCenterDisplay = (match: Match) => {
+const getMatchCenterDisplay = (match: Match, t: Translate) => {
   if (match.status === "PRE_GAME") {
     return {
-      top: "Kickoff",
+      top: t("partidas.kickoff"),
       bottom: match.kickoffTime,
     };
   }
@@ -126,22 +125,24 @@ const getMatchCenterDisplay = (match: Match) => {
   // A knockout tie decided on penalties is level on the scoreline, so the
   // shootout tally replaces the plain "Final" label to show who advanced.
   const finishedLabel = match.penaltyScore
-    ? `Pên. ${match.penaltyScore.teamA} x ${match.penaltyScore.teamB}`
-    : "Final";
+    ? t("partidas.penalties", { teamA: match.penaltyScore.teamA, teamB: match.penaltyScore.teamB })
+    : t("partidas.fullTimeLong");
 
   return {
     top: `${match.score?.teamA ?? 0} x ${match.score?.teamB ?? 0}`,
     bottom:
       match.status === "LIVE"
-        ? match.matchTime || "Em jogo"
+        ? match.matchTime || t("partidas.inPlay")
         : match.status === "SUSPENDED"
-          ? "Paralisado"
+          ? t("partidas.suspended")
           : finishedLabel,
   };
 };
 
 export function PartidasView({ matches, theme, onSelectTeamLineup, onSelectMatch }: PartidasViewProps) {
+  const t = useT();
   const [activeFilter, setActiveFilter] = useState<MatchStatus>("PRE_GAME");
+  const filterOptions = buildFilterOptions(t);
 
   const headingClasses = theme === "classic-light" ? "text-slate-900" : "text-white";
   const mutedClasses = theme === "classic-light" ? "text-slate-600" : "text-slate-300";
@@ -187,8 +188,8 @@ export function PartidasView({ matches, theme, onSelectTeamLineup, onSelectMatch
   // Only separate by phase when this filter actually spans more than one (e.g. the
   // "Agendadas" tab now mixes group-stage and knockout fixtures).
   const hasMultiplePhases = useMemo(
-    () => new Set(groupedMatches.map((group) => matchPhaseLabel(group.matches[0]))).size > 1,
-    [groupedMatches],
+    () => new Set(groupedMatches.map((group) => matchPhaseLabel(group.matches[0], t))).size > 1,
+    [groupedMatches, t],
   );
   // Render the per-phase collapsible headers when the filter spans multiple phases,
   // and always on "Encerradas" — so finished results carry a phase header (e.g.
@@ -202,7 +203,7 @@ export function PartidasView({ matches, theme, onSelectTeamLineup, onSelectMatch
   const phaseSections = useMemo(() => {
     const sections: { phase: string; matchCount: number; groups: MatchGroup[] }[] = [];
     for (const group of groupedMatches) {
-      const phase = matchPhaseLabel(group.matches[0]);
+      const phase = matchPhaseLabel(group.matches[0], t);
       const last = sections[sections.length - 1];
       if (last && last.phase === phase) {
         last.groups.push(group);
@@ -212,7 +213,7 @@ export function PartidasView({ matches, theme, onSelectTeamLineup, onSelectMatch
       }
     }
     return sections;
-  }, [groupedMatches]);
+  }, [groupedMatches, t]);
 
   // Knockout fixtures carry placeholder slots ("2º A", …). Project the team that
   // currently holds each group-position slot from live standings — exactly like the
@@ -229,7 +230,7 @@ export function PartidasView({ matches, theme, onSelectTeamLineup, onSelectMatch
     status === null ? null : status === "qualified" ? (
       <span
         className={`shrink-0 font-mono text-[11px] font-bold ${theme === "classic-light" ? "text-[#009c3b]" : "text-[#00e476]"}`}
-        title="Classificado (provisório)"
+        title={t("partidas.qualifiedProvisional")}
       >
         ✓
       </span>
@@ -239,7 +240,7 @@ export function PartidasView({ matches, theme, onSelectTeamLineup, onSelectMatch
           theme === "classic-light" ? "border-amber-400/60 text-amber-700" : "border-[#ffd84d]/40 text-[#ffd84d]/70"
         }`}
       >
-        prov.
+        {t("partidas.provAbbrev")}
       </span>
     );
 
@@ -255,7 +256,7 @@ export function PartidasView({ matches, theme, onSelectTeamLineup, onSelectMatch
           {group.title}
         </h3>
         <span className={`font-mono text-[10px] uppercase tracking-[0.22em] ${softMutedClasses}`}>
-          {FILTER_OPTIONS.find((option) => option.id === activeFilter)?.shortLabel}
+          {filterOptions.find((option) => option.id === activeFilter)?.shortLabel}
         </span>
       </div>
 
@@ -263,9 +264,9 @@ export function PartidasView({ matches, theme, onSelectTeamLineup, onSelectMatch
         {group.matches.map((match) => {
           const stripClasses =
             theme === "classic-light"
-              ? STATUS_COPY[match.status].stripLight
-              : STATUS_COPY[match.status].stripDark;
-          const centerDisplay = getMatchCenterDisplay(match);
+              ? STATUS_STRIP[match.status].stripLight
+              : STATUS_STRIP[match.status].stripDark;
+          const centerDisplay = getMatchCenterDisplay(match, t);
           const dispA = resolveTeamDisplay(match, match.teamA);
           const dispB = resolveTeamDisplay(match, match.teamB);
           // For an unresolved winner-ref slot, show its feeder matchup ("MEX x ECU") in
@@ -305,7 +306,7 @@ export function PartidasView({ matches, theme, onSelectTeamLineup, onSelectMatch
                     id={match.status === "LIVE" ? "partidas-live-indicator" : undefined}
                   />
                   <span className="font-mono text-[10px] uppercase tracking-[0.24em]">
-                    {STATUS_COPY[match.status].compactLabel}
+                    {statusCompactLabel(match.status, t)}
                   </span>
                 </div>
                 <span className="font-mono text-[10px] uppercase tracking-[0.24em]">
@@ -344,7 +345,7 @@ export function PartidasView({ matches, theme, onSelectTeamLineup, onSelectMatch
                 <div
                   className={`min-w-[78px] text-center ${match.status === "FINISHED" ? "group/score" : ""}`}
                   id={`partidas-center-${match.id}`}
-                  aria-label={`${STATUS_COPY[match.status].accessibleLabel}: ${centerDisplay.top}`}
+                  aria-label={`${statusAccessibleLabel(match.status, t)}: ${centerDisplay.top}`}
                 >
                   <p
                     className={`uppercase ${
@@ -443,15 +444,15 @@ export function PartidasView({ matches, theme, onSelectTeamLineup, onSelectMatch
               className={`font-anton text-2xl md:text-3xl uppercase tracking-wider ${headingClasses}`}
               id="partidas-view-title"
             >
-              Partidas
+              {t("partidas.title")}
             </h2>
             <p className={`mt-1 font-archivo text-sm ${mutedClasses}`}>
-              Lista compacta inspirada no placar da BBC para navegar a agenda sem poluição visual.
+              {t("partidas.subtitle")}
             </p>
           </div>
 
           <div className="flex flex-wrap gap-2" id="partidas-filter-tabs">
-            {FILTER_OPTIONS.map((option) => {
+            {filterOptions.map((option) => {
               const isActive = activeFilter === option.id;
               const count = counts[option.id];
 
@@ -474,7 +475,9 @@ export function PartidasView({ matches, theme, onSelectTeamLineup, onSelectMatch
                 >
                   <span className="block font-anton text-sm uppercase tracking-wide">{option.label}</span>
                   <span className="block font-mono text-[10px] uppercase tracking-[0.2em] opacity-80">
-                    {count} jogo{count === 1 ? "" : "s"}
+                    {count === 1
+                      ? t("partidas.matchCountSingular", { count })
+                      : t("partidas.matchCountPlural", { count })}
                   </span>
                 </button>
               );
@@ -490,7 +493,7 @@ export function PartidasView({ matches, theme, onSelectTeamLineup, onSelectMatch
               }`}
             >
               <p className={`font-archivo text-sm ${mutedClasses}`}>
-                Nenhuma partida nesta faixa no momento.
+                {t("partidas.emptyState")}
               </p>
             </div>
           ) : showPhaseSections ? (
@@ -522,12 +525,16 @@ export function PartidasView({ matches, theme, onSelectTeamLineup, onSelectMatch
                     {/* When collapsed, flag that the section's matches are hidden;
                         the "ocultos" hint disappears once the phase is expanded. */}
                     <span className={`shrink-0 font-mono text-[10px] uppercase tracking-[0.22em] ${softMutedClasses}`}>
-                      {section.matchCount} jogo{section.matchCount === 1 ? "" : "s"}
+                      {section.matchCount === 1
+                        ? t("partidas.matchCountSingular", { count: section.matchCount })
+                        : t("partidas.matchCountPlural", { count: section.matchCount })}
                       <span
                         data-testid="partidas-phase-hidden-hint"
                         className={`font-bold group-open:hidden ${phaseHintClasses}`}
                       >
-                        {section.matchCount === 1 ? " oculto" : " ocultos"}
+                        {section.matchCount === 1
+                          ? t("partidas.hiddenHintSingular")
+                          : t("partidas.hiddenHintPlural")}
                       </span>
                     </span>
                     <span

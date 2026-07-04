@@ -17,7 +17,9 @@ import {
   type Player,
 } from "../types";
 import { APP_MATCHES } from "../appMatches";
+import { apiUrl, useT, useLocale, localeToIntlTag, getActiveLocale } from "../i18n";
 import { buildGroupPositionMap } from "../standings";
+import { localizedStageName } from "../utils/knockoutSlots";
 import { resolveTeamDisplay } from "../utils/resolveTeamDisplay";
 import MATCH_VIDEOS from "../data/matchVideos.json";
 import MATCH_ANALYSIS from "../data/matchAnalysis.json";
@@ -62,11 +64,12 @@ import {
   LayoutGrid,
 } from "lucide-react";
 
-// Header match-selector groups, split by match status
-const MATCH_STATUS_GROUPS: { status: MatchStatus; label: string }[] = [
-  { status: "FINISHED", label: "Jogos concluídos: " },
-  { status: "LIVE", label: "Jogos atuais: " },
-  { status: "PRE_GAME", label: "Próximos jogos: " },
+// Header match-selector groups, split by match status. `labelKey` resolves to a
+// catalog string at render time (the label text is localized, not stored here).
+const MATCH_STATUS_GROUPS: { status: MatchStatus; labelKey: string }[] = [
+  { status: "FINISHED", labelKey: "aoVivo.group.finished" },
+  { status: "LIVE", labelKey: "aoVivo.group.live" },
+  { status: "PRE_GAME", labelKey: "aoVivo.group.upcoming" },
 ];
 
 const HEADER_MATCH_STATUS_GROUPS = MATCH_STATUS_GROUPS.filter(
@@ -150,18 +153,21 @@ function buildIncidentSpeech(incident: CommentaryEvent): string {
   return `${minute ? `Aos ${minute} minutos. ` : ""}${incident.text}`;
 }
 
-function getIncidentLabel(type: CommentaryEvent["type"]) {
+function getIncidentLabel(
+  type: CommentaryEvent["type"],
+  t: (key: string, params?: Record<string, string | number>) => string,
+) {
   switch (type) {
     case "GOAL":
-      return "GOL";
+      return t("aoVivo.incident.goal");
     case "YELLOW_CARD":
-      return "AM";
+      return t("aoVivo.incident.yellow");
     case "RED_CARD":
-      return "VM";
+      return t("aoVivo.incident.red");
     case "SUBSTITUTION":
-      return "SUB";
+      return t("aoVivo.incident.sub");
     default:
-      return "LANCE";
+      return t("aoVivo.incident.play");
   }
 }
 
@@ -435,7 +441,7 @@ function getMatchStageLabel(match: Match) {
 }
 
 function formatBrasiliaTime(date: Date) {
-  return date.toLocaleTimeString("pt-BR", {
+  return date.toLocaleTimeString(localeToIntlTag(getActiveLocale()), {
     timeZone: "America/Sao_Paulo",
     hour: "2-digit",
     minute: "2-digit",
@@ -444,7 +450,7 @@ function formatBrasiliaTime(date: Date) {
 }
 
 function formatTimeInZone(date: Date, timeZone: string) {
-  return date.toLocaleTimeString("pt-BR", {
+  return date.toLocaleTimeString(localeToIntlTag(getActiveLocale()), {
     timeZone,
     hour: "2-digit",
     minute: "2-digit",
@@ -452,22 +458,27 @@ function formatTimeInZone(date: Date, timeZone: string) {
   });
 }
 
-function formatOverlayUpdatedAt(value: string | undefined) {
+function formatOverlayUpdatedAt(
+  value: string | undefined,
+  t: (key: string, params?: Record<string, string | number>) => string,
+) {
   if (!value) {
-    return "Atualização pendente";
+    return t("aoVivo.overlay.pending");
   }
 
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) {
-    return "Atualização indisponível";
+    return t("aoVivo.overlay.unavailable");
   }
 
-  return `Atualizado ${date.toLocaleTimeString("pt-BR", {
-    timeZone: "America/Sao_Paulo",
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-  })}`;
+  return t("aoVivo.overlay.updatedAt", {
+    time: date.toLocaleTimeString(localeToIntlTag(getActiveLocale()), {
+      timeZone: "America/Sao_Paulo",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+    }),
+  });
 }
 
 function formatCountdown(totalSecs: number) {
@@ -505,6 +516,7 @@ interface IncidentTextProps {
 }
 
 function IncidentText({ incident, match, lineupEntry, theme, onSelectPlayer }: IncidentTextProps) {
+  const t = useT();
   const renderablePlayers = buildIncidentPlayerSelections(incident, match, lineupEntry);
 
   if (renderablePlayers.length === 0) {
@@ -525,10 +537,10 @@ function IncidentText({ incident, match, lineupEntry, theme, onSelectPlayer }: I
     const [entry] = renderablePlayers;
     const suffix =
       incident.type === "GOAL"
-        ? " marcou."
+        ? t("aoVivo.incidentText.scoredSuffix")
         : incident.type === "YELLOW_CARD"
-          ? " recebeu amarelo."
-          : " foi expulso.";
+          ? t("aoVivo.incidentText.yellowSuffix")
+          : t("aoVivo.incidentText.redSuffix");
 
     return (
       <>
@@ -548,7 +560,7 @@ function IncidentText({ incident, match, lineupEntry, theme, onSelectPlayer }: I
   if (incident.type === "SUBSTITUTION" && renderablePlayers.length >= 2) {
     return (
       <>
-        Sai{" "}
+        {t("aoVivo.incidentText.subOut")}
         <button
           type="button"
           id={`btn-incident-player-${incident.id}-0`}
@@ -557,7 +569,7 @@ function IncidentText({ incident, match, lineupEntry, theme, onSelectPlayer }: I
         >
           {renderablePlayers[0].token}
         </button>
-        {", entra "}
+        {t("aoVivo.incidentText.subIn")}
         <button
           type="button"
           id={`btn-incident-player-${incident.id}-1`}
@@ -598,6 +610,7 @@ export function MatchDetailView({
   teamLineups,
   initialMatchId,
 }: MatchDetailViewProps) {
+  const { t, locale } = useLocale();
   const [matchOverlays, setMatchOverlays] = useState<
     Record<string, MatchOverlayEntry>
   >({});
@@ -731,11 +744,11 @@ export function MatchDetailView({
     .at(-1);
   const currentOverlaySourceLabel =
     currentSimulatedState
-      ? "Simulação local"
+      ? t("aoVivo.overlay.sourceSimulation")
       : currentOverlay?.broadcastGuide.source === "fifa" &&
           currentOverlay?.matchState.source === "fifa"
-      ? "Oficial"
-      : "Fallback local";
+      ? t("aoVivo.overlay.sourceOfficial")
+      : t("aoVivo.overlay.sourceFallback");
   // Official FIFA status/period label (e.g. "2º tempo", "Intervalo", "Encerrado"),
   // only when the live state is genuinely FIFA-sourced (not a local simulation).
   const currentOfficialFifaStatus =
@@ -749,9 +762,9 @@ export function MatchDetailView({
       : undefined;
   const currentMatchGroupLabel = getMatchGroupLabel(currentMatch);
   const currentMatchStageLabel = getMatchStageLabel(currentMatch);
-  const headerMatchGroups = HEADER_MATCH_STATUS_GROUPS.map(({ status, label }) => ({
+  const headerMatchGroups = HEADER_MATCH_STATUS_GROUPS.map(({ status, labelKey }) => ({
     status,
-    label,
+    label: t(labelKey),
     matches: matches
       // Suspended matches are still "current", so list them under the LIVE group.
       .filter(
@@ -917,13 +930,13 @@ export function MatchDetailView({
         >
           {currentMatch.status === "LIVE"
             ? currentMatch.matchTime
-              ? `AO VIVO • ${currentMatch.matchTime}`
-              : "AO VIVO"
+              ? t("aoVivo.status.liveWithTime", { time: currentMatch.matchTime })
+              : t("aoVivo.status.live")
             : currentMatch.status === "SUSPENDED"
-              ? "PARALISADO"
+              ? t("aoVivo.status.suspended")
               : currentMatch.status === "FINISHED"
-                ? "ENCERRADO"
-                : "PRÉ-JOGO"}
+                ? t("aoVivo.status.finished")
+                : t("aoVivo.status.preGame")}
         </span>
       </div>
 
@@ -936,7 +949,7 @@ export function MatchDetailView({
               ? "border-slate-200 bg-slate-100 text-slate-600"
               : "border-white/10 bg-white/5 text-slate-300"
           }`}
-          title="Status oficial da partida segundo a FIFA"
+          title={t("aoVivo.status.officialFifaTitle")}
         >
           <span>{currentOfficialFifaStatus}</span>
         </div>
@@ -953,7 +966,7 @@ export function MatchDetailView({
         theme === "classic-light" ? "text-slate-500" : "text-slate-300"
       }`}
     >
-      {currentOverlaySourceLabel} • {formatOverlayUpdatedAt(currentOverlayUpdatedAt)}
+      {currentOverlaySourceLabel} • {formatOverlayUpdatedAt(currentOverlayUpdatedAt, t)}
     </div>
   );
 
@@ -1024,7 +1037,7 @@ export function MatchDetailView({
       requestInFlight = true;
 
       try {
-        const response = await fetch("/api/match-overlays");
+        const response = await fetch(apiUrl("/api/match-overlays"));
         if (!response.ok) {
           throw new Error("Falha ao atualizar dados da FIFA.");
         }
@@ -1164,20 +1177,20 @@ export function MatchDetailView({
 
     const texts: Record<CommentaryEvent["type"], string> = {
       GOAL: scoringPlayer
-        ? `${scoringPlayer.name} marcou.`
-        : `Gol da simulação para ${teamName}. A tabela do grupo foi recalculada na hora.`,
+        ? `${scoringPlayer.name}${t("aoVivo.incidentText.scoredSuffix")}`
+        : t("aoVivo.sim.goalGeneric", { teamName }),
       YELLOW_CARD: bookedPlayer
-        ? `${bookedPlayer.name} recebeu amarelo.`
-        : `Cartão amarelo para ${teamName} na pressão da simulação.`,
+        ? `${bookedPlayer.name}${t("aoVivo.incidentText.yellowSuffix")}`
+        : t("aoVivo.sim.yellowGeneric", { teamName }),
       RED_CARD: sentOffPlayer
-        ? `${sentOffPlayer.name} foi expulso.`
-        : `Cartão vermelho para ${teamName} em lance recriado localmente.`,
+        ? `${sentOffPlayer.name}${t("aoVivo.incidentText.redSuffix")}`
+        : t("aoVivo.sim.redGeneric", { teamName }),
       SUBSTITUTION:
         playerOff && playerOn && playerOff.id !== playerOn.id
-          ? `Sai ${playerOff.name}, entra ${playerOn.name}.`
-          : `Substituição simulada para ${teamName}.`,
-      WHISTLE: `Apito simulado em ${teamName}.`,
-      COMMENT: `Atualização local para ${teamName}.`,
+          ? `${t("aoVivo.incidentText.subOut")}${playerOff.name}${t("aoVivo.incidentText.subIn")}${playerOn.name}.`
+          : t("aoVivo.sim.subGeneric", { teamName }),
+      WHISTLE: t("aoVivo.sim.whistle", { teamName }),
+      COMMENT: t("aoVivo.sim.comment", { teamName }),
     };
 
     return {
@@ -1289,14 +1302,14 @@ export function MatchDetailView({
               }`}
             >
               <Zap size={13} className="animate-pulse" aria-hidden="true" />
-              {liveMatches.length} jogos ao vivo agora
+              {t("aoVivo.simultaneous.liveNow", { count: liveMatches.length })}
             </span>
             <span
               className={`text-[11px] ${
                 theme === "classic-light" ? "text-amber-700/80" : "text-amber-200/80"
               }`}
             >
-              Partidas simultâneas — toque para alternar:
+              {t("aoVivo.simultaneous.tapToSwitch")}
             </span>
             <div className="flex flex-wrap items-center gap-1.5">
               {/* Overview pill: stack both live games side by side. The match pills
@@ -1305,7 +1318,7 @@ export function MatchDetailView({
                 type="button"
                 id="btn-simultaneous-overview"
                 onClick={() => setLiveViewMode("overview")}
-                aria-label="Ver os dois jogos ao vivo lado a lado"
+                aria-label={t("aoVivo.simultaneous.bothAria")}
                 aria-pressed={liveViewMode === "overview"}
                 className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-1 font-anton text-xs uppercase tracking-wide transition ${
                   liveViewMode === "overview"
@@ -1316,7 +1329,7 @@ export function MatchDetailView({
                 }`}
               >
                 <LayoutGrid size={12} aria-hidden="true" />
-                <span>Os dois</span>
+                <span>{t("aoVivo.simultaneous.both")}</span>
               </button>
               {liveMatches.map((m) => {
                 const isFocused =
@@ -1327,7 +1340,10 @@ export function MatchDetailView({
                     type="button"
                     id={`btn-simultaneous-${m.id}`}
                     onClick={() => handleSelectMatch(m.id)}
-                    aria-label={`Ver ${formatCountryNameForTooltip(m.teamA.name)} x ${formatCountryNameForTooltip(m.teamB.name)}`}
+                    aria-label={t("aoVivo.simultaneous.matchAria", {
+                      teamA: formatCountryNameForTooltip(m.teamA.name),
+                      teamB: formatCountryNameForTooltip(m.teamB.name),
+                    })}
                     aria-pressed={isFocused}
                     className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-1 font-anton text-xs uppercase tracking-wide transition ${
                       isFocused
@@ -1405,8 +1421,14 @@ export function MatchDetailView({
                           key={m.id}
                           id={`btn-match-${m.id}`}
                           onClick={() => handleSelectMatch(m.id)}
-                          title={`${formatCountryNameForTooltip(a.name)} x ${formatCountryNameForTooltip(b.name)}`}
-                          aria-label={`${formatCountryNameForTooltip(a.name)} x ${formatCountryNameForTooltip(b.name)}`}
+                          title={t("aoVivo.selector.matchTooltip", {
+                            teamA: formatCountryNameForTooltip(a.name),
+                            teamB: formatCountryNameForTooltip(b.name),
+                          })}
+                          aria-label={t("aoVivo.selector.matchTooltip", {
+                            teamA: formatCountryNameForTooltip(a.name),
+                            teamB: formatCountryNameForTooltip(b.name),
+                          })}
                           className={`shrink-0 px-3.5 py-2 rounded-md text-[13px] md:text-sm leading-none font-anton transition-all uppercase tracking-wide ${
                             selectedMatchId === m.id
                               ? theme === "classic-light"
@@ -1436,7 +1458,9 @@ export function MatchDetailView({
                             ? "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
                             : "border-white/10 bg-[#171a1c] text-slate-100 hover:bg-white/10"
                         }`}
-                        aria-label={`Ver jogos anteriores em ${label.toLowerCase()}`}
+                        aria-label={t("aoVivo.selector.prevIn", {
+                          label: label.toLowerCase(),
+                        })}
                       >
                         <ChevronLeft size={16} />
                       </button>
@@ -1458,8 +1482,14 @@ export function MatchDetailView({
                               key={m.id}
                               id={`btn-match-${m.id}`}
                               onClick={() => handleSelectMatch(m.id)}
-                              title={`${formatCountryNameForTooltip(a.name)} x ${formatCountryNameForTooltip(b.name)}`}
-                              aria-label={`${formatCountryNameForTooltip(a.name)} x ${formatCountryNameForTooltip(b.name)}`}
+                              title={t("aoVivo.selector.matchTooltip", {
+                                teamA: formatCountryNameForTooltip(a.name),
+                                teamB: formatCountryNameForTooltip(b.name),
+                              })}
+                              aria-label={t("aoVivo.selector.matchTooltip", {
+                                teamA: formatCountryNameForTooltip(a.name),
+                                teamB: formatCountryNameForTooltip(b.name),
+                              })}
                               className={`shrink-0 snap-center px-3.5 py-2 rounded-md text-[13px] md:text-sm leading-none font-anton transition-all uppercase tracking-wide ${
                                 selectedMatchId === m.id
                                   ? theme === "classic-light"
@@ -1488,7 +1518,9 @@ export function MatchDetailView({
                             ? "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
                             : "border-white/10 bg-[#171a1c] text-slate-100 hover:bg-white/10"
                         }`}
-                        aria-label={`Ver próximos jogos em ${label.toLowerCase()}`}
+                        aria-label={t("aoVivo.selector.nextIn", {
+                          label: label.toLowerCase(),
+                        })}
                       >
                         <ChevronRight size={16} />
                       </button>
@@ -1520,14 +1552,14 @@ export function MatchDetailView({
         >
           <div className="flex items-center justify-between mb-3 border-b pb-2 border-slate-100 dark:border-white/5">
             <h3 className="font-anton text-sm tracking-wider uppercase text-[#ffd700] flex items-center gap-1.5">
-              <Edit3 size={15} /> CONFIGUREM O CRONÔMETRO MOCK
+              <Edit3 size={15} /> {t("aoVivo.config.title")}
             </h3>
             <button
               id="btn-close-config"
               onClick={() => setShowConfig(false)}
               className="text-xs text-red-500 font-mono"
             >
-              Fechar [X]
+              {t("aoVivo.config.close")}
             </button>
           </div>
 
@@ -1538,29 +1570,29 @@ export function MatchDetailView({
             className="mb-4 rounded-lg border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-black/20 p-3"
           >
             <p className="font-mono text-xs uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-2">
-              Status da narração
+              {t("aoVivo.config.narrationStatus")}
             </p>
             <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 font-mono text-[11px]">
-              <dt className="text-slate-400">Suporte do navegador</dt>
+              <dt className="text-slate-400">{t("aoVivo.config.browserSupport")}</dt>
               <dd className={matchSpeech.status.supported ? "text-emerald-600 dark:text-emerald-400" : "text-amber-600 dark:text-amber-400"}>
-                {matchSpeech.status.supported ? "Disponível" : "Indisponível"}
+                {matchSpeech.status.supported ? t("aoVivo.config.available") : t("aoVivo.config.unavailable")}
               </dd>
-              <dt className="text-slate-400">Motor de voz (CDN)</dt>
+              <dt className="text-slate-400">{t("aoVivo.config.voiceEngine")}</dt>
               <dd className={matchSpeech.status.engineLoaded ? "text-emerald-600 dark:text-emerald-400" : "text-slate-500 dark:text-slate-400"}>
-                {matchSpeech.status.engineLoaded ? "Carregado" : matchSpeech.status.supported ? "Carregando…" : "—"}
+                {matchSpeech.status.engineLoaded ? t("aoVivo.config.loaded") : matchSpeech.status.supported ? t("aoVivo.config.loading") : t("aoVivo.config.dash")}
               </dd>
-              <dt className="text-slate-400">Voz selecionada</dt>
+              <dt className="text-slate-400">{t("aoVivo.config.selectedVoice")}</dt>
               <dd className="text-slate-700 dark:text-slate-200 truncate">
-                {matchSpeech.status.voiceName ?? (matchSpeech.status.engineLoaded ? "carregando voz…" : "—")}
+                {matchSpeech.status.voiceName ?? (matchSpeech.status.engineLoaded ? t("aoVivo.config.loadingVoice") : t("aoVivo.config.dash"))}
                 {matchSpeech.status.voiceLocal !== null && (
                   <span className="text-slate-400">
-                    {matchSpeech.status.voiceLocal ? " · no aparelho" : " · da rede"}
+                    {matchSpeech.status.voiceLocal ? t("aoVivo.config.voiceOnDevice") : t("aoVivo.config.voiceOnNetwork")}
                   </span>
                 )}
               </dd>
-              <dt className="text-slate-400">Narração</dt>
+              <dt className="text-slate-400">{t("aoVivo.config.narration")}</dt>
               <dd className={matchSpeech.enabled ? "text-emerald-600 dark:text-emerald-400" : "text-slate-500 dark:text-slate-400"}>
-                {matchSpeech.enabled ? "Ativada" : "Desativada"}
+                {matchSpeech.enabled ? t("aoVivo.config.enabled") : t("aoVivo.config.disabled")}
               </dd>
             </dl>
 
@@ -1572,7 +1604,7 @@ export function MatchDetailView({
                       htmlFor="select-narration-voice"
                       className="block font-mono text-[10px] uppercase tracking-wider text-slate-400 mb-1"
                     >
-                      Voz (escolha uma que fale no seu aparelho)
+                      {t("aoVivo.config.voiceLabel")}
                     </label>
                     <select
                       id="select-narration-voice"
@@ -1581,10 +1613,10 @@ export function MatchDetailView({
                       onChange={(e) => matchSpeech.selectVoice(e.target.value)}
                       className="w-full rounded-lg border px-2 py-2 font-mono text-xs border-slate-300 bg-white text-slate-800 dark:border-white/15 dark:bg-black dark:text-white"
                     >
-                      <option value="">Automática (recomendada)</option>
+                      <option value="">{t("aoVivo.config.voiceAuto")}</option>
                       {matchSpeech.voices.map((v) => (
                         <option key={v.voiceURI} value={v.voiceURI}>
-                          {v.name} ({v.lang}){v.localService ? "" : " · rede"}
+                          {v.name} ({v.lang}){v.localService ? "" : t("aoVivo.config.voiceNetworkSuffix")}
                         </option>
                       ))}
                     </select>
@@ -1595,7 +1627,7 @@ export function MatchDetailView({
                   id="btn-test-narration"
                   data-testid="btn-test-narration"
                   onClick={() => {
-                    setSpeechTestStatus("iniciando…");
+                    setSpeechTestStatus(t("aoVivo.config.testVoiceStarting"));
                     // Pass a voice only when the user explicitly picked one;
                     // "Automática" → simplest call (device default voice).
                     runDirectSpeechTest(
@@ -1604,10 +1636,10 @@ export function MatchDetailView({
                     );
                   }}
                   className="mt-3 inline-flex items-center gap-2 rounded-lg border px-3 py-2 font-mono text-xs font-bold uppercase tracking-wider transition border-[#009c3b]/40 bg-[#009c3b]/10 text-[#007a2f] hover:bg-[#009c3b]/20 dark:border-[#00e476]/30 dark:bg-[#00e476]/10 dark:text-[#00e476] dark:hover:bg-[#00e476]/20"
-                  title="Falar uma frase de teste agora (teste direto do dispositivo)"
+                  title={t("aoVivo.config.testVoiceTitle")}
                 >
                   <Mic size={14} aria-hidden="true" />
-                  Testar voz
+                  {t("aoVivo.config.testVoice")}
                 </button>
                 {speechTestStatus && (
                   <p
@@ -1624,7 +1656,7 @@ export function MatchDetailView({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-mono mb-1 text-slate-600 dark:text-slate-300">
-                Horário Principal de Entrada:
+                {t("aoVivo.config.kickoffLabel")}
               </label>
               <input
                 id="input-kickoff-time"
@@ -1632,12 +1664,12 @@ export function MatchDetailView({
                 value={customKickoffTime}
                 onChange={(e) => setCustomKickoffTime(e.target.value)}
                 className="w-full text-sm font-mono p-2 border rounded bg-slate-50 dark:bg-black text-slate-900 dark:text-white"
-                placeholder="Exemplo: 16:00"
+                placeholder={t("aoVivo.config.kickoffPlaceholder")}
               />
             </div>
             <div>
               <label className="block text-sm font-mono mb-1 text-slate-600 dark:text-slate-300">
-                Tempo Restante (Segundos):
+                {t("aoVivo.config.remainingLabel")}
               </label>
               <input
                 id="input-countdown-seconds"
@@ -1649,7 +1681,9 @@ export function MatchDetailView({
                 className="w-full text-sm font-mono p-2 border rounded bg-slate-50 dark:bg-black text-slate-900 dark:text-white"
               />
               <span className="text-xs text-slate-600 dark:text-slate-300 italic">
-                Previsão convertida: {formatCountdown(customCountdownSeconds)}
+                {t("aoVivo.config.convertedPreview", {
+                  value: formatCountdown(customCountdownSeconds),
+                })}
               </span>
             </div>
           </div>
@@ -1660,11 +1694,10 @@ export function MatchDetailView({
             <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
               <div>
                 <p className="font-anton text-sm tracking-wider uppercase text-slate-800 dark:text-white">
-                  Simulador de placar e disciplina
+                  {t("aoVivo.config.simulatorTitle")}
                 </p>
                 <p className="text-xs font-archivo text-slate-600 dark:text-slate-300 leading-5">
-                  Use o duelo Brasil x Marrocos para validar o cronômetro demo e ver o
-                  Grupos reagir a gols e cartões em tempo real.
+                  {t("aoVivo.config.simulatorDesc")}
                 </p>
               </div>
               <button
@@ -1673,7 +1706,7 @@ export function MatchDetailView({
                 onClick={handleResetSimulation}
                 className="px-3 py-2 border rounded font-mono text-[11px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-white/10"
               >
-                Resetar demo local
+                {t("aoVivo.config.resetDemo")}
               </button>
             </div>
 
@@ -1685,7 +1718,7 @@ export function MatchDetailView({
                 className="flex min-h-11 items-center justify-center gap-2 rounded-lg bg-[#004d2c] px-3 py-2 font-anton text-xs uppercase tracking-wider text-white hover:bg-[#00391f]"
               >
                 <CircleDot size={14} />
-                Iniciar ao vivo
+                {t("aoVivo.config.startLive")}
               </button>
               <button
                 id="btn-sim-goal-a"
@@ -1694,7 +1727,7 @@ export function MatchDetailView({
                 className="flex min-h-11 items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 font-anton text-xs uppercase tracking-wider text-slate-800 hover:bg-slate-50 dark:border-white/10 dark:bg-[#161919] dark:text-white dark:hover:bg-white/10"
               >
                 <Goal size={14} />
-                Gol {currentTeamA.code}
+                {t("aoVivo.config.goal", { code: currentTeamA.code })}
               </button>
               <button
                 id="btn-sim-goal-b"
@@ -1703,7 +1736,7 @@ export function MatchDetailView({
                 className="flex min-h-11 items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 font-anton text-xs uppercase tracking-wider text-slate-800 hover:bg-slate-50 dark:border-white/10 dark:bg-[#161919] dark:text-white dark:hover:bg-white/10"
               >
                 <Goal size={14} />
-                Gol {currentTeamB.code}
+                {t("aoVivo.config.goal", { code: currentTeamB.code })}
               </button>
               <button
                 id="btn-sim-yellow-a"
@@ -1712,7 +1745,7 @@ export function MatchDetailView({
                 className="flex min-h-11 items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 font-anton text-xs uppercase tracking-wider text-slate-800 hover:bg-slate-50 dark:border-white/10 dark:bg-[#161919] dark:text-white dark:hover:bg-white/10"
               >
                 <ShieldAlert size={14} />
-                Amarelo {currentTeamA.code}
+                {t("aoVivo.config.yellow", { code: currentTeamA.code })}
               </button>
               <button
                 id="btn-sim-red-b"
@@ -1721,7 +1754,7 @@ export function MatchDetailView({
                 className="flex min-h-11 items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 font-anton text-xs uppercase tracking-wider text-slate-800 hover:bg-slate-50 dark:border-white/10 dark:bg-[#161919] dark:text-white dark:hover:bg-white/10"
               >
                 <ShieldAlert size={14} />
-                Vermelho {currentTeamB.code}
+                {t("aoVivo.config.red", { code: currentTeamB.code })}
               </button>
               <button
                 id="btn-sim-finish-match"
@@ -1729,7 +1762,7 @@ export function MatchDetailView({
                 onClick={handleFinishSimulation}
                 className="flex min-h-11 items-center justify-center gap-2 rounded-lg bg-[#1f2937] px-3 py-2 font-anton text-xs uppercase tracking-wider text-white hover:bg-[#111827]"
               >
-                Encerrar jogo
+                {t("aoVivo.config.finishMatch")}
               </button>
             </div>
           </div>
@@ -1739,7 +1772,7 @@ export function MatchDetailView({
               onClick={handleUpdateKickoff}
               className="px-4 py-2 bg-[#004d2c] text-white rounded font-anton uppercase text-xs hover:bg-[#00391f]"
             >
-              Aplicar ao Jogo
+              {t("aoVivo.config.applyToMatch")}
             </button>
           </div>
         </div>
@@ -1805,8 +1838,8 @@ export function MatchDetailView({
                   >
                     <Zap size={18} className="shrink-0 animate-pulse" aria-hidden="true" />
                     {simultaneousUpcomingMatches.length === 1
-                      ? "Atenção: outro jogo no mesmo horário"
-                      : "Atenção: outros jogos no mesmo horário"}
+                      ? t("aoVivo.scoreboard.simultaneousOne")
+                      : t("aoVivo.scoreboard.simultaneousMany")}
                   </span>
                   <div className="flex flex-wrap items-center justify-center gap-2">
                     {simultaneousUpcomingMatches.map((m) => {
@@ -1818,8 +1851,14 @@ export function MatchDetailView({
                         type="button"
                         id={`btn-simultaneous-${m.id}`}
                         onClick={() => handleSelectMatch(m.id)}
-                        title={`${formatCountryNameForTooltip(a.name)} x ${formatCountryNameForTooltip(b.name)} — começa no mesmo horário`}
-                        aria-label={`Ver ${formatCountryNameForTooltip(a.name)} contra ${formatCountryNameForTooltip(b.name)}, que começa no mesmo horário`}
+                        title={t("aoVivo.scoreboard.simultaneousTitle", {
+                          teamA: formatCountryNameForTooltip(a.name),
+                          teamB: formatCountryNameForTooltip(b.name),
+                        })}
+                        aria-label={t("aoVivo.scoreboard.simultaneousAria", {
+                          teamA: formatCountryNameForTooltip(a.name),
+                          teamB: formatCountryNameForTooltip(b.name),
+                        })}
                         className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 font-anton text-sm uppercase tracking-wide transition ${
                           theme === "classic-light"
                             ? "border-amber-300 bg-white text-slate-800 hover:border-amber-400 hover:bg-amber-100"
@@ -1923,9 +1962,11 @@ export function MatchDetailView({
                         ? "border-amber-300 bg-amber-50 text-amber-700"
                         : "border-amber-400/30 bg-amber-400/10 text-amber-300"
                     }`}
-                    title="Resultado da disputa por pênaltis"
+                    title={t("aoVivo.scoreboard.penaltyTitle")}
                   >
-                    Pênaltis {currentMatchPenaltyScore.teamA}
+                    {t("aoVivo.scoreboard.penaltyLabel", {
+                      a: currentMatchPenaltyScore.teamA,
+                    })}
                     <span className="opacity-50">x</span>
                     {currentMatchPenaltyScore.teamB}
                   </span>
@@ -1935,7 +1976,9 @@ export function MatchDetailView({
                         theme === "classic-light" ? "text-slate-500" : "text-slate-300"
                       }`}
                     >
-                      {penaltyShootoutWinnerName} avança nos pênaltis
+                      {t("aoVivo.scoreboard.advancesOnPenalties", {
+                        name: penaltyShootoutWinnerName,
+                      })}
                     </span>
                   )}
                 </div>
@@ -1963,7 +2006,9 @@ export function MatchDetailView({
                       : "border-white/10 bg-white/5 text-slate-100 hover:border-[#00e476]/25 hover:bg-[#00e476]/10 hover:text-[#a7e6bf]"
                   }`}
                   id="scoreboard-group-label"
-                  aria-label={`Abrir tabela do ${currentMatchGroupLabel}`}
+                  aria-label={t("aoVivo.scoreboard.openGroupTable", {
+                    group: currentMatchGroupLabel,
+                  })}
                 >
                   {currentMatchGroupLabel}
                 </button>
@@ -2035,10 +2080,10 @@ export function MatchDetailView({
                     className={`mb-2 flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-wider ${
                       theme === "classic-light" ? "text-slate-500" : "text-slate-400"
                     }`}
-                    title="Hora local no estádio"
+                    title={t("aoVivo.scoreboard.stadiumLocalTimeTitle")}
                   >
                     <Clock size={12} aria-hidden="true" />
-                    <span>Horário local</span>
+                    <span>{t("aoVivo.scoreboard.localTime")}</span>
                     <span className="font-bold tabular-nums text-amber-500">
                       {formatTimeInZone(currentTime, currentStadiumTimeZone)}
                     </span>
@@ -2055,7 +2100,7 @@ export function MatchDetailView({
                         : "text-[#00e476] glowing-text-green"
                     }`}
                   >
-                    Faltam:{" "}
+                    {t("aoVivo.scoreboard.countdown")}{" "}
                     <span className="font-bold">
                       {formatCountdown(secondsRemaining)}
                     </span>
@@ -2070,7 +2115,7 @@ export function MatchDetailView({
                     theme === "classic-light" ? "text-slate-800" : "text-white"
                   }`}
                 >
-                  <span className={theme === "classic-light" ? "text-slate-800" : "text-white"}>HORÁRIO DE BRASÍLIA</span>
+                  <span className={theme === "classic-light" ? "text-slate-800" : "text-white"}>{t("aoVivo.scoreboard.brasiliaTime")}</span>
                   <span className="tabular-nums" id="brasilia-clock">
                     {formatBrasiliaTime(currentTime)}
                   </span>
@@ -2093,7 +2138,7 @@ export function MatchDetailView({
                     theme === "classic-light" ? "text-slate-700" : "text-slate-100"
                   }`}
                 >
-                  {currentMatch.stadiumName} • {currentMatch.stageName}
+                  {currentMatch.stadiumName} • {localizedStageName(currentMatch.stageName)}
                 </a>
               </div>
 
@@ -2128,7 +2173,7 @@ export function MatchDetailView({
                       : "text-[#8cc8ff] hover:text-white"
                   }`}
                 >
-                  Página oficial da FIFA para esta partida
+                  {t("aoVivo.scoreboard.fifaMatchPage")}
                 </a>
               )}
             </div>
@@ -2160,7 +2205,7 @@ export function MatchDetailView({
                   : "text-slate-100 hover:bg-white/10 hover:text-white"
             }`}
           >
-            Onde Assistir
+            {t("aoVivo.tab.broadcast")}
           </button>
           <button
             id="btn-tab-lineup"
@@ -2175,9 +2220,9 @@ export function MatchDetailView({
                   : "text-slate-100 hover:bg-white/10 hover:text-white"
             }`}
           >
-            Escalação
+            {t("aoVivo.tab.lineup")}
           </button>
-          {matchAnalysisText && (
+          {locale !== "es" && matchAnalysisText && (
             <button
               id="btn-tab-pregame"
               onClick={() => setActiveTab("pregame")}
@@ -2191,7 +2236,7 @@ export function MatchDetailView({
                     : "text-slate-100 hover:bg-white/10 hover:text-white"
               }`}
             >
-              {currentMatch.status === "FINISHED" ? "Pós-jogo" : "Pré-jogo"}
+              {currentMatch.status === "FINISHED" ? t("aoVivo.tab.postGame") : t("aoVivo.tab.preGame")}
             </button>
           )}
           {hasMatchInstagram && (
@@ -2208,7 +2253,7 @@ export function MatchDetailView({
                     : "text-slate-100 hover:bg-white/10 hover:text-white"
               }`}
             >
-              Instagram
+              {t("aoVivo.tab.instagram")}
             </button>
           )}
         </div>
@@ -2233,7 +2278,7 @@ export function MatchDetailView({
                 }`}
                 id="broadcast-section-title"
               >
-                Onde ver o jogo
+                {t("aoVivo.broadcast.title")}
               </p>
               <p
                 className={`mb-4 font-mono text-[11px] uppercase tracking-wider ${
@@ -2242,8 +2287,8 @@ export function MatchDetailView({
                     : "text-slate-300"
                 }`}
               >
-                {currentOverlay?.broadcastGuide.note || "Carregando dados oficiais da FIFA..."} •{" "}
-                {formatOverlayUpdatedAt(currentOverlay?.broadcastGuide.updatedAt)}
+                {currentOverlay?.broadcastGuide.note || t("aoVivo.broadcast.loadingNote")} •{" "}
+                {formatOverlayUpdatedAt(currentOverlay?.broadcastGuide.updatedAt, t)}
               </p>
               {currentMatch.status === "FINISHED" &&
               (MATCH_VIDEOS as Record<string, { embedUrl: string; title: string }[]>)[currentMatch.id]?.length ? (
@@ -2276,7 +2321,9 @@ export function MatchDetailView({
                             rel="noopener noreferrer"
                             className="group relative shrink-0 overflow-hidden rounded-xl border transition hover:-translate-y-0.5"
                             style={{ width: 120, height: 68 }}
-                            aria-label={`Assistir no YouTube: ${video.title}`}
+                            aria-label={t("aoVivo.broadcast.videoAria", {
+                              title: video.title,
+                            })}
                             title={video.title}
                           >
                             <img
@@ -2390,7 +2437,7 @@ export function MatchDetailView({
                           theme === "classic-light" ? "text-slate-900" : "text-white"
                         }`}
                       >
-                        Lances do jogo
+                        {t("aoVivo.incidents.title")}
                       </p>
                       <p
                         className={`mt-1 font-mono text-[11px] uppercase tracking-wider ${
@@ -2400,14 +2447,15 @@ export function MatchDetailView({
                         }`}
                       >
                         {currentSimulatedState
-                          ? "Feed da simulação local"
+                          ? t("aoVivo.incidents.feedSimulation")
                           : currentOverlay?.matchState.source === "fifa"
-                          ? "Feed oficial da FIFA"
-                          : "Aguardando lances oficiais da FIFA"}{" "}
+                          ? t("aoVivo.incidents.feedOfficial")
+                          : t("aoVivo.incidents.feedWaiting")}{" "}
                         •{" "}
                         {formatOverlayUpdatedAt(
                           currentSimulatedState?.updatedAt ??
                             currentOverlay?.matchState.updatedAt,
+                          t,
                         )}
                       </p>
                       {hasClickableIncidentPlayers && (
@@ -2418,7 +2466,7 @@ export function MatchDetailView({
                               : "text-[#ffd84d]"
                           }`}
                         >
-                          Clique no nome destacado para abrir o card do jogador
+                          {t("aoVivo.incidents.clickHint")}
                         </p>
                       )}
                     </div>
@@ -2462,7 +2510,7 @@ export function MatchDetailView({
                                 theme,
                               )}`}
                             >
-                              {getIncidentLabel(incident.type)}
+                              {getIncidentLabel(incident.type, t)}
                             </span>
                             {incident.team && (
                               <span
@@ -2508,8 +2556,8 @@ export function MatchDetailView({
                               type="button"
                               data-testid="incident-speak"
                               onClick={() => matchSpeech.speak(buildIncidentSpeech(incident))}
-                              aria-label="Ouvir o lance"
-                              title="Ouvir o lance"
+                              aria-label={t("aoVivo.incidents.listenPlay")}
+                              title={t("aoVivo.incidents.listenPlay")}
                               className={`mt-0.5 shrink-0 rounded-full border p-2 transition ${
                                 theme === "classic-light"
                                   ? "border-slate-200 bg-white text-slate-600 hover:bg-slate-100"
@@ -2530,7 +2578,7 @@ export function MatchDetailView({
                           : "text-slate-200"
                       }`}
                     >
-                      Sem lances oficiais registrados pela FIFA ate agora.
+                      {t("aoVivo.incidents.empty")}
                     </p>
                   )}
                 </div>
@@ -2563,7 +2611,7 @@ export function MatchDetailView({
                           : "text-slate-100"
                       }`}
                     >
-                      Jogos concluídos:
+                      {t("aoVivo.finished.label")}
                     </span>
                     <div className="flex min-w-0 items-center gap-2">
                       <button
@@ -2574,7 +2622,7 @@ export function MatchDetailView({
                             ? "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
                             : "border-white/10 bg-[#171a1c] text-slate-100 hover:bg-white/10"
                         }`}
-                        aria-label="Ver jogos concluídos anteriores"
+                        aria-label={t("aoVivo.finished.prev")}
                       >
                         <ChevronLeft size={16} />
                       </button>
@@ -2607,8 +2655,14 @@ export function MatchDetailView({
                               key={m.id}
                               id={`btn-match-${m.id}`}
                               onClick={() => handleSelectMatch(m.id)}
-                              title={`${formatCountryNameForTooltip(m.teamA.name)} x ${formatCountryNameForTooltip(m.teamB.name)}`}
-                              aria-label={`${formatCountryNameForTooltip(m.teamA.name)} x ${formatCountryNameForTooltip(m.teamB.name)}`}
+                              title={t("aoVivo.selector.matchTooltip", {
+                                teamA: formatCountryNameForTooltip(m.teamA.name),
+                                teamB: formatCountryNameForTooltip(m.teamB.name),
+                              })}
+                              aria-label={t("aoVivo.selector.matchTooltip", {
+                                teamA: formatCountryNameForTooltip(m.teamA.name),
+                                teamB: formatCountryNameForTooltip(m.teamB.name),
+                              })}
                               className={`shrink-0 snap-center px-3.5 py-2 rounded-md text-[13px] md:text-sm leading-none font-anton transition-all uppercase tracking-wide ${
                                 selectedMatchId === m.id
                                   ? theme === "classic-light"
@@ -2636,7 +2690,7 @@ export function MatchDetailView({
                             ? "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
                             : "border-white/10 bg-[#171a1c] text-slate-100 hover:bg-white/10"
                         }`}
-                        aria-label="Ver próximos jogos concluídos"
+                        aria-label={t("aoVivo.finished.next")}
                       >
                         <ChevronRight size={16} />
                       </button>
@@ -2652,7 +2706,7 @@ export function MatchDetailView({
         {activeTab === "broadcast" && <AffiliateProducts theme={theme} />}
 
         {/* TAB: PRE-GAME / POST-GAME EDITORIAL ANALYSIS */}
-        {activeTab === "pregame" && matchAnalysisText && (
+        {activeTab === "pregame" && locale !== "es" && matchAnalysisText && (
           <div
             className={`rounded-2xl border px-4 py-4 ${
               theme === "classic-light"
@@ -2667,12 +2721,12 @@ export function MatchDetailView({
                 theme === "classic-light" ? "text-slate-900" : "text-white"
               }`}
             >
-              {currentMatch.status === "FINISHED" ? "Destaques da partida" : "Prévia da partida"}
+              {currentMatch.status === "FINISHED" ? t("aoVivo.analysis.highlights") : t("aoVivo.analysis.preview")}
             </p>
             <div className="mt-3 space-y-3 max-w-prose">
               {parseNoteSections(
                 matchAnalysisText,
-                currentMatch.status === "FINISHED" ? "Destaques" : "Prévia",
+                currentMatch.status === "FINISHED" ? t("aoVivo.analysis.highlightsLabel") : t("aoVivo.analysis.previewLabel"),
               ).map((section) => (
                 <div key={section.label}>
                   <p
@@ -2711,7 +2765,7 @@ export function MatchDetailView({
                 theme === "classic-light" ? "text-slate-900" : "text-white"
               }`}
             >
-              No Instagram
+              {t("aoVivo.instagram.title")}
             </p>
             <div className="mx-auto max-w-md space-y-5">
               {matchInstagramUrls.map((postUrl, index) => (
@@ -2729,7 +2783,7 @@ export function MatchDetailView({
                     }`}
                   >
                     <InstagramBrandIcon size={14} />
-                    Abrir no Instagram
+                    {t("aoVivo.instagram.open")}
                   </a>
                 </div>
               ))}
@@ -2754,11 +2808,10 @@ export function MatchDetailView({
               >
                 <div>
                   <h3 className="font-anton text-lg tracking-wider uppercase text-slate-800 dark:text-white">
-                    CENTRAL TÁTICA E DISTRIBUIÇÃO ESPACIAL
+                    {t("aoVivo.lineup.title")}
                   </h3>
                   <p className="text-sm font-archivo text-slate-600 dark:text-slate-300 leading-6">
-                    Posicionamento estratégico planejado para o confronto
-                    oficial de São Paulo / Nova Iorque 2026.
+                    {t("aoVivo.lineup.desc")}
                   </p>
                 </div>
               </div>
@@ -2793,16 +2846,20 @@ export function MatchDetailView({
             theme,
           )}
           details={[
-            { label: "Posição", value: getPositionLabel(selectedIncidentPlayer.player.position) },
+            { label: t("aoVivo.overlayCard.position"), value: getPositionLabel(selectedIncidentPlayer.player.position) },
             ...(selectedIncidentPlayer.player.dateOfBirth
-              ? [{ label: "Nascimento", value: formatBirthDate(selectedIncidentPlayer.player.dateOfBirth) }]
+              ? [{ label: t("aoVivo.overlayCard.birth"), value: formatBirthDate(selectedIncidentPlayer.player.dateOfBirth) }]
               : []),
             ...(selectedIncidentPlayer.player.club
-              ? [{ label: "Clube atual", value: selectedIncidentPlayer.player.club }]
+              ? [{ label: t("aoVivo.overlayCard.currentClub"), value: selectedIncidentPlayer.player.club }]
               : []),
             {
-              label: "Contexto da partida",
-              value: `${toTitleCasePtBr(selectedIncidentPlayer.team.name)} x ${toTitleCasePtBr(selectedIncidentPlayer.opponentName)}: ${toTitleCasePtBr(selectedIncidentPlayer.player.name)} aparece no radar dos lances da partida.`,
+              label: t("aoVivo.overlayCard.matchContext"),
+              value: t("aoVivo.overlayCard.matchContextValue", {
+                teamName: toTitleCasePtBr(selectedIncidentPlayer.team.name),
+                opponentName: toTitleCasePtBr(selectedIncidentPlayer.opponentName),
+                playerName: toTitleCasePtBr(selectedIncidentPlayer.player.name),
+              }),
               fullWidth: true,
             },
           ]}

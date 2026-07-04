@@ -5,11 +5,13 @@ import { getPlayerByFifaId } from "../data/playerRegistry";
 import { getPositionLabel } from "../utils/playerDisplay";
 import { PlayerPortrait } from "./PlayerOverlayCard";
 import { MESSI_FIFA_ID } from "../messiTour";
+import { useLocale } from "../i18n";
 
 type Theme = "classic-light" | "stadium-dark";
 
 /** Small read-only player card used as a hover/tap preview inside running text. */
 export function PlayerCardCompact({ player, theme }: { player: SquadPlayer; theme: Theme }) {
+  const { locale } = useLocale();
   const isDark = theme !== "classic-light";
   return (
     <div
@@ -38,7 +40,7 @@ export function PlayerCardCompact({ player, theme }: { player: SquadPlayer; them
         {player.club && (
           <p className={`mt-1 text-xs ${isDark ? "text-slate-300" : "text-slate-600"}`}>{player.club}</p>
         )}
-        {player.worldCupNote && (
+        {locale !== "es" && player.worldCupNote && (
           <p className="mt-1.5 font-mono text-[9px] uppercase tracking-wider text-[#009c3b]">★ Craque da Copa</p>
         )}
       </div>

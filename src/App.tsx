@@ -29,13 +29,15 @@ import { DonationPix } from "./components/DonationPix";
 import { ShareButton } from "./components/ShareButton";
 import { OnlineCountBadge } from "./components/OnlineCountBadge";
 import { NAV_ITEMS } from "./navigation";
-import { Sun, Moon, HelpCircle, Settings } from "lucide-react";
+import { useLocale } from "./i18n";
+import { Sun, Moon, HelpCircle, Settings, Languages } from "lucide-react";
 
 const APP_VERSION = packageInfo.version;
 
 const getGroupSlug = (group: string) => group.replace(/\s+/g, "-").toLowerCase();
 
 export default function App() {
+  const { t, locale, setLocale } = useLocale();
   const [theme, setTheme] = useState<"classic-light" | "stadium-dark">(
     "classic-light",
   );
@@ -120,7 +122,7 @@ export default function App() {
   const activeNavItem =
     NAV_ITEMS.find((item) => item.id === activeNavId) || NAV_ITEMS[0];
 
-  useAnalytics(`/${activeNavItem.id}`, activeNavItem.label);
+  useAnalytics(`/${activeNavItem.id}`, t(`nav.${activeNavItem.id}.label`));
   const { startTour } = useFeatureTour(theme);
   useTipTour(theme);
 
@@ -206,14 +208,14 @@ export default function App() {
           className="fixed top-0 left-0 right-0 z-[60] flex items-center justify-center gap-3 bg-[#ffd84d] px-4 py-2 shadow-md"
         >
           <span className="font-mono text-[11px] font-bold uppercase tracking-wider text-[#111]">
-            Nova versão disponível
+            {t("shell.newVersion")}
           </span>
           <button
             type="button"
             onClick={() => window.location.reload()}
             className="rounded-md bg-[#111] px-3 py-1 font-mono text-[10px] font-bold uppercase tracking-wider text-[#ffd84d] transition hover:bg-[#333]"
           >
-            Atualizar agora
+            {t("shell.updateNow")}
           </button>
         </div>
       )}
@@ -237,7 +239,7 @@ export default function App() {
                   theme === "classic-light" ? "text-slate-900" : "text-white"
                 }`}
               >
-                Agora na Copa{" "}
+                {t("shell.brandName")}{" "}
                 <span
                   className={
                     theme === "classic-light"
@@ -262,8 +264,8 @@ export default function App() {
               id="btn-edit-match"
               type="button"
               onClick={() => window.dispatchEvent(new CustomEvent("toggle-match-clock-config"))}
-              title="Mudar Relógio"
-              aria-label="Mudar Relógio"
+              title={t("shell.editClock")}
+              aria-label={t("shell.editClock")}
               className="p-2 rounded-lg bg-[#1e2020]/5 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/10 transition"
             >
               <Settings size={14} />
@@ -276,8 +278,8 @@ export default function App() {
             <button
               id="btn-feature-tour"
               onClick={startTour}
-              title="Como usar o app"
-              aria-label="Como usar o app"
+              title={t("shell.howToUse")}
+              aria-label={t("shell.howToUse")}
               className="p-2 rounded-lg bg-[#1e2020]/5 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/10 transition"
             >
               <HelpCircle
@@ -294,8 +296,8 @@ export default function App() {
                   theme === "classic-light" ? "stadium-dark" : "classic-light",
                 )
               }
-              title="Alternar estilo visual"
-              aria-label="Alternar estilo visual"
+              title={t("shell.toggleTheme")}
+              aria-label={t("shell.toggleTheme")}
               className="p-2 rounded-lg bg-[#1e2020]/5 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/10 transition"
             >
               {theme === "classic-light" ? (
@@ -303,6 +305,21 @@ export default function App() {
               ) : (
                 <Sun size={14} className="text-amber-400" />
               )}
+            </button>
+
+            {/* Language switcher — pt ⇄ es (LATAM). Persists to localStorage. */}
+            <button
+              id="btn-switch-language"
+              type="button"
+              onClick={() => setLocale(locale === "pt" ? "es" : "pt")}
+              title={t("shell.switchLanguage")}
+              aria-label={t("shell.switchLanguage")}
+              className="flex items-center gap-1 p-2 rounded-lg bg-[#1e2020]/5 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/10 transition"
+            >
+              <Languages size={14} />
+              <span className="font-mono text-[10px] font-bold uppercase tracking-wider">
+                {locale === "pt" ? "ES" : "PT"}
+              </span>
             </button>
             </div>
           </div>
@@ -359,7 +376,7 @@ export default function App() {
                             ></span>
                           </span>
                         )}
-                        <span className={hasLiveAttention ? "animate-pulse" : ""}>{item.label}</span>
+                        <span className={hasLiveAttention ? "animate-pulse" : ""}>{t(`nav.${item.id}.label`)}</span>
                       </span>
                     </button>
                   );
@@ -395,14 +412,13 @@ export default function App() {
         id="app-footer"
       >
         <p className={theme === "classic-light" ? "text-slate-500" : "text-slate-300"}>
-          © 2026 Agora na Copa 26. Todos os direitos reservados. FIFA World Cup,
-          marcas e logos são de propriedade de seus respectivos donos.
+          {t("footer.rights")}
         </p>
         <p className={`mt-2 ${theme === "classic-light" ? "text-slate-600" : "text-slate-200"}`}>
-          Desenvolvido com carinho para o fanático por dados esportivos.
+          {t("footer.madeWith")}
         </p>
         <p className={`mt-2 ${theme === "classic-light" ? "text-slate-600" : "text-slate-200"}`}>
-          Créditos:{" "}
+          {t("footer.credits")}{" "}
           <a
             href="https://github.com/rezarahiminia/worldcup2026"
             target="_blank"
@@ -419,12 +435,12 @@ export default function App() {
             rel="noopener noreferrer"
             className="underline underline-offset-4 hover:no-underline"
           >
-            Política de Privacidade
+            {t("footer.privacy")}
           </a>
         </p>
         <DonationPix theme={theme} variant="compact" />
         <p className={`mt-3 ${theme === "classic-light" ? "text-slate-500" : "text-slate-300"}`}>
-          Versão da página: {APP_VERSION}
+          {t("footer.pageVersion")} {APP_VERSION}
         </p>
       </footer>
 

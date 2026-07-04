@@ -1,3 +1,5 @@
+import { useT } from "../i18n";
+
 interface AnalysisFreshnessBadgeProps {
   /** True = "Atualizada", false = "Desatualizada", null/undefined = render nothing. */
   upToDate: boolean | null | undefined;
@@ -20,6 +22,7 @@ export function AnalysisFreshnessBadge({
   testId,
   className = "",
 }: AnalysisFreshnessBadgeProps) {
+  const t = useT();
   if (upToDate === null || upToDate === undefined) return null;
   const isLight = theme === "classic-light";
 
@@ -37,12 +40,12 @@ export function AnalysisFreshnessBadge({
       data-fresh={upToDate ? "true" : "false"}
       title={
         upToDate
-          ? "A análise reflete o último jogo"
-          : "A análise está atrás do último jogo"
+          ? t("common.freshness.upToDateTitle")
+          : t("common.freshness.staleTitle")
       }
       className={`inline-flex items-center rounded-full border px-2 py-0.5 font-mono text-[9px] font-bold uppercase tracking-wider ${tone} ${className}`}
     >
-      ● {upToDate ? "Atualizada" : "Desatualizada"}
+      ● {upToDate ? t("common.freshness.upToDate") : t("common.freshness.stale")}
     </span>
   );
 }

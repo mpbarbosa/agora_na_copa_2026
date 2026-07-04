@@ -1,4 +1,5 @@
 import type { KnockoutMatch } from "../types";
+import { translate, getActiveLocale } from "../i18n";
 
 /**
  * Humanize an official FIFA knockout slot label into pt-BR:
@@ -54,3 +55,26 @@ export const KNOCKOUT_STAGE_NAMES: Record<KnockoutMatch["stage"], string> = {
   TP: "Disputa do 3º Lugar",
   F: "Final",
 };
+
+// Reverse map: pt stage name → stage code. KNOCKOUT_STAGE_NAMES stays pt because
+// it doubles as the canonical `Match.stageName` identity (equality-checked across
+// the code); this lets DISPLAY sites translate a pt stageName for the UI locale.
+const STAGE_CODE_BY_PT_NAME: Record<string, KnockoutMatch["stage"]> = Object.fromEntries(
+  (Object.entries(KNOCKOUT_STAGE_NAMES) as [KnockoutMatch["stage"], string][]).map(
+    ([code, name]) => [name, code],
+  ),
+);
+
+/**
+ * Display-only: translate a canonical `stageName` to the active UI locale (pt by
+ * default → unchanged). Handles the knockout pt names and the internal English
+ * "Group Stage" sentinel; returns any other value verbatim, so it is always safe
+ * to wrap a stageName with this.
+ */
+export function localizedStageName(stageName: string): string {
+  if (stageName === "Group Stage") {
+    return translate(getActiveLocale(), "utils.stage.group");
+  }
+  const code = STAGE_CODE_BY_PT_NAME[stageName];
+  return code ? translate(getActiveLocale(), `utils.stage.${code}`) : stageName;
+}

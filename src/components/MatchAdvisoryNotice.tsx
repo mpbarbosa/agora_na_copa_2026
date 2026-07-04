@@ -1,4 +1,5 @@
 import { CloudRain } from "lucide-react";
+import { useT } from "../i18n";
 
 interface MatchAdvisoryNoticeProps {
   /** The advisory text (pt-BR), e.g. a weather-delay warning. */
@@ -14,6 +15,10 @@ interface MatchAdvisoryNoticeProps {
  * hides it once the match is FINISHED so a stale note never lingers.
  */
 export function MatchAdvisoryNotice({ message, theme }: MatchAdvisoryNoticeProps) {
+  // The advisory `message` is authored pt-BR copy from src/data/matchAdvisories.json,
+  // so it is passed through verbatim; this component has no hardcoded UI strings of
+  // its own to localize. The hook is kept so future in-component copy can translate.
+  useT();
   const isLight = theme === "classic-light";
 
   return (

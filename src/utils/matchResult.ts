@@ -1,5 +1,9 @@
 import type { Match } from "../types";
 import { KNOCKOUT_STAGE_NAMES } from "./knockoutSlots";
+import { translate, getActiveLocale } from "../i18n";
+
+const t = (key: string, params?: Record<string, string | number>) =>
+  translate(getActiveLocale(), key, params);
 
 // Pure logic for the per-team result line under a FINISHED match in the compact
 // "Partidas" list. Group-stage fixtures earned points (3/1/0); knockout fixtures
@@ -15,7 +19,7 @@ export function matchPoints(scoreA: number, scoreB: number): { a: number; b: num
 
 /** pt-BR points label, e.g. "+3 pts", "+1 pt", "0 pts". */
 export function ptLabel(pts: number): string {
-  return pts === 1 ? "+1 pt" : pts > 0 ? `+${pts} pts` : "0 pts";
+  return pts === 1 ? t("utils.pointsOne") : pts > 0 ? t("utils.pointsMany", { pts }) : t("utils.pointsZero");
 }
 
 export type ResultTone = "win" | "draw" | "loss";
@@ -43,10 +47,10 @@ export function finishedSideResult(
   const advanced = advancedSlot === (side === "a" ? "A" : "B");
   const label =
     match.stageName === KNOCKOUT_STAGE_NAMES.F
-      ? advanced ? "Campeão" : "Vice"
+      ? advanced ? t("utils.champion") : t("utils.runnerUpShort")
       : match.stageName === KNOCKOUT_STAGE_NAMES.TP
-        ? advanced ? "3º lugar" : "4º lugar"
-        : advanced ? "Classificado" : "Eliminado";
+        ? advanced ? t("utils.thirdPlace") : t("utils.fourthPlace")
+        : advanced ? t("utils.qualified") : t("utils.eliminated");
   return { label, tone: advanced ? "win" : "loss" };
 }
 

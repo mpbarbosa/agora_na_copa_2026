@@ -20,6 +20,12 @@ import type {
 } from "./fifa-sync-core";
 import { GOOGLE_TRENDS_BATCH_URL, buildGoogleTrendsRequestBody, parseGoogleTrendsBatch } from "./trends-core";
 import { buildOpenMeteoUrl, parseOpenMeteoCurrent } from "./weather-core";
+import {
+  localeFromFifaLanguage,
+  localeFromHost,
+  type Locale,
+} from "./src/i18n/locale";
+import { localizeIndexHtml, localizeNote, localizeResilienceNote } from "./server-i18n";
 import { buildTrafficDashboard } from "./traffic-report-core";
 import {
   buildRedditTokenRequest,
@@ -117,6 +123,15 @@ const FIFA_COMPETITION_ID = "17";
 const FIFA_SEASON_ID = "285023";
 const DEFAULT_BROADCAST_COUNTRY = "BR";
 const DEFAULT_BROADCAST_LANGUAGE = "pt";
+
+// Resolve the response locale for a request. The explicit `?language=` param wins
+// (the client sends it for the active locale on FIFA-data fetches); otherwise the
+// Host header decides (the `es.` subdomain serves Spanish); default pt.
+const localeForRequest = (req: express.Request): Locale => {
+  const q = req.query?.language;
+  if (typeof q === "string" && q.trim()) return localeFromFifaLanguage(q.trim());
+  return localeFromHost(req.hostname);
+};
 const BROADCAST_GUIDE_CACHE_TTL_MS = 5 * 60 * 1000;
 const TEAM_LINEUPS_CACHE_TTL_MS = 5 * 60 * 1000;
 const LIVE_TEAM_LINEUPS_CACHE_TTL_MS = 10 * 1000;
@@ -1070,9 +1085,12 @@ const getBroadcastGuidePayload = async (
           {
             broadcasters: hasOfficialGuide ? fifaBroadcasters : match.broadcasters,
             source: hasOfficialGuide ? "fifa" : "fallback",
-            note: hasOfficialGuide
-              ? "Dados oficiais do Onde Assistir da FIFA para o Brasil."
-              : "Dados oficiais da FIFA indisponíveis para esta partida no momento; exibindo a lista local.",
+            note: localizeNote(
+              hasOfficialGuide
+                ? "Dados oficiais do Onde Assistir da FIFA para o Brasil."
+                : "Dados oficiais da FIFA indisponíveis para esta partida no momento; exibindo a lista local.",
+              localeFromFifaLanguage(language),
+            ),
             fifaMatchId: fifaMatch?.IdMatch,
             updatedAt: new Date().toISOString(),
           } satisfies BroadcastGuideEntry,
@@ -1397,6 +1415,7 @@ const getTeamViewNote = (source: TeamViewResponse["source"]) => {
 const buildFallbackLineupEntry = (
   players: LineupEntry["players"],
   teamCode: string,
+  locale: Locale = "pt",
 ): LineupEntry => ({
   // Enrich the local lineup from the squad registry so editorial/profile fields
   // (worldCupNote, instagramPostUrl, socials, picture, metadata) reach the player
@@ -1419,7 +1438,7 @@ const buildFallbackLineupEntry = (
     };
   }),
   source: "fallback",
-  note: "Escalação estimada a partir da base local do aplicativo.",
+  note: localizeNote("Escalação estimada a partir da base local do aplicativo.", locale),
   updatedAt: new Date().toISOString(),
 });
 
@@ -1599,9 +1618,9 @@ const buildTeamViewPayload = async (
   const lineup = lineupReference
     ? lineupReference.isTeamA
       ? teamLineupsPayload.lineups[lineupReference.match.id]?.teamA ??
-        buildFallbackLineupEntry(lineupReference.team.lineup, lineupReference.team.code)
+        buildFallbackLineupEntry(lineupReference.team.lineup, lineupReference.team.code, localeFromFifaLanguage(language))
       : teamLineupsPayload.lineups[lineupReference.match.id]?.teamB ??
-        buildFallbackLineupEntry(lineupReference.team.lineup, lineupReference.team.code)
+        buildFallbackLineupEntry(lineupReference.team.lineup, lineupReference.team.code, localeFromFifaLanguage(language))
     : null;
   const featuredGuideReference = currentMatchReference ?? nextMatchReference ?? null;
   const broadcastGuide = featuredGuideReference
@@ -1790,7 +1809,9 @@ app.get("/api/broadcast-guide", async (req, res) => {
     res
       .status(502)
       .json({
-        error: error?.message || "Erro ao carregar guia de transmissão da FIFA",
+        error:
+          error?.message ||
+          localizeNote("Erro ao carregar guia de transmissão da FIFA", localeForRequest(req)),
       });
   }
 });
@@ -1808,7 +1829,11 @@ app.get("/api/match-states", async (req, res) => {
     console.error("FIFA API Error in /api/match-states:", error);
     res
       .status(502)
-      .json({ error: error?.message || "Erro ao carregar placares da FIFA" });
+      .json({
+        error:
+          error?.message ||
+          localizeNote("Erro ao carregar placares da FIFA", localeForRequest(req)),
+      });
   }
 });
 
@@ -1831,7 +1856,8 @@ app.get("/api/match-overlays", async (req, res) => {
       .status(502)
       .json({
         error:
-          error?.message || "Erro ao carregar dados unificados da FIFA",
+          error?.message ||
+          localizeNote("Erro ao carregar dados unificados da FIFA", localeForRequest(req)),
       });
   }
 });
@@ -1849,7 +1875,11 @@ app.get("/api/team-lineups", async (req, res) => {
     console.error("FIFA API Error in /api/team-lineups:", error);
     res
       .status(502)
-      .json({ error: error?.message || "Erro ao carregar escalações da FIFA" });
+      .json({
+        error:
+          error?.message ||
+          localizeNote("Erro ao carregar escalações da FIFA", localeForRequest(req)),
+      });
   }
 });
 
@@ -1861,12 +1891,21 @@ app.get("/api/tournament-leaders", async (req, res) => {
         : DEFAULT_BROADCAST_LANGUAGE;
 
     res.set("Cache-Control", "no-store");
-    res.json(await getTournamentLeadersPayload(language));
+    res.json(
+      localizeResilienceNote(
+        await getTournamentLeadersPayload(language),
+        localeFromFifaLanguage(language),
+      ),
+    );
   } catch (error: any) {
     console.error("FIFA API Error in /api/tournament-leaders:", error);
     res
       .status(502)
-      .json({ error: error?.message || "Erro ao carregar líderes do torneio" });
+      .json({
+        error:
+          error?.message ||
+          localizeNote("Erro ao carregar líderes do torneio", localeForRequest(req)),
+      });
   }
 });
 
@@ -1885,8 +1924,11 @@ app.get("/api/player-stats/:teamCode/:playerName", async (req, res) => {
       (p) => p.teamCode === teamCode && normalizeText(p.name) === normalizedPlayerName,
     );
 
+    const locale = localeFromFifaLanguage(language);
     if (!leader) {
-      res.status(404).json({ error: "Jogador não encontrado nos líderes do torneio" });
+      res.status(404).json({
+        error: localizeNote("Jogador não encontrado nos líderes do torneio", locale),
+      });
       return;
     }
 
@@ -1895,7 +1937,7 @@ app.get("/api/player-stats/:teamCode/:playerName", async (req, res) => {
       yellowCards: leader.yellowCards,
       redCards: leader.redCards,
       source: aggregated.source,
-      note: aggregated.note,
+      note: localizeNote(aggregated.note, locale),
       updatedAt: aggregated.updatedAt,
     };
     res.set("Cache-Control", "no-store");
@@ -1907,7 +1949,7 @@ app.get("/api/player-stats/:teamCode/:playerName", async (req, res) => {
       yellowCards: 0,
       redCards: 0,
       source: "fallback",
-      note: "Estatísticas indisponíveis — FIFA API inacessível.",
+      note: localizeNote("Estatísticas indisponíveis — FIFA API inacessível.", localeForRequest(req)),
       updatedAt: new Date().toISOString(),
     };
     res.json(fallback);
@@ -1923,14 +1965,15 @@ app.get("/api/player-incidents/:teamCode/:playerName", async (req, res) => {
         ? req.query.language.trim()
         : DEFAULT_BROADCAST_LANGUAGE;
 
+    const locale = localeFromFifaLanguage(language);
     const payload = await aggregatePlayerIncidents(teamCode, playerName, language);
     if (!payload) {
-      res.status(404).json({ error: "Jogador não encontrado" });
+      res.status(404).json({ error: localizeNote("Jogador não encontrado", locale) });
       return;
     }
 
     res.set("Cache-Control", "no-store");
-    res.json(payload);
+    res.json(localizeResilienceNote(payload, locale));
   } catch (error: any) {
     console.error("FIFA API Error in /api/player-incidents:", error);
     const fallback: PlayerIncidentsPayload = {
@@ -1943,7 +1986,7 @@ app.get("/api/player-incidents/:teamCode/:playerName", async (req, res) => {
       incidents: [],
       summary: { goals: 0, yellowCards: 0, redCards: 0, substitutionsOff: 0, substitutionsOn: 0 },
       source: "fallback",
-      note: "Incidentes indisponíveis — FIFA API inacessível.",
+      note: localizeNote("Incidentes indisponíveis — FIFA API inacessível.", localeForRequest(req)),
       updatedAt: new Date().toISOString(),
     };
     res.json(fallback);
@@ -1961,19 +2004,24 @@ app.get("/api/team-view/:teamCode", async (req, res) => {
         ? req.query.language.trim()
         : DEFAULT_BROADCAST_LANGUAGE;
 
+    const locale = localeFromFifaLanguage(language);
     const payload = await buildTeamViewPayload(req.params.teamCode, country, language);
     if (!payload) {
-      res.status(404).json({ error: "Seleção não encontrada" });
+      res.status(404).json({ error: localizeNote("Seleção não encontrada", locale) });
       return;
     }
 
     res.set("Cache-Control", "no-store");
-    res.json(payload);
+    res.json(localizeResilienceNote(payload, locale));
   } catch (error: any) {
     console.error("FIFA API Error in /api/team-view/:teamCode:", error);
     res
       .status(502)
-      .json({ error: error?.message || "Erro ao carregar painel completo da seleção" });
+      .json({
+        error:
+          error?.message ||
+          localizeNote("Erro ao carregar painel completo da seleção", localeForRequest(req)),
+      });
   }
 });
 
@@ -2157,20 +2205,25 @@ async function fetchCountryInfo(code: string): Promise<CountryInfoResponse | nul
 
 app.get("/api/country-info/:code", async (req, res) => {
   const code = req.params.code.toUpperCase();
+  const locale = localeForRequest(req);
   try {
     const payload = await fetchCountryInfo(code);
     if (!payload) {
-      res.status(404).json({ error: "País não encontrado" });
+      res.status(404).json({ error: localizeNote("País não encontrado", locale) });
       return;
     }
     res.set("Cache-Control", "public, max-age=3600");
-    res.json(payload);
+    res.json(localizeResilienceNote(payload, locale));
   } catch (error: any) {
     console.error("Wikipedia API Error in /api/country-info:", error);
     const stale = countryInfoCache.get(code);
     if (stale) {
       res.set("Cache-Control", "public, max-age=3600");
-      res.json({ ...stale.payload, source: "fallback", note: "Usando dados em cache — Wikipedia inacessível." } satisfies CountryInfoResponse);
+      res.json({
+        ...stale.payload,
+        source: "fallback",
+        note: localizeNote("Usando dados em cache — Wikipedia inacessível.", locale),
+      } satisfies CountryInfoResponse);
       return;
     }
     const fallback: CountryInfoResponse = {
@@ -2187,7 +2240,7 @@ app.get("/api/country-info/:code", async (req, res) => {
       government: null,
       currency: null,
       source: "fallback",
-      note: "Informações indisponíveis — Wikipedia inacessível.",
+      note: localizeNote("Informações indisponíveis — Wikipedia inacessível.", locale),
       updatedAt: new Date().toISOString(),
     };
     res.json(fallback);
@@ -2466,7 +2519,11 @@ const parseCoordinate = (value: unknown, max: number): number | null => {
   return n;
 };
 
-const fetchVenueWeather = async (lat: number, lng: number): Promise<WeatherResponse> => {
+const fetchVenueWeather = async (
+  lat: number,
+  lng: number,
+  locale: Locale,
+): Promise<WeatherResponse> => {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), WEATHER_FETCH_TIMEOUT_MS);
 
@@ -2481,34 +2538,42 @@ const fetchVenueWeather = async (lat: number, lng: number): Promise<WeatherRespo
     throw new Error(`Open-Meteo request failed (${response.status})`);
   }
 
-  const snapshot = parseOpenMeteoCurrent(await response.json());
+  const snapshot = parseOpenMeteoCurrent(await response.json(), locale);
   if (!snapshot) {
     throw new Error("Open-Meteo returned no current weather");
   }
 
   return {
     source: "open-meteo",
-    note: "Condições no estádio • Open-Meteo",
+    note:
+      locale === "es"
+        ? "Condiciones en el estadio • Open-Meteo"
+        : "Condições no estádio • Open-Meteo",
     updatedAt: new Date().toISOString(),
     weather: snapshot,
   };
 };
 
 app.get("/api/match-weather", async (req, res) => {
+  const locale = localeForRequest(req);
   const lat = parseCoordinate(req.query.lat, 90);
   const lng = parseCoordinate(req.query.lng, 180);
 
   if (lat === null || lng === null) {
     res.status(400).json({
       source: "fallback",
-      note: "Coordenadas do estádio inválidas.",
+      note:
+        locale === "es"
+          ? "Coordenadas del estadio inválidas."
+          : "Coordenadas do estádio inválidas.",
       updatedAt: new Date().toISOString(),
       weather: null,
     } satisfies WeatherResponse);
     return;
   }
 
-  const key = `${lat.toFixed(2)},${lng.toFixed(2)}`;
+  // Cache per locale so pt/es descriptions don't overwrite each other.
+  const key = `${locale}:${lat.toFixed(2)},${lng.toFixed(2)}`;
   const cached = weatherCache.get(key);
   if (cached && cached.expiresAt > Date.now()) {
     res.set("Cache-Control", "public, max-age=300");
@@ -2517,7 +2582,7 @@ app.get("/api/match-weather", async (req, res) => {
   }
 
   try {
-    const payload = await fetchVenueWeather(lat, lng);
+    const payload = await fetchVenueWeather(lat, lng, locale);
     weatherCache.set(key, { payload, expiresAt: Date.now() + WEATHER_CACHE_TTL_MS });
     res.set("Cache-Control", "public, max-age=300");
     res.json(payload);
@@ -2526,13 +2591,20 @@ app.get("/api/match-weather", async (req, res) => {
     // Serve a stale snapshot if we have one; otherwise an empty fallback.
     if (cached) {
       res.set("Cache-Control", "public, max-age=60");
-      res.json({ ...cached.payload, source: "fallback", note: "Atualizando o clima…" } satisfies WeatherResponse);
+      res.json({
+        ...cached.payload,
+        source: "fallback",
+        note: locale === "es" ? "Actualizando el clima…" : "Atualizando o clima…",
+      } satisfies WeatherResponse);
       return;
     }
     res.set("Cache-Control", "public, max-age=60");
     res.json({
       source: "fallback",
-      note: "Clima indisponível no momento.",
+      note:
+        locale === "es"
+          ? "Clima no disponible por ahora."
+          : "Clima indisponível no momento.",
       updatedAt: new Date().toISOString(),
       weather: null,
     } satisfies WeatherResponse);
@@ -2685,17 +2757,28 @@ app.get("/api/questions", (_req, res) => {
 // Not FIFA-sourced, so it carries no resilience shape.
 app.post("/api/predict", (req, res) => {
   res.set("Cache-Control", "no-store");
+  const locale = localeForRequest(req);
   const body = (req.body ?? {}) as { homeTeam?: unknown; awayTeam?: unknown; userNotes?: unknown };
   const homeKey = typeof body.homeTeam === "string" ? body.homeTeam.trim() : "";
   const awayKey = typeof body.awayTeam === "string" ? body.awayTeam.trim() : "";
   const userNotes = typeof body.userNotes === "string" ? body.userNotes : undefined;
 
   if (!homeKey || !awayKey) {
-    res.status(400).json({ error: "Informe as duas seleções (homeTeam e awayTeam)." });
+    res.status(400).json({
+      error:
+        locale === "es"
+          ? "Indica las dos selecciones (homeTeam y awayTeam)."
+          : "Informe as duas seleções (homeTeam e awayTeam).",
+    });
     return;
   }
   if (homeKey.toUpperCase() === awayKey.toUpperCase()) {
-    res.status(400).json({ error: "Escolha duas seleções diferentes." });
+    res.status(400).json({
+      error:
+        locale === "es"
+          ? "Elige dos selecciones diferentes."
+          : "Escolha duas seleções diferentes.",
+    });
     return;
   }
 
@@ -2709,7 +2792,9 @@ app.post("/api/predict", (req, res) => {
   const home = byKey.get(homeKey.toUpperCase());
   const away = byKey.get(awayKey.toUpperCase());
   if (!home || !away) {
-    res.status(404).json({ error: "Seleção não encontrada." });
+    res.status(404).json({
+      error: locale === "es" ? "Selección no encontrada." : "Seleção não encontrada.",
+    });
     return;
   }
 
@@ -2727,7 +2812,10 @@ app.post("/api/predict", (req, res) => {
   });
 
   const outcome = predictMatchOutcome(rows, home.code, away.code);
-  res.json({ text: buildPrediction(toTeam(home), toTeam(away), outcome, userNotes), simulated: true });
+  res.json({
+    text: buildPrediction(toTeam(home), toTeam(away), outcome, userNotes, locale),
+    simulated: true,
+  });
 });
 
 // Monte-Carlo estimate of a team's odds of reaching the Round of 32 (top two of its
@@ -2858,7 +2946,9 @@ app.get("/api/chat/:matchId", (req, res) => {
   res.set("Cache-Control", "no-store");
   const { matchId } = req.params;
   if (!VALID_MATCH_IDS.has(matchId)) {
-    return res.status(404).json({ error: "Partida desconhecida." });
+    return res.status(404).json({
+      error: localeForRequest(req) === "es" ? "Partido desconocido." : "Partida desconhecida.",
+    });
   }
   const rawSince = req.query.since;
   const sinceId = typeof rawSince === "string" && rawSince !== "" ? Number(rawSince) : undefined;
@@ -2875,25 +2965,39 @@ app.get("/api/chat/:matchId", (req, res) => {
 // is LIVE, valid nickname/text, and per-client rate limit.
 app.post("/api/chat/:matchId", (req, res) => {
   res.set("Cache-Control", "no-store");
+  const locale = localeForRequest(req);
+  const es = locale === "es";
   const { matchId } = req.params;
   if (!VALID_MATCH_IDS.has(matchId)) {
-    return res.status(404).json({ error: "Partida desconhecida." });
+    return res.status(404).json({ error: es ? "Partido desconocido." : "Partida desconhecida." });
   }
   if (process.memoryUsage().rss > CHAT_MAX_RSS_BYTES) {
-    return res.status(503).json({ error: "Chat temporariamente indisponível. Tente em instantes." });
+    return res.status(503).json({
+      error: es
+        ? "Chat no disponible temporalmente. Prueba en unos instantes."
+        : "Chat temporariamente indisponível. Tente em instantes.",
+    });
   }
   if (!isMatchLive(matchId)) {
-    return res.status(403).json({ error: "O chat abre quando a partida começa." });
+    return res.status(403).json({
+      error: es
+        ? "El chat se abre cuando comienza el partido."
+        : "O chat abre quando a partida começa.",
+    });
   }
   const body = (req.body ?? {}) as { nickname?: unknown; text?: unknown };
-  const nickname = validateNickname(body.nickname);
+  const nickname = validateNickname(body.nickname, locale);
   if (!nickname.ok) return res.status(400).json({ error: nickname.reason });
-  const text = validateText(body.text);
+  const text = validateText(body.text, locale);
   if (!text.ok) return res.status(400).json({ error: text.reason });
 
   const now = Date.now();
   if (!passesRateLimit(chatRateMap, deriveClientKey(req), now)) {
-    return res.status(429).json({ error: "Você está enviando mensagens rápido demais. Respire." });
+    return res.status(429).json({
+      error: es
+        ? "Estás enviando mensajes demasiado rápido. Respira."
+        : "Você está enviando mensagens rápido demais. Respire.",
+    });
   }
 
   const message = appendMessage(
@@ -2942,9 +3046,17 @@ async function startServer() {
     app.use(vite.middlewares);
   } else {
     const distPath = path.join(process.cwd(), 'dist');
-    app.use(express.static(distPath));
+    // `index: false` so a bare `/` (and any SPA route) falls through to the
+    // handler below instead of static-serving the raw index.html — otherwise the
+    // per-Host localization never runs. Static still serves /assets/* etc.
+    app.use(express.static(distPath, { index: false }));
+    // index.html is static in prod — read once, then localize per Host (the `es.`
+    // subdomain gets Spanish <title>/meta/lang + an injected locale global) on
+    // each SPA navigation request.
+    const indexHtml = readFileSync(path.join(distPath, 'index.html'), 'utf8');
     app.get('*', (req, res) => {
-      res.sendFile(path.join(distPath, 'index.html'));
+      res.set('Content-Type', 'text/html; charset=utf-8');
+      res.send(localizeIndexHtml(indexHtml, localeFromHost(req.hostname)));
     });
   }
 

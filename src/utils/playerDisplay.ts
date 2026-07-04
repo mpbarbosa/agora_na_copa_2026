@@ -1,10 +1,14 @@
 import { Position, type PlayerSocials } from "../types";
+import { translate, getActiveLocale } from "../i18n";
+
+const t = (key: string, params?: Record<string, string | number>) =>
+  translate(getActiveLocale(), key, params);
 
 export function getPositionLabel(position: Position): string {
-  if (position === Position.GK) return "Goleiro";
-  if (position === Position.DF) return "Defensor";
-  if (position === Position.MF) return "Meio-Campista";
-  return "Atacante";
+  if (position === Position.GK) return t("utils.positionGK");
+  if (position === Position.DF) return t("utils.positionDF");
+  if (position === Position.MF) return t("utils.positionMF");
+  return t("utils.positionFW");
 }
 
 // pt-BR title-case for prose. Normalizes FIFA "First LAST" names ("Sebastian

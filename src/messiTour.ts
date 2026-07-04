@@ -1,5 +1,6 @@
 import { driver } from "driver.js";
 import "driver.js/dist/driver.css";
+import { translate, getActiveLocale } from "./i18n";
 
 export const MESSI_FIFA_ID = "229397";
 const MESSI_CARD_ID = `jogador-card-${MESSI_FIFA_ID}`;
@@ -24,6 +25,8 @@ function waitForElement(selector: string, cb: () => void, timeoutMs = 3000) {
  * watches the real path happen. Forward-only (no Previous). `onEnd` fires once on close.
  */
 export function startMessiTour(theme: "classic-light" | "stadium-dark", onEnd?: () => void): void {
+  const t = (key: string, params?: Record<string, string | number>) =>
+    translate(getActiveLocale(), key, params);
   const popoverClass =
     theme === "classic-light" ? "agora-tour agora-tour-light" : "agora-tour agora-tour-dark";
 
@@ -39,9 +42,8 @@ export function startMessiTour(theme: "classic-light" | "stadium-dark", onEnd?: 
       {
         element: "#btn-nav-jogadores",
         popover: {
-          title: "Conheça o maior craque ⭐",
-          description:
-            'Lionel Messi é a estrela da Copa. Vamos abrir o card dele — tudo começa na aba Jogadores. Toque em "Próximo".',
+          title: t("tours.messi.step1.title"),
+          description: t("tours.messi.step1.description"),
           side: "bottom",
           align: "start",
         },
@@ -49,8 +51,8 @@ export function startMessiTour(theme: "classic-light" | "stadium-dark", onEnd?: 
       {
         element: `#${MESSI_CARD_ID}`,
         popover: {
-          title: "Lionel Messi",
-          description: 'Aqui está o Messi entre os jogadores. Toque em "Próximo" para abrir o card completo.',
+          title: t("tours.messi.step2.title"),
+          description: t("tours.messi.step2.description"),
           side: "bottom",
           align: "start",
         },
@@ -58,9 +60,8 @@ export function startMessiTour(theme: "classic-light" | "stadium-dark", onEnd?: 
       {
         element: "#jogadores-player-overlay",
         popover: {
-          title: "Card completo do Messi ✓",
-          description:
-            "Pronto! Estatísticas, análise e redes oficiais — é assim que você abre o card de qualquer jogador.",
+          title: t("tours.messi.step3.title"),
+          description: t("tours.messi.step3.description"),
           side: "left",
           align: "center",
         },

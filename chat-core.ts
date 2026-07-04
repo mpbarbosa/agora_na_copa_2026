@@ -7,6 +7,32 @@
 // nothing is persisted (history is gone on restart, by design).
 
 import type { ChatMessage } from "./src/types";
+import type { Locale } from "./src/i18n/locale";
+
+// Validation messages, pt default with es-LATAM fallback (see src/i18n).
+const CHAT_MESSAGES = {
+  pt: {
+    nicknameInvalid: "Apelido inválido.",
+    nicknameEmpty: "Escolha um apelido para participar.",
+    nicknameLinks: "O apelido não pode conter links.",
+    textInvalid: "Mensagem inválida.",
+    textEmpty: "Digite uma mensagem.",
+    textTooLong: (max: number) => `A mensagem passa de ${max} caracteres.`,
+    textLinks: "A mensagem não pode conter links.",
+  },
+  es: {
+    nicknameInvalid: "Apodo inválido.",
+    nicknameEmpty: "Elige un apodo para participar.",
+    nicknameLinks: "El apodo no puede contener enlaces.",
+    textInvalid: "Mensaje inválido.",
+    textEmpty: "Escribe un mensaje.",
+    textTooLong: (max: number) => `El mensaje supera los ${max} caracteres.`,
+    textLinks: "El mensaje no puede contener enlaces.",
+  },
+} as const;
+
+const chatMessages = (locale: Locale) =>
+  locale === "es" ? CHAT_MESSAGES.es : CHAT_MESSAGES.pt;
 
 /** Per-match ring buffer: matchId -> messages, oldest first. */
 export type ChatStore = Map<string, ChatMessage[]>;
@@ -60,11 +86,15 @@ function clean(raw: string): string {
  * token, and is clamped to `maxNicknameLength` after cleaning. Returns the cleaned
  * value or a reason. (Length is clamped, not rejected, so a long name still posts.)
  */
-export function validateNickname(raw: unknown): ValidationResult {
-  if (typeof raw !== "string") return invalid("Apelido inválido.");
+export function validateNickname(
+  raw: unknown,
+  locale: Locale = "pt",
+): ValidationResult {
+  const m = chatMessages(locale);
+  if (typeof raw !== "string") return invalid(m.nicknameInvalid);
   const cleaned = clean(raw).slice(0, CHAT_LIMITS.maxNicknameLength);
-  if (!cleaned) return invalid("Escolha um apelido para participar.");
-  if (URL_PATTERN.test(cleaned)) return invalid("O apelido não pode conter links.");
+  if (!cleaned) return invalid(m.nicknameEmpty);
+  if (URL_PATTERN.test(cleaned)) return invalid(m.nicknameLinks);
   return valid(cleaned);
 }
 
@@ -73,14 +103,18 @@ export function validateNickname(raw: unknown): ValidationResult {
  * `maxTextLength` (rejected, not silently truncated, so nothing is lost mid-sentence),
  * and free of URL-like tokens. Returns the cleaned value or a reason.
  */
-export function validateText(raw: unknown): ValidationResult {
-  if (typeof raw !== "string") return invalid("Mensagem inválida.");
+export function validateText(
+  raw: unknown,
+  locale: Locale = "pt",
+): ValidationResult {
+  const m = chatMessages(locale);
+  if (typeof raw !== "string") return invalid(m.textInvalid);
   const cleaned = clean(raw);
-  if (!cleaned) return invalid("Digite uma mensagem.");
+  if (!cleaned) return invalid(m.textEmpty);
   if (cleaned.length > CHAT_LIMITS.maxTextLength) {
-    return invalid(`A mensagem passa de ${CHAT_LIMITS.maxTextLength} caracteres.`);
+    return invalid(m.textTooLong(CHAT_LIMITS.maxTextLength));
   }
-  if (URL_PATTERN.test(cleaned)) return invalid("A mensagem não pode conter links.");
+  if (URL_PATTERN.test(cleaned)) return invalid(m.textLinks);
   return valid(cleaned);
 }
 

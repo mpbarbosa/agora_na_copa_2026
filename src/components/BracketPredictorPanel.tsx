@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import type { PredictionResponse } from "../types";
 import { parseNoteSections } from "../utils/noteSections";
 import { FlagIcon } from "./FlagIcon";
+import { useT } from "../i18n";
 
 /** A knockout slot resolved to a team — the subset the predictor needs. */
 export interface ResolvedSlotTeam {
@@ -31,6 +32,7 @@ type Status = "idle" | "loading" | "ready" | "error";
 // bracket's own already-resolved fixtures (confirmed or provisional) rather than
 // a free two-team choice. Only fixtures with both sides resolved are offered.
 export function BracketPredictorPanel({ theme, fixtures }: BracketPredictorPanelProps) {
+  const t = useT();
   const isLight = theme === "classic-light";
   const [selected, setSelected] = useState<number | null>(fixtures[0]?.matchNumber ?? null);
   const [prediction, setPrediction] = useState<PredictionResponse | null>(null);
@@ -91,11 +93,10 @@ export function BracketPredictorPanel({ theme, fixtures }: BracketPredictorPanel
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h3 className={`font-anton text-xl uppercase tracking-wide ${headingClasses}`}>
-            Palpite do confronto
+            {t("bracket.predictor.title")}
           </h3>
           <p className={`mt-1 font-archivo text-sm ${mutedClasses}`}>
-            Escolha um cruzamento já definido do mata-mata e gere um prognóstico por um modelo estatístico
-            (Poisson/Dixon-Coles) sobre a campanha atual das seleções.
+            {t("bracket.predictor.subtitle")}
           </p>
         </div>
         <span
@@ -106,21 +107,20 @@ export function BracketPredictorPanel({ theme, fixtures }: BracketPredictorPanel
           }`}
           id="bracket-predictor-mode"
         >
-          Simulado
+          {t("bracket.predictor.simulated")}
         </span>
       </div>
 
       {fixtures.length === 0 ? (
         <p className={`mt-5 font-archivo text-sm leading-6 ${mutedClasses}`} id="bracket-predictor-empty">
-          Nenhum confronto do mata-mata tem as duas vagas definidas ainda. Assim que a classificação preencher
-          os dois lados de um jogo, o palpite aparece aqui.
+          {t("bracket.predictor.empty")}
         </p>
       ) : (
         <>
           <label
             className={`mt-5 flex flex-col gap-1 font-mono text-[11px] uppercase tracking-wider ${subtleClasses}`}
           >
-            Confronto
+            {t("bracket.predictor.confrontoLabel")}
             <select
               id="select-bracket-predictor"
               value={selected ?? ""}
@@ -158,7 +158,7 @@ export function BracketPredictorPanel({ theme, fixtures }: BracketPredictorPanel
 
           {status === "loading" && (
             <p className={`mt-4 font-archivo text-sm leading-6 ${mutedClasses}`} id="bracket-predictor-loading">
-              Gerando palpite…
+              {t("bracket.predictor.loading")}
             </p>
           )}
 
@@ -171,10 +171,10 @@ export function BracketPredictorPanel({ theme, fixtures }: BracketPredictorPanel
                     isLight ? "border-amber-400/60 text-amber-700" : "border-[#ffd84d]/40 text-[#ffd84d]/80"
                   }`}
                 >
-                  Palpite simulado
+                  {t("bracket.predictor.simulatedBadge")}
                 </span>
               )}
-              {parseNoteSections(prediction.text, "Prognóstico").map((section) => (
+              {parseNoteSections(prediction.text, t("bracket.predictor.prognosisFallback")).map((section) => (
                 <div key={section.label} className="mt-3">
                   <p className={`font-mono text-[10px] uppercase tracking-wider ${subtleClasses}`}>{section.label}</p>
                   <p className={`mt-1 font-archivo text-sm leading-6 ${mutedClasses}`}>{section.body}</p>
@@ -185,7 +185,7 @@ export function BracketPredictorPanel({ theme, fixtures }: BracketPredictorPanel
 
           {status === "error" && (
             <p id="bracket-predictor-error" className={`mt-4 font-archivo text-sm ${mutedClasses}`}>
-              Não foi possível gerar o palpite agora. Tente escolher o confronto novamente.
+              {t("bracket.predictor.error")}
             </p>
           )}
         </>

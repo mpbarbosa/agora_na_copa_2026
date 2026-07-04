@@ -2,8 +2,13 @@ import { driver, type Side, type Alignment } from "driver.js";
 import "driver.js/dist/driver.css";
 import { startMessiTour } from "./messiTour";
 import { clearBracketSpotlight } from "./bracketHover";
+import { translate, getActiveLocale } from "./i18n";
 
 type Theme = "classic-light" | "stadium-dark";
+
+/** Resolve a `tours.` key against the active locale at call time. */
+const t = (key: string, params?: Record<string, string | number>) =>
+  translate(getActiveLocale(), key, params);
 
 /** Poll until `selector` exists (or timeout), then run cb — for awaiting async navigation/render. */
 function waitForElement(selector: string, cb: () => void, timeoutMs = 3000) {
@@ -92,9 +97,8 @@ function startTeamLineupTour(theme: Theme, onEnd?: () => void): void {
     [
       {
         element: "#btn-nav-selecoes",
-        title: "Veja o elenco de cada seleção 🌎",
-        description:
-          'Todas as 48 seleções têm uma página completa. Tudo começa na aba Seleções — toque em "Próximo".',
+        title: t("tours.teamLineup.step1.title"),
+        description: t("tours.teamLineup.step1.description"),
         side: "bottom",
         align: "start",
         act: () => document.getElementById("btn-nav-selecoes")?.click(),
@@ -102,8 +106,8 @@ function startTeamLineupTour(theme: Theme, onEnd?: () => void): void {
       },
       {
         element: BRAZIL_TEAM_CARD,
-        title: "Toque na bandeira",
-        description: 'Toque no escudo da seleção para abrir o elenco completo. Vamos abrir o Brasil.',
+        title: t("tours.teamLineup.step2.title"),
+        description: t("tours.teamLineup.step2.description"),
         side: "bottom",
         align: "start",
         act: () => document.querySelector<HTMLElement>(BRAZIL_TEAM_CARD)?.click(),
@@ -111,9 +115,8 @@ function startTeamLineupTour(theme: Theme, onEnd?: () => void): void {
       },
       {
         element: "#team-lineup-header",
-        title: "Elenco completo ✓",
-        description:
-          "Pronto! Escalação titular, comissão técnica e histórico de jogos — é assim que você abre qualquer seleção.",
+        title: t("tours.teamLineup.step3.title"),
+        description: t("tours.teamLineup.step3.description"),
         side: "bottom",
         align: "center",
       },
@@ -129,9 +132,8 @@ function startBestThirdsTour(theme: Theme, onEnd?: () => void): void {
     [
       {
         element: "#btn-nav-grupos",
-        title: "8 dos 12 terceiros avançam 🧮",
-        description:
-          'Nem todo 3º colocado está fora — e dá para ver quem passa. Vamos achar essa tabela: abra a aba Grupos no "Próximo".',
+        title: t("tours.bestThirds.step1.title"),
+        description: t("tours.bestThirds.step1.description"),
         side: "bottom",
         align: "start",
         act: () => document.getElementById("btn-nav-grupos")?.click(),
@@ -139,9 +141,8 @@ function startBestThirdsTour(theme: Theme, onEnd?: () => void): void {
       },
       {
         element: "#standings-grid",
-        title: "Role até o fim da página ⬇️",
-        description:
-          'A seção "Melhores 3º colocados" fica no rodapé desta página, logo abaixo das 12 chaves. Toque em "Próximo" que eu te levo até lá.',
+        title: t("tours.bestThirds.step2.title"),
+        description: t("tours.bestThirds.step2.description"),
         side: "top",
         align: "center",
         act: () =>
@@ -152,9 +153,8 @@ function startBestThirdsTour(theme: Theme, onEnd?: () => void): void {
       },
       {
         element: "#third-place-ranking",
-        title: "Achou: Melhores 3º colocados ✓",
-        description:
-          "É aqui. Os 12 terceiros colocados são ranqueados por pontos, saldo, gols e fair play. A linha verde marca o corte: os 8 de cima avançam ao mata-mata.",
+        title: t("tours.bestThirds.step3.title"),
+        description: t("tours.bestThirds.step3.description"),
         side: "top",
         align: "center",
       },
@@ -170,9 +170,8 @@ function startBracketTour(theme: Theme, onEnd?: () => void): void {
     [
       {
         element: "#btn-nav-chaveamento",
-        title: "O caminho até a final 🏆",
-        description:
-          'Acompanhe todo o mata-mata, dos 16 avos à decisão, na aba Mata-mata — toque em "Próximo".',
+        title: t("tours.bracket.step1.title"),
+        description: t("tours.bracket.step1.description"),
         side: "bottom",
         align: "start",
         act: () => document.getElementById("btn-nav-chaveamento")?.click(),
@@ -180,9 +179,8 @@ function startBracketTour(theme: Theme, onEnd?: () => void): void {
       },
       {
         element: "#bracket-stage-grid",
-        title: "Mata-mata da Copa",
-        description:
-          "A cada fase, o cruzamento se monta com os classificados — incluindo as vagas dos 8 melhores terceiros colocados.",
+        title: t("tours.bracket.step2.title"),
+        description: t("tours.bracket.step2.description"),
         side: "top",
         align: "center",
       },
@@ -225,9 +223,8 @@ function startBracketFeederTour(theme: Theme, onEnd?: () => void): void {
     [
       {
         element: "#btn-nav-chaveamento",
-        title: "Quem decide o adversário? 🔍",
-        description:
-          'No Mata-mata, cada confronto nasce de dois jogos da fase anterior — e dá para ver quais. Abra a aba Mata-mata no "Próximo".',
+        title: t("tours.bracketFeeder.step1.title"),
+        description: t("tours.bracketFeeder.step1.description"),
         side: "bottom",
         align: "start",
         act: () => document.getElementById("btn-nav-chaveamento")?.click(),
@@ -235,9 +232,8 @@ function startBracketFeederTour(theme: Theme, onEnd?: () => void): void {
       },
       {
         element: OITAVAS,
-        title: "Aponte para um jogo das Oitavas",
-        description:
-          'Passe o mouse (ou toque, no celular) num confronto das Oitavas. No "Próximo" eu faço isso por você.',
+        title: t("tours.bracketFeeder.step2.title"),
+        description: t("tours.bracketFeeder.step2.description"),
         side: "bottom",
         align: "center",
         act: () => spotlightTie(FEEDER_DEMO_MATCH),
@@ -245,9 +241,8 @@ function startBracketFeederTour(theme: Theme, onEnd?: () => void): void {
       },
       {
         element: FEEDER,
-        title: "Os 2 jogos das 16 avos ✓",
-        description:
-          "Prontinho! As 16 avos acendem os dois jogos que decidem quem chega a este confronto — destacados e lado a lado. O resto da coluna some para focar no caminho.",
+        title: t("tours.bracketFeeder.step3.title"),
+        description: t("tours.bracketFeeder.step3.description"),
         side: "bottom",
         align: "center",
       },
@@ -267,9 +262,8 @@ function startGroupHistoryTour(theme: Theme, onEnd?: () => void): void {
     [
       {
         element: "#btn-nav-grupos",
-        title: "Todos os jogos do grupo 📅",
-        description:
-          'Resultados e próximos jogos de cada chave ficam no card do grupo. Abra a aba Grupos no "Próximo".',
+        title: t("tours.groupHistory.step1.title"),
+        description: t("tours.groupHistory.step1.description"),
         side: "bottom",
         align: "start",
         act: () => document.getElementById("btn-nav-grupos")?.click(),
@@ -277,9 +271,8 @@ function startGroupHistoryTour(theme: Theme, onEnd?: () => void): void {
       },
       {
         element: HISTORY,
-        title: "Histórico de jogos",
-        description:
-          'Cada grupo tem uma seção "Histórico de jogos". Toque em "Próximo" que eu abro para você.',
+        title: t("tours.groupHistory.step2.title"),
+        description: t("tours.groupHistory.step2.description"),
         side: "top",
         align: "center",
         act: () => {
@@ -293,9 +286,8 @@ function startGroupHistoryTour(theme: Theme, onEnd?: () => void): void {
       },
       {
         element: HISTORY,
-        title: "Resultados e próximos jogos ✓",
-        description:
-          "Pronto! Os jogos já disputados aparecem com o placar e os próximos com o horário — em ordem, sem sair da tabela.",
+        title: t("tours.groupHistory.step3.title"),
+        description: t("tours.groupHistory.step3.description"),
         side: "top",
         align: "center",
       },
@@ -311,9 +303,8 @@ function startFullBracketTour(theme: Theme, onEnd?: () => void): void {
     [
       {
         element: "#btn-nav-chaveamento",
-        title: "Toda a chave numa tela só 🏆",
-        description:
-          'Dá para ver o mata-mata inteiro como um pôster, dos 16 avos à final. Abra a aba Mata-mata no "Próximo".',
+        title: t("tours.fullBracket.step1.title"),
+        description: t("tours.fullBracket.step1.description"),
         side: "bottom",
         align: "start",
         act: () => document.getElementById("btn-nav-chaveamento")?.click(),
@@ -321,9 +312,8 @@ function startFullBracketTour(theme: Theme, onEnd?: () => void): void {
       },
       {
         element: "#bracket-view-toggle",
-        title: 'Ative a "Chave completa"',
-        description:
-          'Este botão troca as colunas pela chave completa — a tabela simétrica com todas as seleções e a taça no centro. No "Próximo" eu ativo para você.',
+        title: t("tours.fullBracket.step2.title"),
+        description: t("tours.fullBracket.step2.description"),
         side: "bottom",
         align: "end",
         act: () => document.getElementById("bracket-view-toggle-full")?.click(),
@@ -331,9 +321,8 @@ function startFullBracketTour(theme: Theme, onEnd?: () => void): void {
       },
       {
         element: "#bracket-full",
-        title: "A chave completa ✓",
-        description:
-          "Pronto! As seleções convergem das laterais até a taça no centro: as bandeiras acesas mostram quem avançou e as caixas vazias esperam os próximos jogos. No celular, gire a tela para o modo horizontal.",
+        title: t("tours.fullBracket.step3.title"),
+        description: t("tours.fullBracket.step3.description"),
         side: "top",
         align: "center",
       },

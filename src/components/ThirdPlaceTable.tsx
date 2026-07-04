@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import type { StandingsRow, TeamRef } from "../types";
+import { useT } from "../i18n";
+import type { LocaleContextValue } from "../i18n";
 import { rankBestThirds } from "../standings";
 import { FlagIcon } from "./FlagIcon";
 
@@ -34,20 +36,20 @@ function isEliminated(advance: number | undefined): boolean {
 // locks and eliminated teams get a definitive line. Falls back to rank-only until
 // the simulated chance loads.
 function buildThirdTooltip(
+  t: LocaleContextValue["t"],
   name: string,
   rankAmongThirds: number,
   qualifies: boolean,
   advance: number | undefined,
   guaranteed: boolean,
 ): string {
-  const ord = `${rankAmongThirds}º melhor 3º colocado`;
-  if (advance === undefined) return `${name} · ${ord}`;
+  const ord = t("standings.third.tooltipOrd", { rank: rankAmongThirds });
+  if (advance === undefined) return t("standings.third.tooltipBase", { name, ord });
   const pct = Math.round(advance * 100);
-  if (guaranteed) return `${name} · ${ord} — classificação ao mata-mata garantida.`;
-  if (pct <= 0) return `${name} · ${ord} — eliminado: sem cenários de ficar entre os 8 melhores 3ºs.`;
-  if (qualifies)
-    return `${name} · ${ord} — dentro do corte provisório dos 8, mas sem vaga garantida (${pct}% nas simulações).`;
-  return `${name} · ${ord} — fora do corte provisório dos 8, mas ainda na briga (${pct}% nas simulações).`;
+  if (guaranteed) return t("standings.third.tooltipGuaranteed", { name, ord });
+  if (pct <= 0) return t("standings.third.tooltipEliminated", { name, ord });
+  if (qualifies) return t("standings.third.tooltipInside", { name, ord, pct });
+  return t("standings.third.tooltipContention", { name, ord, pct });
 }
 
 // Cross-group ranking of the 12 third-placed teams. The best 8 provisionally
@@ -55,6 +57,7 @@ function buildThirdTooltip(
 // points → goal difference → goals for → fair play (Art. 13), shared with the
 // group tables and the bracket via rankBestThirds.
 export function ThirdPlaceTable({ groups, theme, onSelectTeamLineup }: ThirdPlaceTableProps) {
+  const t = useT();
   const ranked = rankBestThirds(groups);
   const codesKey = ranked.map((third) => third.row.code).join(",");
 
@@ -113,10 +116,10 @@ export function ThirdPlaceTable({ groups, theme, onSelectTeamLineup }: ThirdPlac
       data-testid="third-place-ranking"
     >
       <h3 className={`font-anton text-lg uppercase tracking-wide ${headingClasses}`}>
-        Melhores 3º colocados
+        {t("standings.third.title")}
       </h3>
       <p className={`mt-1 mb-4 font-mono text-[10px] uppercase tracking-wider ${mutedClasses}`}>
-        8 das 12 chaves avançam pelo 3º lugar · ranking provisório
+        {t("standings.third.subtitle")}
       </p>
 
       <div className="-mx-1 overflow-x-auto pb-1">
@@ -127,35 +130,35 @@ export function ThirdPlaceTable({ groups, theme, onSelectTeamLineup }: ThirdPlac
                 #
               </th>
               <th className={`w-8 py-1.5 text-left font-normal uppercase tracking-wider ${headerCellClasses}`}>
-                Gr.
+                {t("standings.third.colGroup")}
               </th>
               <th className={`py-1.5 text-left font-normal uppercase tracking-wider ${headerCellClasses}`}>
-                Equipe
+                {t("standings.third.colTeam")}
               </th>
               <th
                 className={`px-1 py-1.5 text-right font-normal uppercase tracking-wider ${headerCellClasses}`}
-                title="Probabilidade simulada (Monte Carlo) de avançar ao mata-mata"
+                title={t("standings.third.colChanceTitle")}
               >
-                Chance
+                {t("standings.third.colChance")}
               </th>
               <th
                 className={`px-1 py-1.5 text-right font-normal uppercase tracking-wider ${headerCellClasses}`}
-                title="Jogos disputados (encerrados + em andamento)"
+                title={t("standings.third.colJTitle")}
               >
-                J
+                {t("standings.col.j")}
               </th>
               <th className={`px-1 py-1.5 text-right font-normal uppercase tracking-wider font-bold ${headingClasses}`}>
-                PTS
+                {t("standings.col.pts")}
               </th>
               <th className={`px-1 py-1.5 text-right font-normal uppercase tracking-wider ${headerCellClasses}`}>
-                SG
+                {t("standings.col.sg")}
               </th>
               <th className={`px-1 py-1.5 text-right font-normal uppercase tracking-wider ${headerCellClasses}`}>
-                GF
+                {t("standings.col.gf")}
               </th>
               <th
                 className={`px-1 py-1.5 text-right font-normal uppercase tracking-wider ${headerCellClasses}`}
-                title="Fair play (Art. 13.2f): −1 amarelo, −3 segundo amarelo, −4 vermelho direto"
+                title={t("standings.third.colFpTitle")}
               >
                 FP
               </th>
@@ -195,7 +198,7 @@ export function ThirdPlaceTable({ groups, theme, onSelectTeamLineup }: ThirdPlac
                         className="h-4 w-6"
                         onClick={() => onSelectTeamLineup(row)}
                       />
-                      <span title={buildThirdTooltip(row.name, index + 1, qualifies, advance, guaranteed)}>
+                      <span title={buildThirdTooltip(t, row.name, index + 1, qualifies, advance, guaranteed)}>
                         {row.code}
                       </span>
                       {guaranteed && (
@@ -203,8 +206,8 @@ export function ThirdPlaceTable({ groups, theme, onSelectTeamLineup }: ThirdPlac
                           className={`rounded px-1 text-[9px] font-bold uppercase tracking-wider ${
                             isLight ? "bg-[#009c3b] text-white" : "bg-[#00e476] text-black"
                           }`}
-                          title="Classificação garantida ao mata-mata (100% nas simulações)"
-                          aria-label="Classificação garantida"
+                          title={t("standings.third.guaranteedTitle")}
+                          aria-label={t("standings.third.guaranteedAria")}
                         >
                           ✓
                         </span>
@@ -214,8 +217,8 @@ export function ThirdPlaceTable({ groups, theme, onSelectTeamLineup }: ThirdPlac
                           className={`rounded px-1 text-[9px] font-bold uppercase tracking-wider ${
                             isLight ? "bg-[#9f1239] text-white" : "bg-[#ff879d] text-black"
                           }`}
-                          title="Eliminado: 0% de chance de ficar entre os 8 melhores 3ºs"
-                          aria-label="Eliminado"
+                          title={t("standings.third.eliminatedTitle")}
+                          aria-label={t("standings.third.eliminatedAria")}
                         >
                           ✕
                         </span>
@@ -226,7 +229,7 @@ export function ThirdPlaceTable({ groups, theme, onSelectTeamLineup }: ThirdPlac
                     className={`whitespace-nowrap px-1 py-1.5 text-right font-semibold ${
                       qualifies ? accent : mutedClasses
                     }`}
-                    title="Probabilidade simulada de avançar ao mata-mata"
+                    title={t("standings.third.chanceCellTitle")}
                   >
                     {formatChance(advance)}
                   </td>
@@ -253,10 +256,7 @@ export function ThirdPlaceTable({ groups, theme, onSelectTeamLineup }: ThirdPlac
       </div>
 
       <p className={`mt-3 font-mono text-[9px] uppercase tracking-wider leading-relaxed ${mutedClasses}`}>
-        A linha verde marca o corte dos 8 classificados. A coluna Chance é uma
-        probabilidade simulada (Monte Carlo) de avançar ao mata-mata — palpite para a
-        torcida, não cravada de resultado. A alocação oficial de cada 3º colocado às
-        chaves do mata-mata só é definida ao fim da fase de grupos.
+        {t("standings.third.footnote")}
       </p>
     </section>
   );

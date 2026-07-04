@@ -3,7 +3,9 @@ import { divIcon, type DivIcon, type LatLngBoundsExpression } from "leaflet";
 import { MapContainer, Marker, TileLayer, Tooltip, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import { stadiums } from "../data/tournament";
+import { localizedStageName } from "../utils/knockoutSlots";
 import type { Match, Stadium, TeamRef } from "../types";
+import { getActiveLocale, localeToIntlTag, useT } from "../i18n";
 import { FlagIcon } from "./FlagIcon";
 
 interface VenueMapViewProps {
@@ -15,12 +17,6 @@ interface VenueMapViewProps {
 interface VenueWithMatches extends Stadium {
   hostedMatches: Match[];
 }
-
-const COUNTRY_LABELS: Record<Stadium["country"], string> = {
-  USA: "Estados Unidos",
-  MEX: "México",
-  CAN: "Canadá",
-};
 
 const NORTH_AMERICA_BOUNDS: LatLngBoundsExpression = [
   [14.5, -127.5],
@@ -53,7 +49,7 @@ function getVenueData(matches: Match[]): VenueWithMatches[] {
 }
 
 function formatCapacity(capacity: number) {
-  return new Intl.NumberFormat("pt-BR").format(capacity);
+  return new Intl.NumberFormat(localeToIntlTag(getActiveLocale())).format(capacity);
 }
 
 function createVenueMarkerIcon(
@@ -92,6 +88,7 @@ function FocusSelectedVenue({ venue }: { venue: VenueWithMatches }) {
 }
 
 export function VenueMapView({ matches, theme, onSelectTeamLineup }: VenueMapViewProps) {
+  const t = useT();
   const venues = useMemo(() => getVenueData(matches), [matches]);
   const [selectedVenueId, setSelectedVenueId] = useState<string>(venues[0].id);
 
@@ -126,10 +123,10 @@ export function VenueMapView({ matches, theme, onSelectTeamLineup }: VenueMapVie
         className={`font-anton text-2xl md:text-3xl uppercase tracking-wider ${headingClasses}`}
         id="venue-map-title"
       >
-        Estádios da Copa
+        {t("venuesNews.venues.title")}
       </h2>
       <p className={`mt-1 mb-6 font-mono text-[11px] uppercase tracking-wider ${mutedClasses}`}>
-        16 sedes • mapa real com OpenStreetMap • exploração por cidade anfitriã
+        {t("venuesNews.venues.subtitle")}
       </p>
 
       <div
@@ -140,10 +137,10 @@ export function VenueMapView({ matches, theme, onSelectTeamLineup }: VenueMapVie
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
               <p className={`font-anton text-lg uppercase tracking-wide ${headingClasses}`}>
-                Rotas do Mundial
+                {t("venuesNews.venues.mapTitle")}
               </p>
               <p className={`mt-1 font-mono text-[10px] uppercase tracking-wider ${mutedClasses}`}>
-                Navegue pelo mapa, aplique zoom e toque em um marcador para abrir a sede
+                {t("venuesNews.venues.mapHint")}
               </p>
             </div>
 
@@ -160,7 +157,7 @@ export function VenueMapView({ matches, theme, onSelectTeamLineup }: VenueMapVie
                   <span
                     className={`h-2.5 w-2.5 rounded-full venue-map-country-dot venue-map-country-dot--${country.toLowerCase()}`}
                   />
-                  {COUNTRY_LABELS[country]}
+                  {t(`venuesNews.country.${country}`)}
                 </span>
               ))}
             </div>
@@ -221,8 +218,7 @@ export function VenueMapView({ matches, theme, onSelectTeamLineup }: VenueMapVie
           </div>
 
           <p className={`mt-3 font-archivo text-sm leading-6 ${mutedClasses}`}>
-            Explore as 16 sedes em escala real, com zoom livre entre Canadá, Estados
-            Unidos e México.
+            {t("venuesNews.venues.mapDescription")}
           </p>
 
           <div className="mt-4 md:hidden">
@@ -249,11 +245,11 @@ export function VenueMapView({ matches, theme, onSelectTeamLineup }: VenueMapVie
                           {venue.name}
                         </p>
                         <p className={`mt-1 font-mono text-[10px] uppercase tracking-wider ${mutedClasses}`}>
-                          {venue.city} • {COUNTRY_LABELS[venue.country]}
+                          {venue.city} • {t(`venuesNews.country.${venue.country}`)}
                         </p>
                       </div>
                       <span className={`font-mono text-[10px] uppercase tracking-wider ${subtleClasses}`}>
-                        {venue.hostedMatches.length} jogos
+                        {t("venuesNews.venues.matchCount", { count: venue.hostedMatches.length })}
                       </span>
                     </div>
                   </button>
@@ -270,7 +266,7 @@ export function VenueMapView({ matches, theme, onSelectTeamLineup }: VenueMapVie
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
               <p className={`font-mono text-[10px] uppercase tracking-[0.22em] ${mutedClasses}`}>
-                Sede selecionada
+                {t("venuesNews.venues.selectedVenue")}
               </p>
               <h3
                 className={`mt-2 font-anton text-2xl uppercase tracking-wide ${headingClasses}`}
@@ -279,7 +275,7 @@ export function VenueMapView({ matches, theme, onSelectTeamLineup }: VenueMapVie
                 {selectedVenue.name}
               </h3>
               <p className={`mt-2 font-mono text-[11px] uppercase tracking-wider ${mutedClasses}`}>
-                {selectedVenue.city} • {COUNTRY_LABELS[selectedVenue.country]}
+                {selectedVenue.city} • {t(`venuesNews.country.${selectedVenue.country}`)}
               </p>
             </div>
 
@@ -290,14 +286,14 @@ export function VenueMapView({ matches, theme, onSelectTeamLineup }: VenueMapVie
                   : "border-white/10 bg-white/5 text-slate-200"
               }`}
             >
-              {selectedVenue.hostedMatches.length} partidas em destaque
+              {t("venuesNews.venues.highlightedMatches", { count: selectedVenue.hostedMatches.length })}
             </span>
           </div>
 
           <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2" id="venue-detail-stats">
             <div className={`rounded-2xl border px-4 py-3 ${softCardClasses}`}>
               <p className={`font-mono text-[10px] uppercase tracking-wider ${subtleClasses}`}>
-                Capacidade
+                {t("venuesNews.venues.capacity")}
               </p>
               <p className={`mt-2 font-anton text-2xl uppercase tracking-wide ${headingClasses}`}>
                 {formatCapacity(selectedVenue.capacity)}
@@ -305,7 +301,7 @@ export function VenueMapView({ matches, theme, onSelectTeamLineup }: VenueMapVie
             </div>
             <div className={`rounded-2xl border px-4 py-3 ${softCardClasses}`}>
               <p className={`font-mono text-[10px] uppercase tracking-wider ${subtleClasses}`}>
-                Inauguração
+                {t("venuesNews.venues.inauguration")}
               </p>
               <p className={`mt-2 font-anton text-2xl uppercase tracking-wide ${headingClasses}`}>
                 {selectedVenue.yearBuilt}
@@ -315,7 +311,7 @@ export function VenueMapView({ matches, theme, onSelectTeamLineup }: VenueMapVie
 
           <div className={`mt-5 rounded-2xl border p-4 ${softCardClasses}`}>
             <p className={`font-anton text-lg uppercase tracking-wide ${headingClasses}`}>
-              Raio-X da arena
+              {t("venuesNews.venues.arenaXRay")}
             </p>
             <ul className="mt-3 flex flex-col gap-3" id="venue-facts-list">
               {selectedVenue.facts.map((fact, index) => (
@@ -337,10 +333,10 @@ export function VenueMapView({ matches, theme, onSelectTeamLineup }: VenueMapVie
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
                 <p className={`font-anton text-lg uppercase tracking-wide ${headingClasses}`}>
-                  Jogos nesta sede
+                  {t("venuesNews.venues.matchesHere")}
                 </p>
                 <p className={`mt-1 font-mono text-[10px] uppercase tracking-wider ${mutedClasses}`}>
-                  Cruzamento com as partidas em destaque do app
+                  {t("venuesNews.venues.matchesHereHint")}
                 </p>
               </div>
             </div>
@@ -386,7 +382,7 @@ export function VenueMapView({ matches, theme, onSelectTeamLineup }: VenueMapVie
                       <span
                         className={`self-start font-mono text-[10px] uppercase tracking-wider sm:self-auto ${mutedClasses}`}
                       >
-                        {match.stageName}
+                        {localizedStageName(match.stageName)}
                       </span>
                     </div>
                     <p className={`mt-2 font-archivo text-sm ${mutedClasses}`}>
@@ -397,7 +393,7 @@ export function VenueMapView({ matches, theme, onSelectTeamLineup }: VenueMapVie
               </div>
             ) : (
               <p className={`mt-4 font-archivo text-sm leading-6 ${mutedClasses}`}>
-                Esta arena ainda não recebeu nenhuma das partidas em destaque da página.
+                {t("venuesNews.venues.noMatches")}
               </p>
             )}
           </div>

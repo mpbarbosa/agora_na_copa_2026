@@ -1,4 +1,5 @@
 import type { CommentaryEvent, Match, MatchOverlayEntry, TeamRef } from "../types";
+import { useT } from "../i18n";
 import { FlagIcon } from "./FlagIcon";
 import { MatchWeatherChip } from "./MatchWeatherChip";
 import { WeatherSuspensionNotice } from "./WeatherSuspensionNotice";
@@ -38,6 +39,7 @@ export function SimultaneousLiveMatches({
   onSelectTeamLineup,
   onOpenStandingsGroup,
 }: SimultaneousLiveMatchesProps) {
+  const t = useT();
   const isLight = theme === "classic-light";
   const cardClasses = isLight
     ? "bg-white border-slate-200/90 shadow-sm"
@@ -81,7 +83,13 @@ export function SimultaneousLiveMatches({
                   suspended ? "text-amber-600" : isLight ? "text-slate-600" : "text-[#a7e6bf]"
                 }`}
               >
-                {live ? (match.matchTime ? `AO VIVO • ${match.matchTime}` : "AO VIVO") : suspended ? "PARALISADO" : "ENCERRADO"}
+                {live
+                  ? match.matchTime
+                    ? t("liveExtras.live.liveWithTime", { time: match.matchTime })
+                    : t("liveExtras.live.live")
+                  : suspended
+                    ? t("liveExtras.live.suspended")
+                    : t("liveExtras.live.finished")}
               </span>
             </div>
 
@@ -146,7 +154,7 @@ export function SimultaneousLiveMatches({
             {/* Onde assistir */}
             {broadcasters.length > 0 && (
               <div className={`mt-4 border-t pt-3 ${dividerClasses}`}>
-                <p className={`${sectionTitle} mb-2`}>Onde assistir</p>
+                <p className={`${sectionTitle} mb-2`}>{t("liveExtras.live.whereToWatch")}</p>
                 <div className="flex flex-wrap gap-2">
                   {broadcasters.map((cast) => (
                     <a
@@ -169,7 +177,7 @@ export function SimultaneousLiveMatches({
             {/* Lances (live incidents) */}
             {incidents.length > 0 && (
               <div className={`mt-4 border-t pt-3 ${dividerClasses}`}>
-                <p className={`${sectionTitle} mb-2`}>Lances</p>
+                <p className={`${sectionTitle} mb-2`}>{t("liveExtras.live.incidents")}</p>
                 <ul className="space-y-1.5">
                   {incidents.map((ev) => (
                     <li key={ev.id} className="flex items-start gap-2 font-archivo text-sm">

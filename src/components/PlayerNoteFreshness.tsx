@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { apiUrl, useT } from "../i18n";
 import { getPlayerByFifaId } from "../data/playerRegistry";
 import { APP_MATCHES } from "../appMatches";
 import {
@@ -20,7 +21,7 @@ let statesPromise: Promise<Record<string, LiveState>> | null = null;
 function fetchMatchStates(): Promise<Record<string, LiveState>> {
   if (statesCache) return Promise.resolve(statesCache);
   if (!statesPromise) {
-    statesPromise = fetch("/api/match-states")
+    statesPromise = fetch(apiUrl("/api/match-states"))
       .then((res) => (res.ok ? res.json() : { states: {} }))
       .then((data: { states?: Record<string, LiveState> }) => {
         statesCache = data.states ?? {};
@@ -52,6 +53,10 @@ export function PlayerNoteFreshness({
   mutedClasses,
   id,
 }: PlayerNoteFreshnessProps) {
+  // Freshness label + "Atualizado em …" stamp are delegated to AnalysisFreshnessBadge
+  // and formatAnalysisTimestamp, so this component has no hardcoded UI strings of its
+  // own to localize. The hook is kept so future in-component copy can translate.
+  useT();
   const entry = fifaId ? getPlayerByFifaId(fifaId) : null;
   const hasNote = Boolean(entry?.worldCupNote);
   const [states, setStates] = useState<Record<string, LiveState> | null>(statesCache);

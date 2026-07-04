@@ -1,4 +1,5 @@
 import { Fragment, type ReactNode } from "react";
+import { getActiveLocale, localeToIntlTag, useT } from "../../i18n";
 
 /**
  * Presentational, dependency-free chart primitives for the Dashboard, built from plain
@@ -256,7 +257,7 @@ interface LineChartProps {
   formatX?: (x: number) => string;
 }
 
-const ptInt = new Intl.NumberFormat("pt-BR");
+const fmtInt = (n: number): string => new Intl.NumberFormat(localeToIntlTag(getActiveLocale())).format(n);
 const defaultXLabel = (x: number): string => {
   const d = new Date(x);
   const pad = (n: number) => String(n).padStart(2, "0");
@@ -268,7 +269,8 @@ const defaultXLabel = (x: number): string => {
  * "Tráfego" tab for the cumulative-requests and request-rate time series; feed it
  * one series at a time to keep the axis readable. Needs ≥2 points to draw a trend.
  */
-export function LineChart({ theme, series, formatValue = (n) => ptInt.format(n), formatX = defaultXLabel }: LineChartProps) {
+export function LineChart({ theme, series, formatValue = (n) => fmtInt(n), formatX = defaultXLabel }: LineChartProps) {
+  const t = useT();
   const isLight = theme === "classic-light";
   const gridColor = isLight ? "#e2e8f0" : "#334155";
   const tickTextColor = isLight ? "#64748b" : "#94a3b8";
@@ -285,7 +287,7 @@ export function LineChart({ theme, series, formatValue = (n) => ptInt.format(n),
     const mutedClasses = isLight ? "text-slate-500" : "text-slate-400";
     return (
       <p className={`py-10 text-center font-mono text-xs uppercase tracking-wider ${mutedClasses}`}>
-        São necessários ao menos dois instantâneos para traçar a tendência
+        {t("dashboard.lineChartNeedTwoPoints")}
       </p>
     );
   }
@@ -374,6 +376,7 @@ export function ScatterPlot({
   xMarkers = [],
   color,
 }: ScatterPlotProps) {
+  const t = useT();
   const isLight = theme === "classic-light";
   const axisColor = isLight ? "#cbd5e1" : "#334155";
   const tickTextColor = isLight ? "#64748b" : "#94a3b8";
@@ -398,7 +401,7 @@ export function ScatterPlot({
   const yTicks = Array.from({ length: yTop + 1 }, (_, i) => i);
 
   return (
-    <svg viewBox={`0 0 ${W} ${H}`} className="w-full" role="img" aria-label={`${yLabel} por ${xLabel}`}>
+    <svg viewBox={`0 0 ${W} ${H}`} className="w-full" role="img" aria-label={t("dashboard.scatterAria", { yLabel, xLabel })}>
       {/* Y gridlines + ticks */}
       {yTicks.map((t) => (
         <g key={`y${t}`}>
@@ -481,6 +484,7 @@ export function HeatMap({
   showTotals = true,
   formatCellTitle = (label, column, value) => `${label} · ${column} · ${value}`,
 }: HeatMapProps) {
+  const t = useT();
   const isLight = theme === "classic-light";
   const rgb = isLight ? "0,156,59" : "0,228,118";
   const trackColor = isLight ? "#f1f5f9" : "rgba(255,255,255,0.05)";
@@ -543,15 +547,15 @@ export function HeatMap({
 
       {/* Scale legend */}
       <div className={`flex items-center gap-1.5 self-end font-mono text-[9px] uppercase tracking-wider ${headClasses}`}>
-        <span>menos</span>
-        {[0.12, 0.35, 0.58, 0.81, 1].map((t) => (
+        <span>{t("dashboard.heatmapLegendLess")}</span>
+        {[0.12, 0.35, 0.58, 0.81, 1].map((step) => (
           <span
-            key={t}
+            key={step}
             className="h-2.5 w-2.5 rounded-sm"
-            style={{ backgroundColor: `rgba(${rgb},${(0.16 + 0.84 * t).toFixed(3)})` }}
+            style={{ backgroundColor: `rgba(${rgb},${(0.16 + 0.84 * step).toFixed(3)})` }}
           />
         ))}
-        <span>mais</span>
+        <span>{t("dashboard.heatmapLegendMore")}</span>
       </div>
     </div>
   );

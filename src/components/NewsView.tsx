@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { news } from "../data/news";
 import type { NewsArticle } from "../types";
+import { useT } from "../i18n";
 
 interface NewsViewProps {
   theme: "classic-light" | "stadium-dark";
@@ -10,6 +11,17 @@ type NewsFilter = "Todas" | NewsArticle["category"];
 
 const FILTERS: NewsFilter[] = ["Todas", "Sedes", "Ingressos", "Equipes", "Geral"];
 
+// Maps each filter/category value (the pt logic key used for match filtering) to
+// its i18n catalog key so the displayed label can be localized while the
+// underlying value stays stable.
+const FILTER_LABEL_KEYS: Record<NewsFilter, string> = {
+  Todas: "venuesNews.news.filterAll",
+  Sedes: "venuesNews.news.filterVenues",
+  Ingressos: "venuesNews.news.filterTickets",
+  Equipes: "venuesNews.news.filterTeams",
+  Geral: "venuesNews.news.filterGeneral",
+};
+
 const filterSlug = (filter: NewsFilter) =>
   filter
     .normalize("NFD")
@@ -18,6 +30,7 @@ const filterSlug = (filter: NewsFilter) =>
     .toLowerCase();
 
 export function NewsView({ theme }: NewsViewProps) {
+  const t = useT();
   const [activeFilter, setActiveFilter] = useState<NewsFilter>("Todas");
 
   const filteredNews = useMemo(
@@ -52,10 +65,10 @@ export function NewsView({ theme }: NewsViewProps) {
             className={`font-anton text-2xl md:text-3xl uppercase tracking-wider ${headingClasses}`}
             id="news-title"
           >
-            Central de Notícias
+            {t("venuesNews.news.title")}
           </h2>
           <p className={`mt-1 font-mono text-[11px] uppercase tracking-wider ${mutedClasses}`}>
-            Atualizações sobre sedes, ingressos, seleções e bastidores do Mundial
+            {t("venuesNews.news.subtitle")}
           </p>
         </div>
 
@@ -67,7 +80,7 @@ export function NewsView({ theme }: NewsViewProps) {
           }`}
           id="news-count-badge"
         >
-          {filteredNews.length} destaques em foco
+          {t("venuesNews.news.highlightsCount", { count: filteredNews.length })}
         </div>
       </div>
 
@@ -88,7 +101,7 @@ export function NewsView({ theme }: NewsViewProps) {
                 isActive ? activeFilterClasses : idleFilterClasses
               }`}
             >
-              {filter}
+              {t(FILTER_LABEL_KEYS[filter])}
             </button>
           );
         })}
@@ -113,7 +126,7 @@ export function NewsView({ theme }: NewsViewProps) {
                     : "border-white/10 bg-white/5 text-slate-200"
                 }`}
               >
-                {article.category}
+                {t(FILTER_LABEL_KEYS[article.category])}
               </span>
               <span className={`font-mono text-[10px] uppercase tracking-wider ${subtleClasses}`}>
                 {article.date}

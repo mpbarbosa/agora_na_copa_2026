@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { apiUrl } from "../i18n";
 import type { TeamLineupsMap } from "../utils/teamLineup";
 
 const REFRESH_INTERVAL_MS = 5 * 60 * 1000;
@@ -54,7 +55,7 @@ export function useTeamLineups(active: boolean): TeamLineupsMap {
       requestInFlight = true;
 
       try {
-        const response = await fetch("/api/team-lineups");
+        const response = await fetch(apiUrl("/api/team-lineups"));
         if (!response.ok) {
           throw new Error("Falha ao atualizar escalações da FIFA.");
         }

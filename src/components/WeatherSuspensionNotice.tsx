@@ -1,4 +1,5 @@
 import { CloudLightning, ExternalLink } from "lucide-react";
+import { useT } from "../i18n";
 
 // Official FIFA World Cup 2026 regulations (PDF) — these govern when a match is
 // suspended/abandoned, including for adverse weather. Same source the standings
@@ -17,6 +18,7 @@ interface WeatherSuspensionNoticeProps {
  * stoppage — linking to the FIFA regulations that govern suspended matches.
  */
 export function WeatherSuspensionNotice({ theme, className = "" }: WeatherSuspensionNoticeProps) {
+  const t = useT();
   const isLight = theme === "classic-light";
 
   return (
@@ -26,7 +28,7 @@ export function WeatherSuspensionNotice({ theme, className = "" }: WeatherSuspen
       rel="noopener noreferrer"
       id="weather-suspension-notice"
       data-testid="weather-suspension-notice"
-      title="Abrir o regulamento da FIFA sobre partidas suspensas"
+      title={t("common.weatherSuspension.title")}
       className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 font-mono text-[11px] font-bold uppercase tracking-wider transition ${
         isLight
           ? "border-amber-300 bg-amber-50 text-amber-700 hover:bg-amber-100"
@@ -35,7 +37,7 @@ export function WeatherSuspensionNotice({ theme, className = "" }: WeatherSuspen
     >
       <CloudLightning size={14} aria-hidden="true" />
       <span className="normal-case tracking-normal">
-        Partida paralisada — protocolo da FIFA para suspensão por condições de tempo
+        {t("common.weatherSuspension.text")}
       </span>
       <ExternalLink size={12} aria-hidden="true" />
     </a>

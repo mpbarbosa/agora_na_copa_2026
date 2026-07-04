@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import type { Match, TeamRef } from "../types";
+import { apiUrl, useT } from "../i18n";
 import { computeStandings, groupStandings, rankBestThirds } from "../standings";
 import { FlagIcon } from "./FlagIcon";
 
@@ -15,6 +16,7 @@ interface LiveState {
 }
 
 export function TeamsView({ matches, theme, onSelectTeamLineup }: TeamsViewProps) {
+  const t = useT();
   const [liveStates, setLiveStates] = useState<Record<string, LiveState>>({});
 
   // Poll live match states so qualification/elimination here matches the Grupos
@@ -27,7 +29,7 @@ export function TeamsView({ matches, theme, onSelectTeamLineup }: TeamsViewProps
 
     const poll = async () => {
       try {
-        const res = await fetch("/api/match-states");
+        const res = await fetch(apiUrl("/api/match-states"));
         if (!res.ok || !active) return;
         const data: { states: Record<string, LiveState>; refreshAfterMs?: number } = await res.json();
         if (active) setLiveStates(data.states ?? {});
@@ -97,10 +99,10 @@ export function TeamsView({ matches, theme, onSelectTeamLineup }: TeamsViewProps
         className={`font-anton text-2xl md:text-3xl uppercase tracking-wider ${headingClasses}`}
         id="teams-view-title"
       >
-        Seleções
+        {t("teams.title")}
       </h2>
       <p className={`mt-1 mb-6 font-mono text-[11px] uppercase tracking-wider ${mutedClasses}`}>
-        Todas as 48 seleções da Copa com acesso direto ao painel completo de cada equipe • <span className={theme === "classic-light" ? "text-[#065f2c]" : "text-[#00e476]"}>✓ Classificada</span> = vaga garantida no mata-mata • <span className={theme === "classic-light" ? "text-rose-700" : "text-rose-300"}>✕ Eliminada</span> = sem chances de classificação
+        {t("teams.subtitle")} • <span className={theme === "classic-light" ? "text-[#065f2c]" : "text-[#00e476]"}>{t("teams.legendQualified")}</span> = {t("teams.legendQualifiedDesc")} • <span className={theme === "classic-light" ? "text-rose-700" : "text-rose-300"}>{t("teams.legendEliminated")}</span> = {t("teams.legendEliminatedDesc")}
       </p>
 
       <div
@@ -118,7 +120,7 @@ export function TeamsView({ matches, theme, onSelectTeamLineup }: TeamsViewProps
                 {group}
               </h3>
               <span className={`font-mono text-[10px] uppercase tracking-wider ${mutedClasses}`}>
-                {rows.length} seleções
+                {t("teams.groupTeamCount", { count: rows.length })}
               </span>
             </div>
 
@@ -159,35 +161,40 @@ export function TeamsView({ matches, theme, onSelectTeamLineup }: TeamsViewProps
                         {team.name}
                       </p>
                       <p className={`mt-1 font-archivo text-sm ${mutedClasses}`}>
-                        {team.code} • {team.points} pt{team.points === 1 ? "" : "s"} • {team.played} jogo{team.played === 1 ? "" : "s"}
+                        {t(team.points === 1 ? "teams.teamStatsOne" : "teams.teamStatsMany", {
+                          code: team.code,
+                          points: team.points,
+                          played: team.played,
+                          jogos: t(team.played === 1 ? "teams.gameSingular" : "teams.gamePlural"),
+                        })}
                       </p>
                     </div>
 
                     {isQualified && (
                       <span
                         data-testid={`team-qualified-${team.code.toLowerCase()}`}
-                        title="Classificada para o mata-mata"
+                        title={t("teams.qualifiedTitle")}
                         className={`inline-flex shrink-0 items-center gap-1 rounded-full border px-2.5 py-1 font-mono text-[10px] font-bold uppercase tracking-wider ${
                           theme === "classic-light"
                             ? "border-[#009c3b]/30 bg-[#009c3b]/10 text-[#065f2c]"
                             : "border-[#00e476]/25 bg-[#00e476]/10 text-[#00e476]"
                         }`}
                       >
-                        <span aria-hidden="true">✓</span> Classificada
+                        <span aria-hidden="true">✓</span> {t("teams.qualifiedBadge")}
                       </span>
                     )}
 
                     {isEliminated && (
                       <span
                         data-testid={`team-eliminated-${team.code.toLowerCase()}`}
-                        title="Sem chances de classificação para o mata-mata"
+                        title={t("teams.eliminatedTitle")}
                         className={`inline-flex shrink-0 items-center gap-1 rounded-full border px-2.5 py-1 font-mono text-[10px] font-bold uppercase tracking-wider ${
                           theme === "classic-light"
                             ? "border-rose-300 bg-rose-50 text-rose-700"
                             : "border-rose-400/30 bg-rose-500/10 text-rose-300"
                         }`}
                       >
-                        <span aria-hidden="true">✕</span> Eliminada
+                        <span aria-hidden="true">✕</span> {t("teams.eliminatedBadge")}
                       </span>
                     )}
                   </button>

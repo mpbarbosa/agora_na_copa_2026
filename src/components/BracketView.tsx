@@ -11,6 +11,10 @@ import { FlagIcon } from "./FlagIcon";
 import { FullBracketView } from "./FullBracketView";
 import { BracketPredictorPanel } from "./BracketPredictorPanel";
 import type { PredictableFixture, ResolvedSlotTeam } from "./BracketPredictorPanel";
+import { getActiveLocale, localeToIntlTag, useT } from "../i18n";
+
+// The translate function threaded into module-level helpers (no hooks there).
+type TFn = (key: string, params?: Record<string, string | number>) => string;
 
 interface BracketViewProps {
   theme: "classic-light" | "stadium-dark";
@@ -26,14 +30,10 @@ type SlotOutcome = "won" | "lost" | null;
 
 const STAGE_ORDER: Stage[] = ["R32", "R16", "QF", "SF", "TP", "F"];
 
-const STAGE_LABELS: Record<Stage, string> = {
-  R32: "16 avos",
-  R16: "Oitavas",
-  QF: "Quartas",
-  SF: "Semifinais",
-  TP: "3º lugar",
-  F: "Final",
-};
+// Localized round label for a stage (e.g. "Oitavas" / "Octavos").
+function stageLabel(stage: Stage, t: TFn): string {
+  return t(`bracket.stage.${stage}`);
+}
 
 interface TeamMeta {
   name: string;
@@ -58,23 +58,25 @@ function toTeamRef(team: TeamMeta | ProvisionalSlot["team"]): TeamRef {
   };
 }
 
-// Brasília-time kickoff, e.g. "28 jun · 16:00". Module-level formatters avoid
-// re-allocating per render and never read Date.now (safe in this codebase).
-const DAY_FMT = new Intl.DateTimeFormat("pt-BR", {
-  day: "2-digit",
-  month: "short",
-  timeZone: "America/Sao_Paulo",
-});
-const TIME_FMT = new Intl.DateTimeFormat("pt-BR", {
-  hour: "2-digit",
-  minute: "2-digit",
-  timeZone: "America/Sao_Paulo",
-});
+// Brasília-time kickoff, e.g. "28 jun · 16:00". Formatters are built per call
+// against the active locale's tag; they never read Date.now (safe in this codebase).
+const dayFmt = (date: Date): string =>
+  new Intl.DateTimeFormat(localeToIntlTag(getActiveLocale()), {
+    day: "2-digit",
+    month: "short",
+    timeZone: "America/Sao_Paulo",
+  }).format(date);
+const timeFmt = (date: Date): string =>
+  new Intl.DateTimeFormat(localeToIntlTag(getActiveLocale()), {
+    hour: "2-digit",
+    minute: "2-digit",
+    timeZone: "America/Sao_Paulo",
+  }).format(date);
 
 function formatKickoff(iso: string): string {
   const date = new Date(iso);
-  const day = DAY_FMT.format(date).replace(" de ", " ").replace(".", "");
-  return `${day} · ${TIME_FMT.format(date)}`;
+  const day = dayFmt(date).replace(" de ", " ").replace(".", "");
+  return `${day} · ${timeFmt(date)}`;
 }
 
 // Map a knockout fixture's FIFA match number → the corresponding APP_MATCHES id
@@ -125,8 +127,11 @@ function isCollapsedOnMobile(match: KnockoutMatch, highlight: FeederHighlight | 
 }
 
 // "N confrontos" (singular when N === 1), for the column subheading.
-function confrontosLabel(count: number): string {
-  return `${count} ${count === 1 ? "confronto" : "confrontos"}`;
+function confrontosLabel(count: number, t: TFn): string {
+  return t(
+    count === 1 ? "bracket.column.confrontoSingular" : "bracket.column.confrontoPlural",
+    { count },
+  );
 }
 
 // All 48 teams keyed by code, for resolving a confirmed knockout team's flag/name.
@@ -173,6 +178,7 @@ function resolveSlotTeam(
 function buildPredictableFixtures(
   teamMeta: Map<string, TeamMeta>,
   groupPositions: Map<string, ProvisionalSlot>,
+  t: TFn,
 ): PredictableFixture[] {
   const fixtures: PredictableFixture[] = [];
   for (const match of KNOCKOUT_MATCHES) {
@@ -181,7 +187,7 @@ function buildPredictableFixtures(
     if (!home || !away) continue;
     fixtures.push({
       matchNumber: match.matchNumber,
-      stageLabel: STAGE_LABELS[match.stage],
+      stageLabel: stageLabel(match.stage, t),
       kickoff: formatKickoff(match.dateUtc),
       home,
       away,
@@ -217,6 +223,7 @@ function BracketSlotRow({
   theme,
   onSelectTeamLineup,
 }: BracketSlotRowProps) {
+  const t = useT();
   const isLight = theme === "classic-light";
   const team = confirmed ?? provisional?.team ?? null;
   const isConfirmed = !!confirmed;
@@ -258,8 +265,8 @@ function BracketSlotRow({
       {outcome === "won" ? (
         <span
           data-bracket-outcome="won"
-          title="Classificado"
-          aria-label="Classificado"
+          title={t("bracket.slot.qualified")}
+          aria-label={t("bracket.slot.qualified")}
           className={`shrink-0 font-mono text-[11px] font-bold ${isLight ? "text-[#009c3b]" : "text-[#00e476]"}`}
         >
           ✓
@@ -267,8 +274,8 @@ function BracketSlotRow({
       ) : outcome === "lost" ? (
         <span
           data-bracket-outcome="lost"
-          title="Eliminado"
-          aria-label="Eliminado"
+          title={t("bracket.slot.eliminated")}
+          aria-label={t("bracket.slot.eliminated")}
           className={`shrink-0 font-mono text-[11px] font-bold ${isLight ? "text-rose-500" : "text-rose-400"}`}
         >
           ✕
@@ -287,7 +294,7 @@ function BracketSlotRow({
             isLight ? "border-amber-400/60 text-amber-700" : "border-[#ffd84d]/40 text-[#ffd84d]/70"
           }`}
         >
-          prov.
+          {t("bracket.slot.provisionalShort")}
         </span>
       )}
     </>
@@ -338,7 +345,7 @@ function BracketSlotRow({
           e.stopPropagation();
           onSelectTeamLineup(toTeamRef(team));
         }}
-        aria-label={`Ver seleção ${team.name}`}
+        aria-label={t("bracket.slot.viewTeam", { name: team.name })}
         className={`${baseClassName} w-full cursor-pointer text-left transition hover:brightness-95`}
       >
         {content}
@@ -381,6 +388,7 @@ interface BracketMatchCardProps {
 }
 
 function BracketMatchCard({ match, theme, teamMeta, groupPositions, matchId, winnerSlot, feederTeamBySlot, feederHighlight, hoveredMatch, feederShift, onHoverMatch, onSelectTeamLineup, onSelectMatch }: BracketMatchCardProps) {
+  const t = useT();
   // Once a tie is finished, mark the slot that advanced vs the one that's out. Undecided
   // (or drawn-on-penalties) ties pass null and render no marker.
   const slotOutcome = (slot: Slot): SlotOutcome =>
@@ -478,7 +486,7 @@ function BracketMatchCard({ match, theme, teamMeta, groupPositions, matchId, win
             isLight ? "border-slate-200 bg-white text-slate-500" : "border-white/10 bg-white/5 text-slate-300"
           }`}
         >
-          {STAGE_LABELS[match.stage]}
+          {stageLabel(match.stage, t)}
         </span>
         <span className="inline-flex items-center gap-1">
           <CalendarDays size={11} /> {formatKickoff(match.dateUtc)}
@@ -541,6 +549,7 @@ interface BracketStageColumnProps {
 }
 
 function BracketStageColumn({ stage, matches, theme, teamMeta, groupPositions, matchIdByNumber, winnerSlotByNumber, feederTeamBySlot, feederHighlight, hoveredMatch, feederShifts, onHoverMatch, onSelectTeamLineup, onSelectMatch }: BracketStageColumnProps) {
+  const t = useT();
   const isLight = theme === "classic-light";
   const stageClasses = isLight ? "bg-slate-50 border-slate-200" : "bg-white/5 border-white/10";
   const headingClasses = isLight ? "text-slate-900" : "text-white";
@@ -557,20 +566,20 @@ function BracketStageColumn({ stage, matches, theme, teamMeta, groupPositions, m
     >
       <div className="mb-4">
         <h3 className={`font-anton text-lg uppercase tracking-wide ${headingClasses}`}>
-          {STAGE_LABELS[stage]}
+          {stageLabel(stage, t)}
         </h3>
         <p
           id={`bracket-stage-${stage.toLowerCase()}-summary`}
           className={`mt-1 font-mono text-[10px] uppercase tracking-wider ${subtleClasses}`}
         >
           {stage === "F" ? (
-            "Grande final em East Rutherford"
+            t("bracket.column.finalSummary")
           ) : stage === "TP" ? (
-            "Disputa do 3º lugar"
+            t("bracket.column.thirdPlaceSummary")
           ) : (
             <>
-              <span className="md:hidden">{confrontosLabel(mobileVisibleCount)}</span>
-              <span className="hidden md:inline">{confrontosLabel(matches.length)}</span>
+              <span className="md:hidden">{confrontosLabel(mobileVisibleCount, t)}</span>
+              <span className="hidden md:inline">{confrontosLabel(matches.length, t)}</span>
             </>
           )}
         </p>
@@ -604,14 +613,15 @@ function BracketStageColumn({ stage, matches, theme, teamMeta, groupPositions, m
 // --- Main component ---
 
 export function BracketView({ theme, matches, onSelectTeamLineup, onSelectMatch }: BracketViewProps) {
+  const t = useT();
   const teamMeta = useMemo(() => buildTeamMetaMap(matches), [matches]);
   const groupPositions = useMemo(() => buildGroupPositionMap(matches), [matches]);
   const matchIdByNumber = useMemo(() => buildKnockoutMatchIdByNumber(matches), [matches]);
   const winnerSlotByNumber = useMemo(() => buildWinnerSlotByNumber(matches), [matches]);
   const feederTeamBySlot = useMemo(() => buildFeederTeamBySlot(matches), [matches]);
   const predictableFixtures = useMemo(
-    () => buildPredictableFixtures(teamMeta, groupPositions),
-    [teamMeta, groupPositions],
+    () => buildPredictableFixtures(teamMeta, groupPositions, t),
+    [teamMeta, groupPositions, t],
   );
 
   const matchesByStage = useMemo(() => {
@@ -703,11 +713,10 @@ export function BracketView({ theme, matches, onSelectTeamLineup, onSelectMatch 
           className={`font-anton text-2xl md:text-3xl uppercase tracking-wider ${headingClasses}`}
           id="bracket-title"
         >
-          Mata-mata da Copa
+          {t("bracket.title")}
         </h2>
         <p className={`font-mono text-[11px] uppercase tracking-wider ${mutedClasses}`}>
-          Tabela oficial da FIFA • datas no horário de Brasília • vagas dos 16 avos preenchidas
-          provisoriamente pela classificação atual
+          {t("bracket.subtitle")}
         </p>
       </div>
 
@@ -715,10 +724,10 @@ export function BracketView({ theme, matches, onSelectTeamLineup, onSelectMatch 
         <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           <div>
             <p className={`font-anton text-lg uppercase tracking-wide ${headingClasses}`}>
-              Rota até MetLife Stadium
+              {t("bracket.route.title")}
             </p>
             <p className={`mt-1 font-mono text-[10px] uppercase tracking-wider ${mutedClasses}`}>
-              East Rutherford • 16 avos → final • inclui a disputa do 3º lugar
+              {t("bracket.route.subtitle")}
             </p>
           </div>
 
@@ -728,7 +737,7 @@ export function BracketView({ theme, matches, onSelectTeamLineup, onSelectMatch 
               className={`inline-flex overflow-hidden rounded-full border ${isLight ? "border-slate-200" : "border-white/10"}`}
               id="bracket-view-toggle"
               role="group"
-              aria-label="Modo de visualização do mata-mata"
+              aria-label={t("bracket.toggle.aria")}
             >
               {(["columns", "full"] as const).map((mode) => {
                 const active = viewMode === mode;
@@ -743,7 +752,7 @@ export function BracketView({ theme, matches, onSelectTeamLineup, onSelectMatch 
                     onClick={() => setViewMode(mode)}
                     className={`px-3 py-1 font-mono text-[10px] uppercase tracking-wider transition ${active ? activeClasses : idleClasses}`}
                   >
-                    {mode === "columns" ? "Colunas" : "Chave completa"}
+                    {mode === "columns" ? t("bracket.toggle.columns") : t("bracket.toggle.full")}
                   </button>
                 );
               })}
@@ -755,7 +764,7 @@ export function BracketView({ theme, matches, onSelectTeamLineup, onSelectMatch 
                   : "border-[#00e476]/25 bg-[#00e476]/5 text-[#00e476]"
               }`}
             >
-              <span className="font-bold">✓</span> Classificado
+              <span className="font-bold">✓</span> {t("bracket.legend.qualified")}
             </span>
             <span
               className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 font-mono text-[10px] uppercase tracking-wider ${
@@ -764,7 +773,7 @@ export function BracketView({ theme, matches, onSelectTeamLineup, onSelectMatch 
                   : "border-dashed border-[#ffd84d]/40 text-[#ffd84d]/80"
               }`}
             >
-              prov. Provisório
+              {t("bracket.legend.provisional")}
             </span>
             <span
               className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 font-mono text-[10px] uppercase tracking-wider ${
@@ -773,7 +782,7 @@ export function BracketView({ theme, matches, onSelectTeamLineup, onSelectMatch 
                   : "border-amber-400/30 bg-amber-400/5 text-amber-300"
               }`}
             >
-              <Medal size={11} /> Melhor 3º
+              <Medal size={11} /> {t("bracket.legend.bestThird")}
             </span>
             <span
               className={`inline-flex rounded-full border px-3 py-1 font-mono text-[10px] uppercase tracking-wider ${
@@ -782,7 +791,7 @@ export function BracketView({ theme, matches, onSelectTeamLineup, onSelectMatch 
                   : "border-white/10 bg-white/5 text-slate-200"
               }`}
             >
-              Demais vagas: rótulos oficiais
+              {t("bracket.legend.officialLabels")}
             </span>
           </div>
         </div>

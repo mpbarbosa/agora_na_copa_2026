@@ -1,4 +1,5 @@
 import type { MatchReferee } from "../types";
+import { useT } from "../i18n";
 
 type Theme = "classic-light" | "stadium-dark";
 
@@ -18,6 +19,7 @@ export function RefereeChip({
   /** When provided, the chip becomes a button that opens the referee card. */
   onClick?: () => void;
 }) {
+  const t = useT();
   if (!referee?.name) return null;
 
   const isLight = theme === "classic-light";
@@ -27,11 +29,11 @@ export function RefereeChip({
       : "border-white/10 bg-white/5 text-slate-100"
   }`;
   const title = referee.country
-    ? `Árbitro da partida: ${referee.name} (${referee.country})`
-    : `Árbitro da partida: ${referee.name}`;
+    ? t("common.referee.titleWithCountry", { name: referee.name, country: referee.country })
+    : t("common.referee.title", { name: referee.name });
   const label = referee.country
-    ? `Árbitro: ${referee.name}, ${referee.country}`
-    : `Árbitro: ${referee.name}`;
+    ? t("common.referee.labelWithCountry", { name: referee.name, country: referee.country })
+    : t("common.referee.label", { name: referee.name });
 
   if (onClick) {
     return (
@@ -44,7 +46,7 @@ export function RefereeChip({
           isLight ? "hover:bg-slate-200" : "hover:bg-white/10"
         }`}
         title={title}
-        aria-label={`${label} — abrir card do árbitro`}
+        aria-label={t("common.referee.openCard", { label })}
       >
         <span className="text-base leading-none" aria-hidden="true">
           🧑‍⚖️
@@ -54,7 +56,7 @@ export function RefereeChip({
             isLight ? "text-slate-500" : "text-slate-300"
           }`}
         >
-          Árbitro
+          {t("common.referee.caption")}
         </span>
         <span className="font-archivo text-sm font-bold leading-none">{referee.name}</span>
         {referee.country && (
@@ -81,7 +83,7 @@ export function RefereeChip({
           isLight ? "text-slate-500" : "text-slate-300"
         }`}
       >
-        Árbitro
+        {t("common.referee.caption")}
       </span>
       <span className="font-archivo text-sm font-bold leading-none">{referee.name}</span>
       {referee.country && (

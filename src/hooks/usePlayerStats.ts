@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { apiUrl } from "../i18n";
 
 export interface PlayerStats {
   goals: number;
@@ -19,7 +20,9 @@ export function usePlayerStats(
     }
     let active = true;
     fetch(
-      `/api/player-stats/${encodeURIComponent(teamCode)}/${encodeURIComponent(playerName)}`,
+      apiUrl(
+        `/api/player-stats/${encodeURIComponent(teamCode)}/${encodeURIComponent(playerName)}`,
+      ),
     )
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => { if (active) setStats(data); })

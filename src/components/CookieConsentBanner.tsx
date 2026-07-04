@@ -1,4 +1,5 @@
 import { useConsent } from "../consent";
+import { useT } from "../i18n";
 
 interface Props {
   theme: "classic-light" | "stadium-dark";
@@ -10,6 +11,7 @@ interface Props {
  * "Apenas essenciais" keeps them off. Links to the full privacy policy.
  */
 export function CookieConsentBanner({ theme }: Props) {
+  const t = useT();
   const { consent, choose } = useConsent();
   if (consent !== null) return null;
 
@@ -31,19 +33,18 @@ export function CookieConsentBanner({ theme }: Props) {
       className={`fixed inset-x-0 bottom-0 z-50 border-t backdrop-blur ${wrap}`}
       id="cookie-consent-banner"
       role="dialog"
-      aria-label="Aviso de cookies"
+      aria-label={t("banners.cookie.ariaLabel")}
     >
       <div className="mx-auto flex max-w-5xl flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
         <p className={`text-xs leading-snug ${muted}`}>
-          Usamos cookies para medir audiência e exibir anúncios, ajudando a manter o site no
-          ar. Ao aceitar, você concorda com o uso de cookies. Veja a{" "}
+          {t("banners.cookie.textBefore")}{" "}
           <a
             href="/privacidade.html"
             target="_blank"
             rel="noopener noreferrer"
             className={`font-semibold underline underline-offset-2 ${link}`}
           >
-            Política de Privacidade
+            {t("banners.cookie.privacyPolicy")}
           </a>
           .
         </p>
@@ -54,7 +55,7 @@ export function CookieConsentBanner({ theme }: Props) {
             onClick={() => choose("essential")}
             className={`rounded-lg border px-3 py-2 text-xs font-bold transition ${essential}`}
           >
-            Apenas essenciais
+            {t("banners.cookie.essential")}
           </button>
           <button
             type="button"
@@ -62,7 +63,7 @@ export function CookieConsentBanner({ theme }: Props) {
             onClick={() => choose("all")}
             className={`rounded-lg px-3 py-2 text-xs font-bold transition ${accept}`}
           >
-            Aceitar
+            {t("banners.cookie.accept")}
           </button>
         </div>
       </div>

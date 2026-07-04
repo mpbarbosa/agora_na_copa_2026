@@ -4,6 +4,7 @@ import { WorldCupNoteCarousel } from "./WorldCupNoteCarousel";
 import { InstagramBrandIcon } from "./InstagramBrandIcon";
 import { InstagramPostFrame } from "./InstagramPostFrame";
 import { useEscapeKey } from "../hooks/useEscapeKey";
+import { useT } from "../i18n";
 import type { CoachRecord } from "../utils/coachRecord";
 import type { TeamTournamentStatus } from "../utils/teamTournamentStatus";
 
@@ -74,6 +75,7 @@ export function CoachCard({
   onClose,
   id,
 }: CoachCardProps) {
+  const t = useT();
   useEscapeKey(onClose);
   const [igExpanded, setIgExpanded] = useState(false);
   const igPosts = instagramPostUrls ?? [];
@@ -91,10 +93,10 @@ export function CoachCard({
 
   const goalDifference = record.goalsFor - record.goalsAgainst;
   const tiles = [
-    { label: "Jogos", value: record.played },
-    { label: "Vitórias", value: record.wins },
-    { label: "Empates", value: record.draws },
-    { label: "Derrotas", value: record.losses },
+    { label: t("playerCard.coachGames"), value: record.played },
+    { label: t("playerCard.coachWins"), value: record.wins },
+    { label: t("playerCard.coachDraws"), value: record.draws },
+    { label: t("playerCard.coachLosses"), value: record.losses },
   ];
 
   const statusToneClasses =
@@ -132,11 +134,11 @@ export function CoachCard({
             onClick={onClose}
             className={`absolute right-4 top-4 z-10 rounded border px-3 py-1 font-mono text-[10px] font-bold uppercase tracking-wider transition ${closeClasses}`}
           >
-            Fechar
+            {t("playerCard.close")}
           </button>
 
           <p className={`font-mono text-[10px] uppercase tracking-[0.25em] ${mutedClasses}`}>
-            Card do treinador
+            {t("playerCard.coachEyebrow")}
           </p>
 
           <div className="mt-2 flex items-center gap-3 pr-16 sm:pr-20">
@@ -163,7 +165,7 @@ export function CoachCard({
               </h4>
               <p className={`mt-1.5 flex items-center gap-1.5 font-archivo text-sm ${mutedClasses}`}>
                 {flagSvg && <FlagIcon flag={flagSvg} className="h-3.5 w-5 shrink-0" />}
-                <span>Técnico • {teamName}</span>
+                <span>{t("playerCard.coachRoleTeam", { team: teamName })}</span>
               </p>
               {igHandle && (
                 <a
@@ -219,7 +221,7 @@ export function CoachCard({
           <div className="mt-5 border-t font-archivo text-sm" style={{ borderColor }}>
             <div className="flex items-center justify-between border-b py-2.5" style={{ borderColor }}>
               <span className={`font-mono text-[10px] uppercase tracking-wider ${mutedClasses}`}>
-                Gols (pró / contra)
+                {t("playerCard.coachGoals")}
               </span>
               <span className="font-semibold tabular-nums">
                 {record.goalsFor} / {record.goalsAgainst}
@@ -227,7 +229,7 @@ export function CoachCard({
             </div>
             <div className="flex items-center justify-between border-b py-2.5" style={{ borderColor }}>
               <span className={`font-mono text-[10px] uppercase tracking-wider ${mutedClasses}`}>
-                Saldo
+                {t("playerCard.coachGoalDiff")}
               </span>
               <span className="font-semibold tabular-nums">
                 {goalDifference > 0 ? `+${goalDifference}` : goalDifference}
@@ -264,7 +266,7 @@ export function CoachCard({
                 <span className="flex items-center gap-2">
                   <InstagramBrandIcon size={16} />
                   <span className="font-mono text-[10px] font-bold uppercase tracking-wider">
-                    {igPosts.length > 1 ? "Destaques no Instagram" : "Destaque no Instagram"}
+                    {igPosts.length > 1 ? t("playerCard.instagramHighlightMany") : t("playerCard.instagramHighlightOne")}
                   </span>
                 </span>
                 <span
@@ -291,7 +293,7 @@ export function CoachCard({
                         style={{ borderColor: `${accent}40` }}
                       >
                         <InstagramBrandIcon size={14} />
-                        Abrir no Instagram
+                        {t("playerCard.openInstagram")}
                       </a>
                     </div>
                   ))}
@@ -306,7 +308,7 @@ export function CoachCard({
               id={id ? `${id}-photo-credit` : undefined}
               className={`mt-5 font-mono text-[9px] leading-relaxed ${mutedClasses}`}
             >
-              Foto:{" "}
+              {t("playerCard.coachPhotoCredit")}{" "}
               <a
                 href={photoCredit.sourceUrl}
                 target="_blank"

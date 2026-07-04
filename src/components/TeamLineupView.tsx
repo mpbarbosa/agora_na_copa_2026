@@ -7,12 +7,17 @@ import type {
   TeamViewResponse,
   TournamentPlayerLeader,
 } from "../types";
+import { apiUrl, useT, useLocale, localeToIntlTag, getActiveLocale } from "../i18n";
+import type { LocaleContextValue } from "../i18n";
+
+type TFunction = LocaleContextValue["t"];
 import { FlagIcon } from "./FlagIcon";
 import { TeamPitchBoard } from "./TeamPitchBoard";
 import { PlayerOverlayCard } from "./PlayerOverlayCard";
 import { CoachCard, type CoachPhotoCredit } from "./CoachCard";
 import { getPositionLabel } from "../utils/playerDisplay";
 import { getTeamTournamentStatus } from "../utils/teamTournamentStatus";
+import { localizedStageName } from "../utils/knockoutSlots";
 import { coachRecord } from "../utils/coachRecord";
 import { parseNoteSections } from "../utils/noteSections";
 import COACH_NOTES from "../data/coachNotes.json";
@@ -160,31 +165,33 @@ const TEAM_COACHES: Record<string, string> = {
 
 type LoadStatus = "loading" | "ready" | "error";
 
-const formatUpdatedAt = (value: string) => {
+const formatUpdatedAt = (value: string, t: TFunction) => {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) {
-    return "Atualização indisponível";
+    return t("teamLineup.updateUnavailable");
   }
 
-  return `Atualizado ${date.toLocaleTimeString("pt-BR", {
-    timeZone: "America/Sao_Paulo",
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-  })}`;
+  return t("teamLineup.updatedAt", {
+    time: date.toLocaleTimeString(localeToIntlTag(getActiveLocale()), {
+      timeZone: "America/Sao_Paulo",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+    }),
+  });
 };
 
-const getStatusLabel = (status: TeamViewMatchSummary["status"]) => {
-  if (status === "LIVE") return "AO VIVO";
-  if (status === "FINISHED") return "ENCERRADO";
-  return "PRÓXIMO JOGO";
+const getStatusLabel = (status: TeamViewMatchSummary["status"], t: TFunction) => {
+  if (status === "LIVE") return t("teamLineup.statusLive");
+  if (status === "FINISHED") return t("teamLineup.statusFinished");
+  return t("teamLineup.statusNext");
 };
 
-const getMatchHeadline = (match: TeamViewMatchSummary) => {
+const getMatchHeadline = (match: TeamViewMatchSummary, t: TFunction) => {
   // A knockout tie decided on penalties is level on the scoreline, so the
   // shootout tally is appended to make the headline self-explanatory.
   const penaltySuffix = match.penaltyScore
-    ? ` (${match.penaltyScore.team} x ${match.penaltyScore.opponent} pên.)`
+    ? ` ${t("teamLineup.penaltySuffix", { team: match.penaltyScore.team, opponent: match.penaltyScore.opponent })}`
     : "";
 
   if (match.status === "LIVE" && match.score) {
@@ -214,6 +221,7 @@ function MatchSummaryCard({
   title: string;
   match: TeamViewMatchSummary | null;
 }) {
+  const t = useT();
   const cardClasses =
     theme === "classic-light"
       ? "border-slate-200 bg-white shadow-sm"
@@ -234,17 +242,17 @@ function MatchSummaryCard({
           <p className={`font-mono text-[10px] uppercase tracking-wider ${mutedClasses}`}>{title}</p>
           {match ? (
             <h3 className={`mt-2 font-anton text-xl uppercase tracking-wide ${headingClasses}`}>
-              {getMatchHeadline(match)}
+              {getMatchHeadline(match, t)}
             </h3>
           ) : (
             <h3 className={`mt-2 font-anton text-xl uppercase tracking-wide ${headingClasses}`}>
-              Sem registro
+              {t("teamLineup.noRecord")}
             </h3>
           )}
         </div>
         {match && (
           <span className={`rounded-full px-3 py-1 font-mono text-[10px] font-bold uppercase tracking-wider ${labelClasses}`}>
-            {getStatusLabel(match.status)}
+            {getStatusLabel(match.status, t)}
           </span>
         )}
       </div>
@@ -260,7 +268,7 @@ function MatchSummaryCard({
                 {match.opponent.name}
               </p>
               <p className={`mt-1 font-archivo text-sm ${mutedClasses}`}>
-                {match.stageName} • {match.stadiumName}
+                {localizedStageName(match.stageName)} • {match.stadiumName}
               </p>
             </div>
           </div>
@@ -271,7 +279,7 @@ function MatchSummaryCard({
                 {match.matchTime || match.kickoffTime}
               </p>
               <p className={`mt-1 font-mono text-[10px] uppercase tracking-wider ${mutedClasses}`}>
-                {match.status === "LIVE" ? "Relógio da partida" : match.kickoffDate}
+                {match.status === "LIVE" ? t("teamLineup.matchClock") : match.kickoffDate}
               </p>
             </div>
             <div className={`rounded-2xl border px-3 py-3 ${theme === "classic-light" ? "border-slate-100 bg-slate-50" : "border-white/5 bg-white/5"}`}>
@@ -279,15 +287,14 @@ function MatchSummaryCard({
                 {match.city}
               </p>
               <p className={`mt-1 font-mono text-[10px] uppercase tracking-wider ${mutedClasses}`}>
-                Cidade-sede
+                {t("teamLineup.hostCity")}
               </p>
             </div>
           </div>
         </>
       ) : (
         <p className={`mt-4 font-archivo text-sm leading-6 ${mutedClasses}`}>
-          Ainda não há jogo suficiente para preencher este bloco da seleção. Assim que a agenda
-          ou o resultado oficial aparecer, o painel atualiza automaticamente.
+          {t("teamLineup.matchCardEmpty")}
         </p>
       )}
     </div>
@@ -317,6 +324,7 @@ function MatchVideosList({
   theme: TeamLineupViewProps["theme"];
   matches: TeamViewMatchSummary[];
 }) {
+  const t = useT();
   const headingClasses = theme === "classic-light" ? "text-slate-900" : "text-white";
   const mutedClasses = theme === "classic-light" ? "text-slate-600" : "text-slate-300";
   const subtleClasses = theme === "classic-light" ? "text-slate-500" : "text-slate-400";
@@ -333,7 +341,7 @@ function MatchVideosList({
   return (
     <div className={`mt-5 border-t pt-4 ${dividerClasses}`} id="team-view-match-videos">
       <p className={`font-mono text-[10px] uppercase tracking-wider ${subtleClasses}`}>
-        Vídeos das partidas — jogo completo e melhores momentos
+        {t("teamLineup.matchVideosHeading")}
       </p>
 
       <div className="mt-3 space-y-5">
@@ -345,7 +353,7 @@ function MatchVideosList({
                 {match.team.code} {match.score ? `${match.score.team} x ${match.score.opponent}` : "x"} {match.opponent.code}
               </p>
               <span className={`font-mono text-[9px] uppercase tracking-wider ${subtleClasses}`}>
-                {match.stageName}
+                {localizedStageName(match.stageName)}
               </span>
             </div>
 
@@ -363,7 +371,7 @@ function MatchVideosList({
                     target="_blank"
                     rel="noopener noreferrer"
                     data-testid={`team-video-${match.matchId}-${highlight ? "highlights" : "fullgame"}`}
-                    aria-label={`Assistir no YouTube: ${video.title}`}
+                    aria-label={t("teamLineup.watchOnYoutube", { title: video.title })}
                     title={video.title}
                     className="group shrink-0"
                   >
@@ -379,7 +387,7 @@ function MatchVideosList({
                       </span>
                     </span>
                     <span className={`mt-1 block font-mono text-[9px] uppercase tracking-wider ${mutedClasses}`}>
-                      {highlight ? "Melhores momentos" : "Jogo completo"}
+                      {highlight ? t("teamLineup.highlights") : t("teamLineup.fullGame")}
                     </span>
                   </a>
                 );
@@ -387,7 +395,7 @@ function MatchVideosList({
               </div>
             ) : (
               <p className={`mt-2 text-xs ${subtleClasses}`}>
-                Aguardando a Cazé TV fazer o upload dos vídeos no YouTube.
+                {t("teamLineup.videosPending")}
               </p>
             )}
           </div>
@@ -404,6 +412,7 @@ function MatchHistoryTable({
   theme: TeamLineupViewProps["theme"];
   matches: TeamViewMatchSummary[];
 }) {
+  const t = useT();
   const cardClasses =
     theme === "classic-light"
       ? "bg-white border-slate-200 shadow-sm"
@@ -423,20 +432,22 @@ function MatchHistoryTable({
   return (
     <section className={`rounded-3xl border p-4 md:p-6 ${cardClasses}`} id="team-view-match-history">
       <h3 className={`font-anton text-xl uppercase tracking-wide ${headingClasses}`}>
-        Histórico na Copa 2026
+        {t("teamLineup.historyTitle")}
       </h3>
       <p className={`mt-1 font-mono text-[10px] uppercase tracking-wider ${mutedClasses}`}>
-        {matches.length} {matches.length === 1 ? "jogo" : "jogos"} no Mundial
+        {matches.length === 1
+          ? t("teamLineup.historyCountOne", { count: matches.length })
+          : t("teamLineup.historyCountMany", { count: matches.length })}
       </p>
 
       <div className="mt-4 overflow-x-auto">
         <table className="w-full border-collapse text-left">
           <thead>
             <tr className={`font-mono text-[9px] uppercase tracking-wider ${subtleClasses}`}>
-              <th className="py-2 pr-3 font-normal">Fase</th>
-              <th className="py-2 pr-3 font-normal">Adversário</th>
-              <th className="py-2 pr-3 text-center font-normal">Placar</th>
-              <th className="py-2 text-right font-normal">Res.</th>
+              <th className="py-2 pr-3 font-normal">{t("teamLineup.colStage")}</th>
+              <th className="py-2 pr-3 font-normal">{t("teamLineup.colOpponent")}</th>
+              <th className="py-2 pr-3 text-center font-normal">{t("teamLineup.colScore")}</th>
+              <th className="py-2 text-right font-normal">{t("teamLineup.colResult")}</th>
             </tr>
           </thead>
           <tbody>
@@ -446,7 +457,7 @@ function MatchHistoryTable({
               return (
                 <tr key={match.matchId} className={`border-t ${rowBorderClasses}`}>
                   <td className={`py-2.5 pr-3 align-middle font-archivo text-xs ${mutedClasses}`}>
-                    <span className="block leading-tight">{match.stageName}</span>
+                    <span className="block leading-tight">{localizedStageName(match.stageName)}</span>
                     <span className={`block font-mono text-[9px] uppercase tracking-wider ${subtleClasses}`}>
                       {match.kickoffDate}
                     </span>
@@ -469,7 +480,7 @@ function MatchHistoryTable({
                         </span>
                         {match.penaltyScore && (
                           <span className={`font-mono text-[9px] uppercase tracking-wider ${subtleClasses}`}>
-                            {match.penaltyScore.team} x {match.penaltyScore.opponent} pên.
+                            {t("teamLineup.penaltyLine", { team: match.penaltyScore.team, opponent: match.penaltyScore.opponent })}
                           </span>
                         )}
                       </span>
@@ -482,7 +493,7 @@ function MatchHistoryTable({
                   <td className="py-2.5 text-right align-middle">
                     {isLive ? (
                       <span className="inline-flex rounded-full bg-[#00e476] px-2 py-0.5 font-mono text-[9px] font-bold uppercase tracking-wider text-[#052814]">
-                        Vivo
+                        {t("teamLineup.liveChip")}
                       </span>
                     ) : outcome ? (
                       <span
@@ -521,6 +532,7 @@ function LeaderStrip({
   theme: TeamLineupViewProps["theme"];
   onSelectPlayer: (entry: TournamentPlayerLeader) => void;
 }) {
+  const t = useT();
   const headingClasses = theme === "classic-light" ? "text-slate-900" : "text-white";
   const mutedClasses = theme === "classic-light" ? "text-slate-600" : "text-slate-300";
 
@@ -540,7 +552,7 @@ function LeaderStrip({
                 {entry.pictureUrl ? (
                   <img
                     src={entry.pictureUrl}
-                    alt={`Foto de ${entry.name}`}
+                    alt={t("teamLineup.playerPhotoAlt", { name: entry.name })}
                     className="h-10 w-10 rounded-2xl border border-white/10 bg-black/20 object-contain p-1"
                     loading="lazy"
                   />
@@ -558,7 +570,9 @@ function LeaderStrip({
                     {entry.name}
                   </button>
                   <p className={`mt-1 font-archivo text-sm ${mutedClasses}`}>
-                    {typeof entry.shirtNumber === "number" ? `Camisa ${entry.shirtNumber}` : "Sem camisa confirmada"}
+                    {typeof entry.shirtNumber === "number"
+                      ? t("teamLineup.shirtNumber", { number: entry.shirtNumber })
+                      : t("teamLineup.noShirt")}
                   </p>
                 </div>
               </div>
@@ -570,7 +584,7 @@ function LeaderStrip({
         </div>
       ) : (
         <p className={`mt-2 rounded-2xl border px-3 py-3 font-archivo text-sm ${theme === "classic-light" ? "border-slate-100 bg-slate-50 text-slate-600" : "border-white/5 bg-white/5 text-slate-300"}`}>
-          A FIFA ainda não registrou ocorrências deste tipo para a seleção.
+          {t("teamLineup.noLeaderEntries")}
         </p>
       )}
     </div>
@@ -584,12 +598,13 @@ function BroadcasterList({
   broadcasters: Broadcaster[];
   theme: TeamLineupViewProps["theme"];
 }) {
+  const t = useT();
   const mutedClasses = theme === "classic-light" ? "text-slate-600" : "text-slate-300";
 
   if (broadcasters.length === 0) {
     return (
       <p className={`font-archivo text-sm leading-6 ${mutedClasses}`}>
-        Sem emissoras publicadas no momento para a partida atual ou próxima desta seleção.
+        {t("teamLineup.noBroadcasters")}
       </p>
     );
   }
@@ -617,7 +632,7 @@ function BroadcasterList({
             </p>
           </div>
           <span className="font-mono text-[10px] font-bold uppercase tracking-wider text-[#00e476]">
-            Abrir
+            {t("teamLineup.open")}
           </span>
         </a>
       ))}
@@ -625,15 +640,17 @@ function BroadcasterList({
   );
 }
 
-const formatPopulation = (n: number) => {
+const formatPopulation = (n: number, t: TFunction) => {
   if (n >= 1_000_000) {
-    return `${(n / 1_000_000).toLocaleString("pt-BR", { maximumFractionDigits: 1 })} mi`;
+    return t("teamLineup.populationMillions", {
+      value: (n / 1_000_000).toLocaleString(localeToIntlTag(getActiveLocale()), { maximumFractionDigits: 1 }),
+    });
   }
-  return n.toLocaleString("pt-BR");
+  return n.toLocaleString(localeToIntlTag(getActiveLocale()));
 };
 
 const formatArea = (n: number) =>
-  `${Math.round(n).toLocaleString("pt-BR")} km²`;
+  `${Math.round(n).toLocaleString(localeToIntlTag(getActiveLocale()))} km²`;
 
 function CountryPillStrip({
   theme,
@@ -642,6 +659,7 @@ function CountryPillStrip({
   theme: TeamLineupViewProps["theme"];
   info: CountryInfoResponse;
 }) {
+  const t = useT();
   const mutedClasses = theme === "classic-light" ? "text-slate-500" : "text-slate-400";
   const headingClasses = theme === "classic-light" ? "text-slate-900" : "text-white";
   const pillClasses =
@@ -654,12 +672,12 @@ function CountryPillStrip({
       : "border-white/10 bg-white/10 text-white hover:bg-white/15";
 
   const pills = [
-    info.capital    ? { label: "Capital",    value: info.capital }                        : null,
-    info.population ? { label: "População",  value: formatPopulation(info.population) }   : null,
-    info.areaSqKm   ? { label: "Área",       value: formatArea(info.areaSqKm) }           : null,
-    info.language   ? { label: "Idioma",     value: info.language }                       : null,
-    info.government ? { label: "Governo",    value: info.government }                     : null,
-    info.currency   ? { label: "Moeda",      value: info.currency }                       : null,
+    info.capital    ? { label: t("teamLineup.pillCapital"),    value: info.capital }                          : null,
+    info.population ? { label: t("teamLineup.pillPopulation"), value: formatPopulation(info.population, t) }   : null,
+    info.areaSqKm   ? { label: t("teamLineup.pillArea"),       value: formatArea(info.areaSqKm) }             : null,
+    info.language   ? { label: t("teamLineup.pillLanguage"),   value: info.language }                         : null,
+    info.government ? { label: t("teamLineup.pillGovernment"), value: info.government }                       : null,
+    info.currency   ? { label: t("teamLineup.pillCurrency"),   value: info.currency }                         : null,
   ].filter(Boolean) as { label: string; value: string }[];
 
   const extract = info.extract.length > 320
@@ -696,13 +714,14 @@ function CountryPillStrip({
         rel="noopener noreferrer"
         className={`mt-3 inline-flex rounded-full border px-4 py-1.5 font-mono text-[10px] font-bold uppercase tracking-wider transition ${linkClasses}`}
       >
-        Ler mais na Wikipédia
+        {t("teamLineup.readMoreWikipedia")}
       </a>
     </div>
   );
 }
 
 export const TeamLineupView: React.FC<TeamLineupViewProps> = ({ team, theme, onBack }) => {
+  const { t, locale } = useLocale();
   const [teamView, setTeamView] = useState<TeamViewResponse | null>(null);
   const [status, setStatus] = useState<LoadStatus>("loading");
   const [countryInfo, setCountryInfo] = useState<CountryInfoResponse | null>(null);
@@ -717,7 +736,7 @@ export const TeamLineupView: React.FC<TeamLineupViewProps> = ({ team, theme, onB
       }
 
       try {
-        const response = await fetch(`/api/team-view/${encodeURIComponent(team.code)}`);
+        const response = await fetch(apiUrl(`/api/team-view/${encodeURIComponent(team.code)}`));
         if (!response.ok) {
           throw new Error("Falha ao carregar o painel completo da seleção.");
         }
@@ -748,7 +767,7 @@ export const TeamLineupView: React.FC<TeamLineupViewProps> = ({ team, theme, onB
     let active = true;
     setCountryInfo(null);
 
-    fetch(`/api/country-info/${encodeURIComponent(team.code)}`)
+    fetch(apiUrl(`/api/country-info/${encodeURIComponent(team.code)}`))
       .then((r) => (r.ok ? r.json() : Promise.reject(r.status)))
       .then((data: CountryInfoResponse) => { if (active) setCountryInfo(data); })
       .catch(() => {/* silently skip — country card is decorative */});
@@ -801,7 +820,7 @@ export const TeamLineupView: React.FC<TeamLineupViewProps> = ({ team, theme, onB
         className={`mb-6 flex items-center gap-2 rounded-lg px-3 py-2 font-mono text-xs font-bold uppercase tracking-widest transition ${backButtonClasses}`}
       >
         <ArrowLeft size={14} />
-        Voltar
+        {t("teamLineup.back")}
       </button>
 
       <section
@@ -822,7 +841,7 @@ export const TeamLineupView: React.FC<TeamLineupViewProps> = ({ team, theme, onB
                 {teamView?.team.name ?? team.name}
               </h2>
               <p className={`mt-1 font-mono text-[11px] uppercase tracking-wider ${mutedClasses}`}>
-                {team.code} {team.group ? `• Grupo ${team.group.replace("Grupo ", "")}` : ""}
+                {team.code}{team.group ? ` ${t("teamLineup.groupLabel", { group: team.group.replace("Grupo ", "") })}` : ""}
               </p>
               {tournamentStatus && (
                 <p
@@ -851,9 +870,9 @@ export const TeamLineupView: React.FC<TeamLineupViewProps> = ({ team, theme, onB
                   id="team-lineup-coach"
                   onClick={() => setCoachCardOpen(true)}
                   className={`mt-1 inline-flex items-center gap-1 rounded font-mono text-[11px] uppercase tracking-wider transition hover:opacity-80 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-400 ${mutedClasses}`}
-                  aria-label={`Abrir card do treinador ${coach}`}
+                  aria-label={t("teamLineup.openCoachCard", { coach })}
                 >
-                  <span className="opacity-60">Técnico</span>
+                  <span className="opacity-60">{t("teamLineup.coachLabel")}</span>
                   <span className={`underline decoration-dotted underline-offset-2 ${theme === "classic-light" ? "text-[#009c3b]" : "text-[#00e476]"}`}>
                     {coach}
                   </span>
@@ -867,7 +886,7 @@ export const TeamLineupView: React.FC<TeamLineupViewProps> = ({ team, theme, onB
               )}
               {teamView && (
                 <p className={`mt-1 font-mono text-[9px] uppercase tracking-wider opacity-40 ${mutedClasses}`}>
-                  {formatUpdatedAt(teamView.updatedAt)}
+                  {formatUpdatedAt(teamView.updatedAt, t)}
                 </p>
               )}
             </div>
@@ -880,8 +899,8 @@ export const TeamLineupView: React.FC<TeamLineupViewProps> = ({ team, theme, onB
               rel="noopener noreferrer"
               id="team-lineup-federation-link"
               data-federation={federation.abbr}
-              title={`Site oficial da ${federation.abbr} — ${federation.name}`}
-              aria-label={`Abrir o site oficial da ${federation.abbr}`}
+              title={t("teamLineup.federationTitle", { abbr: federation.abbr, name: federation.name })}
+              aria-label={t("teamLineup.federationAria", { abbr: federation.abbr })}
               className="group flex shrink-0 flex-col items-center gap-1.5"
             >
               {federation.logoFile ? (
@@ -914,12 +933,12 @@ export const TeamLineupView: React.FC<TeamLineupViewProps> = ({ team, theme, onB
 
       {status === "loading" && !teamView ? (
         <div className={`mt-6 rounded-3xl border p-6 ${cardClasses}`}>
-          <p className={`font-archivo text-sm ${mutedClasses}`}>Montando o painel completo da seleção...</p>
+          <p className={`font-archivo text-sm ${mutedClasses}`}>{t("teamLineup.loadingPanel")}</p>
         </div>
       ) : status === "error" && !teamView ? (
         <div className={`mt-6 rounded-3xl border p-6 ${cardClasses}`}>
           <p className={`font-archivo text-sm ${headingClasses}`}>
-            Não foi possível carregar o painel completo da seleção agora.
+            {t("teamLineup.loadError")}
           </p>
         </div>
       ) : teamView ? (
@@ -930,9 +949,9 @@ export const TeamLineupView: React.FC<TeamLineupViewProps> = ({ team, theme, onB
                 className={`rounded-2xl border px-5 py-4 ${cardClasses}`}
                 id="team-view-matches"
               >
-                <p className={`font-mono text-[10px] uppercase tracking-wider ${mutedClasses}`}>Partidas</p>
+                <p className={`font-mono text-[10px] uppercase tracking-wider ${mutedClasses}`}>{t("teamLineup.matchesLabel")}</p>
                 <p className={`mt-1 font-archivo text-sm ${mutedClasses}`}>
-                  Agenda da seleção ainda sem registros para este torneio.
+                  {t("teamLineup.scheduleEmpty")}
                 </p>
               </div>
             ) : (
@@ -943,13 +962,13 @@ export const TeamLineupView: React.FC<TeamLineupViewProps> = ({ team, theme, onB
                 id="team-view-matches"
               >
                 {teamView.currentMatch && (
-                  <MatchSummaryCard theme={theme} title="Agora" match={teamView.currentMatch} />
+                  <MatchSummaryCard theme={theme} title={t("teamLineup.cardNow")} match={teamView.currentMatch} />
                 )}
                 {teamView.nextMatch && (
-                  <MatchSummaryCard theme={theme} title="Próxima" match={teamView.nextMatch} />
+                  <MatchSummaryCard theme={theme} title={t("teamLineup.cardNext")} match={teamView.nextMatch} />
                 )}
                 {teamView.lastMatch && (
-                  <MatchSummaryCard theme={theme} title="Última" match={teamView.lastMatch} />
+                  <MatchSummaryCard theme={theme} title={t("teamLineup.cardLast")} match={teamView.lastMatch} />
                 )}
               </div>
             )}
@@ -958,7 +977,7 @@ export const TeamLineupView: React.FC<TeamLineupViewProps> = ({ team, theme, onB
               <MatchHistoryTable theme={theme} matches={teamView.matchHistory} />
             )}
 
-            {teamView.teamAnalysis && (
+            {locale !== "es" && teamView.teamAnalysis && (
               <section
                 className={`rounded-3xl border p-4 md:p-6 ${cardClasses}`}
                 id="team-view-analysis"
@@ -966,7 +985,7 @@ export const TeamLineupView: React.FC<TeamLineupViewProps> = ({ team, theme, onB
               >
                 <div className="flex flex-wrap items-center gap-2">
                   <h3 className={`font-anton text-xl uppercase tracking-wide ${headingClasses}`}>
-                    Análise da seleção
+                    {t("teamLineup.analysisTitle")}
                   </h3>
                   <AnalysisFreshnessBadge
                     upToDate={teamView.teamAnalysisUpToDate}
@@ -1001,14 +1020,14 @@ export const TeamLineupView: React.FC<TeamLineupViewProps> = ({ team, theme, onB
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
                   <h3 className={`font-anton text-xl uppercase tracking-wide ${headingClasses}`}>
-                    Escalação da seleção
+                    {t("teamLineup.lineupTitle")}
                   </h3>
                   <p className={`mt-1 font-mono text-[10px] uppercase tracking-wider ${mutedClasses}`}>
                     {teamView.lineup
                       ? teamView.lineup.source === "fifa"
-                        ? "Escalação oficial FIFA"
-                        : "Escalação estimada (dados locais)"
-                      : "Escalação indisponível"}
+                        ? t("teamLineup.lineupOfficial")
+                        : t("teamLineup.lineupEstimated")
+                      : t("teamLineup.lineupUnavailable")}
                   </p>
                 </div>
                 {teamView.lineup && (
@@ -1033,8 +1052,7 @@ export const TeamLineupView: React.FC<TeamLineupViewProps> = ({ team, theme, onB
                   id="team-lineup-unavailable"
                 >
                   <p className={`font-archivo text-base ${headingClasses}`}>
-                    Escalação ainda não disponibilizada pela FIFA para esta seleção. Enquanto isso,
-                    o painel aguarda a confirmação oficial ou a próxima atualização local.
+                    {t("teamLineup.lineupUnavailableBody")}
                   </p>
                 </div>
               )}
@@ -1046,26 +1064,26 @@ export const TeamLineupView: React.FC<TeamLineupViewProps> = ({ team, theme, onB
           <div className="space-y-6">
             <section className={`rounded-3xl border p-5 ${cardClasses}`} id="team-view-campanha-card">
               <h3 className={`font-anton text-xl uppercase tracking-wide ${headingClasses}`}>
-                Campanha
+                {t("teamLineup.campaignTitle")}
               </h3>
               {teamView.standings ? (
                 <>
                   <p className={`mt-1 font-mono text-[10px] uppercase tracking-wider ${mutedClasses}`}>
-                    {teamView.standings.row.group} • {teamView.standings.rank}º de {teamView.standings.groupSize}
+                    {t("teamLineup.campaignRank", { group: teamView.standings.row.group, rank: teamView.standings.rank, size: teamView.standings.groupSize })}
                   </p>
 
                   <div className="mt-4 flex gap-3">
                     <div className={`flex-none rounded-2xl border px-4 py-3 ${theme === "classic-light" ? "border-slate-100 bg-slate-50" : "border-white/5 bg-white/5"}`}>
                       <p className="font-anton text-3xl text-[#00e476]">{teamView.standings.row.points}</p>
-                      <p className={`mt-1 font-mono text-[10px] uppercase tracking-wider ${mutedClasses}`}>Pontos</p>
+                      <p className={`mt-1 font-mono text-[10px] uppercase tracking-wider ${mutedClasses}`}>{t("teamLineup.points")}</p>
                     </div>
                     <div className={`flex-1 rounded-2xl border px-4 py-3 ${theme === "classic-light" ? "border-slate-100 bg-slate-50" : "border-white/5 bg-white/5"}`}>
                       <div className="flex h-full items-center justify-around gap-2">
                         {[
-                          { label: "J", value: teamView.standings.row.played },
-                          { label: "V", value: teamView.standings.row.won },
-                          { label: "E", value: teamView.standings.row.drawn },
-                          { label: "D", value: teamView.standings.row.lost },
+                          { label: t("teamLineup.abbrPlayed"), value: teamView.standings.row.played },
+                          { label: t("teamLineup.abbrWon"), value: teamView.standings.row.won },
+                          { label: t("teamLineup.abbrDrawn"), value: teamView.standings.row.drawn },
+                          { label: t("teamLineup.abbrLost"), value: teamView.standings.row.lost },
                         ].map(({ label, value }) => (
                           <div key={label} className="text-center">
                             <p className="font-anton text-2xl text-[#00e476]">{value}</p>
@@ -1256,7 +1274,7 @@ export const TeamLineupView: React.FC<TeamLineupViewProps> = ({ team, theme, onB
           primaryColor={team.primaryColor}
           record={coachTournamentRecord}
           status={tournamentStatus}
-          note={coachNote}
+          note={locale === "es" ? undefined : coachNote}
           pictureUrl={coachImage?.pictureUrl}
           photoCredit={coachImage?.credit}
           instagramPostUrls={coachInstagramPosts}

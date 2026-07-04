@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import type { Match, WeatherSnapshot } from "../types";
+import { useT } from "../i18n";
 import { resolveVenueCoordinates } from "../utils/venueCoordinates";
 
 type Theme = "classic-light" | "stadium-dark";
@@ -13,6 +14,7 @@ const WEATHER_REFRESH_INTERVAL_MS = 10 * 60 * 1000;
  * never leaves an empty placeholder.
  */
 export function MatchWeatherChip({ match, theme }: { match: Match; theme: Theme }) {
+  const t = useT();
   const [weather, setWeather] = useState<WeatherSnapshot | null>(null);
 
   useEffect(() => {
@@ -67,8 +69,15 @@ export function MatchWeatherChip({ match, theme }: { match: Match; theme: Theme 
           ? "border-slate-200 bg-slate-100 text-slate-700 hover:bg-slate-200"
           : "border-white/10 bg-white/5 text-slate-100 hover:bg-white/10"
       }`}
-      title={`Ver previsão do tempo do estádio • Sensação ${weather.apparentC}° • Umidade ${weather.humidity}% • Vento ${weather.windKmh} km/h`}
-      aria-label={`Clima no estádio: ${weather.description}, ${weather.temperatureC} graus. Abrir a previsão do tempo.`}
+      title={t("common.weatherChip.title", {
+        apparent: weather.apparentC,
+        humidity: weather.humidity,
+        wind: weather.windKmh,
+      })}
+      aria-label={t("common.weatherChip.ariaLabel", {
+        description: weather.description,
+        temperature: weather.temperatureC,
+      })}
     >
       <span className="text-base leading-none" aria-hidden="true">
         {weather.emoji}

@@ -26,13 +26,11 @@ import {
   type DonutSegment,
 } from "./dashboard/DashboardCharts";
 import { TrafficDashboardPanel } from "./dashboard/TrafficDashboardPanel";
+import { getActiveLocale, localeToIntlTag, useT } from "../i18n";
 
 type DashboardTab = "panorama" | "trafego";
 
-const DASHBOARD_TABS: { id: DashboardTab; label: string }[] = [
-  { id: "panorama", label: "Panorama" },
-  { id: "trafego", label: "Tráfego" },
-];
+const DASHBOARD_TABS: DashboardTab[] = ["panorama", "trafego"];
 
 interface DashboardViewProps {
   theme: "classic-light" | "stadium-dark";
@@ -53,7 +51,7 @@ const PHASE_COLORS: Record<
   "stadium-dark": { groupStage: "#4f8cff", roundOf32: "#00e476", roundOf16: "#ffa94d" },
 };
 
-const integer = (n: number) => new Intl.NumberFormat("pt-BR").format(n);
+const integer = (n: number) => new Intl.NumberFormat(localeToIntlTag(getActiveLocale())).format(n);
 
 /**
  * "Dashboard" tab — a tournament overview built from the live `matches` state and the
@@ -62,6 +60,7 @@ const integer = (n: number) => new Intl.NumberFormat("pt-BR").format(n);
  * lives in the pure `dashboardStats` module; the charts are dependency-free SVG/CSS.
  */
 export function DashboardView({ theme, matches }: DashboardViewProps) {
+  const t = useT();
   const isLight = theme === "classic-light";
   const headingClasses = isLight ? "text-slate-900" : "text-white";
   const mutedClasses = isLight ? "text-slate-600" : "text-slate-300";
@@ -120,11 +119,13 @@ export function DashboardView({ theme, matches }: DashboardViewProps) {
         label: p.phase,
         value: p.goals,
         color: phaseGoalColor[p.phase],
-        sublabel: `${p.played} ${p.played === 1 ? "jogo" : "jogos"}`,
+        sublabel: t(p.played === 1 ? "dashboard.phaseGameSingular" : "dashboard.phaseGamePlural", {
+          count: p.played,
+        }),
       })),
       phaseGoalsTotal: phaseSeries.reduce((sum, p) => sum + p.goals, 0),
     };
-  }, [matches, theme]);
+  }, [matches, theme, t]);
 
   const goalsPerMatch = totals.groupGoalsPerMatch
     ? totals.groupGoalsPerMatch.toFixed(2).replace(".", ",")
@@ -176,12 +177,12 @@ export function DashboardView({ theme, matches }: DashboardViewProps) {
           className={`font-anton text-2xl md:text-3xl uppercase tracking-wider ${headingClasses}`}
           id="dashboard-title"
         >
-          Dashboard
+          {t("dashboard.title")}
         </h2>
         <p className={`mt-1 font-mono text-[11px] uppercase tracking-wider ${mutedClasses}`}>
           {tab === "panorama"
-            ? "Panorama da Copa do Mundo FIFA 2026 em números"
-            : "Bastidores da audiência do site em números"}
+            ? t("dashboard.subtitlePanorama")
+            : t("dashboard.subtitleTrafego")}
         </p>
         <div className="mt-1 flex flex-wrap items-center gap-2">
           {lastUpdated && (
@@ -197,8 +198,8 @@ export function DashboardView({ theme, matches }: DashboardViewProps) {
             data-fresh={upToDate ? "true" : "false"}
             title={
               upToDate
-                ? "O painel reflete a última partida disputada"
-                : "Uma partida foi disputada após a publicação deste painel"
+                ? t("dashboard.freshnessTitleUpToDate")
+                : t("dashboard.freshnessTitleStale")
             }
             className={`inline-flex items-center rounded-full border px-2 py-0.5 font-mono text-[9px] font-bold uppercase tracking-wider ${
               upToDate
@@ -210,23 +211,24 @@ export function DashboardView({ theme, matches }: DashboardViewProps) {
                   : "border-amber-400/30 bg-amber-400/10 text-amber-300"
             }`}
           >
-            ● {upToDate ? "Atualizado" : "Desatualizado"}
+            ● {upToDate ? t("dashboard.freshUpToDate") : t("dashboard.freshStale")}
           </span>
         </div>
       </div>
 
       {/* Tabs */}
-      <div className="mt-5 flex gap-2" role="tablist" aria-label="Seções do dashboard">
-        {DASHBOARD_TABS.map((t) => {
-          const active = tab === t.id;
+      <div className="mt-5 flex gap-2" role="tablist" aria-label={t("dashboard.tabsAriaLabel")}>
+        {DASHBOARD_TABS.map((tabId) => {
+          const active = tab === tabId;
+          const label = tabId === "panorama" ? t("dashboard.tabPanorama") : t("dashboard.tabTrafego");
           return (
             <button
-              key={t.id}
+              key={tabId}
               type="button"
               role="tab"
               aria-selected={active}
-              id={`dashboard-tab-${t.id}`}
-              onClick={() => setTab(t.id)}
+              id={`dashboard-tab-${tabId}`}
+              onClick={() => setTab(tabId)}
               className={`rounded-full border px-4 py-1.5 font-mono text-[11px] uppercase tracking-wider transition ${
                 active
                   ? isLight
@@ -237,7 +239,7 @@ export function DashboardView({ theme, matches }: DashboardViewProps) {
                     : "border-white/10 bg-[#1a1d1d] text-slate-300 hover:border-white/25"
               }`}
             >
-              {t.label}
+              {label}
             </button>
           );
         })}
@@ -249,33 +251,33 @@ export function DashboardView({ theme, matches }: DashboardViewProps) {
         <>
       {/* KPI tiles */}
       <div className="mt-6 grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-6">
-        <StatCard theme={theme} label="Seleções" value={integer(totals.teams)} hint="6 continentes" />
-        <StatCard theme={theme} label="Sedes" value={integer(totals.stadiums)} hint="3 países" />
+        <StatCard theme={theme} label={t("dashboard.kpiTeams")} value={integer(totals.teams)} hint={t("dashboard.kpiTeamsHint")} />
+        <StatCard theme={theme} label={t("dashboard.kpiStadiums")} value={integer(totals.stadiums)} hint={t("dashboard.kpiStadiumsHint")} />
         <StatCard
           theme={theme}
-          label="Jogos encerrados"
+          label={t("dashboard.kpiMatchesFinished")}
           value={integer(totals.matchesFinished)}
-          hint={`de ${integer(totals.matchesTotal)}`}
+          hint={t("dashboard.kpiMatchesFinishedHint", { total: integer(totals.matchesTotal) })}
         />
         <StatCard
           theme={theme}
-          label="Ao vivo"
+          label={t("dashboard.kpiLive")}
           value={integer(totals.matchesLive)}
-          hint="agora"
+          hint={t("dashboard.kpiLiveHint")}
           accentColor={STATUS_COLORS[theme].live}
         />
         <StatCard
           theme={theme}
-          label="Agendados"
+          label={t("dashboard.kpiUpcoming")}
           value={integer(totals.matchesUpcoming)}
-          hint="a disputar"
+          hint={t("dashboard.kpiUpcomingHint")}
           accentColor={STATUS_COLORS[theme].upcoming}
         />
         <StatCard
           theme={theme}
-          label="Gols (grupos)"
+          label={t("dashboard.kpiGroupGoals")}
           value={integer(totals.groupGoals)}
-          hint={`${goalsPerMatch} por jogo`}
+          hint={t("dashboard.kpiGroupGoalsHint", { value: goalsPerMatch })}
         />
       </div>
 
@@ -283,45 +285,49 @@ export function DashboardView({ theme, matches }: DashboardViewProps) {
       <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
         <ChartCard
           theme={theme}
-          title="Seleções por continente"
-          subtitle={`por fase · ${continentTotals.groupStage} grupos → ${continentTotals.roundOf32} 16-avos → ${continentTotals.roundOf16} oitavas`}
+          title={t("dashboard.chartContinentsTitle")}
+          subtitle={t("dashboard.chartContinentsSubtitle", {
+            groupStage: continentTotals.groupStage,
+            roundOf32: continentTotals.roundOf32,
+            roundOf16: continentTotals.roundOf16,
+          })}
         >
           <GroupedBars
             theme={theme}
             data={continents}
             legend={[
-              { label: "Fase de grupos", color: PHASE_COLORS[theme].groupStage },
-              { label: "16-avos", color: PHASE_COLORS[theme].roundOf32 },
-              { label: "Oitavas", color: PHASE_COLORS[theme].roundOf16 },
+              { label: t("dashboard.phaseGroupStage"), color: PHASE_COLORS[theme].groupStage },
+              { label: t("dashboard.phaseRoundOf32"), color: PHASE_COLORS[theme].roundOf32 },
+              { label: t("dashboard.phaseRoundOf16"), color: PHASE_COLORS[theme].roundOf16 },
             ]}
           />
         </ChartCard>
 
         <ChartCard
           theme={theme}
-          title="Partidas por situação"
-          subtitle="todo o torneio · grupos + mata-mata"
+          title={t("dashboard.chartStatusTitle")}
+          subtitle={t("dashboard.chartStatusSubtitle")}
         >
           <Donut
             theme={theme}
             segments={statusSegments}
             centerValue={integer(totals.matchesTotal)}
-            centerLabel="jogos"
+            centerLabel={t("dashboard.donutCenterLabel")}
           />
         </ChartCard>
 
         <ChartCard
           theme={theme}
-          title="Gols por grupo"
-          subtitle="fase de grupos · gols marcados"
+          title={t("dashboard.chartGroupGoalsTitle")}
+          subtitle={t("dashboard.chartGroupGoalsSubtitle")}
         >
           <VerticalBars theme={theme} data={groupGoals} />
         </ChartCard>
 
         <ChartCard
           theme={theme}
-          title="Artilharia das seleções"
-          subtitle="fase de grupos · 8 maiores ataques"
+          title={t("dashboard.chartTopTeamsTitle")}
+          subtitle={t("dashboard.chartTopTeamsSubtitle")}
         >
           <HorizontalBars theme={theme} data={topTeams} />
         </ChartCard>
@@ -331,8 +337,8 @@ export function DashboardView({ theme, matches }: DashboardViewProps) {
       <div className="mt-4">
         <ChartCard
           theme={theme}
-          title="Gols por fase"
-          subtitle={`gols marcados por fase · grupos + mata-mata · ${integer(phaseGoalsTotal)} gols`}
+          title={t("dashboard.chartPhaseGoalsTitle")}
+          subtitle={t("dashboard.chartPhaseGoalsSubtitle", { total: integer(phaseGoalsTotal) })}
         >
           <HorizontalBars theme={theme} data={phaseGoals} />
         </ChartCard>
@@ -342,16 +348,20 @@ export function DashboardView({ theme, matches }: DashboardViewProps) {
       <div className="mt-4">
         <ChartCard
           theme={theme}
-          title="Gols por minuto"
+          title={t("dashboard.chartGoalsByMinuteTitle")}
           subtitle={
             goalsTeamName
-              ? `${goalsTeamName} · ${scatterTotal} ${scatterTotal === 1 ? "gol" : "gols"} · minuto do jogo × nº de gols`
-              : `todos os jogos encerrados · ${scatterTotal} gols · minuto do jogo × nº de gols`
+              ? t("dashboard.chartGoalsByMinuteSubtitleTeam", {
+                  team: goalsTeamName,
+                  count: scatterTotal,
+                  goals: t(scatterTotal === 1 ? "dashboard.goalSingular" : "dashboard.goalPlural"),
+                })
+              : t("dashboard.chartGoalsByMinuteSubtitleAll", { count: scatterTotal })
           }
           headerAction={
             <select
               id="dashboard-goals-team-filter"
-              aria-label="Filtrar gols por minuto por seleção"
+              aria-label={t("dashboard.goalsTeamFilterAria")}
               value={goalsTeam}
               onChange={(event) => setGoalsTeam(event.target.value)}
               className={`rounded-lg border px-2.5 py-1.5 font-mono text-[11px] uppercase tracking-wider outline-none transition focus-visible:ring-2 focus-visible:ring-sky-400 ${
@@ -360,10 +370,10 @@ export function DashboardView({ theme, matches }: DashboardViewProps) {
                   : "border-white/10 bg-[#1a1d1d] text-slate-200 hover:border-white/20"
               }`}
             >
-              <option value="">Todas as seleções</option>
+              <option value="">{t("dashboard.goalsTeamFilterAll")}</option>
               {goalScorerTeamOptions.map((team) => (
                 <option key={team.code} value={team.code}>
-                  {team.name} ({team.goals})
+                  {t("dashboard.goalsTeamFilterOption", { name: team.name, goals: team.goals })}
                 </option>
               ))}
             </select>
@@ -371,17 +381,17 @@ export function DashboardView({ theme, matches }: DashboardViewProps) {
         >
           {goalScatter.length === 0 ? (
             <p className={`py-10 text-center font-mono text-xs uppercase tracking-wider ${mutedClasses}`}>
-              Sem gols registrados para esta seleção
+              {t("dashboard.goalsByMinuteEmpty")}
             </p>
           ) : (
           <ScatterPlot
             theme={theme}
             data={goalScatter}
             xMax={90}
-            xLabel="minuto"
-            yLabel="gols"
+            xLabel={t("dashboard.axisMinute")}
+            yLabel={t("dashboard.axisGoals")}
             xMarkers={[
-              { x: 45, label: "intervalo" },
+              { x: 45, label: t("dashboard.markerHalfTime") },
               { x: 90, label: "90'" },
             ]}
           />
@@ -393,17 +403,21 @@ export function DashboardView({ theme, matches }: DashboardViewProps) {
       <div className="mt-4">
         <ChartCard
           theme={theme}
-          title="Mapa de calor dos gols"
-          subtitle={`gols por grupo da seleção × intervalo de 15 min · ${integer(goalHeatmap.total)} gols`}
+          title={t("dashboard.chartHeatmapTitle")}
+          subtitle={t("dashboard.chartHeatmapSubtitle", { total: integer(goalHeatmap.total) })}
         >
           <HeatMap
             theme={theme}
             columns={goalHeatmap.intervals}
             rows={goalHeatmap.rows.map((r) => ({ label: r.group, cells: r.cells, total: r.total }))}
             maxCell={goalHeatmap.maxCell}
-            rowHeader="Grupo"
+            rowHeader={t("dashboard.heatmapRowHeader")}
             formatCellTitle={(group, interval, value) =>
-              `Grupo ${group} · ${interval} min · ${value} ${value === 1 ? "gol" : "gols"}`
+              t(value === 1 ? "dashboard.heatmapCellSingular" : "dashboard.heatmapCellPlural", {
+                group,
+                interval,
+                value,
+              })
             }
           />
         </ChartCard>

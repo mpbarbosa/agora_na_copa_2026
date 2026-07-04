@@ -1,5 +1,9 @@
 import type { TeamViewMatchSummary } from "../types";
-import { KNOCKOUT_STAGE_NAMES } from "./knockoutSlots";
+import { KNOCKOUT_STAGE_NAMES, localizedStageName } from "./knockoutSlots";
+import { translate, getActiveLocale } from "../i18n";
+
+const t = (key: string, params?: Record<string, string | number>) =>
+  translate(getActiveLocale(), key, params);
 
 export type TeamStatusTone = "champion" | "advanced" | "eliminated";
 
@@ -42,7 +46,7 @@ export function getTeamTournamentStatus(
 ): TeamTournamentStatus | null {
   if (!Array.isArray(matchHistory)) return null; // payload may omit the history (fallback/stub)
   const classifiedFor = (stageName: string): TeamTournamentStatus => ({
-    label: `Classificado para ${stageName.toLowerCase()}`,
+    label: t("utils.classifiedFor", { stage: localizedStageName(stageName).toLowerCase() }),
     tone: "advanced",
   });
 
@@ -67,13 +71,13 @@ export function getTeamTournamentStatus(
     const stage = lastKnockout.stageName;
     if (stage === KNOCKOUT_STAGE_NAMES.F) {
       return won
-        ? { label: "Campeão", tone: "champion" }
-        : { label: "Vice-campeão", tone: "eliminated" };
+        ? { label: t("utils.champion"), tone: "champion" }
+        : { label: t("utils.runnerUp"), tone: "eliminated" };
     }
     if (stage === KNOCKOUT_STAGE_NAMES.TP) {
       return won
-        ? { label: "3º lugar", tone: "advanced" }
-        : { label: "4º lugar", tone: "eliminated" };
+        ? { label: t("utils.thirdPlace"), tone: "advanced" }
+        : { label: t("utils.fourthPlace"), tone: "eliminated" };
     }
     // A Semifinal loss drops the team to the 3rd-place match — status pending.
     if (!won && stage === KNOCKOUT_STAGE_NAMES.SF) return null;
@@ -84,7 +88,10 @@ export function getTeamTournamentStatus(
       return classifiedFor(nextStage);
     }
     // Lost a 16-avos / Oitavas / Quartas tie → out of the tournament.
-    return { label: `Eliminado em ${stage.toLowerCase()}`, tone: "eliminated" };
+    return {
+      label: t("utils.eliminatedIn", { stage: localizedStageName(stage).toLowerCase() }),
+      tone: "eliminated",
+    };
   }
 
   // No finished knockout tie yet. If the bracket already placed the team in a
@@ -100,7 +107,7 @@ export function getTeamTournamentStatus(
   // handled above.) Mid-group-stage we can't tell a future qualifier from an
   // eliminated team, so stay quiet.
   if (groupStageComplete) {
-    return { label: "Eliminada na fase de grupos", tone: "eliminated" };
+    return { label: t("utils.eliminatedGroupStage"), tone: "eliminated" };
   }
 
   return null; // still in the group phase, or not placed in the bracket

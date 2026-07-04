@@ -6,6 +6,7 @@ import type { ProvisionalSlot } from "../standings";
 import { feederNumbersOf } from "../utils/knockoutFeeders";
 import { humanizeSlot } from "../utils/knockoutSlots";
 import { FlagIcon } from "./FlagIcon";
+import { useT } from "../i18n";
 
 type Theme = "classic-light" | "stadium-dark";
 type Slot = "A" | "B";
@@ -32,16 +33,6 @@ interface FullBracketViewProps {
 const LEFT_SF = 101;
 const RIGHT_SF = 102;
 const FINAL = 104;
-
-// Short pt-BR round label per stage, for the column headers along the top of the bracket.
-const STAGE_SHORT: Record<KnockoutMatch["stage"], string> = {
-  R32: "16-avos",
-  R16: "Oitavas",
-  QF: "Quartas",
-  SF: "Semis",
-  TP: "3º lugar",
-  F: "Final",
-};
 
 // Rounds of one half, OUTER (R32, 8 ties) → INNER (SF, 1), by walking the feeder tree down
 // from the half's semifinal. Bottoms out at R32 (feederNumbersOf returns [] there).
@@ -76,6 +67,9 @@ export function FullBracketView({
   winnerSlotByNumber,
   onSelectTeamLineup,
 }: FullBracketViewProps) {
+  const t = useT();
+  // Short round label per stage, for the column headers along the top of the bracket.
+  const stageShort = (stage: KnockoutMatch["stage"]): string => t(`bracket.stageShort.${stage}`);
   const isLight = theme === "classic-light";
   const line = isLight ? "#cbd5e1" : "#3a3f3f";
   const mutedClasses = isLight ? "text-slate-500" : "text-slate-400";
@@ -118,7 +112,7 @@ export function FullBracketView({
       <button
         type="button"
         title={d.name}
-        aria-label={`Abrir seleção ${d.name}`}
+        aria-label={t("bracket.full.openTeam", { name: d.name })}
         onClick={() => onSelectTeamLineup(team)}
         className={`${base} hover:brightness-95`}
       >
@@ -165,7 +159,7 @@ export function FullBracketView({
     const stage = byNumber.get(round[0])?.stage;
     return (
       <div key={key} className="flex flex-col">
-        <p className={headerClasses}>{stage ? STAGE_SHORT[stage] : ""}</p>
+        <p className={headerClasses}>{stage ? stageShort(stage) : ""}</p>
         <div className="flex flex-1 flex-col justify-around">
           {round.map((matchNumber, index) => (
             <div key={matchNumber} className="flex flex-1 items-center">
@@ -188,7 +182,7 @@ export function FullBracketView({
       >
         <RotateCw size={28} className={mutedClasses} />
         <p className={`font-mono text-xs uppercase tracking-wider ${mutedClasses}`}>
-          Gire o celular para o modo horizontal para ver a chave completa
+          {t("bracket.full.rotateHint")}
         </p>
       </div>
 
@@ -199,7 +193,7 @@ export function FullBracketView({
 
           {/* Center: the final + trophy. */}
           <div className="flex flex-col px-2">
-            <p className={headerClasses}>{STAGE_SHORT.F}</p>
+            <p className={headerClasses}>{stageShort("F")}</p>
             <div className="flex flex-1 flex-col items-center justify-center gap-3">
               <MatchBox matchNumber={FINAL} />
               <Trophy size={40} className={isLight ? "text-amber-500" : "text-amber-300"} />

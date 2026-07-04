@@ -3,6 +3,7 @@ import { standings } from "../data/tournament";
 import type { RedditPost, RedditResponse } from "../types";
 import { RedditBrandIcon } from "./RedditBrandIcon";
 import { FlagIcon } from "./FlagIcon";
+import { getActiveLocale, localeToIntlTag } from "../i18n";
 
 interface RedditPostsFeedProps {
   theme: "classic-light" | "stadium-dark";
@@ -11,7 +12,7 @@ interface RedditPostsFeedProps {
 const FLAG_BY_CODE = new Map(standings.map((row) => [row.code, row.flagSvg]));
 
 const formatCount = (n: number): string =>
-  n >= 1000 ? `${Number((n / 1000).toFixed(1)).toLocaleString("pt-BR")} mil` : `${n}`;
+  n >= 1000 ? `${Number((n / 1000).toFixed(1)).toLocaleString(localeToIntlTag(getActiveLocale()))} mil` : `${n}`;
 
 // "Repercussão no Reddit" feed on the Redes Sociais tab. Reads /api/reddit —
 // curated posts enriched with live Reddit data (or the curated seed when Reddit

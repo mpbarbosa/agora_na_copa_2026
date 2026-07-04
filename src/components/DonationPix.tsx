@@ -3,6 +3,7 @@ import { QRCodeSVG } from "qrcode.react";
 import { Check, Coffee, Copy } from "lucide-react";
 import { PIX_DONATION, isPixDonationConfigured } from "../config";
 import { buildPixBrCode } from "../utils/pixBrCode";
+import { useT } from "../i18n";
 
 interface DonationPixProps {
   theme: "classic-light" | "stadium-dark";
@@ -17,6 +18,7 @@ interface DonationPixProps {
  * QR is rendered locally from the same string the copy button exposes.
  */
 export function DonationPix({ theme, variant }: DonationPixProps) {
+  const t = useT();
   const isLight = theme === "classic-light";
   const [copied, setCopied] = useState<null | "key" | "brcode">(null);
 
@@ -62,7 +64,7 @@ export function DonationPix({ theme, variant }: DonationPixProps) {
           <Coffee size={12} aria-hidden="true" /> {PIX_DONATION.label}
         </span>
         <span className={mutedClasses}>·</span>
-        <span className={mutedClasses}>Pix:</span>
+        <span className={mutedClasses}>{t("banners.pix.pixPrefix")}</span>
         <code className={isLight ? "text-slate-700" : "text-slate-200"} data-testid="donation-pix-key">
           {PIX_DONATION.key}
         </code>
@@ -70,11 +72,11 @@ export function DonationPix({ theme, variant }: DonationPixProps) {
           type="button"
           onClick={() => copy(PIX_DONATION.key, "key")}
           className={`inline-flex items-center gap-1 rounded-md border px-2 py-0.5 uppercase tracking-wider transition ${copyBtnClass}`}
-          aria-label="Copiar chave Pix"
+          aria-label={t("banners.pix.copyKeyAria")}
           data-testid="donation-pix-copy-key"
         >
           {copied === "key" ? <Check size={11} /> : <Copy size={11} />}
-          {copied === "key" ? "Copiado" : "Copiar"}
+          {copied === "key" ? t("banners.pix.copied") : t("banners.pix.copy")}
         </button>
       </div>
     );
@@ -99,8 +101,7 @@ export function DonationPix({ theme, variant }: DonationPixProps) {
         </span>
       </h3>
       <p className={`mt-1 font-archivo text-sm ${mutedClasses}`}>
-        Escaneie o QR no app do seu banco ou copie a chave Pix. Toda contribuição ajuda
-        a manter o projeto no ar.
+        {t("banners.pix.blurb")}
       </p>
 
       <div className="mt-4 flex flex-col items-center gap-4 sm:flex-row sm:items-start">
@@ -112,7 +113,7 @@ export function DonationPix({ theme, variant }: DonationPixProps) {
         <div className="w-full min-w-0 space-y-3">
           <div>
             <p className={`font-mono text-[10px] uppercase tracking-wider ${mutedClasses}`}>
-              Chave Pix · {PIX_DONATION.keyTypeLabel}
+              {t("banners.pix.keyLabel", { keyType: PIX_DONATION.keyTypeLabel })}
             </p>
             <div className="mt-1 flex items-center gap-2">
               <code
@@ -128,7 +129,7 @@ export function DonationPix({ theme, variant }: DonationPixProps) {
                 data-testid="donation-pix-full-copy-key"
               >
                 {copied === "key" ? <Check size={12} /> : <Copy size={12} />}
-                {copied === "key" ? "Copiado" : "Copiar"}
+                {copied === "key" ? t("banners.pix.copied") : t("banners.pix.copy")}
               </button>
             </div>
           </div>
@@ -140,7 +141,7 @@ export function DonationPix({ theme, variant }: DonationPixProps) {
             data-testid="donation-pix-copy-brcode"
           >
             {copied === "brcode" ? <Check size={14} /> : <Copy size={14} />}
-            {copied === "brcode" ? "Pix Copia e Cola copiado" : "Copiar Pix Copia e Cola"}
+            {copied === "brcode" ? t("banners.pix.brcodeCopied") : t("banners.pix.brcodeCopy")}
           </button>
         </div>
       </div>

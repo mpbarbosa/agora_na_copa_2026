@@ -1,4 +1,5 @@
 import type { Match, TeamRef } from "../types";
+import { useT } from "../i18n";
 import { FlagIcon } from "./FlagIcon";
 
 interface GroupMatchHistoryProps {
@@ -26,6 +27,7 @@ function shortDate(kickoffTimestamp: string): string {
  * only when the group has no matches at all.
  */
 export function GroupMatchHistory({ matches, theme, slug, onSelectTeamLineup, onSelectMatch }: GroupMatchHistoryProps) {
+  const t = useT();
   const isLight = theme === "classic-light";
 
   const ordered = [...matches].sort((a, b) =>
@@ -48,7 +50,7 @@ export function GroupMatchHistory({ matches, theme, slug, onSelectTeamLineup, on
       <summary
         className={`flex cursor-pointer list-none items-center justify-between gap-2 font-anton text-sm uppercase tracking-wide ${headingClasses} [&::-webkit-details-marker]:hidden`}
       >
-        <span>Histórico de jogos</span>
+        <span>{t("standings.history.title")}</span>
         <span
           aria-hidden="true"
           className={`font-mono text-[10px] transition-transform group-open:rotate-180 ${mutedClasses}`}
@@ -83,8 +85,8 @@ export function GroupMatchHistory({ matches, theme, slug, onSelectTeamLineup, on
               <button
                 type="button"
                 onClick={() => onSelectMatch(m.id)}
-                title={`Abrir a partida ${m.teamA.code} x ${m.teamB.code}`}
-                aria-label={`Abrir a partida ${m.teamA.name} contra ${m.teamB.name}`}
+                title={t("standings.history.openMatchTitle", { teamA: m.teamA.code, teamB: m.teamB.code })}
+                aria-label={t("standings.history.openMatchAria", { teamA: m.teamA.name, teamB: m.teamB.name })}
                 data-testid={`group-history-match-link-${m.id}`}
                 className={`shrink-0 rounded tabular-nums underline-offset-2 transition hover:underline ${
                   hasScore
@@ -108,7 +110,7 @@ export function GroupMatchHistory({ matches, theme, slug, onSelectTeamLineup, on
 
               {live && (
                 <span className={`shrink-0 text-[8px] font-bold uppercase tracking-wider ${liveColor}`}>
-                  ● ao vivo
+                  {t("standings.history.live")}
                 </span>
               )}
             </li>

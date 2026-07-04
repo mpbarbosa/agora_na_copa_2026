@@ -1,5 +1,7 @@
 import { Mic, MicOff } from "lucide-react";
 
+import { useT } from "../i18n";
+
 interface MatchSpeechToggleProps {
   enabled: boolean;
   onToggle: () => void;
@@ -14,6 +16,7 @@ interface MatchSpeechToggleProps {
  */
 export function MatchSpeechToggle({ enabled, onToggle, theme }: MatchSpeechToggleProps) {
   const isLight = theme === "classic-light";
+  const t = useT();
   const tone = enabled
     ? isLight
       ? "border-emerald-300 bg-emerald-50 text-emerald-700"
@@ -22,7 +25,7 @@ export function MatchSpeechToggle({ enabled, onToggle, theme }: MatchSpeechToggl
       ? "border-slate-300 bg-slate-50 text-slate-600"
       : "border-white/15 bg-white/5 text-slate-300";
 
-  const label = enabled ? "Desativar a narração dos lances" : "Ativar a narração dos lances";
+  const label = enabled ? t("liveExtras.speech.disable") : t("liveExtras.speech.enable");
   const Icon = enabled ? Mic : MicOff;
 
   return (

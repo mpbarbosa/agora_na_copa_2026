@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import type { PredictionResponse, TriviaQuestion } from "../types";
 import { standings as TOURNAMENT_TEAMS } from "../data/tournament";
 import { parseNoteSections } from "../utils/noteSections";
+import { useT } from "../i18n";
 import { DonationPix } from "./DonationPix";
 
 interface FanZoneViewProps {
@@ -18,11 +19,18 @@ interface PenaltyStats {
 
 const KEEPER_SEQUENCE: ShotDirection[] = ["centro", "direita", "esquerda", "centro"];
 
-const PENALTY_OPTIONS: { id: ShotDirection; label: string }[] = [
-  { id: "esquerda", label: "Canto esquerdo" },
-  { id: "centro", label: "No meio" },
-  { id: "direita", label: "Canto direito" },
+const PENALTY_OPTIONS: { id: ShotDirection; labelKey: string }[] = [
+  { id: "esquerda", labelKey: "fanSocial.penaltyOptionLeft" },
+  { id: "centro", labelKey: "fanSocial.penaltyOptionCenter" },
+  { id: "direita", labelKey: "fanSocial.penaltyOptionRight" },
 ];
+
+// Human-readable direction label key for the "you shot left / keeper dove right" line.
+const SHOT_DIRECTION_KEY: Record<ShotDirection, string> = {
+  esquerda: "fanSocial.penaltyDirLeft",
+  centro: "fanSocial.penaltyDirCenter",
+  direita: "fanSocial.penaltyDirRight",
+};
 
 function nextKeeperDive(round: number): ShotDirection {
   return KEEPER_SEQUENCE[round % KEEPER_SEQUENCE.length];
@@ -34,6 +42,7 @@ const PREDICTOR_TEAMS = [...TOURNAMENT_TEAMS]
   .sort((a, b) => a.name.localeCompare(b.name, "pt-BR"));
 
 export function FanZoneView({ theme }: FanZoneViewProps) {
+  const t = useT();
   const [questions, setQuestions] = useState<TriviaQuestion[]>([]);
   const [quizStatus, setQuizStatus] = useState<"loading" | "ready" | "error">("loading");
   const [questionIndex, setQuestionIndex] = useState(0);
@@ -98,11 +107,14 @@ export function FanZoneView({ theme }: FanZoneViewProps) {
 
   const quizProgressLabel = useMemo(() => {
     if (questions.length === 0) {
-      return "Aquecendo o quiz";
+      return t("fanSocial.triviaWarmup");
     }
 
-    return `Pergunta ${questionIndex + 1} de ${questions.length}`;
-  }, [questionIndex, questions.length]);
+    return t("fanSocial.triviaProgress", {
+      current: questionIndex + 1,
+      total: questions.length,
+    });
+  }, [questionIndex, questions.length, t]);
 
   const shellClasses =
     theme === "classic-light"
@@ -190,10 +202,10 @@ export function FanZoneView({ theme }: FanZoneViewProps) {
             className={`font-anton text-2xl md:text-3xl uppercase tracking-wider ${headingClasses}`}
             id="fanzone-title"
           >
-            Fan Zone
+            {t("fanSocial.fanZoneTitle")}
           </h2>
           <p className={`mt-1 font-mono text-[11px] uppercase tracking-wider ${mutedClasses}`}>
-            Quiz da torcida, disputa de pênaltis e palpite simulado das partidas
+            {t("fanSocial.fanZoneSubtitle")}
           </p>
         </div>
 
@@ -205,7 +217,7 @@ export function FanZoneView({ theme }: FanZoneViewProps) {
           }`}
           id="fanzone-scope-note"
         >
-          Palpite 100% simulado • sem IA externa
+          {t("fanSocial.fanZoneScopeNote")}
         </span>
       </div>
 
@@ -214,7 +226,7 @@ export function FanZoneView({ theme }: FanZoneViewProps) {
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
               <p className={`font-anton text-lg uppercase tracking-wide ${headingClasses}`}>
-                Quiz da torcida
+                {t("fanSocial.triviaTitle")}
               </p>
               <p className={`mt-1 font-mono text-[10px] uppercase tracking-wider ${mutedClasses}`}>
                 {quizProgressLabel}
@@ -229,17 +241,17 @@ export function FanZoneView({ theme }: FanZoneViewProps) {
               }`}
               id="fanzone-trivia-score"
             >
-              Placar: {score}
+              {t("fanSocial.triviaScore", { score })}
             </div>
           </div>
 
           {quizStatus === "loading" ? (
             <p className={`mt-6 font-archivo text-sm leading-6 ${mutedClasses}`}>
-              Carregando perguntas do aquecimento da torcida...
+              {t("fanSocial.triviaLoading")}
             </p>
           ) : quizStatus === "error" ? (
             <p className={`mt-6 font-archivo text-sm leading-6 ${mutedClasses}`}>
-              Não foi possível carregar o quiz agora. Tente atualizar a Fan Zone.
+              {t("fanSocial.triviaError")}
             </p>
           ) : currentQuestion ? (
             <div className="mt-6" id="fanzone-trivia-question">
@@ -306,7 +318,7 @@ export function FanZoneView({ theme }: FanZoneViewProps) {
                             : "text-[#ff9cab]"
                       }`}
                     >
-                      {isCorrect ? "Resposta certa" : "Não foi dessa vez"}
+                      {isCorrect ? t("fanSocial.triviaCorrect") : t("fanSocial.triviaWrong")}
                     </p>
                     <p className={`mt-2 font-archivo text-sm leading-6 ${mutedClasses}`}>
                       {currentQuestion.explanation}
@@ -318,8 +330,8 @@ export function FanZoneView({ theme }: FanZoneViewProps) {
                       className={`mt-4 min-h-11 rounded-full border px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-wider transition ${idleButtonClasses}`}
                     >
                       {questionIndex === questions.length - 1
-                        ? "Reiniciar quiz"
-                        : "Próxima pergunta"}
+                        ? t("fanSocial.triviaRestart")
+                        : t("fanSocial.triviaNext")}
                     </button>
                   </div>
                 ) : null}
@@ -332,10 +344,10 @@ export function FanZoneView({ theme }: FanZoneViewProps) {
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
               <p className={`font-anton text-lg uppercase tracking-wide ${headingClasses}`}>
-                Disputa de pênaltis
+                {t("fanSocial.penaltyTitle")}
               </p>
               <p className={`mt-1 font-mono text-[10px] uppercase tracking-wider ${mutedClasses}`}>
-                Escolha o canto e veja para onde o goleiro mergulha
+                {t("fanSocial.penaltySubtitle")}
               </p>
             </div>
 
@@ -345,14 +357,14 @@ export function FanZoneView({ theme }: FanZoneViewProps) {
               onClick={resetPenaltyGame}
               className={`min-h-11 rounded-full border px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-wider transition ${idleButtonClasses}`}
             >
-              Reiniciar disputa
+              {t("fanSocial.penaltyReset")}
             </button>
           </div>
 
           <div className="mt-5 grid grid-cols-3 gap-3" id="penalty-scoreboard">
             <div className={`rounded-2xl border px-4 py-3 ${cardClasses}`}>
               <p className={`font-mono text-[10px] uppercase tracking-wider ${subtleClasses}`}>
-                Batidas
+                {t("fanSocial.penaltyShots")}
               </p>
               <p className={`mt-2 font-anton text-2xl uppercase tracking-wide ${headingClasses}`}>
                 {penaltyStats.rounds}
@@ -360,7 +372,7 @@ export function FanZoneView({ theme }: FanZoneViewProps) {
             </div>
             <div className={`rounded-2xl border px-4 py-3 ${cardClasses}`}>
               <p className={`font-mono text-[10px] uppercase tracking-wider ${subtleClasses}`}>
-                Gols
+                {t("fanSocial.penaltyGoals")}
               </p>
               <p className={`mt-2 font-anton text-2xl uppercase tracking-wide ${headingClasses}`}>
                 {penaltyStats.goals}
@@ -368,7 +380,7 @@ export function FanZoneView({ theme }: FanZoneViewProps) {
             </div>
             <div className={`rounded-2xl border px-4 py-3 ${cardClasses}`}>
               <p className={`font-mono text-[10px] uppercase tracking-wider ${subtleClasses}`}>
-                Defesas
+                {t("fanSocial.penaltySaves")}
               </p>
               <p className={`mt-2 font-anton text-2xl uppercase tracking-wide ${headingClasses}`}>
                 {penaltyStats.saves}
@@ -378,8 +390,7 @@ export function FanZoneView({ theme }: FanZoneViewProps) {
 
           <div className={`mt-5 rounded-2xl border p-4 ${cardClasses}`}>
             <p className={`font-archivo text-sm leading-6 ${mutedClasses}`}>
-              O goleiro alterna leitura de cantos em um padrão pseudoaleatório para
-              manter a brincadeira rápida e consistente entre as rodadas.
+              {t("fanSocial.penaltyExplainer")}
             </p>
 
             <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
@@ -391,7 +402,7 @@ export function FanZoneView({ theme }: FanZoneViewProps) {
                   onClick={() => handlePenaltyShot(option.id)}
                   className={`min-h-11 rounded-2xl border px-4 py-3 text-left font-mono text-[11px] font-bold uppercase tracking-wider transition ${idleButtonClasses}`}
                 >
-                  {option.label}
+                  {t(option.labelKey)}
                 </button>
               ))}
             </div>
@@ -399,7 +410,7 @@ export function FanZoneView({ theme }: FanZoneViewProps) {
 
           <div className={`mt-5 rounded-2xl border p-4 ${cardClasses}`} id="penalty-result-panel">
             <p className={`font-anton text-lg uppercase tracking-wide ${headingClasses}`}>
-              Resultado da última cobrança
+              {t("fanSocial.penaltyLastResult")}
             </p>
 
             {lastPenaltyResult ? (
@@ -416,18 +427,25 @@ export function FanZoneView({ theme }: FanZoneViewProps) {
                   }`}
                   id="penalty-result-status"
                 >
-                  {lastPenaltyResult.goal ? "Gol confirmado" : "Goleiro defendeu"}
+                  {lastPenaltyResult.goal
+                    ? t("fanSocial.penaltyGoalConfirmed")
+                    : t("fanSocial.penaltyKeeperSaved")}
                 </p>
                 <p className={`mt-2 font-archivo text-sm leading-6 ${mutedClasses}`}>
-                  Você bateu em{" "}
-                  <span className={headingClasses}>{lastPenaltyResult.shot}</span> e o
-                  goleiro caiu em{" "}
-                  <span className={headingClasses}>{lastPenaltyResult.keeper}</span>.
+                  {t("fanSocial.penaltyResultShotPrefix")}{" "}
+                  <span className={headingClasses}>
+                    {t(SHOT_DIRECTION_KEY[lastPenaltyResult.shot])}
+                  </span>{" "}
+                  {t("fanSocial.penaltyResultKeeperMid")}{" "}
+                  <span className={headingClasses}>
+                    {t(SHOT_DIRECTION_KEY[lastPenaltyResult.keeper])}
+                  </span>
+                  {t("fanSocial.penaltyResultSuffix")}
                 </p>
               </div>
             ) : (
               <p className={`mt-4 font-archivo text-sm leading-6 ${mutedClasses}`}>
-                Faça a primeira cobrança para abrir o placar da Fan Zone.
+                {t("fanSocial.penaltyEmpty")}
               </p>
             )}
           </div>
@@ -438,10 +456,10 @@ export function FanZoneView({ theme }: FanZoneViewProps) {
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
             <h3 className={`font-anton text-xl uppercase tracking-wide ${headingClasses}`}>
-              Palpite da partida
+              {t("fanSocial.predictorTitle")}
             </h3>
             <p className={`mt-1 font-archivo text-sm ${mutedClasses}`}>
-              Escolha duas seleções e gere um prognóstico a partir da campanha atual delas.
+              {t("fanSocial.predictorSubtitle")}
             </p>
           </div>
           <span
@@ -452,14 +470,14 @@ export function FanZoneView({ theme }: FanZoneViewProps) {
             }`}
             id="fanzone-predictor-mode"
           >
-            Simulado
+            {t("fanSocial.predictorSimulated")}
           </span>
         </div>
 
         <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2">
           {([
-            { id: "home", label: "Mandante", value: homeTeam, set: setHomeTeam },
-            { id: "away", label: "Visitante", value: awayTeam, set: setAwayTeam },
+            { id: "home", label: t("fanSocial.predictorHome"), value: homeTeam, set: setHomeTeam },
+            { id: "away", label: t("fanSocial.predictorAway"), value: awayTeam, set: setAwayTeam },
           ] as const).map((field) => (
             <label
               key={field.id}
@@ -476,7 +494,7 @@ export function FanZoneView({ theme }: FanZoneViewProps) {
                     : "border-white/10 bg-[#161919] text-slate-100"
                 }`}
               >
-                <option value="">Selecione…</option>
+                <option value="">{t("fanSocial.predictorSelect")}</option>
                 {PREDICTOR_TEAMS.map((team) => (
                   <option key={team.code} value={team.code}>
                     {team.name}
@@ -493,7 +511,7 @@ export function FanZoneView({ theme }: FanZoneViewProps) {
           onChange={(event) => setPredictorNotes(event.target.value)}
           maxLength={280}
           rows={2}
-          placeholder="Opcional: seu pitaco (lesões, clima, fator casa…)"
+          placeholder={t("fanSocial.predictorNotesPlaceholder")}
           className={`mt-3 w-full rounded-xl border px-3 py-2 font-archivo text-sm ${
             theme === "classic-light"
               ? "border-slate-200 bg-white text-slate-800"
@@ -502,7 +520,7 @@ export function FanZoneView({ theme }: FanZoneViewProps) {
         />
 
         {sameTeams && (
-          <p className={`mt-2 font-archivo text-xs ${subtleClasses}`}>Escolha duas seleções diferentes.</p>
+          <p className={`mt-2 font-archivo text-xs ${subtleClasses}`}>{t("fanSocial.predictorSameTeams")}</p>
         )}
 
         <button

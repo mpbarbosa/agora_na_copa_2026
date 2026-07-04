@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { ADSENSE_PUBLISHER_ID, ADSENSE_AD_SLOT, isAdSenseConfigured } from "../config";
 import { useConsent } from "../consent";
+import { useT } from "../i18n";
 
 declare global {
   interface Window {
@@ -21,6 +22,7 @@ interface Props {
  * Instagram embed in SocialMediasView.
  */
 export function AdSlot({ theme, slot = ADSENSE_AD_SLOT }: Props) {
+  const t = useT();
   const { consent } = useConsent();
   const adsEnabled = isAdSenseConfigured() && consent === "all";
 
@@ -54,14 +56,14 @@ export function AdSlot({ theme, slot = ADSENSE_AD_SLOT }: Props) {
         isDark ? "border-white/10 bg-white/5" : "border-slate-200 bg-slate-50"
       }`}
       id="adsense-slot"
-      aria-label="Publicidade"
+      aria-label={t("banners.ads.label")}
     >
       <p
         className={`pt-1 text-center font-mono text-[10px] uppercase tracking-wider ${
           isDark ? "text-slate-500" : "text-slate-400"
         }`}
       >
-        Publicidade
+        {t("banners.ads.label")}
       </p>
       <ins
         className="adsbygoogle"
