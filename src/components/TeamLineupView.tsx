@@ -18,6 +18,7 @@ import { parseNoteSections } from "../utils/noteSections";
 import COACH_NOTES from "../data/coachNotes.json";
 import COACH_IMAGES from "../data/coachImages.json";
 import COACH_INSTAGRAM from "../data/coachInstagram.json";
+import COACH_SOCIALS from "../data/coachSocials.json";
 import { formatAnalysisTimestamp } from "../utils/dateFormat";
 import { AnalysisFreshnessBadge } from "./AnalysisFreshnessBadge";
 import { TeamInstagramHighlights } from "./TeamInstagramHighlights";
@@ -789,6 +790,8 @@ export const TeamLineupView: React.FC<TeamLineupViewProps> = ({ team, theme, onB
     COACH_IMAGES as Record<string, { pictureUrl: string; credit: CoachPhotoCredit }>
   )[team.code];
   const coachInstagramPosts = (COACH_INSTAGRAM as Record<string, string[]>)[team.code];
+  const coachInstagramHandle = (COACH_SOCIALS as Record<string, { instagram?: string }>)[team.code]
+    ?.instagram;
 
   return (
     <div className="mx-auto mt-8 max-w-7xl px-4 2xl:max-w-[1600px]" id="team-lineup-view">
@@ -1257,6 +1260,7 @@ export const TeamLineupView: React.FC<TeamLineupViewProps> = ({ team, theme, onB
           pictureUrl={coachImage?.pictureUrl}
           photoCredit={coachImage?.credit}
           instagramPostUrls={coachInstagramPosts}
+          instagramHandle={coachInstagramHandle}
           onClose={() => setCoachCardOpen(false)}
         />
       )}

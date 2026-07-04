@@ -669,6 +669,27 @@ test.describe("Team view", () => {
     await expect(card).toBeHidden();
   });
 
+  test("shows the coach's Instagram profile link when one is curated", async ({ page }) => {
+    await mockTeamView(page);
+
+    await page.goto("/");
+    await page.click("#btn-nav-grupos");
+    // Canada's coach (Jesse Marsch) has a curated Instagram handle in coachSocials.json.
+    await page.click("#standings-row-can button[aria-label^='Ver escalação']");
+    await expect(page.locator("#team-lineup-view")).toBeVisible();
+
+    await page.click("#team-lineup-coach");
+    const profileLink = page.locator("#team-view-coach-card-ig-profile");
+    await expect(profileLink).toBeVisible();
+    await expect(profileLink).toContainText("@jessemarsch.15");
+    await expect(profileLink).toHaveAttribute(
+      "href",
+      "https://www.instagram.com/jessemarsch.15/",
+    );
+    await expect(profileLink).toHaveAttribute("target", "_blank");
+    await expect(profileLink).toHaveAttribute("rel", "noopener noreferrer");
+  });
+
   test("opens the full team page from the venue hosted matches list", async ({ page }) => {
     await mockTeamView(page);
 

@@ -33,6 +33,8 @@ interface CoachCardProps {
   photoCredit?: CoachPhotoCredit;
   /** Optional Instagram highlight permalinks — rendered as a collapsible "Destaque(s) no Instagram" embed, mirroring the player card. */
   instagramPostUrls?: string[];
+  /** Optional Instagram account handle (without the leading "@") — rendered as a profile link in the header, mirroring the player card's socials chip. */
+  instagramHandle?: string;
   onClose: () => void;
   id?: string;
 }
@@ -68,6 +70,7 @@ export function CoachCard({
   pictureUrl,
   photoCredit,
   instagramPostUrls,
+  instagramHandle,
   onClose,
   id,
 }: CoachCardProps) {
@@ -75,6 +78,7 @@ export function CoachCard({
   const [igExpanded, setIgExpanded] = useState(false);
   const igPosts = instagramPostUrls ?? [];
   const hasInstagramHighlights = igPosts.length > 0;
+  const igHandle = instagramHandle?.trim().replace(/^@/, "") || undefined;
 
   const accent = primaryColor ?? "#00e476";
   const isLight = theme === "classic-light";
@@ -161,6 +165,19 @@ export function CoachCard({
                 {flagSvg && <FlagIcon flag={flagSvg} className="h-3.5 w-5 shrink-0" />}
                 <span>Técnico • {teamName}</span>
               </p>
+              {igHandle && (
+                <a
+                  href={`https://www.instagram.com/${igHandle}/`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  id={id ? `${id}-ig-profile` : undefined}
+                  className={`mt-1.5 inline-flex items-center gap-1.5 font-mono text-[11px] font-bold tracking-wide transition hover:opacity-80 ${mutedClasses}`}
+                  aria-label={`Perfil de ${coachName} no Instagram`}
+                >
+                  <InstagramBrandIcon size={14} />
+                  <span>@{igHandle}</span>
+                </a>
+              )}
             </div>
           </div>
 
