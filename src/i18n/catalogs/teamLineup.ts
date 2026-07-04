@@ -23,6 +23,8 @@ export const teamLineupCatalog: CatalogModule = {
     "teamLineup.fullGame": "Jogo completo",
     "teamLineup.videosPending":
       "Aguardando a Cazé TV fazer o upload dos vídeos no YouTube.",
+    "teamLineup.igHighlightsSubtitle":
+      "Os melhores momentos da seleção, direto do Instagram",
     "teamLineup.historyTitle": "Histórico na Copa 2026",
     "teamLineup.historyCountOne": "{count} jogo no Mundial",
     "teamLineup.historyCountMany": "{count} jogos no Mundial",
@@ -97,6 +99,8 @@ export const teamLineupCatalog: CatalogModule = {
     "teamLineup.fullGame": "Partido completo",
     "teamLineup.videosPending":
       "Esperando que Cazé TV suba los videos a YouTube.",
+    "teamLineup.igHighlightsSubtitle":
+      "Los mejores momentos de la selección, directo desde Instagram",
     "teamLineup.historyTitle": "Historial en el Mundial 2026",
     "teamLineup.historyCountOne": "{count} partido en el Mundial",
     "teamLineup.historyCountMany": "{count} partidos en el Mundial",

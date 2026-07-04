@@ -1,4 +1,5 @@
 import TEAM_INSTAGRAM from "../data/teamInstagram.json";
+import { useT } from "../i18n";
 import { resolveInstagramPostUrls } from "../utils/instagram";
 import { InstagramPostFrame } from "./InstagramPostFrame";
 import { InstagramBrandIcon } from "./InstagramBrandIcon";
@@ -20,6 +21,7 @@ const POSTS_BY_TEAM: Record<string, string[]> = TEAM_INSTAGRAM;
  * fails to load. Renders nothing when the team carries no posts.
  */
 export function TeamInstagramHighlights({ teamCode, theme }: TeamInstagramHighlightsProps) {
+  const t = useT();
   const posts = resolveInstagramPostUrls(POSTS_BY_TEAM[teamCode], undefined);
   if (posts.length === 0) return null;
 
@@ -40,11 +42,11 @@ export function TeamInstagramHighlights({ teamCode, theme }: TeamInstagramHighli
       <div className="flex items-center gap-2">
         <InstagramBrandIcon size={20} />
         <h3 className={`font-anton text-xl uppercase tracking-wide ${headingClasses}`}>
-          Destaques no Instagram
+          {t("playerCard.instagramHighlightMany")}
         </h3>
       </div>
       <p className={`mt-1 font-mono text-[10px] uppercase tracking-wider ${mutedClasses}`}>
-        Os melhores momentos da seleção, direto do Instagram
+        {t("teamLineup.igHighlightsSubtitle")}
       </p>
 
       <div className="mx-auto mt-4 max-w-md space-y-5">
@@ -59,7 +61,7 @@ export function TeamInstagramHighlights({ teamCode, theme }: TeamInstagramHighli
               className={`inline-flex w-full items-center justify-center gap-2 rounded-xl border py-2.5 font-mono text-[10px] font-bold uppercase tracking-wider transition ${openClasses}`}
             >
               <InstagramBrandIcon size={14} />
-              Abrir no Instagram
+              {t("playerCard.openInstagram")}
             </a>
           </div>
         ))}

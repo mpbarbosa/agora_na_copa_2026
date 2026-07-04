@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { useT } from "../i18n";
 import { getInstagramHighlights } from "../data/instagramHighlights";
 import { getPositionLabel } from "../utils/playerDisplay";
 import { InstagramBrandIcon } from "./InstagramBrandIcon";
@@ -15,6 +16,7 @@ interface InstagramHighlightsFeedProps {
 // same performance posture as the per-player overlay). Renders nothing when no
 // player carries a highlight, keeping the tab clean.
 export function InstagramHighlightsFeed({ theme }: InstagramHighlightsFeedProps) {
+  const t = useT();
   const highlights = useMemo(getInstagramHighlights, []);
   const [expanded, setExpanded] = useState<Record<string, boolean>>(() =>
     highlights.length > 0 ? { [highlights[0].fifaId]: true } : {},
@@ -38,17 +40,17 @@ export function InstagramHighlightsFeed({ theme }: InstagramHighlightsFeedProps)
   return (
     <section
       id="instagram-highlights-feed"
-      aria-label="Destaques de jogadores no Instagram"
+      aria-label={t("fanSocial.igHighlightsAria")}
       className={`mt-6 rounded-3xl border p-5 ${shellClasses}`}
     >
       <div className="flex items-center gap-2">
         <InstagramBrandIcon size={20} />
         <h3 className={`font-anton text-lg uppercase tracking-wide ${headingClasses}`}>
-          Destaques no Instagram
+          {t("playerCard.instagramHighlightMany")}
         </h3>
       </div>
       <p className={`mt-1 font-mono text-[10px] uppercase tracking-wider ${mutedClasses}`}>
-        Os melhores momentos dos craques da Copa, direto do Instagram
+        {t("fanSocial.igHighlightsSubtitle")}
       </p>
 
       <div className="mt-4 flex flex-col gap-3">
@@ -95,7 +97,7 @@ export function InstagramHighlightsFeed({ theme }: InstagramHighlightsFeedProps)
                     className={`inline-flex w-full items-center justify-center gap-2 rounded-xl border py-2.5 font-mono text-[10px] font-bold uppercase tracking-wider transition ${openClasses}`}
                   >
                     <InstagramBrandIcon size={14} />
-                    Abrir no Instagram
+                    {t("playerCard.openInstagram")}
                   </a>
                 </div>
               )}

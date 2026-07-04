@@ -76,6 +76,11 @@ export const fanSocialCatalog: CatalogModule = {
       "Siga a conta oficial da Copa do Mundo FIFA 2026 e acompanhe tudo do Mundial em primeira mão.",
     "fanSocial.fifaFollow": "Seguir",
 
+    // Player Instagram highlights feed
+    "fanSocial.igHighlightsSubtitle":
+      "Os melhores momentos dos craques da Copa, direto do Instagram",
+    "fanSocial.igHighlightsAria": "Destaques de jogadores no Instagram",
+
     // Google Trends card
     "fanSocial.trendsLabel": "Buscas em alta no Google",
     "fanSocial.trendsTitle": "Em alta no Google",
@@ -183,6 +188,11 @@ export const fanSocialCatalog: CatalogModule = {
     "fanSocial.fifaFollowBlurb":
       "Sigue la cuenta oficial de la Copa Mundial de la FIFA 2026 y acompaña todo el Mundial de primera mano.",
     "fanSocial.fifaFollow": "Seguir",
+
+    // Player Instagram highlights feed
+    "fanSocial.igHighlightsSubtitle":
+      "Los mejores momentos de las estrellas del Mundial, directo desde Instagram",
+    "fanSocial.igHighlightsAria": "Destacados de jugadores en Instagram",
 
     // Google Trends card
     "fanSocial.trendsLabel": "Búsquedas populares en Google",

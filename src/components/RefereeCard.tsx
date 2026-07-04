@@ -125,7 +125,7 @@ export function RefereeCard({ theme, referee, instagramPostUrls, onClose, id }: 
                 <span className="flex items-center gap-2">
                   <InstagramBrandIcon size={16} />
                   <span className="font-mono text-[10px] font-bold uppercase tracking-wider">
-                    {igPosts.length > 1 ? "Destaques no Instagram" : "Destaque no Instagram"}
+                    {igPosts.length > 1 ? t("playerCard.instagramHighlightMany") : t("playerCard.instagramHighlightOne")}
                   </span>
                 </span>
                 <span
@@ -152,7 +152,7 @@ export function RefereeCard({ theme, referee, instagramPostUrls, onClose, id }: 
                         style={{ borderColor: `${accent}40` }}
                       >
                         <InstagramBrandIcon size={14} />
-                        Abrir no Instagram
+                        {t("playerCard.openInstagram")}
                       </a>
                     </div>
                   ))}
