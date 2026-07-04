@@ -10,7 +10,7 @@ import {
   goalsByMinute,
   goalsByPhase,
   matchStatusBreakdown,
-  topScoringTeams,
+  topScoringTeamsAllPhases,
   tournamentTotals,
   type MatchStatusKey,
 } from "../dashboardStats";
@@ -110,7 +110,7 @@ export function DashboardView({ theme, matches }: DashboardViewProps) {
         value: s.value,
         color: statusColors[s.key],
       })),
-      topTeams: topScoringTeams(standings, 8).map((t) => ({
+      topTeams: topScoringTeamsAllPhases(standings, undefined, undefined, 8).map((t) => ({
         label: t.name,
         value: t.goalsFor,
         color: t.primaryColor,

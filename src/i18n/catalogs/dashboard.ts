@@ -57,7 +57,7 @@ export const dashboardCatalog: CatalogModule = {
 
     // Chart: top scorers
     "dashboard.chartTopTeamsTitle": "Artilharia das seleções",
-    "dashboard.chartTopTeamsSubtitle": "fase de grupos · 8 maiores ataques",
+    "dashboard.chartTopTeamsSubtitle": "todo o torneio · grupos + mata-mata · 8 maiores ataques",
 
     // Chart: goals by phase
     "dashboard.chartPhaseGoalsTitle": "Gols por fase",
@@ -208,7 +208,7 @@ export const dashboardCatalog: CatalogModule = {
 
     // Chart: top scorers
     "dashboard.chartTopTeamsTitle": "Artillería de las selecciones",
-    "dashboard.chartTopTeamsSubtitle": "fase de grupos · 8 mejores ataques",
+    "dashboard.chartTopTeamsSubtitle": "todo el torneo · grupos + eliminatorias · 8 mejores ataques",
 
     // Chart: goals by phase
     "dashboard.chartPhaseGoalsTitle": "Goles por fase",

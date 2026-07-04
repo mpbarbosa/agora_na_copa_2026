@@ -299,21 +299,59 @@ export interface GoalScorerTeam {
 }
 
 /**
+ * Whole-tournament goals per team code (group + knockout), summed from the per-side timeline.
+ * The timeline mirrors each scoreline, so extra-time goals count but penalty-shootout goals do
+ * not. Pure over its inputs so both callers below stay unit-tested through it.
+ */
+export function tallyTimelineGoals(
+  timeline: Record<string, MatchGoalTimeline>,
+  sideCodes: Record<string, { a: string; b: string }>,
+): Map<string, number> {
+  const tally = new Map<string, number>();
+  for (const [matchId, sides] of Object.entries(timeline)) {
+    const codes = sideCodes[matchId];
+    if (!codes) continue;
+    if (sides.teamA.length) tally.set(codes.a, (tally.get(codes.a) ?? 0) + sides.teamA.length);
+    if (sides.teamB.length) tally.set(codes.b, (tally.get(codes.b) ?? 0) + sides.teamB.length);
+  }
+  return tally;
+}
+
+/**
  * National teams that scored at least one goal in the timeline, with their tally, sorted by
  * name (pt-BR) — the option set for the "Gols por minuto" team filter. Teams with no goals
  * are omitted (nothing to plot for them).
  */
 export function goalScorerTeams(): GoalScorerTeam[] {
-  const tally = new Map<string, number>();
-  for (const [matchId, sides] of Object.entries(GOAL_TIMELINE)) {
-    const codes = MATCH_SIDE_CODES[matchId];
-    if (!codes) continue;
-    if (sides.teamA.length) tally.set(codes.a, (tally.get(codes.a) ?? 0) + sides.teamA.length);
-    if (sides.teamB.length) tally.set(codes.b, (tally.get(codes.b) ?? 0) + sides.teamB.length);
-  }
-  return [...tally.entries()]
+  return [...tallyTimelineGoals(GOAL_TIMELINE, MATCH_SIDE_CODES).entries()]
     .map(([code, goals]) => ({ code, name: TEAM_NAME_BY_CODE[code] ?? code, goals }))
     .sort((a, b) => a.name.localeCompare(b.name, "pt-BR"));
+}
+
+/**
+ * The top `limit` scoring teams across the WHOLE tournament (group stage + knockout), for the
+ * "Artilharia das seleções" bars. Unlike `topScoringTeams` (group-stage only, off the standings
+ * table), goals come from `goalTimeline.json` so knockout goals count — extra time included,
+ * penalty shootouts excluded (the timeline mirrors each scoreline). Ties break alphabetically
+ * (pt-BR). Team names/colours are resolved from `standings` (every team has a group-stage row),
+ * falling back to the timeline name map. Pure over its inputs so it is unit-tested.
+ */
+export function topScoringTeamsAllPhases(
+  standings: StandingsRow[],
+  timeline: Record<string, MatchGoalTimeline> = GOAL_TIMELINE,
+  sideCodes: Record<string, { a: string; b: string }> = MATCH_SIDE_CODES,
+  limit = 8,
+): TeamGoalsDatum[] {
+  const meta = new Map(standings.map((row) => [row.code, row]));
+  return [...tallyTimelineGoals(timeline, sideCodes).entries()]
+    .map(([code, goalsFor]) => ({
+      code,
+      name: meta.get(code)?.name ?? TEAM_NAME_BY_CODE[code] ?? code,
+      goalsFor,
+      primaryColor: meta.get(code)?.primaryColor ?? "#94a3b8",
+    }))
+    .sort((a, b) => b.goalsFor - a.goalsFor || a.name.localeCompare(b.name, "pt-BR"))
+    .slice(0, limit);
 }
 
 // 15-minute goal-interval buckets. Minutes fold stoppage into the raw clock

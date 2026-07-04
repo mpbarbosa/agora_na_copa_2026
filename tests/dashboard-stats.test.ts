@@ -21,6 +21,7 @@ import {
   roundOf16TeamCodes,
   roundOf32TeamCodes,
   topScoringTeams,
+  topScoringTeamsAllPhases,
   tournamentTotals,
   type MatchGoalTimeline,
 } from "../src/dashboardStats";
@@ -258,6 +259,38 @@ test("topScoringTeams sorts by goals then name, and honours the limit", () => {
     ["TOP", "MIDA", "MIDB"], // 5, then 3/3 broken alphabetically (Alfa < Beta)
   );
   assert.equal(top.length, 3);
+});
+
+test("topScoringTeamsAllPhases sums whole-tournament goals from the timeline, not group standings", () => {
+  const standings = [
+    row({ code: "AAA", name: "Alfa", group: "Grupo A", goalsFor: 2, primaryColor: "#a1" }),
+    row({ code: "BBB", name: "Beta", group: "Grupo A", goalsFor: 5, primaryColor: "#b2" }),
+    row({ code: "CCC", name: "Gama", group: "Grupo B", goalsFor: 0, primaryColor: "#c3" }),
+  ];
+  const timeline = {
+    m1: { teamA: [10, 20], teamB: [30] }, //   AAA 2, BBB 1
+    ko1: { teamA: [5, 15, 88], teamB: [] }, //  BBB +3 (a knockout match)
+    m2: { teamA: [40], teamB: [50, 60] }, //   AAA 1, CCC 2
+  };
+  const sideCodes = {
+    m1: { a: "AAA", b: "BBB" },
+    ko1: { a: "BBB", b: "CCC" },
+    m2: { a: "AAA", b: "CCC" },
+  };
+  // Totals: BBB 1+3=4, AAA 2+1=3, CCC 2 — driven by the timeline, so BBB's group-only
+  // goalsFor of 5 is irrelevant and its knockout goals (ko1) count.
+  const top = topScoringTeamsAllPhases(standings, timeline, sideCodes, 2);
+  assert.deepEqual(
+    top.map((t) => ({ code: t.code, goalsFor: t.goalsFor })),
+    [
+      { code: "BBB", goalsFor: 4 },
+      { code: "AAA", goalsFor: 3 },
+    ],
+  );
+  assert.equal(top.length, 2);
+  // Name + colour are resolved from the standings row, not the timeline.
+  assert.equal(top[0].name, "Beta");
+  assert.equal(top[0].primaryColor, "#b2");
 });
 
 test("aggregateGoalsByPhase orders phases, sums knockout scores, and skips unplayed phases", () => {
