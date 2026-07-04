@@ -1,10 +1,12 @@
 import { useMemo, useState } from "react";
 import type { Match } from "../types";
 import { computeStandings } from "../standings";
+import { formatAnalysisTimestamp } from "../utils/dateFormat";
 import {
   continentByPhase,
   goalScorerTeams,
   goalsByGroup,
+  goalsByGroupAndInterval,
   goalsByMinute,
   goalsByPhase,
   matchStatusBreakdown,
@@ -16,6 +18,7 @@ import {
   ChartCard,
   Donut,
   GroupedBars,
+  HeatMap,
   HorizontalBars,
   ScatterPlot,
   StatCard,
@@ -127,10 +130,36 @@ export function DashboardView({ theme, matches }: DashboardViewProps) {
     ? totals.groupGoalsPerMatch.toFixed(2).replace(".", ",")
     : "—";
 
+  // Freshness of this build against the tournament. `latestKickoff` is the most recent
+  // kickoff among matches already played or under way; `lastUpdated` renders it as an
+  // "Atualizado em …" line. The build is "Desatualizado" when a match has kicked off after
+  // this version shipped (build time from the Vite `define`) — i.e. results exist that a
+  // stale static bundle would not carry.
+  const { lastUpdated, upToDate } = useMemo(() => {
+    const latestKickoff = matches
+      .filter((m) => m.status === "FINISHED" || m.status === "LIVE" || m.status === "SUSPENDED")
+      .reduce<string | null>((acc, m) => {
+        const ts = m.kickoffTimestamp;
+        return ts && (!acc || ts > acc) ? ts : acc;
+      }, null);
+    const buildTime = new Date(__BUILD_TIME__).getTime();
+    return {
+      lastUpdated: formatAnalysisTimestamp(latestKickoff),
+      upToDate:
+        !latestKickoff || Number.isNaN(buildTime)
+          ? true
+          : buildTime >= new Date(latestKickoff).getTime(),
+    };
+  }, [matches]);
+
   // "Gols por minuto" national-team filter ("" = all teams). The scatter is independent of
   // the theme/matches memo above, so it recomputes only when the selected team changes.
   const [goalsTeam, setGoalsTeam] = useState("");
   const goalScorerTeamOptions = useMemo(() => goalScorerTeams(), []);
+
+  // Goal heat-map (group × 15-min interval). Static over `goalTimeline.json` + APP_MATCHES,
+  // so it is computed once, independent of the theme/matches memo above.
+  const goalHeatmap = useMemo(() => goalsByGroupAndInterval(), []);
   const { goalScatter, scatterTotal, goalsTeamName } = useMemo(() => {
     const series = goalsByMinute(goalsTeam || null);
     return {
@@ -154,6 +183,36 @@ export function DashboardView({ theme, matches }: DashboardViewProps) {
             ? "Panorama da Copa do Mundo FIFA 2026 em números"
             : "Bastidores da audiência do site em números"}
         </p>
+        <div className="mt-1 flex flex-wrap items-center gap-2">
+          {lastUpdated && (
+            <span
+              className={`font-mono text-[10px] uppercase tracking-wider ${mutedClasses}`}
+              id="dashboard-last-updated"
+            >
+              {lastUpdated}
+            </span>
+          )}
+          <span
+            data-testid="dashboard-freshness"
+            data-fresh={upToDate ? "true" : "false"}
+            title={
+              upToDate
+                ? "O painel reflete a última partida disputada"
+                : "Uma partida foi disputada após a publicação deste painel"
+            }
+            className={`inline-flex items-center rounded-full border px-2 py-0.5 font-mono text-[9px] font-bold uppercase tracking-wider ${
+              upToDate
+                ? isLight
+                  ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+                  : "border-emerald-400/30 bg-emerald-400/10 text-emerald-300"
+                : isLight
+                  ? "border-amber-200 bg-amber-50 text-amber-700"
+                  : "border-amber-400/30 bg-amber-400/10 text-amber-300"
+            }`}
+          >
+            ● {upToDate ? "Atualizado" : "Desatualizado"}
+          </span>
+        </div>
       </div>
 
       {/* Tabs */}
@@ -327,6 +386,26 @@ export function DashboardView({ theme, matches }: DashboardViewProps) {
             ]}
           />
           )}
+        </ChartCard>
+      </div>
+
+      {/* Goals heat-map — group × 15-min interval, full width */}
+      <div className="mt-4">
+        <ChartCard
+          theme={theme}
+          title="Mapa de calor dos gols"
+          subtitle={`gols por grupo da seleção × intervalo de 15 min · ${integer(goalHeatmap.total)} gols`}
+        >
+          <HeatMap
+            theme={theme}
+            columns={goalHeatmap.intervals}
+            rows={goalHeatmap.rows.map((r) => ({ label: r.group, cells: r.cells, total: r.total }))}
+            maxCell={goalHeatmap.maxCell}
+            rowHeader="Grupo"
+            formatCellTitle={(group, interval, value) =>
+              `Grupo ${group} · ${interval} min · ${value} ${value === 1 ? "gol" : "gols"}`
+            }
+          />
         </ChartCard>
       </div>
         </>

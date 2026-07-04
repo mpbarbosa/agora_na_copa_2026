@@ -316,6 +316,91 @@ export function goalScorerTeams(): GoalScorerTeam[] {
     .sort((a, b) => a.name.localeCompare(b.name, "pt-BR"));
 }
 
+// 15-minute goal-interval buckets. Minutes fold stoppage into the raw clock
+// (e.g. 45'+5' → 50), so a first-half-stoppage goal lands in the next bucket —
+// the same convention the `goalsByMinute` scatter already uses.
+export const GOAL_INTERVAL_LABELS = ["1-15", "16-30", "31-45", "46-60", "61-75", "76-90", "90+"] as const;
+const GOAL_INTERVAL_BOUNDS = [15, 30, 45, 60, 75, 90];
+
+/** Bucket a goal minute into a 0-based `GOAL_INTERVAL_LABELS` index (last = "90+"). */
+export function goalIntervalIndex(minute: number): number {
+  const i = GOAL_INTERVAL_BOUNDS.findIndex((bound) => minute <= bound);
+  return i === -1 ? GOAL_INTERVAL_BOUNDS.length : i;
+}
+
+// Team code → group letter (A–L). Only group-stage fixtures populate `group`
+// ("Grupo A"); knockout fixtures carry none, so a knockout goal is still
+// attributed to the scoring team's permanent group.
+const GROUP_BY_CODE: Record<string, string> = (() => {
+  const map: Record<string, string> = {};
+  for (const m of APP_MATCHES) {
+    for (const team of [m.teamA, m.teamB]) {
+      const letter = team.group.replace(/^Grupo\s+/i, "").trim();
+      if (letter && !(team.code in map)) map[team.code] = letter;
+    }
+  }
+  return map;
+})();
+
+export interface GoalHeatmapRow {
+  /** Group letter, e.g. "A". */
+  group: string;
+  /** Goals in each interval, aligned to `GOAL_INTERVAL_LABELS`. */
+  cells: number[];
+  /** Row total across all intervals. */
+  total: number;
+}
+
+export interface GoalHeatmap {
+  /** Column labels (the 15-min intervals). */
+  intervals: string[];
+  /** One row per group, ordered A→L (every group seeded, even with zero goals). */
+  rows: GoalHeatmapRow[];
+  /** Hottest single cell, for the colour scale (≥1 so callers can divide safely). */
+  maxCell: number;
+  /** Goals placed across the whole grid. */
+  total: number;
+}
+
+/**
+ * Aggregate goal minutes into a group × 15-min-interval matrix — the heat-map source.
+ * Pure over its inputs (the per-side timeline, a matchId → side-codes map, and a
+ * team-code → group map) so it is unit-tested; `goalsByGroupAndInterval` feeds it the
+ * seeded data. Every goal is bucketed by the scoring side's group and minute; all groups
+ * present in `groupByCode` are seeded so the grid stays rectangular.
+ */
+export function aggregateGoalsByGroupInterval(
+  timeline: Record<string, MatchGoalTimeline>,
+  sideCodes: Record<string, { a: string; b: string }>,
+  groupByCode: Record<string, string>,
+): GoalHeatmap {
+  const intervals = [...GOAL_INTERVAL_LABELS];
+  const blank = () => intervals.map(() => 0);
+  const byGroup = new Map<string, number[]>();
+  for (const group of new Set(Object.values(groupByCode))) byGroup.set(group, blank());
+  const place = (code: string | undefined, minute: number) => {
+    const group = code ? groupByCode[code] : undefined;
+    const cells = group ? byGroup.get(group) : undefined;
+    if (cells) cells[goalIntervalIndex(minute)] += 1;
+  };
+  for (const [matchId, sides] of Object.entries(timeline)) {
+    const codes = sideCodes[matchId];
+    for (const minute of sides.teamA) place(codes?.a, minute);
+    for (const minute of sides.teamB) place(codes?.b, minute);
+  }
+  const rows: GoalHeatmapRow[] = [...byGroup.entries()]
+    .map(([group, cells]) => ({ group, cells, total: cells.reduce((s, n) => s + n, 0) }))
+    .sort((a, b) => a.group.localeCompare(b.group));
+  const maxCell = Math.max(1, ...rows.flatMap((r) => r.cells));
+  const total = rows.reduce((s, r) => s + r.total, 0);
+  return { intervals, rows, maxCell, total };
+}
+
+/** Group × 15-min-interval goal heat-map over finished matches, from `goalTimeline.json`. */
+export function goalsByGroupAndInterval(): GoalHeatmap {
+  return aggregateGoalsByGroupInterval(GOAL_TIMELINE, MATCH_SIDE_CODES, GROUP_BY_CODE);
+}
+
 export interface PhaseGoalsDatum {
   /** Short pt-BR phase label, e.g. "Fase de grupos", "16-avos". */
   phase: string;

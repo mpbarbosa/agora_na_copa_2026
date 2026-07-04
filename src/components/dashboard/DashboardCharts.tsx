@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { Fragment, type ReactNode } from "react";
 
 /**
  * Presentational, dependency-free chart primitives for the Dashboard, built from plain
@@ -438,6 +438,122 @@ export function ScatterPlot({
         {yLabel.toUpperCase()}
       </text>
     </svg>
+  );
+}
+
+export interface HeatMapRow {
+  /** Row label (e.g. a group letter). */
+  label: string;
+  /** One value per column, aligned to `columns`. */
+  cells: number[];
+  /** Optional precomputed row total; falls back to summing `cells`. */
+  total?: number;
+}
+
+interface HeatMapProps {
+  theme: Theme;
+  /** Column headers, left to right. */
+  columns: string[];
+  rows: HeatMapRow[];
+  /** Value of the hottest cell, driving the colour scale (≥1). */
+  maxCell: number;
+  /** Small caption over the row-label column, e.g. "Grupo". */
+  rowHeader?: string;
+  /** Render the right-hand per-row total column (default true). */
+  showTotals?: boolean;
+  /** Cell tooltip text; defaults to "label · column · value". */
+  formatCellTitle?: (rowLabel: string, column: string, value: number) => string;
+}
+
+/**
+ * Dependency-free heat-map: a CSS grid of cells shaded by a single-hue (brand green)
+ * sequential ramp — alpha scales with each cell's share of `maxCell`, so darker = more.
+ * Zero cells fall back to the track colour; the count sits inside each non-empty cell
+ * with intensity-aware contrast. A compact "menos → mais" swatch legend anchors the
+ * scale. Used for the Dashboard "goals by group × 15-min interval".
+ */
+export function HeatMap({
+  theme,
+  columns,
+  rows,
+  maxCell,
+  rowHeader = "",
+  showTotals = true,
+  formatCellTitle = (label, column, value) => `${label} · ${column} · ${value}`,
+}: HeatMapProps) {
+  const isLight = theme === "classic-light";
+  const rgb = isLight ? "0,156,59" : "0,228,118";
+  const trackColor = isLight ? "#f1f5f9" : "rgba(255,255,255,0.05)";
+  const headClasses = isLight ? "text-slate-500" : "text-slate-400";
+  const labelClasses = isLight ? "text-slate-700" : "text-slate-200";
+  const totalClasses = isLight ? "text-slate-900" : "text-white";
+  const denom = Math.max(1, maxCell);
+  const templateCols = `2rem repeat(${columns.length}, minmax(0, 1fr))${showTotals ? " 2rem" : ""}`;
+
+  const cellStyle = (v: number) => {
+    if (v <= 0) return { backgroundColor: trackColor, color: "transparent" };
+    const intensity = v / denom;
+    const alpha = 0.16 + 0.84 * intensity;
+    const text = isLight
+      ? intensity >= 0.5
+        ? "#ffffff"
+        : "#0f172a"
+      : intensity >= 0.45
+        ? "#04231a"
+        : "#cbd5e1";
+    return { backgroundColor: `rgba(${rgb},${alpha.toFixed(3)})`, color: text };
+  };
+
+  return (
+    <div className="flex flex-col gap-2">
+      <div className="grid items-center gap-1" style={{ gridTemplateColumns: templateCols }}>
+        {/* Header row */}
+        <span className={`font-mono text-[9px] uppercase tracking-wider ${headClasses}`}>{rowHeader}</span>
+        {columns.map((c) => (
+          <span key={c} className={`text-center font-mono text-[9px] uppercase tracking-wider ${headClasses}`}>
+            {c}
+          </span>
+        ))}
+        {showTotals && (
+          <span className={`text-center font-mono text-[9px] uppercase tracking-wider ${headClasses}`}>Σ</span>
+        )}
+
+        {/* Data rows */}
+        {rows.map((row) => (
+          <Fragment key={row.label}>
+            <span className={`pr-1 text-right font-archivo text-xs ${labelClasses}`}>{row.label}</span>
+            {row.cells.map((v, i) => (
+              <div
+                key={columns[i] ?? i}
+                title={formatCellTitle(row.label, columns[i] ?? "", v)}
+                className="flex h-9 items-center justify-center rounded font-mono text-[10px] tabular-nums transition-colors"
+                style={cellStyle(v)}
+              >
+                {v || ""}
+              </div>
+            ))}
+            {showTotals && (
+              <span className={`text-center font-mono text-[10px] tabular-nums ${totalClasses}`}>
+                {row.total ?? row.cells.reduce((s, n) => s + n, 0)}
+              </span>
+            )}
+          </Fragment>
+        ))}
+      </div>
+
+      {/* Scale legend */}
+      <div className={`flex items-center gap-1.5 self-end font-mono text-[9px] uppercase tracking-wider ${headClasses}`}>
+        <span>menos</span>
+        {[0.12, 0.35, 0.58, 0.81, 1].map((t) => (
+          <span
+            key={t}
+            className="h-2.5 w-2.5 rounded-sm"
+            style={{ backgroundColor: `rgba(${rgb},${(0.16 + 0.84 * t).toFixed(3)})` }}
+          />
+        ))}
+        <span>mais</span>
+      </div>
+    </div>
   );
 }
 

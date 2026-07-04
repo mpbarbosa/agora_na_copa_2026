@@ -2,15 +2,19 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import type { Match, StandingsRow } from "../src/types";
 import {
+  GOAL_INTERVAL_LABELS,
   TEAM_COUNT,
   aggregateContinentByPhase,
+  aggregateGoalsByGroupInterval,
   aggregateGoalsByMinute,
   aggregateGoalsByPhase,
   collectGoalMinutes,
   continentBreakdown,
   continentByPhase,
+  goalIntervalIndex,
   goalScorerTeams,
   goalsByGroup,
+  goalsByGroupAndInterval,
   goalsByMinute,
   goalsByPhase,
   matchStatusBreakdown,
@@ -293,6 +297,71 @@ test("aggregateGoalsByPhase ignores live/unfinished knockout ties", () => {
     { phase: "Fase de grupos", goals: 10, played: 4 },
     { phase: "16-avos", goals: 3, played: 1 },
   ]);
+});
+
+test("goalIntervalIndex buckets minutes into 15-min intervals with a 90+ overflow", () => {
+  assert.equal(GOAL_INTERVAL_LABELS.length, 7);
+  assert.equal(goalIntervalIndex(1), 0); // 1-15
+  assert.equal(goalIntervalIndex(15), 0);
+  assert.equal(goalIntervalIndex(16), 1); // 16-30
+  assert.equal(goalIntervalIndex(45), 2); // 31-45 (regulation first half)
+  assert.equal(goalIntervalIndex(46), 3); // 46-60 — a folded 45'+X lands here too
+  assert.equal(goalIntervalIndex(90), 5); // 76-90
+  assert.equal(goalIntervalIndex(91), 6); // 90+ overflow
+  assert.equal(goalIntervalIndex(126), 6);
+});
+
+test("aggregateGoalsByGroupInterval buckets each goal by the scoring side's group and minute", () => {
+  const timeline: Record<string, MatchGoalTimeline> = {
+    "bra-jpn": { teamA: [10, 50], teamB: [90] }, // BRA(L) → 1-15, 46-60 ; JPN(L) → 76-90
+    "arg-ger": { teamA: [46], teamB: [120] }, // ARG(C) → 46-60 ; GER(F) → 90+
+  };
+  const sideCodes = {
+    "bra-jpn": { a: "BRA", b: "JPN" },
+    "arg-ger": { a: "ARG", b: "GER" },
+  };
+  const groupByCode = { BRA: "L", JPN: "L", ARG: "C", GER: "F" };
+  const out = aggregateGoalsByGroupInterval(timeline, sideCodes, groupByCode);
+
+  assert.deepEqual([...GOAL_INTERVAL_LABELS], out.intervals);
+  // Rows cover every group in the map, ordered alphabetically, even zero ones.
+  assert.deepEqual(out.rows.map((r) => r.group), ["C", "F", "L"]);
+  const byGroup = Object.fromEntries(out.rows.map((r) => [r.group, r]));
+  assert.deepEqual(byGroup.C.cells, [0, 0, 0, 1, 0, 0, 0]); // ARG 46'
+  assert.deepEqual(byGroup.F.cells, [0, 0, 0, 0, 0, 0, 1]); // GER 120'
+  assert.deepEqual(byGroup.L.cells, [1, 0, 0, 1, 0, 1, 0]); // BRA 10'/50' + JPN 90'
+  assert.equal(byGroup.L.total, 3);
+  assert.equal(out.maxCell, 1);
+  assert.equal(out.total, 5);
+});
+
+test("aggregateGoalsByGroupInterval skips goals with no side-code or no group mapping", () => {
+  const timeline: Record<string, MatchGoalTimeline> = {
+    mapped: { teamA: [30], teamB: [] },
+    unmapped: { teamA: [40], teamB: [] }, // no entry in sideCodes → skipped
+  };
+  const sideCodes = { mapped: { a: "BRA", b: "JPN" } };
+  const groupByCode = { BRA: "L" }; // JPN absent → its goals (none here) would be skipped too
+  const out = aggregateGoalsByGroupInterval(timeline, sideCodes, groupByCode);
+  assert.equal(out.total, 1); // only BRA's 30' counted
+  assert.deepEqual(out.rows.map((r) => r.group), ["L"]);
+});
+
+test("goalsByGroupAndInterval reconciles with the all-teams goal total and stays rectangular", () => {
+  const heat = goalsByGroupAndInterval();
+  assert.equal(heat.intervals.length, GOAL_INTERVAL_LABELS.length);
+  assert.ok(heat.rows.length > 0, "expected seeded groups");
+  // Groups are ordered A→L and every row has one cell per interval.
+  assert.deepEqual(heat.rows.map((r) => r.group), [...heat.rows.map((r) => r.group)].sort());
+  for (const r of heat.rows) {
+    assert.equal(r.cells.length, heat.intervals.length, `${r.group} row not rectangular`);
+    assert.equal(r.total, r.cells.reduce((s, n) => s + n, 0), `${r.group} total mismatch`);
+    for (const c of r.cells) assert.ok(c <= heat.maxCell, "cell exceeds reported maxCell");
+  }
+  // Every goal has a scoring team with a group, so the grid holds all of them.
+  const allGoals = goalsByMinute(null).reduce((s, d) => s + d.goals, 0);
+  assert.equal(heat.total, allGoals);
+  assert.ok(heat.maxCell >= 1);
 });
 
 test("goalsByPhase leads with the group stage and never exceeds bracket order", () => {
