@@ -1077,7 +1077,10 @@
       "instagram": "mosalah",
       "wikipedia": "https://pt.wikipedia.org/wiki/Mohamed_Salah"
     },
-    "instagramPostUrl": "https://www.instagram.com/p/DZn4QqYjQg0/",
+    "instagramPostUrls": [
+      "https://www.instagram.com/p/DZn4QqYjQg0/",
+      "https://www.instagram.com/p/DaWFkJniUoa/"
+    ],
     "worldCupNote": "## Leitura\nSalah é o farol do Egito e cumpriu seu papel: com o gol da virada sobre a Nova Zelândia e a vaga garantida, o capitão levou os Faraós ao mata-mata. Astro do Liverpool e principal nome do Egito, é a esperança egípcia na próxima fase.\n## Desempenho\nComeçou discreto no empate em 1 a 1 com a Bélgica, substituído aos 76. Respondeu contra a Nova Zelândia: marcou aos 67 o gol que completou a virada no 3 a 1. No fechamento, no 1 a 1 com o Irã, atuou até os 57 sem balançar as redes, mas o empate bastou para classificar o Egito. Ficha limpa.\n## Números\nJ3 · 1 gol · 0 cartões. O Egito terminou em 2º no Grupo G, com 5 pontos e saldo +2, classificado às oitavas. Salah é o nome em que os Faraós depositam o sonho de avançar ainda mais.",
     "worldCupNoteUpdatedAt": "2026-06-27T03:00:00.000Z"
   },
