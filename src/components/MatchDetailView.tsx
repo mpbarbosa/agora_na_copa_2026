@@ -32,6 +32,7 @@ import MATCH_VIDEOS from "../data/matchVideos.json";
 import MATCH_ANALYSIS from "../data/matchAnalysis.json";
 import MATCH_ANALYSIS_EN from "../data/matchAnalysis.en.json";
 import { pickEditorialText } from "../data/editorial";
+import { resolvePlayerEntry } from "../data/playerRegistry";
 import MATCH_INSTAGRAM from "../data/matchInstagram.json";
 import { resolveVenueTimeZone } from "../utils/venueCoordinates";
 import type { TeamLineupsMap } from "../utils/teamLineup";
@@ -403,13 +404,39 @@ export function MatchDetailView({
     [currentLineupEntry, currentMatch],
   );
 
-  const resolvePlayerFromKey = (key: StoredIncidentPlayerKey): Player => {
+  const resolvePlayerFromKey = (key: StoredIncidentPlayerKey, teamCode?: string): Player => {
     const found = currentLineupPlayers.find(
       (p) =>
         (key.id !== undefined && p.id === key.id) ||
         isIncidentPlayerNameMatch(p.name, key.name),
     );
-    return found ?? {
+    if (found) return found;
+    // Not in the loaded lineup (the incident arrived before the lineup, or the mention is a
+    // name-only reference): enrich from the squad registry so the card shows the real shirt
+    // number, position and bio instead of the "0 / Meio-campista" placeholder. Resolves by
+    // FIFA id first (key.id), then by name within the team.
+    const entry = resolvePlayerEntry(teamCode ?? "", key.name, Number.NaN, key.id);
+    if (entry) {
+      return {
+        id: entry.fifaId,
+        name: entry.name,
+        number: entry.number,
+        position: entry.position,
+        x: 50,
+        y: 50,
+        fifaId: entry.fifaId,
+        fullName: entry.fullName,
+        club: entry.club,
+        pictureUrl: key.pictureUrl ?? entry.pictureUrl,
+        socials: entry.socials,
+        instagramPostUrl: entry.instagramPostUrl,
+        instagramPostUrls: entry.instagramPostUrls,
+        worldCupNote: entry.worldCupNote,
+        dateOfBirth: entry.dateOfBirth,
+        height: entry.height,
+      };
+    }
+    return {
       id: key.id ?? `ref-${normalizePlayerLookupText(key.name).replace(/\s+/g, "-")}`,
       name: key.name,
       number: 0,
@@ -422,7 +449,7 @@ export function MatchDetailView({
 
   const selectedIncidentPlayer: IncidentPlayerSelection | null = storedIncidentPlayer
     ? {
-        player: resolvePlayerFromKey(storedIncidentPlayer.playerKey),
+        player: resolvePlayerFromKey(storedIncidentPlayer.playerKey, storedIncidentPlayer.team.code),
         team: storedIncidentPlayer.team,
         opponentName: storedIncidentPlayer.opponentName,
       }
