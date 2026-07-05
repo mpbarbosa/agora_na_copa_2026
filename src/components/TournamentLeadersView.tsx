@@ -310,7 +310,7 @@ export function TournamentLeadersView({ theme, onSelectTeamLineup }: TournamentL
       try {
         const response = await fetch(apiUrl("/api/tournament-leaders"));
         if (!response.ok) {
-          throw new Error("Falha ao carregar os líderes da Copa.");
+          throw new Error(t("lideres.loadError"));
         }
 
         const data: TournamentLeadersResponse = await response.json();

@@ -10,6 +10,7 @@ import {
 } from "./PlayerOverlayCard";
 import { getPlayerSocialEntries, getPositionLabel, toTitleCasePtBr, buildPlayerSearchUrls } from "../utils/playerDisplay";
 import { usePlayerStats } from "../hooks/usePlayerStats";
+import { useT } from "../i18n";
 
 interface TeamPitchBoardProps {
   team: {
@@ -44,6 +45,7 @@ export const TeamPitchBoard: FC<TeamPitchBoardProps> = ({
   mirror = false,
   theme = "stadium-dark",
 }) => {
+  const t = useT();
   const enrichedLineup = useMemo(() => team.lineup, [team.lineup]);
   const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
   const [expandedPlayer, setExpandedPlayer] = useState<Player | null>(null);
@@ -228,7 +230,7 @@ export const TeamPitchBoard: FC<TeamPitchBoardProps> = ({
                   ) : selectedPlayer.captain ? (
                     <div className="flex justify-between py-1.5 border-b border-white/5">
                       <span className="text-white/65 font-mono">FUNÇÃO</span>
-                      <span className="font-semibold text-[#ffd700]">Capitão</span>
+                      <span className="font-semibold text-[#ffd700]">{t("teamLineup.pitchCaptain")}</span>
                     </div>
                   ) : null}
                 </div>
@@ -290,14 +292,22 @@ export const TeamPitchBoard: FC<TeamPitchBoardProps> = ({
                     onClick={() => setFeaturedPlayer(selectedPlayer)}
                     className="w-full rounded-xl border border-[#ffd700]/25 bg-[#ffd700]/10 px-3 py-2 font-mono text-[10px] font-bold uppercase tracking-widest text-[#ffd700] transition hover:bg-[#ffd700]/15 focus:outline-none focus:ring-2 focus:ring-[#ffd700]/50"
                   >
-                    Abrir card completo do jogador
+                    {t("teamLineup.pitchOpenCard")}
                   </button>
                 </div>
 
                 {opponentName && (
                   <div className="mt-4 p-3 bg-white/5 rounded-lg border border-white/5" id="pundit-quote">
                     <p className="text-sm text-white/85 italic font-archivo leading-6">
-                      "Para esta partida contra a {opponentName}, {selectedPlayer.name} desempenha papel fundamental no bloco tático {selectedPlayer.position === Position.FW ? "ofensivo para que romper a última linha adversária" : "sustentando a posse ou as saídas rápidas"}. "
+                      &ldquo;{t("teamLineup.pitchTactic", {
+                        opponent: opponentName,
+                        player: selectedPlayer.name,
+                        role: t(
+                          selectedPlayer.position === Position.FW
+                            ? "teamLineup.pitchRoleFw"
+                            : "teamLineup.pitchRoleOther",
+                        ),
+                      })}&rdquo;
                     </p>
                   </div>
                 )}
@@ -383,7 +393,7 @@ export const TeamPitchBoard: FC<TeamPitchBoardProps> = ({
             theme as "classic-light" | "stadium-dark",
           )}
           details={[
-            { label: "Posição", value: getPositionLabel(featuredPlayer.position) },
+            { label: t("teamLineup.pitchPosition"), value: getPositionLabel(featuredPlayer.position) },
             ...(featuredPlayer.dateOfBirth
               ? [{ label: "Nascimento", value: formatBirthDate(featuredPlayer.dateOfBirth) }]
               : []),

@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { LineupEntry, Match, TeamRef } from "../types";
 import { FlagIcon } from "./FlagIcon";
 import { TeamPitchBoard } from "./TeamPitchBoard";
+import { useT } from "../i18n";
 
 interface PitchLineupProps {
   match: Match;
@@ -10,6 +11,7 @@ interface PitchLineupProps {
 }
 
 export const PitchLineup: React.FC<PitchLineupProps> = ({ match, onSelectTeamLineup, lineupEntry }) => {
+  const t = useT();
   const [activeTeam, setActiveTeam] = useState<"A" | "B">("A");
 
   const teamALineup = lineupEntry?.teamA.players ?? match.teamA.lineup;
@@ -78,8 +80,8 @@ export const PitchLineup: React.FC<PitchLineupProps> = ({ match, onSelectTeamLin
           id="pitch-lineup-source-note"
         >
           {activeLineupSource.source === "fifa"
-            ? "Escalação oficial FIFA"
-            : "Escalação estimada (dados locais)"}
+            ? t("teamLineup.lineupOfficial")
+            : t("teamLineup.lineupEstimated")}
         </p>
       )}
 

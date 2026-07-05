@@ -79,6 +79,15 @@ export const teamLineupCatalog: CatalogModule = {
     "teamLineup.abbrWon": "V",
     "teamLineup.abbrDrawn": "E",
     "teamLineup.abbrLost": "D",
+    "teamLineup.pitchCaptain": "Capitão",
+    "teamLineup.pitchPosition": "Posição",
+    "teamLineup.pitchOpenCard": "Abrir card completo do jogador",
+    "teamLineup.pitchTactic":
+      "Para esta partida contra {opponent}, {player} desempenha papel fundamental no bloco tático {role}.",
+    "teamLineup.pitchRoleFw": "ofensivo, buscando romper a última linha adversária",
+    "teamLineup.pitchRoleOther": "sustentando a posse ou as saídas rápidas",
+    "teamLineup.leaderYellowTitle": "Cartões amarelos",
+    "teamLineup.leaderRedTitle": "Cartões vermelhos",
   },
   es: {
     "teamLineup.updateUnavailable": "Actualización no disponible",
@@ -155,6 +164,15 @@ export const teamLineupCatalog: CatalogModule = {
     "teamLineup.abbrWon": "G",
     "teamLineup.abbrDrawn": "E",
     "teamLineup.abbrLost": "P",
+    "teamLineup.pitchCaptain": "Capitán",
+    "teamLineup.pitchPosition": "Posición",
+    "teamLineup.pitchOpenCard": "Abrir la ficha completa del jugador",
+    "teamLineup.pitchTactic":
+      "Para este partido ante {opponent}, {player} cumple un papel clave en el bloque táctico {role}.",
+    "teamLineup.pitchRoleFw": "ofensivo, buscando romper la última línea rival",
+    "teamLineup.pitchRoleOther": "sosteniendo la posesión o las salidas rápidas",
+    "teamLineup.leaderYellowTitle": "Tarjetas amarillas",
+    "teamLineup.leaderRedTitle": "Tarjetas rojas",
   },
   en: {
     "teamLineup.updateUnavailable": "Update unavailable",
@@ -231,5 +249,14 @@ export const teamLineupCatalog: CatalogModule = {
     "teamLineup.abbrWon": "W",
     "teamLineup.abbrDrawn": "D",
     "teamLineup.abbrLost": "L",
+    "teamLineup.pitchCaptain": "Captain",
+    "teamLineup.pitchPosition": "Position",
+    "teamLineup.pitchOpenCard": "Open full player card",
+    "teamLineup.pitchTactic":
+      "In this match against {opponent}, {player} plays a key role in the {role} tactical block.",
+    "teamLineup.pitchRoleFw": "attacking side, looking to break the opponent's last line",
+    "teamLineup.pitchRoleOther": "sustaining possession or quick transitions",
+    "teamLineup.leaderYellowTitle": "Yellow cards",
+    "teamLineup.leaderRedTitle": "Red cards",
   },
 };

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { toInstagramEmbedUrl } from "../utils/instagram";
+import { useT } from "../i18n";
 
 interface InstagramPostFrameProps {
   /** The post/reel permalink to embed (must be an instagram.com URL). */
@@ -24,6 +25,7 @@ const DEFAULT_HEIGHT = 640;
  * if the iframe fails to load.
  */
 export function InstagramPostFrame({ permalink, id }: InstagramPostFrameProps) {
+  const t = useT();
   const embedUrl = toInstagramEmbedUrl(permalink);
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [height, setHeight] = useState(DEFAULT_HEIGHT);
@@ -55,7 +57,7 @@ export function InstagramPostFrame({ permalink, id }: InstagramPostFrameProps) {
       ref={iframeRef}
       id={id}
       src={embedUrl}
-      title="Publicação no Instagram"
+      title={t("aoVivo.instagramPostTitle")}
       loading="lazy"
       scrolling="no"
       className="mx-auto w-full max-w-[540px] rounded-xl border-0 bg-white"

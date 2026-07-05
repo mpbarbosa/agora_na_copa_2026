@@ -117,6 +117,15 @@ export const fanSocialCatalog: CatalogModule = {
     "fanSocial.trendingHint": "Toque numa hashtag para filtrar o feed",
     "fanSocial.postCountSingular": "post",
     "fanSocial.postCountPlural": "posts",
+
+    // Reddit feed + predictor section
+    "fanSocial.redditTitle": "Repercussão no Reddit",
+    "fanSocial.redditAria": "Repercussão da Copa no Reddit",
+    "fanSocial.redditThousand": "mil",
+    "fanSocial.predictorSectionFallback": "Prognóstico",
+    "fanSocial.redditSubtitle": "O que a torcida está discutindo no Reddit",
+    "fanSocial.redditComments": "coment.",
+    "fanSocial.redditOpen": "Abrir no Reddit",
   },
   es: {
     // FanZoneView — header
@@ -230,6 +239,15 @@ export const fanSocialCatalog: CatalogModule = {
     "fanSocial.trendingHint": "Toca un hashtag para filtrar el feed",
     "fanSocial.postCountSingular": "post",
     "fanSocial.postCountPlural": "posts",
+
+    // Reddit feed + predictor section
+    "fanSocial.redditTitle": "Repercusión en Reddit",
+    "fanSocial.redditAria": "Repercusión del Mundial en Reddit",
+    "fanSocial.redditThousand": "mil",
+    "fanSocial.predictorSectionFallback": "Pronóstico",
+    "fanSocial.redditSubtitle": "Lo que la hinchada está discutiendo en Reddit",
+    "fanSocial.redditComments": "coment.",
+    "fanSocial.redditOpen": "Abrir en Reddit",
   },
   en: {
     // FanZoneView — header
@@ -343,5 +361,14 @@ export const fanSocialCatalog: CatalogModule = {
     "fanSocial.trendingHint": "Tap a hashtag to filter the feed",
     "fanSocial.postCountSingular": "post",
     "fanSocial.postCountPlural": "posts",
+
+    // Reddit feed + predictor section
+    "fanSocial.redditTitle": "Reddit buzz",
+    "fanSocial.redditAria": "World Cup buzz on Reddit",
+    "fanSocial.redditThousand": "K",
+    "fanSocial.predictorSectionFallback": "Prediction",
+    "fanSocial.redditSubtitle": "What fans are talking about on Reddit",
+    "fanSocial.redditComments": "comments",
+    "fanSocial.redditOpen": "Open on Reddit",
   },
 };

@@ -17,7 +17,7 @@ interface Props {
  * uses Inter (font-sans) at 15px for comfortable long-form reading.
  */
 export function WorldCupNoteCarousel({ note, isLight, mutedClasses, id }: Props) {
-  const { locale } = useLocale();
+  const { t, locale } = useLocale();
   const sections = parseNoteSections(note);
   const [active, setActive] = useState(0);
   const trackRef = useRef<HTMLDivElement>(null);
@@ -76,7 +76,7 @@ export function WorldCupNoteCarousel({ note, isLight, mutedClasses, id }: Props)
       <div
         className="mt-3 flex items-center justify-center gap-1.5"
         role="tablist"
-        aria-label="Seções da análise"
+        aria-label={t("playerCard.noteSectionsAria")}
       >
         {sections.map((section, i) => (
           <button

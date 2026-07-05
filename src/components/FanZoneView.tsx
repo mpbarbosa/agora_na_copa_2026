@@ -544,10 +544,10 @@ export function FanZoneView({ theme }: FanZoneViewProps) {
                     : "border-[#ffd84d]/40 text-[#ffd84d]/80"
                 }`}
               >
-                Palpite simulado
+                {t("fanSocial.predictorSimulatedBadge")}
               </span>
             )}
-            {parseNoteSections(prediction.text, "Prognóstico").map((section) => (
+            {parseNoteSections(prediction.text, t("fanSocial.predictorSectionFallback")).map((section) => (
               <div key={section.label} className="mt-3">
                 <p className={`font-mono text-[10px] uppercase tracking-wider ${subtleClasses}`}>{section.label}</p>
                 <p className={`mt-1 font-archivo text-sm leading-6 ${mutedClasses}`}>{section.body}</p>

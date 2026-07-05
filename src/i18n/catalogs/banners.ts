@@ -29,6 +29,9 @@ export const bannersCatalog: CatalogModule = {
     "banners.share.shareTitle": "Compartilhar",
     "banners.share.shareAria": "Compartilhar o app",
     "banners.share.linkCopied": "Link copiado!",
+    "banners.shareTitle": "Agora na Copa 26",
+    "banners.shareText":
+      "Acompanhe a Copa do Mundo FIFA 2026 ao vivo: onde assistir, escalações, grupos e chaveamento.",
 
     // OnlineCountBadge
     "banners.online.titleOne": "{count} fã online agora",
@@ -87,6 +90,9 @@ export const bannersCatalog: CatalogModule = {
     "banners.share.shareTitle": "Compartir",
     "banners.share.shareAria": "Compartir la app",
     "banners.share.linkCopied": "¡Enlace copiado!",
+    "banners.shareTitle": "Ahora en el Mundial 26",
+    "banners.shareText":
+      "Sigue la Copa Mundial de la FIFA 2026 en vivo: dónde ver, alineaciones, grupos y llave.",
 
     // OnlineCountBadge
     "banners.online.titleOne": "{count} fan en línea ahora",
@@ -145,6 +151,9 @@ export const bannersCatalog: CatalogModule = {
     "banners.share.shareTitle": "Share",
     "banners.share.shareAria": "Share the app",
     "banners.share.linkCopied": "Link copied!",
+    "banners.shareTitle": "Now at the World Cup 26",
+    "banners.shareText":
+      "Follow the FIFA World Cup 2026 live: where to watch, lineups, groups and bracket.",
 
     // OnlineCountBadge
     "banners.online.titleOne": "{count} fan online now",

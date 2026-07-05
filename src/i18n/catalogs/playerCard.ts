@@ -68,6 +68,9 @@ export const playerCardCatalog: CatalogModule = {
     "playerCard.refereeRole": "Árbitro(a)",
     "playerCard.refereeRoleCountry": "Árbitro(a) • {country}",
     "playerCard.refereeBlurb": "Árbitro(a) principal designado(a) pela FIFA para a partida.",
+
+    // Note carousel
+    "playerCard.noteSectionsAria": "Seções da análise",
   },
   es: {
     // Shared chrome
@@ -132,6 +135,9 @@ export const playerCardCatalog: CatalogModule = {
     "playerCard.refereeRole": "Árbitro(a)",
     "playerCard.refereeRoleCountry": "Árbitro(a) • {country}",
     "playerCard.refereeBlurb": "Árbitro(a) principal designado(a) por la FIFA para el partido.",
+
+    // Note carousel
+    "playerCard.noteSectionsAria": "Secciones del análisis",
   },
   en: {
     // Shared chrome
@@ -196,5 +202,8 @@ export const playerCardCatalog: CatalogModule = {
     "playerCard.refereeRole": "Referee",
     "playerCard.refereeRoleCountry": "Referee • {country}",
     "playerCard.refereeBlurb": "Head referee assigned by FIFA for the match.",
+
+    // Note carousel
+    "playerCard.noteSectionsAria": "Analysis sections",
   },
 };

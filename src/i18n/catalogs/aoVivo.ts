@@ -153,6 +153,10 @@ export const aoVivoCatalog: CatalogModule = {
     "aoVivo.analysis.previewLabel": "Prévia",
     "aoVivo.instagram.title": "No Instagram",
     "aoVivo.instagram.open": "Abrir no Instagram",
+    "aoVivo.instagramPostTitle": "Publicação no Instagram",
+
+    // Affiliate gear strip
+    "aoVivo.affiliateTitle": "Equipe para assistir à Copa",
 
     // Lineup tab
     "aoVivo.lineup.title": "CENTRAL TÁTICA E DISTRIBUIÇÃO ESPACIAL",
@@ -316,6 +320,10 @@ export const aoVivoCatalog: CatalogModule = {
     "aoVivo.analysis.previewLabel": "Previa",
     "aoVivo.instagram.title": "En Instagram",
     "aoVivo.instagram.open": "Abrir en Instagram",
+    "aoVivo.instagramPostTitle": "Publicación en Instagram",
+
+    // Affiliate gear strip
+    "aoVivo.affiliateTitle": "Equipo para ver el Mundial",
 
     // Lineup tab
     "aoVivo.lineup.title": "CENTRAL TÁCTICA Y DISTRIBUCIÓN ESPACIAL",
@@ -479,6 +487,10 @@ export const aoVivoCatalog: CatalogModule = {
     "aoVivo.analysis.previewLabel": "Preview",
     "aoVivo.instagram.title": "On Instagram",
     "aoVivo.instagram.open": "Open on Instagram",
+    "aoVivo.instagramPostTitle": "Instagram post",
+
+    // Affiliate gear strip
+    "aoVivo.affiliateTitle": "Gear to watch the World Cup",
 
     // Lineup tab
     "aoVivo.lineup.title": "TACTICAL HUB AND SPATIAL LAYOUT",

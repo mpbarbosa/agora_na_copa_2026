@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Tv, Volume2, Shirt, Popcorn, Snowflake, type LucideIcon } from "lucide-react";
 import { AFFILIATE_PRODUCTS, withAffiliateTag } from "../config";
 import type { AffiliateProduct } from "../types";
+import { useT } from "../i18n";
 
 interface Props {
   theme: "classic-light" | "stadium-dark";
@@ -52,6 +53,7 @@ function ProductMedia({ product, accentClass }: { product: AffiliateProduct; acc
  * hook for GA4 click tracking added in Step 4.
  */
 export function AffiliateProducts({ theme, products = AFFILIATE_PRODUCTS }: Props) {
+  const t = useT();
   const isDark = theme !== "classic-light";
   const card = isDark
     ? "bg-[#121414]/95 border-white/10 text-slate-100"
@@ -66,11 +68,11 @@ export function AffiliateProducts({ theme, products = AFFILIATE_PRODUCTS }: Prop
     <section
       className={`w-full rounded-2xl border p-5 ${card}`}
       id="affiliate-products"
-      aria-label="Equipe para assistir à Copa"
+      aria-label={t("aoVivo.affiliateTitle")}
     >
       <div className="mb-4">
         <h3 className="font-anton text-lg uppercase tracking-wider">
-          Equipe para assistir à Copa
+          {t("aoVivo.affiliateTitle")}
         </h3>
         <p className={`mt-0.5 font-mono text-[10px] uppercase tracking-wider ${muted}`}>
           Gear pra curtir os jogos · link direto pra Amazon

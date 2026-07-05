@@ -3,7 +3,7 @@ import { standings } from "../data/tournament";
 import type { RedditPost, RedditResponse } from "../types";
 import { RedditBrandIcon } from "./RedditBrandIcon";
 import { FlagIcon } from "./FlagIcon";
-import { getActiveLocale, localeToIntlTag } from "../i18n";
+import { getActiveLocale, localeToIntlTag, translate, useT } from "../i18n";
 
 interface RedditPostsFeedProps {
   theme: "classic-light" | "stadium-dark";
@@ -11,8 +11,12 @@ interface RedditPostsFeedProps {
 
 const FLAG_BY_CODE = new Map(standings.map((row) => [row.code, row.flagSvg]));
 
-const formatCount = (n: number): string =>
-  n >= 1000 ? `${Number((n / 1000).toFixed(1)).toLocaleString(localeToIntlTag(getActiveLocale()))} mil` : `${n}`;
+const formatCount = (n: number): string => {
+  const locale = getActiveLocale();
+  return n >= 1000
+    ? `${Number((n / 1000).toFixed(1)).toLocaleString(localeToIntlTag(locale))} ${translate(locale, "fanSocial.redditThousand")}`
+    : `${n}`;
+};
 
 // "Repercussão no Reddit" feed on the Redes Sociais tab. Reads /api/reddit —
 // curated posts enriched with live Reddit data (or the curated seed when Reddit
@@ -20,6 +24,7 @@ const formatCount = (n: number): string =>
 // stays blocker- and offline-resilient. Renders nothing until at least one post
 // is available, keeping the tab clean.
 export function RedditPostsFeed({ theme }: RedditPostsFeedProps) {
+  const t = useT();
   const [posts, setPosts] = useState<RedditPost[]>([]);
 
   useEffect(() => {
@@ -53,17 +58,17 @@ export function RedditPostsFeed({ theme }: RedditPostsFeedProps) {
   return (
     <section
       id="reddit-posts-feed"
-      aria-label="Repercussão da Copa no Reddit"
+      aria-label={t("fanSocial.redditAria")}
       className={`mt-6 rounded-3xl border p-5 ${shellClasses}`}
     >
       <div className="flex items-center gap-2">
         <RedditBrandIcon size={20} />
         <h3 className={`font-anton text-lg uppercase tracking-wide ${headingClasses}`}>
-          Repercussão no Reddit
+          {t("fanSocial.redditTitle")}
         </h3>
       </div>
       <p className={`mt-1 font-mono text-[10px] uppercase tracking-wider ${mutedClasses}`}>
-        O que a torcida está discutindo no Reddit
+        {t("fanSocial.redditSubtitle")}
       </p>
 
       <div className="mt-4 flex flex-col gap-3">
@@ -93,14 +98,14 @@ export function RedditPostsFeed({ theme }: RedditPostsFeedProps) {
                 <span className={`font-mono text-[10px] uppercase tracking-wider ${mutedClasses}`}>
                   {post.score !== undefined && `▲ ${formatCount(post.score)}`}
                   {post.score !== undefined && post.numComments !== undefined && " • "}
-                  {post.numComments !== undefined && `${formatCount(post.numComments)} coment.`}
+                  {post.numComments !== undefined && `${formatCount(post.numComments)} ${t("fanSocial.redditComments")}`}
                 </span>
                 <span
                   id={`reddit-post-open-${post.id}`}
                   className={`inline-flex items-center gap-1.5 rounded-xl border px-3 py-1.5 font-mono text-[10px] font-bold uppercase tracking-wider transition ${openClasses}`}
                 >
                   <RedditBrandIcon size={13} />
-                  Abrir no Reddit
+                  {t("fanSocial.redditOpen")}
                 </span>
               </div>
             </a>

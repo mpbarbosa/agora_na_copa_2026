@@ -52,6 +52,7 @@ export const lideresCatalog: CatalogModule = {
     "lideres.detailClub": "Clube atual",
     "lideres.detailPosition": "Posição",
     "lideres.officialHighlight": "Destaque oficial do torneio para {team}.",
+    "lideres.loadError": "Falha ao carregar os líderes da Copa.",
   },
   es: {
     "lideres.title": "Líderes del Torneo",
@@ -101,6 +102,7 @@ export const lideresCatalog: CatalogModule = {
     "lideres.detailClub": "Club actual",
     "lideres.detailPosition": "Posición",
     "lideres.officialHighlight": "Destacado oficial del torneo por {team}.",
+    "lideres.loadError": "Error al cargar los líderes del Mundial.",
   },
   en: {
     "lideres.title": "Tournament Leaders",
@@ -150,5 +152,6 @@ export const lideresCatalog: CatalogModule = {
     "lideres.detailClub": "Current club",
     "lideres.detailPosition": "Position",
     "lideres.officialHighlight": "Official tournament standout for {team}.",
+    "lideres.loadError": "Failed to load the World Cup leaders.",
   },
 };

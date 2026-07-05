@@ -1169,7 +1169,7 @@ export const TeamLineupView: React.FC<TeamLineupViewProps> = ({ team, theme, onB
                   onSelectPlayer={setSelectedPlayer}
                 />
                 <LeaderStrip
-                  title="Cartões amarelos"
+                  title={t("teamLineup.leaderYellowTitle")}
                   metricLabel="amarelo"
                   entries={teamView.leaders.yellowCards}
                   metricFor={(entry) => entry.yellowCards}
@@ -1177,7 +1177,7 @@ export const TeamLineupView: React.FC<TeamLineupViewProps> = ({ team, theme, onB
                   onSelectPlayer={setSelectedPlayer}
                 />
                 <LeaderStrip
-                  title="Cartões vermelhos"
+                  title={t("teamLineup.leaderRedTitle")}
                   metricLabel="vermelho"
                   entries={teamView.leaders.redCards}
                   metricFor={(entry) => entry.redCards}

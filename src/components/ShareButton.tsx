@@ -9,8 +9,6 @@ interface Props {
 }
 
 const SHARE_DATA = {
-  title: "Agora na Copa 26",
-  text: "Acompanhe a Copa do Mundo FIFA 2026 ao vivo: onde assistir, escalações, grupos e chaveamento.",
   url: SITE_URL,
 };
 
@@ -26,9 +24,14 @@ export function ShareButton({ theme }: Props) {
   const accent = isDark ? "text-[#00e476]" : "text-[#007a2e]";
 
   const handleShare = async () => {
+    const sharePayload = {
+      title: t("banners.shareTitle"),
+      text: t("banners.shareText"),
+      url: SHARE_DATA.url,
+    };
     if (typeof navigator !== "undefined" && navigator.share) {
       try {
-        await navigator.share(SHARE_DATA);
+        await navigator.share(sharePayload);
         trackEvent("share", { method: "web_share", content_type: "app" });
       } catch {
         /* user dismissed the share sheet — no-op */
