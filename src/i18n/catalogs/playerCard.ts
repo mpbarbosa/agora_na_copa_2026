@@ -8,6 +8,7 @@ export const playerCardCatalog: CatalogModule = {
   pt: {
     // Shared chrome
     "playerCard.close": "Fechar",
+    "playerCard.starBadge": "★ Craque da Copa",
     "playerCard.openInstagram": "Abrir no Instagram",
     "playerCard.instagramHighlightOne": "Destaque no Instagram",
     "playerCard.instagramHighlightMany": "Destaques no Instagram",
@@ -71,6 +72,7 @@ export const playerCardCatalog: CatalogModule = {
   es: {
     // Shared chrome
     "playerCard.close": "Cerrar",
+    "playerCard.starBadge": "★ Crack del Mundial",
     "playerCard.openInstagram": "Abrir en Instagram",
     "playerCard.instagramHighlightOne": "Destacado en Instagram",
     "playerCard.instagramHighlightMany": "Destacados en Instagram",
@@ -134,6 +136,7 @@ export const playerCardCatalog: CatalogModule = {
   en: {
     // Shared chrome
     "playerCard.close": "Close",
+    "playerCard.starBadge": "★ World Cup Star",
     "playerCard.openInstagram": "Open on Instagram",
     "playerCard.instagramHighlightOne": "Instagram highlight",
     "playerCard.instagramHighlightMany": "Instagram highlights",

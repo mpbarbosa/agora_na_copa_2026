@@ -5,6 +5,7 @@ import { FlagIcon } from "./FlagIcon";
 import { useEscapeKey } from "../hooks/useEscapeKey";
 import { getPlayerSocialEntries, buildPlayerSearchUrls, formatFollowerCount } from "../utils/playerDisplay";
 import { WorldCupNoteCarousel } from "./WorldCupNoteCarousel";
+import { localizeWorldCupNote } from "../data/starNotesLocale";
 import { PlayerVideoRail } from "./PlayerVideoRail";
 import { PlayerNoteFreshness } from "./PlayerNoteFreshness";
 import { InstagramPostFrame } from "./InstagramPostFrame";
@@ -674,7 +675,7 @@ export function PlayerOverlayCard({
             {locale !== "es" && player.worldCupNote && (
               <>
                 <WorldCupNoteCarousel
-                  note={player.worldCupNote}
+                  note={localizeWorldCupNote(player.fifaId, player.worldCupNote, locale)!}
                   isLight={isLight}
                   mutedClasses={mutedClasses}
                   id={id ? `${id}-leitura` : undefined}

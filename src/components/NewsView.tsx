@@ -1,7 +1,8 @@
 import { useMemo, useState } from "react";
 import { news } from "../data/news";
+import { localizeNews } from "../data/news.en";
 import type { NewsArticle } from "../types";
-import { useT } from "../i18n";
+import { useLocale } from "../i18n";
 
 interface NewsViewProps {
   theme: "classic-light" | "stadium-dark";
@@ -30,15 +31,16 @@ const filterSlug = (filter: NewsFilter) =>
     .toLowerCase();
 
 export function NewsView({ theme }: NewsViewProps) {
-  const t = useT();
+  const { t, locale } = useLocale();
   const [activeFilter, setActiveFilter] = useState<NewsFilter>("Todas");
 
+  const localizedNews = useMemo(() => localizeNews(news, locale), [locale]);
   const filteredNews = useMemo(
     () =>
       activeFilter === "Todas"
-        ? news
-        : news.filter((article) => article.category === activeFilter),
-    [activeFilter],
+        ? localizedNews
+        : localizedNews.filter((article) => article.category === activeFilter),
+    [activeFilter, localizedNews],
   );
 
   const shellClasses =

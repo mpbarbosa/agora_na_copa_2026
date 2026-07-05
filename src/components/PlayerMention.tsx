@@ -11,7 +11,7 @@ type Theme = "classic-light" | "stadium-dark";
 
 /** Small read-only player card used as a hover/tap preview inside running text. */
 export function PlayerCardCompact({ player, theme }: { player: SquadPlayer; theme: Theme }) {
-  const { locale } = useLocale();
+  const { t, locale } = useLocale();
   const isDark = theme !== "classic-light";
   return (
     <div
@@ -41,7 +41,7 @@ export function PlayerCardCompact({ player, theme }: { player: SquadPlayer; them
           <p className={`mt-1 text-xs ${isDark ? "text-slate-300" : "text-slate-600"}`}>{player.club}</p>
         )}
         {locale !== "es" && player.worldCupNote && (
-          <p className="mt-1.5 font-mono text-[9px] uppercase tracking-wider text-[#009c3b]">★ Craque da Copa</p>
+          <p className="mt-1.5 font-mono text-[9px] uppercase tracking-wider text-[#009c3b]">{t("playerCard.starBadge")}</p>
         )}
       </div>
     </div>
