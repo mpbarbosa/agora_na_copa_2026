@@ -33,20 +33,15 @@ import MATCH_ANALYSIS from "../data/matchAnalysis.json";
 import MATCH_ANALYSIS_EN from "../data/matchAnalysis.en.json";
 import { pickEditorialText } from "../data/editorial";
 import MATCH_INSTAGRAM from "../data/matchInstagram.json";
-import { parseNoteSections } from "../utils/noteSections";
 import { resolveVenueTimeZone } from "../utils/venueCoordinates";
 import type { TeamLineupsMap } from "../utils/teamLineup";
 import { FlagIcon } from "./FlagIcon";
 import { PlayerOverlayCard, PlayerPictureOverlay, buildPlayerStatCells, formatBirthDate } from "./PlayerOverlayCard";
 import { usePlayerStats } from "../hooks/usePlayerStats";
 import { getPositionLabel, toTitleCasePtBr } from "../utils/playerDisplay";
-import { PitchLineup } from "./PitchLineup";
 import { MatchChatPanel } from "./MatchChatPanel";
 import { AffiliateProducts } from "./AffiliateProducts";
-import { InstagramPostFrame } from "./InstagramPostFrame";
-import { InstagramBrandIcon } from "./InstagramBrandIcon";
 import { resolveInstagramPostUrls } from "../utils/instagram";
-import { renderAnalysisWithMentions } from "./PlayerMention";
 import { MatchWeatherChip } from "./MatchWeatherChip";
 import { RefereeChip } from "./RefereeChip";
 import { RefereeCard } from "./RefereeCard";
@@ -73,6 +68,9 @@ import {
   LayoutGrid,
 } from "lucide-react";
 import { IncidentText } from "./IncidentText";
+import { MatchEditorialTab } from "./MatchEditorialTab";
+import { MatchInstagramTab } from "./MatchInstagramTab";
+import { MatchLineupTab } from "./MatchLineupTab";
 import {
   buildIncidentSpeech,
   buildIncidentPlayerSelections,
@@ -2323,123 +2321,26 @@ export function MatchDetailView({
 
         {/* TAB: PRE-GAME / POST-GAME EDITORIAL ANALYSIS */}
         {activeTab === "pregame" && locale !== "es" && matchAnalysisText && (
-          <div
-            className={`rounded-2xl border px-4 py-4 ${
-              theme === "classic-light"
-                ? "bg-slate-50 border-slate-200"
-                : "bg-[#121414]/70 border-white/10"
-            }`}
-            id="match-analysis-panel"
-            data-testid="match-analysis"
-          >
-            <p
-              className={`font-anton text-base uppercase tracking-wide ${
-                theme === "classic-light" ? "text-slate-900" : "text-white"
-              }`}
-            >
-              {currentMatch.status === "FINISHED" ? t("aoVivo.analysis.highlights") : t("aoVivo.analysis.preview")}
-            </p>
-            <div className="mt-3 space-y-3 max-w-prose">
-              {parseNoteSections(
-                matchAnalysisText,
-                currentMatch.status === "FINISHED" ? t("aoVivo.analysis.highlightsLabel") : t("aoVivo.analysis.previewLabel"),
-              ).map((section) => (
-                <div key={section.label}>
-                  <p
-                    className={`font-mono text-[10px] uppercase tracking-wider ${
-                      theme === "classic-light" ? "text-slate-500" : "text-slate-300"
-                    }`}
-                  >
-                    {section.label}
-                  </p>
-                  <p
-                    className={`mt-1 font-sans text-[15px] leading-6 ${
-                      theme === "classic-light" ? "text-slate-700" : "text-slate-200"
-                    }`}
-                  >
-                    {renderAnalysisWithMentions(section.body, theme)}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </div>
+          <MatchEditorialTab
+            analysisText={matchAnalysisText}
+            status={currentMatch.status}
+            theme={theme}
+          />
         )}
 
         {/* TAB: INSTAGRAM POST(S) FOR THIS MATCH */}
         {activeTab === "instagram" && hasMatchInstagram && (
-          <div
-            className={`rounded-2xl border px-4 py-4 ${
-              theme === "classic-light"
-                ? "bg-slate-50 border-slate-200"
-                : "bg-[#121414]/70 border-white/10"
-            }`}
-            id="match-instagram-panel"
-            data-testid="match-instagram"
-          >
-            <p
-              className={`mb-3 font-anton text-base uppercase tracking-wide ${
-                theme === "classic-light" ? "text-slate-900" : "text-white"
-              }`}
-            >
-              {t("aoVivo.instagram.title")}
-            </p>
-            <div className="mx-auto max-w-md space-y-5">
-              {matchInstagramUrls.map((postUrl, index) => (
-                <div key={postUrl} className="space-y-3">
-                  <InstagramPostFrame permalink={postUrl} id={`match-instagram-embed-${index}`} />
-                  <a
-                    href={postUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    id={`match-instagram-open-${index}`}
-                    className={`inline-flex w-full items-center justify-center gap-2 rounded-xl border py-2.5 font-mono text-[10px] font-bold uppercase tracking-wider transition ${
-                      theme === "classic-light"
-                        ? "border-slate-200 text-slate-700 hover:bg-white"
-                        : "border-white/15 text-slate-100 hover:bg-white/10"
-                    }`}
-                  >
-                    <InstagramBrandIcon size={14} />
-                    {t("aoVivo.instagram.open")}
-                  </a>
-                </div>
-              ))}
-            </div>
-          </div>
+          <MatchInstagramTab urls={matchInstagramUrls} theme={theme} />
         )}
 
         {/* TAB 2: INTERACTIVE TACTICAL LINEUPS / SQUAD PITCH */}
         {activeTab === "lineup" && (
-          <div className="w-full" id="lineups-view-container">
-            <div
-              className={`p-6 rounded-2xl border transition ${
-                theme === "classic-light"
-                  ? "bg-white border-slate-200 shadow"
-                  : "bg-gradient-to-br from-[#121414] to-[#1a1c1c] border-white/5 shadow-xl text-white"
-              }`}
-              id="lineup-tab-card"
-            >
-              <div
-                className="flex items-center justify-between mb-6"
-                id="lineup-tabs-header"
-              >
-                <div>
-                  <h3 className="font-anton text-lg tracking-wider uppercase text-slate-800 dark:text-white">
-                    {t("aoVivo.lineup.title")}
-                  </h3>
-                  <p className="text-sm font-archivo text-slate-600 dark:text-slate-300 leading-6">
-                    {t("aoVivo.lineup.desc")}
-                  </p>
-                </div>
-              </div>
-
-              {/* Soccer Dynamic Pitch Lineup Board */}
-              <PitchLineup
-                match={currentMatch}
-                onSelectTeamLineup={onSelectTeamLineup}
-                lineupEntry={teamLineups[currentMatch.id]}
-              />
-            </div>
-          </div>
+          <MatchLineupTab
+            match={currentMatch}
+            onSelectTeamLineup={onSelectTeamLineup}
+            lineupEntry={teamLineups[currentMatch.id]}
+            theme={theme}
+          />
         )}
 
         {/* Anonymous live-match chat ("Resenha ao vivo") — open only while LIVE */}

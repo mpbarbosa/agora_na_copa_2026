@@ -85,8 +85,12 @@ and composition of the above.
 
 - **Phase 0 (prerequisite):** Option 1 (done) — the new components import helpers
   from `utils/` instead of receiving closures as props.
-- **Phase 1 — leaf tabs (lowest risk):** `MatchEditorialTab`, `MatchInstagramTab`,
-  `MatchLineupTab` (~120 lines, few props). Verify against existing specs.
+- **Phase 1 — leaf tabs (lowest risk): ✅ DONE.** Extracted `MatchEditorialTab`,
+  `MatchInstagramTab`, `MatchLineupTab` into their own files (presentational, data
+  down; parent keeps the active-tab/locale visibility gates). Removed the five
+  now-orphaned imports from the view (2503 → 2404 lines). Verified: `tsc` clean,
+  240 unit tests, and the `match-instagram` / `player-mention` / `navigation` /
+  `affiliate-products` e2e specs (16 tests) all green.
 - **Phase 2 — `MatchSelectorBar`:** props `matches`, `selectedMatchId`, `onSelect`,
   `matchSelectorRailRefs`, `theme`. Covered by `simultaneous-live.spec.ts`.
 - **Phase 3 — `MatchClockConfigDrawer`:** push `customKickoffTime`/

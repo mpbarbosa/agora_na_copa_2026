@@ -9,7 +9,7 @@ Each maps to one `NAV_ITEMS` entry in `src/navigation.ts` and is mounted by `src
 
 | Component | Tab id | Lines |
 |-----------|--------|-------|
-| `MatchDetailView.tsx` | `ao-vivo` | 2503 |
+| `MatchDetailView.tsx` | `ao-vivo` | 2404 |
 | `PartidasView.tsx` | `partidas` | 365 |
 | `StandingsView.tsx` | `grupos` | 182 |
 | `TeamsView.tsx` | `selecoes` | 86 |
@@ -26,6 +26,10 @@ Each maps to one `NAV_ITEMS` entry in `src/navigation.ts` and is mounted by `src
 |-----------|---------|
 | `BracketPredictorPanel.tsx` | "Palpite do confronto" panel at the bottom of `BracketView`: pick a knockout tie whose both sides are resolved (confirmed or provisional) and auto-forecast it via `/api/predict` — the same deterministic Dixon-Coles Poisson "palpite simulado" the Fan Zone uses. Fixtures are built by `buildPredictableFixtures()` in `BracketView` |
 | `FullBracketView.tsx` | The "Chave completa" symmetric flag bracket — an alternative to `BracketView`'s per-stage columns, toggled via `#bracket-view-toggle` inside Chaveamento. Both halves of the draw (the two SF subtrees feeding the final) fan inward to a central trophy; each slot is a `FlagIcon` resolved from the same maps `BracketView` builds (`teamMeta` / `feederTeamBySlot` / `groupPositions` / `winnerSlotByNumber`), with elbow connectors drawn via border pseudo-elements and losers dimmed. Too wide for a phone, so on mobile-portrait it hides the bracket and shows a rotate-to-landscape hint (`#bracket-full-rotate-hint`). Tree walking + slot helpers live in `src/utils/knockoutFeeders.ts`. |
+| `IncidentText.tsx` | Renders one live-commentary incident's text with its mentioned player(s) as tappable buttons (opens the player overlay). Extracted from `MatchDetailView`; selection logic is the pure `src/utils/matchIncidents.ts` |
+| `MatchEditorialTab.tsx` | The "Prévia"/"Destaques da partida" editorial panel — the pré/pós-jogo analysis tab inside `MatchDetailView`. Presentational; the parent gates visibility (active tab + locale + non-empty text) |
+| `MatchInstagramTab.tsx` | The per-match Instagram post(s) tab inside `MatchDetailView` — each post an `InstagramPostFrame` + outbound "open" link. Presentational; parent passes the resolved URLs |
+| `MatchLineupTab.tsx` | The interactive tactical-lineup tab inside `MatchDetailView` — header + the dynamic `PitchLineup` board for the selected match |
 | `PitchLineup.tsx` | Visual pitch with player `x`/`y` positions from `matches.json` |
 | `TeamPitchBoard.tsx` | Team-focused pitch board used by `TeamLineupView` |
 | `TeamLineupView.tsx` | Full team lineup panel (690 lines — standalone modal/panel) |
@@ -49,7 +53,7 @@ Each maps to one `NAV_ITEMS` entry in `src/navigation.ts` and is mounted by `src
 
 ## Size cautions
 
-`MatchDetailView.tsx` (2503 lines) covers match selection, scoreboard, broadcast guide, live commentary, and pitch lineup in one file. Its pure helpers were extracted to `src/utils/matchIncidents.ts`, `src/utils/matchClock.ts`, and `src/utils/matchSelection.ts` (each unit-tested); the incident-text renderer lives in `IncidentText.tsx`. Before adding to it, consider whether the addition belongs in a sub-component. Do not read the full file for changes scoped to one section — use line-range reads.
+`MatchDetailView.tsx` (2404 lines) covers match selection, scoreboard, broadcast guide, live commentary, and pitch lineup in one file. Its pure helpers were extracted to `src/utils/matchIncidents.ts`, `src/utils/matchClock.ts`, and `src/utils/matchSelection.ts` (each unit-tested); the incident-text renderer lives in `IncidentText.tsx`, and the three leaf content tabs in `MatchEditorialTab.tsx` / `MatchInstagramTab.tsx` / `MatchLineupTab.tsx` (see `docs/MATCHDETAILVIEW_REFACTOR_PLAN.md` for the staged decomposition). Before adding to it, consider whether the addition belongs in a sub-component. Do not read the full file for changes scoped to one section — use line-range reads.
 
 `TeamLineupView.tsx` (690 lines) and `JogadoresView.tsx` (572 lines) are also large. Same caution applies.
 
