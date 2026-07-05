@@ -2361,11 +2361,12 @@ export function MatchDetailView({
             selectedIncidentPlayer.player,
             incidentPlayerStats,
             theme,
+            t,
           )}
           details={[
             { label: t("aoVivo.overlayCard.position"), value: getPositionLabel(selectedIncidentPlayer.player.position) },
             ...(selectedIncidentPlayer.player.dateOfBirth
-              ? [{ label: t("aoVivo.overlayCard.birth"), value: formatBirthDate(selectedIncidentPlayer.player.dateOfBirth) }]
+              ? [{ label: t("aoVivo.overlayCard.birth"), value: formatBirthDate(selectedIncidentPlayer.player.dateOfBirth, t) }]
               : []),
             ...(selectedIncidentPlayer.player.club
               ? [{ label: t("aoVivo.overlayCard.currentClub"), value: selectedIncidentPlayer.player.club }]

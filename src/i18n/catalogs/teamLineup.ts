@@ -81,6 +81,8 @@ export const teamLineupCatalog: CatalogModule = {
     "teamLineup.abbrLost": "D",
     "teamLineup.pitchCaptain": "Capitão",
     "teamLineup.pitchPosition": "Posição",
+    "teamLineup.pitchBirth": "Nascimento",
+    "teamLineup.pitchClub": "Clube atual",
     "teamLineup.pitchOpenCard": "Abrir card completo do jogador",
     "teamLineup.pitchTactic":
       "Para esta partida contra {opponent}, {player} desempenha papel fundamental no bloco tático {role}.",
@@ -166,6 +168,8 @@ export const teamLineupCatalog: CatalogModule = {
     "teamLineup.abbrLost": "P",
     "teamLineup.pitchCaptain": "Capitán",
     "teamLineup.pitchPosition": "Posición",
+    "teamLineup.pitchBirth": "Nacimiento",
+    "teamLineup.pitchClub": "Club actual",
     "teamLineup.pitchOpenCard": "Abrir la ficha completa del jugador",
     "teamLineup.pitchTactic":
       "Para este partido ante {opponent}, {player} cumple un papel clave en el bloque táctico {role}.",
@@ -251,6 +255,8 @@ export const teamLineupCatalog: CatalogModule = {
     "teamLineup.abbrLost": "L",
     "teamLineup.pitchCaptain": "Captain",
     "teamLineup.pitchPosition": "Position",
+    "teamLineup.pitchBirth": "Born",
+    "teamLineup.pitchClub": "Current club",
     "teamLineup.pitchOpenCard": "Open full player card",
     "teamLineup.pitchTactic":
       "In this match against {opponent}, {player} plays a key role in the {role} tactical block.",

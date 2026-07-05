@@ -10,7 +10,7 @@ import { PlayerVideoRail } from "./PlayerVideoRail";
 import { PlayerNoteFreshness } from "./PlayerNoteFreshness";
 import { InstagramPostFrame } from "./InstagramPostFrame";
 import { resolveInstagramPostUrls } from "../utils/instagram";
-import { useT, useLocale } from "../i18n";
+import { useT, useLocale, type Locale } from "../i18n";
 import PLAYER_SIGNATURES from "../data/playerSignatures.json";
 
 /** Translate function shape from `useT()`; threaded into helpers that build display text. */
@@ -141,10 +141,11 @@ export function renderSocialPlatformLabel(
   platform: keyof PlayerSocials,
   instagramFollowers?: number,
   t?: TFn,
+  locale?: Locale,
 ) {
   if (platform === "instagram") {
     const followersLabel =
-      instagramFollowers != null ? formatFollowerCount(instagramFollowers) : "";
+      instagramFollowers != null ? formatFollowerCount(instagramFollowers, locale) : "";
     return (
       <>
         <InstagramBrandIcon size={16} />
@@ -513,7 +514,7 @@ export function PlayerOverlayCard({
                       className={`inline-flex items-center justify-center rounded border px-3 py-1.5 font-mono text-[10px] font-bold uppercase tracking-wider transition ${closeClasses}`}
                       style={{ borderColor: `${accent}40` }}
                     >
-                      {renderSocialPlatformLabel(platform, player.socials?.instagramFollowers, t)}
+                      {renderSocialPlatformLabel(platform, player.socials?.instagramFollowers, t, locale)}
                     </a>
                   ))}
                 </div>

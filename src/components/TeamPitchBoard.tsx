@@ -391,14 +391,15 @@ export const TeamPitchBoard: FC<TeamPitchBoardProps> = ({
             featuredPlayer,
             featuredPlayerStats,
             theme as "classic-light" | "stadium-dark",
+            t,
           )}
           details={[
             { label: t("teamLineup.pitchPosition"), value: getPositionLabel(featuredPlayer.position) },
             ...(featuredPlayer.dateOfBirth
-              ? [{ label: "Nascimento", value: formatBirthDate(featuredPlayer.dateOfBirth) }]
+              ? [{ label: t("teamLineup.pitchBirth"), value: formatBirthDate(featuredPlayer.dateOfBirth, t) }]
               : []),
             ...(featuredPlayer.club
-              ? [{ label: "Clube atual", value: featuredPlayer.club }]
+              ? [{ label: t("teamLineup.pitchClub"), value: featuredPlayer.club }]
               : []),
             ...(opponentName
               ? [

@@ -1,5 +1,5 @@
 import { Position, type PlayerSocials } from "../types";
-import { translate, getActiveLocale } from "../i18n";
+import { translate, getActiveLocale, type Locale } from "../i18n";
 
 const t = (key: string, params?: Record<string, string | number>) =>
   translate(getActiveLocale(), key, params);
@@ -50,19 +50,25 @@ export function getPlayerSocialEntries(socials: PlayerSocials | undefined) {
 }
 
 /**
- * Compact pt-BR rendering of an (approximate) follower count for the player card's Instagram chip:
- * 1_000_000 → "1 mi", 1_200_000 → "1,2 mi", 850_000 → "850 mil", 12_400 → "12 mil". Values below
- * 1_000 render as-is. Returns "" for non-positive/non-finite input so callers can skip rendering.
+ * Compact, locale-aware rendering of an (approximate) follower count for the player card's
+ * Instagram chip. The magnitude suffix and decimal formatting follow the active locale:
+ *   pt → "1,2 mi" / "850 mil"   es → "1,2 M" / "850 mil"   en → "1.2M" / "850K"
+ * Values below 1_000 render as-is (localized). Returns "" for non-positive/non-finite input
+ * so callers can skip rendering.
  */
-export function formatFollowerCount(count: number): string {
+export function formatFollowerCount(count: number, locale: Locale = "pt"): string {
   if (!Number.isFinite(count) || count <= 0) return "";
+  const intlTag = locale === "es" ? "es-MX" : locale === "en" ? "en-US" : "pt-BR";
+  const millionsSuffix = locale === "pt" ? "mi" : "M"; // pt "milhões" → "mi"; es/en → "M"
+  const thousandsSuffix = locale === "en" ? "K" : "mil";
+  const sep = locale === "en" ? "" : " "; // English abbreviations sit tight: "230M", not "230 M"
   if (count >= 1_000_000) {
     const millions = count / 1_000_000;
     const rounded = millions >= 10 ? Math.round(millions) : Math.round(millions * 10) / 10;
-    return `${rounded.toLocaleString("pt-BR")} mi`;
+    return `${rounded.toLocaleString(intlTag)}${sep}${millionsSuffix}`;
   }
   if (count >= 1_000) {
-    return `${Math.round(count / 1_000).toLocaleString("pt-BR")} mil`;
+    return `${Math.round(count / 1_000).toLocaleString(intlTag)}${sep}${thousandsSuffix}`;
   }
-  return count.toLocaleString("pt-BR");
+  return count.toLocaleString(intlTag);
 }

@@ -579,11 +579,11 @@ export function JogadoresView({ theme, onSelectTeamLineup }: JogadoresViewProps)
           primaryColor={selected.team.primaryColor}
           secondaryColor={selected.team.secondaryColor}
           flagSvg={selected.team.flagSvg}
-          stats={buildPlayerStatCells(selected.player, selectedStats, theme)}
+          stats={buildPlayerStatCells(selected.player, selectedStats, theme, t)}
           details={[
             { label: t("jogadores.detailPosition"), value: getPositionLabel(selected.player.position) },
             ...(selected.player.dateOfBirth
-              ? [{ label: t("jogadores.detailBirth"), value: formatBirthDate(selected.player.dateOfBirth) }]
+              ? [{ label: t("jogadores.detailBirth"), value: formatBirthDate(selected.player.dateOfBirth, t) }]
               : []),
           ]}
           onClose={() => setSelected(null)}
