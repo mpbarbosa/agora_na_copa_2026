@@ -36,7 +36,6 @@ export const bannersCatalog: CatalogModule = {
     // OnlineCountBadge
     "banners.online.titleOne": "{count} fã online agora",
     "banners.online.titleMany": "{count} fãs online agora",
-    "banners.online.label": "online",
 
     // VersionCheckTimer
     "banners.version.updateTitle": "Nova versão disponível — recarregue para atualizar",
@@ -97,7 +96,6 @@ export const bannersCatalog: CatalogModule = {
     // OnlineCountBadge
     "banners.online.titleOne": "{count} fan en línea ahora",
     "banners.online.titleMany": "{count} fans en línea ahora",
-    "banners.online.label": "en línea",
 
     // VersionCheckTimer
     "banners.version.updateTitle": "Nueva versión disponible — recarga para actualizar",
@@ -158,7 +156,6 @@ export const bannersCatalog: CatalogModule = {
     // OnlineCountBadge
     "banners.online.titleOne": "{count} fan online now",
     "banners.online.titleMany": "{count} fans online now",
-    "banners.online.label": "online",
 
     // VersionCheckTimer
     "banners.version.updateTitle": "New version available — reload to update",

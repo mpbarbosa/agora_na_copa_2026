@@ -37,7 +37,6 @@ export function OnlineCountBadge({ theme }: OnlineCountBadgeProps) {
       </span>
       <Users size={11} aria-hidden="true" />
       <span data-testid="online-count-value">{count}</span>
-      <span className="font-normal normal-case tracking-normal">{t("banners.online.label")}</span>
     </span>
   );
 }
