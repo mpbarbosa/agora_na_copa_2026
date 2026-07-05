@@ -22,26 +22,26 @@ export interface BroadcastCountry {
 // Americas first (the core audience), then Europe. The picker sorts by localized
 // name at render, so this order is just the canonical source-of-truth listing.
 export const BROADCAST_COUNTRIES: BroadcastCountry[] = [
-  { code: "BR", name: { pt: "Brasil", es: "Brasil" } },
-  { code: "AR", name: { pt: "Argentina", es: "Argentina" } },
-  { code: "US", name: { pt: "Estados Unidos", es: "Estados Unidos" } },
-  { code: "MX", name: { pt: "México", es: "México" } },
-  { code: "CO", name: { pt: "Colômbia", es: "Colombia" } },
-  { code: "CL", name: { pt: "Chile", es: "Chile" } },
-  { code: "PE", name: { pt: "Peru", es: "Perú" } },
-  { code: "UY", name: { pt: "Uruguai", es: "Uruguay" } },
-  { code: "EC", name: { pt: "Equador", es: "Ecuador" } },
-  { code: "BO", name: { pt: "Bolívia", es: "Bolivia" } },
-  { code: "VE", name: { pt: "Venezuela", es: "Venezuela" } },
-  { code: "CR", name: { pt: "Costa Rica", es: "Costa Rica" } },
-  { code: "PA", name: { pt: "Panamá", es: "Panamá" } },
-  { code: "ES", name: { pt: "Espanha", es: "España" } },
-  { code: "PT", name: { pt: "Portugal", es: "Portugal" } },
-  { code: "GB", name: { pt: "Reino Unido", es: "Reino Unido" } },
-  { code: "FR", name: { pt: "França", es: "Francia" } },
-  { code: "DE", name: { pt: "Alemanha", es: "Alemania" } },
-  { code: "IT", name: { pt: "Itália", es: "Italia" } },
-  { code: "NL", name: { pt: "Países Baixos", es: "Países Bajos" } },
+  { code: "BR", name: { pt: "Brasil", es: "Brasil", en: "Brazil" } },
+  { code: "AR", name: { pt: "Argentina", es: "Argentina", en: "Argentina" } },
+  { code: "US", name: { pt: "Estados Unidos", es: "Estados Unidos", en: "United States" } },
+  { code: "MX", name: { pt: "México", es: "México", en: "Mexico" } },
+  { code: "CO", name: { pt: "Colômbia", es: "Colombia", en: "Colombia" } },
+  { code: "CL", name: { pt: "Chile", es: "Chile", en: "Chile" } },
+  { code: "PE", name: { pt: "Peru", es: "Perú", en: "Peru" } },
+  { code: "UY", name: { pt: "Uruguai", es: "Uruguay", en: "Uruguay" } },
+  { code: "EC", name: { pt: "Equador", es: "Ecuador", en: "Ecuador" } },
+  { code: "BO", name: { pt: "Bolívia", es: "Bolivia", en: "Bolivia" } },
+  { code: "VE", name: { pt: "Venezuela", es: "Venezuela", en: "Venezuela" } },
+  { code: "CR", name: { pt: "Costa Rica", es: "Costa Rica", en: "Costa Rica" } },
+  { code: "PA", name: { pt: "Panamá", es: "Panamá", en: "Panama" } },
+  { code: "ES", name: { pt: "Espanha", es: "España", en: "Spain" } },
+  { code: "PT", name: { pt: "Portugal", es: "Portugal", en: "Portugal" } },
+  { code: "GB", name: { pt: "Reino Unido", es: "Reino Unido", en: "United Kingdom" } },
+  { code: "FR", name: { pt: "França", es: "Francia", en: "France" } },
+  { code: "DE", name: { pt: "Alemanha", es: "Alemania", en: "Germany" } },
+  { code: "IT", name: { pt: "Itália", es: "Italia", en: "Italy" } },
+  { code: "NL", name: { pt: "Países Baixos", es: "Países Bajos", en: "Netherlands" } },
 ];
 
 const BROADCAST_COUNTRY_CODES = new Set(BROADCAST_COUNTRIES.map((c) => c.code));
@@ -56,6 +56,7 @@ export const DEFAULT_BROADCAST_COUNTRY = "BR";
 export const DEFAULT_COUNTRY_BY_LOCALE: Record<Locale, string> = {
   pt: "BR",
   es: "MX",
+  en: "US",
 };
 
 /** True when a code is one we offer (guards a geo/stored value before use). */

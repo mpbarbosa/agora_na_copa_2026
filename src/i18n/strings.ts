@@ -53,11 +53,12 @@ const MODULES: CatalogModule[] = [
 ];
 
 const mergeLocale = (pick: keyof CatalogModule): StringCatalog =>
-  Object.assign({}, ...MODULES.map((module) => module[pick]));
+  Object.assign({}, ...MODULES.map((module) => module[pick] ?? {}));
 
 export const CATALOGS: Record<Locale, StringCatalog> = {
   pt: mergeLocale("pt"),
   es: mergeLocale("es"),
+  en: mergeLocale("en"),
 };
 
 /**

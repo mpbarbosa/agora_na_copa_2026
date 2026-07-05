@@ -6,45 +6,53 @@
 // Spanish (LATAM) shell is opt-in via the `es.` subdomain (see docs runbook),
 // a `?lang=` query param, or the in-app language switcher.
 
-export type Locale = "pt" | "es";
+export type Locale = "pt" | "es" | "en";
 
 export const DEFAULT_LOCALE: Locale = "pt";
-export const SUPPORTED_LOCALES: readonly Locale[] = ["pt", "es"];
+export const SUPPORTED_LOCALES: readonly Locale[] = ["pt", "es", "en"];
 
 export const isLocale = (value: unknown): value is Locale =>
-  value === "pt" || value === "es";
+  value === "pt" || value === "es" || value === "en";
 
 /** Coerce any input to a supported locale, falling back to pt. */
 export const coerceLocale = (value: unknown): Locale =>
   isLocale(value) ? value : DEFAULT_LOCALE;
 
-/** BCP-47 tag for Intl / toLocale* formatting. LATAM Spanish → es-MX. */
+/** BCP-47 tag for Intl / toLocale* formatting. LATAM Spanish → es-MX, US English → en-US. */
 export const localeToIntlTag = (locale: Locale): string =>
-  locale === "es" ? "es-MX" : "pt-BR";
+  ({ pt: "pt-BR", es: "es-MX", en: "en-US" })[locale];
 
 /** Language code the FIFA API expects (?language=…). */
 export const localeToFifaLanguage = (locale: Locale): string =>
-  locale === "es" ? "es" : "pt";
+  ({ pt: "pt", es: "es", en: "en" })[locale];
 
 /** Inverse of {@link localeToFifaLanguage}: a FIFA/`?language=` code → Locale. */
-export const localeFromFifaLanguage = (language: string): Locale =>
-  language.trim().toLowerCase().startsWith("es") ? "es" : DEFAULT_LOCALE;
+export const localeFromFifaLanguage = (language: string): Locale => {
+  const lang = language.trim().toLowerCase();
+  if (lang.startsWith("es")) return "es";
+  if (lang.startsWith("en")) return "en";
+  return DEFAULT_LOCALE;
+};
 
 /** `<html lang>` value. */
 export const localeToHtmlLang = (locale: Locale): string =>
-  locale === "es" ? "es-419" : "pt-BR";
+  ({ pt: "pt-BR", es: "es-419", en: "en-US" })[locale];
 
 /** Open Graph og:locale value. */
 export const localeToOgLocale = (locale: Locale): string =>
-  locale === "es" ? "es_MX" : "pt_BR";
+  ({ pt: "pt_BR", es: "es_MX", en: "en_US" })[locale];
 
 /**
  * Derive the locale from a request Host header (server) — the `es.` subdomain
  * serves Spanish; everything else stays pt. Kept here so both the server and
  * any client hostname check share one rule.
  */
-export const localeFromHost = (host: string | null | undefined): Locale =>
-  typeof host === "string" && /^es\./i.test(host.trim()) ? "es" : DEFAULT_LOCALE;
+export const localeFromHost = (host: string | null | undefined): Locale => {
+  const h = typeof host === "string" ? host.trim() : "";
+  if (/^es\./i.test(h)) return "es";
+  if (/^en\./i.test(h)) return "en";
+  return DEFAULT_LOCALE;
+};
 
 const STORAGE_KEY = "agora-locale";
 const QUERY_KEY = "lang";

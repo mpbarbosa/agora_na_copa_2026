@@ -25,8 +25,8 @@ test.describe("Spanish (LATAM) locale — es shell", () => {
     await expect(page.locator("#btn-nav-partidas")).toContainText(/partidos/i);
     await expect(page.locator("#btn-nav-selecoes")).toContainText(/selecciones/i);
     await expect(page.locator("#btn-nav-chaveamento")).toContainText(/eliminatorias/i);
-    // In es the switcher offers the way back to Portuguese.
-    await expect(page.locator("#btn-switch-language")).toContainText(/pt/i);
+    // In es the language picker reflects the active locale.
+    await expect(page.locator("#btn-switch-language")).toHaveValue("es");
   });
 
   test("hides the group editorial but keeps the standings table", async ({ page }) => {
@@ -45,7 +45,7 @@ test.describe("Spanish (LATAM) locale — es shell", () => {
     await page.goto("/");
     await page.click("#btn-consent-accept").catch(() => {});
 
-    await page.click("#btn-switch-language");
+    await page.selectOption("#btn-switch-language", "pt");
 
     await expect(page.locator("html")).toHaveAttribute("lang", "pt-BR");
     await expect(page.locator("#app-branding")).toContainText(/agora na copa/i);

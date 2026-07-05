@@ -31,7 +31,7 @@ import { DonationPix } from "./components/DonationPix";
 import { ShareButton } from "./components/ShareButton";
 import { OnlineCountBadge } from "./components/OnlineCountBadge";
 import { NAV_ITEMS } from "./navigation";
-import { useLocale } from "./i18n";
+import { useLocale, type Locale } from "./i18n";
 import { Sun, Moon, HelpCircle, Settings, Languages } from "lucide-react";
 
 const APP_VERSION = packageInfo.version;
@@ -330,20 +330,22 @@ export default function App() {
               )}
             </button>
 
-            {/* Language switcher — pt ⇄ es (LATAM). Persists to localStorage. */}
-            <button
-              id="btn-switch-language"
-              type="button"
-              onClick={() => setLocale(locale === "pt" ? "es" : "pt")}
-              title={t("shell.switchLanguage")}
-              aria-label={t("shell.switchLanguage")}
-              className="flex items-center gap-1 p-2 rounded-lg bg-[#1e2020]/5 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/10 transition"
-            >
-              <Languages size={14} />
-              <span className="font-mono text-[10px] font-bold uppercase tracking-wider">
-                {locale === "pt" ? "ES" : "PT"}
-              </span>
-            </button>
+            {/* Language switcher — pt (default) / es (LATAM) / en (US). Persists to localStorage. */}
+            <div className="relative flex items-center rounded-lg bg-[#1e2020]/5 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/10 transition">
+              <Languages size={14} className="pointer-events-none absolute left-2" aria-hidden="true" />
+              <select
+                id="btn-switch-language"
+                value={locale}
+                onChange={(event) => setLocale(event.target.value as Locale)}
+                title={t("shell.switchLanguage")}
+                aria-label={t("shell.switchLanguage")}
+                className="cursor-pointer appearance-none bg-transparent py-2 pl-7 pr-2 font-mono text-[10px] font-bold uppercase tracking-wider focus:outline-none"
+              >
+                <option value="pt">PT</option>
+                <option value="es">ES</option>
+                <option value="en">EN</option>
+              </select>
+            </div>
             </div>
           </div>
 
