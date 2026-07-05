@@ -12,6 +12,8 @@ import { formatAnalysisTimestamp } from "../utils/dateFormat";
 import { isAnalysisUpToDate, lastFinishedKickoff } from "../utils/analysisFreshness";
 import { AnalysisFreshnessBadge } from "./AnalysisFreshnessBadge";
 import GROUP_ANALYSIS from "../data/groupAnalysis.json";
+import GROUP_ANALYSIS_EN from "../data/groupAnalysis.en.json";
+import { pickEditorialEntry, type EditorialEntry } from "../data/editorial";
 
 interface GroupAnalysisEntry {
   text: string;
@@ -550,7 +552,14 @@ export function StandingsView({
                 // Editorial pt-BR prose is HIDDEN in the Spanish (LATAM) thin shell.
                 if (locale === "es") return null;
                 const letter = group.match(/Grupo ([A-L])/)?.[1];
-                const analysis = letter ? GROUP_ANALYSIS_BY_LETTER[letter] : undefined;
+                const analysis = letter
+                  ? pickEditorialEntry(
+                      GROUP_ANALYSIS_BY_LETTER as Record<string, EditorialEntry>,
+                      GROUP_ANALYSIS_EN as Record<string, EditorialEntry>,
+                      letter,
+                      locale,
+                    )
+                  : undefined;
                 if (!analysis) return null;
                 // Up to date when the analysis was authored at/after the group's
                 // most recent finished match (live-polled statuses).

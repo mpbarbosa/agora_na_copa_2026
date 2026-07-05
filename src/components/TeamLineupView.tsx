@@ -21,6 +21,8 @@ import { localizedStageName } from "../utils/knockoutSlots";
 import { coachRecord } from "../utils/coachRecord";
 import { parseNoteSections } from "../utils/noteSections";
 import COACH_NOTES from "../data/coachNotes.json";
+import COACH_NOTES_EN from "../data/coachNotes.en.json";
+import { pickEditorialText } from "../data/editorial";
 import COACH_IMAGES from "../data/coachImages.json";
 import COACH_INSTAGRAM from "../data/coachInstagram.json";
 import COACH_SOCIALS from "../data/coachSocials.json";
@@ -804,7 +806,12 @@ export const TeamLineupView: React.FC<TeamLineupViewProps> = ({ team, theme, onB
   // the "Técnico" line in the header.
   const [coachCardOpen, setCoachCardOpen] = useState(false);
   const coachTournamentRecord = coachRecord(teamView?.matchHistory);
-  const coachNote = (COACH_NOTES as Record<string, string>)[team.code];
+  const coachNote = pickEditorialText(
+    COACH_NOTES as Record<string, string>,
+    COACH_NOTES_EN as Record<string, string>,
+    team.code,
+    locale,
+  );
   const coachImage = (
     COACH_IMAGES as Record<string, { pictureUrl: string; credit: CoachPhotoCredit }>
   )[team.code];

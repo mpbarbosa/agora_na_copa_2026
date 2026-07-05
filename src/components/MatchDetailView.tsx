@@ -30,6 +30,8 @@ import {
 import { resolveTeamDisplay } from "../utils/resolveTeamDisplay";
 import MATCH_VIDEOS from "../data/matchVideos.json";
 import MATCH_ANALYSIS from "../data/matchAnalysis.json";
+import MATCH_ANALYSIS_EN from "../data/matchAnalysis.en.json";
+import { pickEditorialText } from "../data/editorial";
 import MATCH_INSTAGRAM from "../data/matchInstagram.json";
 import { parseNoteSections } from "../utils/noteSections";
 import { resolveVenueTimeZone } from "../utils/venueCoordinates";
@@ -740,7 +742,12 @@ export function MatchDetailView({
   const currentSimulatedState = simulatedMatchStates[currentMatch.id];
   const currentOverlay = matchOverlays[currentMatch.id];
   const currentLineupEntry = teamLineups[currentMatch.id];
-  const matchAnalysisText = (MATCH_ANALYSIS as Record<string, string>)[currentMatch.id];
+  const matchAnalysisText = pickEditorialText(
+    MATCH_ANALYSIS as Record<string, string>,
+    MATCH_ANALYSIS_EN as Record<string, string>,
+    currentMatch.id,
+    locale,
+  );
   const matchInstagramUrls = resolveInstagramPostUrls(
     (MATCH_INSTAGRAM as Record<string, string[]>)[currentMatch.id],
     undefined,

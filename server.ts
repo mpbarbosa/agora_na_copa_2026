@@ -53,12 +53,12 @@ import { resolvePlayerEntry } from "./src/data/playerRegistry";
 import { triviaQuestions } from "./src/data/questions";
 import WIKIPEDIA_COUNTRIES from "./src/data/wikipediaCountries";
 import TEAM_ANALYSIS from "./src/data/teamAnalysis.json";
+import TEAM_ANALYSIS_EN from "./src/data/teamAnalysis.en.json";
+import { pickEditorialEntry, type EditorialEntry } from "./src/data/editorial";
 import { isAnalysisUpToDate } from "./src/utils/analysisFreshness";
 
-const TEAM_ANALYSIS_BY_CODE = TEAM_ANALYSIS as Record<
-  string,
-  { text: string; updatedAt: string | null }
->;
+const TEAM_ANALYSIS_BY_CODE = TEAM_ANALYSIS as Record<string, EditorialEntry>;
+const TEAM_ANALYSIS_EN_BY_CODE = TEAM_ANALYSIS_EN as Record<string, EditorialEntry>;
 import { computeStandings, groupStandings } from "./src/standings";
 import { buildPrediction, type PredictionTeam } from "./predict-core";
 import {
@@ -1695,7 +1695,13 @@ const buildTeamViewPayload = async (
   // Editorial team analysis + its freshness relative to the team's last match.
   // "Up to date" means the analysis was authored at/after the kickoff of the
   // most recent FINISHED match this team played (see isAnalysisUpToDate).
-  const teamAnalysisEntry = TEAM_ANALYSIS_BY_CODE[normalizedTeamCode] ?? null;
+  const teamAnalysisEntry =
+    pickEditorialEntry(
+      TEAM_ANALYSIS_BY_CODE,
+      TEAM_ANALYSIS_EN_BY_CODE,
+      normalizedTeamCode,
+      localeFromFifaLanguage(language),
+    ) ?? null;
   const teamAnalysisUpdatedAt = teamAnalysisEntry?.updatedAt ?? null;
   const teamAnalysisUpToDate = teamAnalysisEntry
     ? isAnalysisUpToDate(teamAnalysisUpdatedAt, lastMatch?.kickoffTimestamp ?? null)
