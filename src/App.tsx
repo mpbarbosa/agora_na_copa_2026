@@ -266,7 +266,7 @@ export default function App() {
                 <span
                   className={
                     theme === "classic-light"
-                      ? "text-[#009c3b]"
+                      ? "text-[#007a2e]"
                       : "text-[#00e476]"
                   }
                 >
@@ -307,7 +307,7 @@ export default function App() {
             >
               <HelpCircle
                 size={14}
-                className={theme === "classic-light" ? "text-[#009c3b]" : "text-[#00e476]"}
+                className={theme === "classic-light" ? "text-[#007a2e]" : "text-[#00e476]"}
               />
             </button>
 

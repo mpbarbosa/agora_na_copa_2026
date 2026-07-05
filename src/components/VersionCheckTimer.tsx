@@ -41,8 +41,8 @@ export function VersionCheckTimer({
 
   useEffect(() => () => window.clearTimeout(spinTimer.current), []);
 
-  const muted = theme === "classic-light" ? "text-slate-400" : "text-slate-500";
-  const accent = theme === "classic-light" ? "text-[#009c3b]" : "text-[#00e476]";
+  const muted = "text-slate-500";
+  const accent = theme === "classic-light" ? "text-[#007a2e]" : "text-[#00e476]";
   const hover = theme === "classic-light" ? "hover:text-slate-700" : "hover:text-slate-200";
 
   const updateReady = status.updateAvailable || status.nextCheckAt === null;

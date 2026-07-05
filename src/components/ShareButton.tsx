@@ -23,7 +23,7 @@ export function ShareButton({ theme }: Props) {
   const t = useT();
   const [copied, setCopied] = useState(false);
   const isDark = theme !== "classic-light";
-  const accent = isDark ? "text-[#00e476]" : "text-[#009c3b]";
+  const accent = isDark ? "text-[#00e476]" : "text-[#007a2e]";
 
   const handleShare = async () => {
     if (typeof navigator !== "undefined" && navigator.share) {
