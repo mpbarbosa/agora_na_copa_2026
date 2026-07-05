@@ -16930,7 +16930,10 @@
       "instagram": "s_elmourabet",
       "wikipedia": "https://en.wikipedia.org/wiki/Samir_El_Mourabet"
     },
-    "instagramPostUrl": "https://www.instagram.com/p/DZjaVOfDcBm/"
+    "instagramPostUrls": [
+      "https://www.instagram.com/p/DZjaVOfDcBm/",
+      "https://www.instagram.com/p/DaYzonaCDqb/"
+    ]
   },
   "505112": {
     "fifaId": "505112",
