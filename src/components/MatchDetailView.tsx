@@ -72,6 +72,39 @@ import {
   Mic,
   LayoutGrid,
 } from "lucide-react";
+import { IncidentText } from "./IncidentText";
+import {
+  buildIncidentSpeech,
+  buildIncidentPlayerSelections,
+  isIncidentPlayerNameMatch,
+  normalizePlayerLookupText,
+  getIncidentLabel,
+  getIncidentAccentClass,
+  getIncidentCardClass,
+  getIncidentTextClass,
+  type IncidentPlayerSelection,
+  type StoredIncidentPlayer,
+  type StoredIncidentPlayerKey,
+} from "../utils/matchIncidents";
+import {
+  DEMO_MATCH_ID,
+  getMatchCountdownSeconds,
+  parseMinuteLabel,
+  formatMinuteLabel,
+  formatBrasiliaTime,
+  formatTimeInZone,
+  formatOverlayUpdatedAt,
+  formatCountdown,
+} from "../utils/matchClock";
+import {
+  getInitialMatchId,
+  applySimulatedState,
+  getMatchGroupLabel,
+  getMatchStageLabel,
+  getBroadcasterBadgeLabel,
+  formatCountryNameForTooltip,
+  type SimulatedMatchState,
+} from "../utils/matchSelection";
 
 // Header match-selector groups, split by match status. `labelKey` resolves to a
 // catalog string at render time (the label text is localized, not stored here).
@@ -87,514 +120,20 @@ const HEADER_MATCH_STATUS_GROUPS = MATCH_STATUS_GROUPS.filter(
 
 const DEFAULT_MATCH_OVERLAY_REFRESH_INTERVAL_MS = 15 * 1000;
 const BROADCAST_COUNTRY_STORAGE_KEY = "agora-broadcast-country";
-const DEMO_MATCH_ID = "bra-mar-2026";
 const INITIAL_MATCHES_BY_ID = new Map(
   APP_MATCHES.map((match) => [match.id, match]),
 );
 
-
-interface IncidentPlayerSelection {
-  player: Player;
-  team: Match["teamA"];
-  opponentName: string;
-}
-
-interface IncidentRenderablePlayer {
-  token: string;
-  selection: IncidentPlayerSelection;
-}
-
-interface SimulatedMatchState {
-  status: MatchStatus;
-  score?: {
-    teamA: number;
-    teamB: number;
-  };
-  matchTime?: string;
-  incidents: CommentaryEvent[];
-  updatedAt: string;
-}
-
-// A live (or suspended) match takes priority; otherwise the soonest match that
-// hasn't kicked off yet
-function getInitialMatchId(matches: Match[]): string {
-  const liveMatch = matches.find((m) => m.status === "LIVE" || m.status === "SUSPENDED");
-  if (liveMatch) return liveMatch.id;
-
-  const upcoming = matches
-    .filter((m) => m.status === "PRE_GAME")
-    .sort(
-      (a, b) =>
-        new Date(a.kickoffTimestamp).getTime() -
-        new Date(b.kickoffTimestamp).getTime(),
-    );
-  if (upcoming.length > 0) return upcoming[0].id;
-
-  return matches[0].id;
-}
-
-function getBroadcasterBadgeLabel(name: string) {
-  return name
-    .replace(/[^A-Za-z0-9]/g, "")
-    .slice(0, 3)
-    .toUpperCase()
-    .padEnd(2, "•");
-}
-
-function formatCountryNameForTooltip(name: string) {
-  const lowercaseWords = new Set(["e", "de", "da", "do", "dos", "das"]);
-
-  return name
-    .toLocaleLowerCase("pt-BR")
-    .split(" ")
-    .map((word, index) => {
-      if (!word) return word;
-      if (index > 0 && lowercaseWords.has(word)) return word;
-
-      return word.charAt(0).toLocaleUpperCase("pt-BR") + word.slice(1);
-    })
-    .join(" ");
-}
-
-// pt-BR phrase spoken when the per-incident microphone is tapped, e.g.
-// "Aos 23 minutos. Vinicius marcou." (the incident text is already pt-BR).
-function buildIncidentSpeech(incident: CommentaryEvent): string {
-  const minute = (incident.time || "").replace(/\D/g, "");
-  return `${minute ? `Aos ${minute} minutos. ` : ""}${incident.text}`;
-}
-
-function getIncidentLabel(
-  type: CommentaryEvent["type"],
-  t: (key: string, params?: Record<string, string | number>) => string,
-) {
-  switch (type) {
-    case "GOAL":
-      return t("aoVivo.incident.goal");
-    case "YELLOW_CARD":
-      return t("aoVivo.incident.yellow");
-    case "RED_CARD":
-      return t("aoVivo.incident.red");
-    case "SUBSTITUTION":
-      return t("aoVivo.incident.sub");
-    default:
-      return t("aoVivo.incident.play");
-  }
-}
-
-function getIncidentAccentClass(
-  type: CommentaryEvent["type"],
-  theme: "classic-light" | "stadium-dark",
-) {
-  if (type === "GOAL") {
-    return theme === "classic-light"
-      ? "border-[#009c3b]/25 bg-[#009c3b]/10 text-[#007a2f]"
-      : "border-[#00e476]/20 bg-[#00e476]/10 text-[#a7e6bf]";
-  }
-
-  if (type === "YELLOW_CARD") {
-    return theme === "classic-light"
-      ? "border-[#d4a017]/25 bg-[#ffd84d]/15 text-[#9a6a00]"
-      : "border-[#ffd84d]/20 bg-[#ffd84d]/10 text-[#ffe58b]";
-  }
-
-  if (type === "RED_CARD") {
-    return theme === "classic-light"
-      ? "border-[#c1121f]/25 bg-[#ed2939]/10 text-[#9f1239]"
-      : "border-[#ed2939]/20 bg-[#ed2939]/10 text-[#ff9cab]";
-  }
-
-  return theme === "classic-light"
-    ? "border-slate-200 bg-slate-100 text-slate-700"
-    : "border-white/10 bg-white/10 text-slate-200";
-}
-
-function getIncidentCardClass(
-  type: CommentaryEvent["type"],
-  theme: "classic-light" | "stadium-dark",
-) {
-  if (type === "GOAL") {
-    return theme === "classic-light"
-      ? "border-[#009c3b]/30 bg-[linear-gradient(135deg,rgba(0,156,59,0.12),rgba(255,216,77,0.18))] shadow-[0_14px_34px_rgba(0,156,59,0.12)]"
-      : "border-[#ffd84d]/25 bg-[linear-gradient(135deg,rgba(255,216,77,0.12),rgba(0,228,118,0.14))] shadow-[0_16px_36px_rgba(255,216,77,0.08)]";
-  }
-
-  return theme === "classic-light"
-    ? "bg-white border-slate-200"
-    : "bg-[#161919] border-white/10";
-}
-
-function getIncidentTextClass(
-  type: CommentaryEvent["type"],
-  theme: "classic-light" | "stadium-dark",
-) {
-  if (type === "GOAL") {
-    return theme === "classic-light"
-      ? "text-slate-900 text-base font-semibold"
-      : "text-white text-base font-semibold";
-  }
-
-  return theme === "classic-light"
-    ? "text-slate-700 text-sm"
-    : "text-slate-100 text-sm";
-}
-
-function normalizePlayerLookupText(value: string) {
-  return value
-    .normalize("NFD")
-    .replace(/\p{Diacritic}/gu, "")
-    .replace(/[^A-Za-z0-9]+/g, " ")
-    .trim()
-    .toUpperCase();
-}
-
-function getNormalizedNameParts(value: string) {
-  return normalizePlayerLookupText(value).split(/\s+/).filter(Boolean);
-}
-
-function isIncidentPlayerNameMatch(playerName: string, incidentName: string) {
-  const normalizedPlayer = normalizePlayerLookupText(playerName);
-  const normalizedIncident = normalizePlayerLookupText(incidentName);
-  if (!normalizedPlayer || !normalizedIncident) {
-    return false;
-  }
-
-  if (
-    normalizedPlayer === normalizedIncident ||
-    normalizedPlayer.includes(normalizedIncident) ||
-    normalizedIncident.includes(normalizedPlayer)
-  ) {
-    return true;
-  }
-
-  const playerParts = getNormalizedNameParts(playerName);
-  const incidentParts = getNormalizedNameParts(incidentName);
-  if (playerParts.length === 0 || incidentParts.length === 0) {
-    return false;
-  }
-
-  const playerSurname = playerParts.at(-1);
-  const incidentSurname = incidentParts.at(-1);
-  if (playerSurname && incidentSurname && playerSurname === incidentSurname) {
-    const playerFirst = playerParts[0] || "";
-    const incidentFirst = incidentParts[0] || "";
-    return (
-      playerFirst === incidentFirst ||
-      playerFirst.startsWith(incidentFirst) ||
-      incidentFirst.startsWith(playerFirst)
-    );
-  }
-
-  return false;
-}
-
-function getIncidentPlayerTokens(incident: CommentaryEvent) {
-  if (incident.type === "GOAL") {
-    const match = incident.text.match(/^(.+?) marcou\.$/);
-    return match ? [match[1]] : [];
-  }
-
-  if (incident.type === "YELLOW_CARD") {
-    const match = incident.text.match(/^(.+?) recebeu amarelo\.$/);
-    return match ? [match[1]] : [];
-  }
-
-  if (incident.type === "RED_CARD") {
-    const match = incident.text.match(/^(.+?) foi expulso\.$/);
-    return match ? [match[1]] : [];
-  }
-
-  if (incident.type === "SUBSTITUTION") {
-    const match = incident.text.match(/^Sai (.+?), entra (.+?)\.$/);
-    return match ? [match[1], match[2]] : [];
-  }
-
-  return [];
-}
-
-function buildIncidentPlayerSelections(
-  incident: CommentaryEvent,
-  match: Match,
-  lineupEntry: { teamA: LineupEntry; teamB: LineupEntry } | undefined,
-) {
-  if (!incident.team) {
-    return [];
-  }
-
-  const team = incident.team === "A" ? match.teamA : match.teamB;
-  const opponentName = incident.team === "A" ? match.teamB.name : match.teamA.name;
-  const lineup =
-    incident.team === "A"
-      ? lineupEntry?.teamA.players ?? match.teamA.lineup
-      : lineupEntry?.teamB.players ?? match.teamB.lineup;
-  const incidentTokens = getIncidentPlayerTokens(incident);
-
-  const metadataSelections = (incident.playerMentions ?? [])
-    .map((mention, index) => {
-      const fallbackPlayer = lineup.find(
-        (candidate) =>
-          (mention.id && candidate.id === mention.id) ||
-          isIncidentPlayerNameMatch(candidate.name, mention.name),
-      );
-
-      const player =
-        fallbackPlayer ??
-        ({
-          id: mention.id ?? `${team.code.toLowerCase()}-${normalizePlayerLookupText(mention.name).replace(/\s+/g, "-")}`,
-          name: mention.name,
-          number: mention.number ?? 0,
-          position: mention.position ?? Position.MF,
-          x: 50,
-          y: 50,
-          pictureUrl: mention.pictureUrl,
-        } satisfies Player);
-      return {
-        token: incidentTokens[index] ?? mention.name,
-        selection: {
-          player: {
-            ...player,
-            club: player.club ?? fallbackPlayer?.club,
-            socials: player.socials ?? fallbackPlayer?.socials,
-            pictureUrl: mention.pictureUrl ?? player.pictureUrl ?? fallbackPlayer?.pictureUrl,
-          },
-          team,
-          opponentName,
-        },
-      } satisfies IncidentRenderablePlayer;
-    })
-    .filter((entry) => Boolean(entry.selection.player.name));
-
-  if (metadataSelections.length > 0) {
-    return metadataSelections;
-  }
-
-  return incidentTokens
-    .map((token) => {
-      const player = lineup.find((candidate) =>
-        isIncidentPlayerNameMatch(candidate.name, token),
-      );
-      if (!player) {
-        return null;
-      }
-
-      return {
-        token,
-        selection: {
-          player,
-          team,
-          opponentName,
-        },
-      } satisfies IncidentRenderablePlayer;
-    })
-    .filter((entry): entry is IncidentRenderablePlayer => Boolean(entry));
-}
-
-function getMatchCountdownSeconds(match: Match, now: Date, customSeconds: number) {
-  if (match.id === DEMO_MATCH_ID) {
-    return Math.max(0, customSeconds);
-  }
-
-  if (match.status !== "PRE_GAME") {
-    return 0;
-  }
-
-  const kickoffTime = new Date(match.kickoffTimestamp).getTime();
-  if (Number.isNaN(kickoffTime)) {
-    return Math.max(0, match.countdownTargetSeconds);
-  }
-
-  return Math.max(0, Math.floor((kickoffTime - now.getTime()) / 1000));
-}
-
-function applySimulatedState(match: Match, simulation: SimulatedMatchState | undefined): Match {
-  if (!simulation) {
-    return match;
-  }
-
-  return {
-    ...match,
-    status: simulation.status,
-    score: simulation.score,
-    matchTime: simulation.matchTime,
-  };
-}
-
-function parseMinuteLabel(value: string | undefined) {
-  if (!value) {
-    return 0;
-  }
-
-  const parsed = Number.parseInt(value.replace(/\D/g, ""), 10);
-  return Number.isFinite(parsed) ? parsed : 0;
-}
-
-function formatMinuteLabel(minute: number) {
-  return `${Math.max(1, minute)}'`;
-}
-
-function getMatchGroupLabel(match: Match) {
-  if (match.stageName !== "Group Stage") {
+// Read the persisted broadcast-country choice, tolerating private-mode /
+// sandboxed contexts where localStorage access throws.
+function readStoredBroadcastCountry(): string | null {
+  try {
+    return window.localStorage?.getItem(BROADCAST_COUNTRY_STORAGE_KEY) ?? null;
+  } catch {
     return null;
   }
-
-  return match.teamA.group === match.teamB.group ? match.teamA.group : match.teamA.group || null;
 }
 
-// Knockout matches have no group, so the scoreboard shows the round name
-// (e.g. "16 Avos de Final", "Oitavas de Final", "Final") in place of the
-// "Grupo X" label, keeping stage context once the group stage is over.
-function getMatchStageLabel(match: Match) {
-  if (match.stageName === "Group Stage" || !match.stageName) {
-    return null;
-  }
-
-  return match.stageName;
-}
-
-function formatBrasiliaTime(date: Date) {
-  return date.toLocaleTimeString(localeToIntlTag(getActiveLocale()), {
-    timeZone: "America/Sao_Paulo",
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-  });
-}
-
-function formatTimeInZone(date: Date, timeZone: string) {
-  return date.toLocaleTimeString(localeToIntlTag(getActiveLocale()), {
-    timeZone,
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-  });
-}
-
-function formatOverlayUpdatedAt(
-  value: string | undefined,
-  t: (key: string, params?: Record<string, string | number>) => string,
-) {
-  if (!value) {
-    return t("aoVivo.overlay.pending");
-  }
-
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) {
-    return t("aoVivo.overlay.unavailable");
-  }
-
-  return t("aoVivo.overlay.updatedAt", {
-    time: date.toLocaleTimeString(localeToIntlTag(getActiveLocale()), {
-      timeZone: "America/Sao_Paulo",
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit",
-    }),
-  });
-}
-
-function formatCountdown(totalSecs: number) {
-  const d = Math.floor(totalSecs / 86400);
-  const h = Math.floor((totalSecs % 86400) / 3600);
-  const m = Math.floor((totalSecs % 3600) / 60);
-  const s = totalSecs % 60;
-  const hh = h.toString().padStart(2, "0");
-  const mm = m.toString().padStart(2, "0");
-  const ss = s.toString().padStart(2, "0");
-  if (d > 0) {
-    return `${d.toString().padStart(2, "0")}d ${hh}h ${mm}m ${ss}s`;
-  }
-  return `${hh}h ${mm}m ${ss}s`;
-}
-
-interface StoredIncidentPlayerKey {
-  id?: string;
-  name: string;
-  pictureUrl?: string;
-}
-
-interface StoredIncidentPlayer {
-  playerKey: StoredIncidentPlayerKey;
-  team: Match["teamA"];
-  opponentName: string;
-}
-
-interface IncidentTextProps {
-  incident: CommentaryEvent;
-  match: Match;
-  lineupEntry: { teamA: LineupEntry; teamB: LineupEntry } | undefined;
-  theme: "classic-light" | "stadium-dark";
-  onSelectPlayer: (selection: IncidentPlayerSelection) => void;
-}
-
-function IncidentText({ incident, match, lineupEntry, theme, onSelectPlayer }: IncidentTextProps) {
-  const t = useT();
-  const renderablePlayers = buildIncidentPlayerSelections(incident, match, lineupEntry);
-
-  if (renderablePlayers.length === 0) {
-    return <>{incident.text}</>;
-  }
-
-  const incidentPlayerButtonClasses =
-    theme === "classic-light"
-      ? "inline-flex items-center rounded-md border border-[#065f2c]/15 bg-[#065f2c]/8 px-1.5 py-0.5 font-semibold text-[#065f2c] underline decoration-[#065f2c]/35 underline-offset-4 transition hover:border-[#065f2c]/30 hover:bg-[#065f2c]/12 hover:text-[#0a7f3f]"
-      : "inline-flex items-center rounded-md border border-[#ffd84d]/15 bg-[#ffd84d]/10 px-1.5 py-0.5 font-semibold text-[#ffd84d] underline decoration-[#ffd84d]/35 underline-offset-4 transition hover:border-[#ffd84d]/35 hover:bg-[#ffd84d]/15 hover:text-[#ffe58b]";
-
-  if (
-    (incident.type === "GOAL" ||
-      incident.type === "YELLOW_CARD" ||
-      incident.type === "RED_CARD") &&
-    renderablePlayers[0]
-  ) {
-    const [entry] = renderablePlayers;
-    const suffix =
-      incident.type === "GOAL"
-        ? t("aoVivo.incidentText.scoredSuffix")
-        : incident.type === "YELLOW_CARD"
-          ? t("aoVivo.incidentText.yellowSuffix")
-          : t("aoVivo.incidentText.redSuffix");
-
-    return (
-      <>
-        <button
-          type="button"
-          id={`btn-incident-player-${incident.id}-0`}
-          onClick={() => onSelectPlayer(entry.selection)}
-          className={`transition ${incidentPlayerButtonClasses}`}
-        >
-          {entry.token}
-        </button>
-        {suffix}
-      </>
-    );
-  }
-
-  if (incident.type === "SUBSTITUTION" && renderablePlayers.length >= 2) {
-    return (
-      <>
-        {t("aoVivo.incidentText.subOut")}
-        <button
-          type="button"
-          id={`btn-incident-player-${incident.id}-0`}
-          onClick={() => onSelectPlayer(renderablePlayers[0].selection)}
-          className={`transition ${incidentPlayerButtonClasses}`}
-        >
-          {renderablePlayers[0].token}
-        </button>
-        {t("aoVivo.incidentText.subIn")}
-        <button
-          type="button"
-          id={`btn-incident-player-${incident.id}-1`}
-          onClick={() => onSelectPlayer(renderablePlayers[1].selection)}
-          className={`transition ${incidentPlayerButtonClasses}`}
-        >
-          {renderablePlayers[1].token}
-        </button>
-        .
-      </>
-    );
-  }
-
-  return <>{incident.text}</>;
-}
 
 interface MatchOverlaysApiResponse {
   refreshAfterMs?: number;
@@ -625,12 +164,8 @@ export function MatchDetailView({
   // by the effect below) → the locale default (pt→BR, es→MX). Persisted so the
   // pick sticks across visits.
   const [broadcastCountry, setBroadcastCountry] = useState<string>(() => {
-    try {
-      const stored = window.localStorage?.getItem(BROADCAST_COUNTRY_STORAGE_KEY);
-      if (isBroadcastCountry(stored)) return stored!.toUpperCase();
-    } catch {
-      // localStorage may throw in private-mode/sandboxed contexts — ignore.
-    }
+    const stored = readStoredBroadcastCountry();
+    if (isBroadcastCountry(stored)) return stored!.toUpperCase();
     return DEFAULT_COUNTRY_BY_LOCALE[locale];
   });
   const handleBroadcastCountryChange = (code: string) => {
@@ -645,13 +180,7 @@ export function MatchDetailView({
   // country. `/api/geo` returns `country: null` when the GeoLite2 db is absent
   // (preview builds) or the IP doesn't resolve — we then keep the locale default.
   useEffect(() => {
-    let stored: string | null = null;
-    try {
-      stored = window.localStorage?.getItem(BROADCAST_COUNTRY_STORAGE_KEY) ?? null;
-    } catch {
-      stored = null;
-    }
-    if (isBroadcastCountry(stored)) return; // respect an explicit choice
+    if (isBroadcastCountry(readStoredBroadcastCountry())) return; // respect an explicit choice
     let active = true;
     fetch("/api/geo")
       .then((response) => (response.ok ? response.json() : null))

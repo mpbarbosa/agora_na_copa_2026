@@ -9,7 +9,7 @@ Each maps to one `NAV_ITEMS` entry in `src/navigation.ts` and is mounted by `src
 
 | Component | Tab id | Lines |
 |-----------|--------|-------|
-| `MatchDetailView.tsx` | `ao-vivo` | 2094 |
+| `MatchDetailView.tsx` | `ao-vivo` | 2503 |
 | `PartidasView.tsx` | `partidas` | 365 |
 | `StandingsView.tsx` | `grupos` | 182 |
 | `TeamsView.tsx` | `selecoes` | 86 |
@@ -49,7 +49,7 @@ Each maps to one `NAV_ITEMS` entry in `src/navigation.ts` and is mounted by `src
 
 ## Size cautions
 
-`MatchDetailView.tsx` (2094 lines) covers match selection, scoreboard, broadcast guide, live commentary, and pitch lineup in one file. Before adding to it, consider whether the addition belongs in a sub-component. Do not read the full file for changes scoped to one section — use line-range reads.
+`MatchDetailView.tsx` (2503 lines) covers match selection, scoreboard, broadcast guide, live commentary, and pitch lineup in one file. Its pure helpers were extracted to `src/utils/matchIncidents.ts`, `src/utils/matchClock.ts`, and `src/utils/matchSelection.ts` (each unit-tested); the incident-text renderer lives in `IncidentText.tsx`. Before adding to it, consider whether the addition belongs in a sub-component. Do not read the full file for changes scoped to one section — use line-range reads.
 
 `TeamLineupView.tsx` (690 lines) and `JogadoresView.tsx` (572 lines) are also large. Same caution applies.
 
