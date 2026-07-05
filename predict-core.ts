@@ -28,9 +28,9 @@ export interface PredictionTeam {
 
 function teamLine(team: PredictionTeam, locale: Locale = "pt"): string {
   if (team.played === 0) {
-    return locale === "es"
-      ? `${team.name} aún no ha entrado en cancha en este Mundial.`
-      : `${team.name} ainda não entrou em campo nesta Copa.`;
+    if (locale === "es") return `${team.name} aún no ha entrado en cancha en este Mundial.`;
+    if (locale === "en") return `${team.name} haven't taken the field yet at this World Cup.`;
+    return `${team.name} ainda não entrou em campo nesta Copa.`;
   }
   const sign = team.goalDifference > 0 ? `+${team.goalDifference}` : `${team.goalDifference}`;
   if (locale === "es") {
@@ -38,6 +38,13 @@ function teamLine(team: PredictionTeam, locale: Locale = "pt"): string {
       `${team.name} — ${team.points} pts en ${team.played} ` +
       `partido${team.played === 1 ? "" : "s"} (${team.won}G ${team.drawn}E ${team.lost}P), ` +
       `${team.goalsFor} goles a favor, ${team.goalsAgainst} en contra, diferencia ${sign}.`
+    );
+  }
+  if (locale === "en") {
+    return (
+      `${team.name} — ${team.points} pts in ${team.played} ` +
+      `match${team.played === 1 ? "" : "es"} (${team.won}W ${team.drawn}D ${team.lost}L), ` +
+      `${team.goalsFor} goals for, ${team.goalsAgainst} against, GD ${sign}.`
     );
   }
   return (
@@ -65,6 +72,7 @@ export function buildPrediction(
   locale: Locale = "pt",
 ): string {
   const es = locale === "es";
+  const en = locale === "en";
   const bothPlayed = home.played > 0 && away.played > 0;
   // The model's win-probability edge decides the verdict tone.
   const edge = outcome.homeWin - outcome.awayWin;
@@ -74,11 +82,16 @@ export function buildPrediction(
     verdict = es
       ? `Demasiado pronto para definir: ${home.name} y ${away.name} apenas calentaron motores. ` +
         `Por ahora, un duelo totalmente abierto.`
+      : en
+      ? `Too early to call: ${home.name} and ${away.name} have barely warmed up. ` +
+        `For now, a wide-open matchup.`
       : `Cedo demais para cravar: ${home.name} e ${away.name} mal aqueceram os motores. ` +
         `Por enquanto, confronto totalmente em aberto.`;
   } else if (Math.abs(edge) <= 0.1) {
     verdict = es
       ? `Partido parejo entre ${home.name} y ${away.name} — moneda al aire.`
+      : en
+      ? `An even matchup between ${home.name} and ${away.name} — a coin flip.`
       : `Jogo de igual para igual entre ${home.name} e ${away.name} — moeda no ar.`;
   } else {
     const fav = edge > 0 ? home : away;
@@ -88,6 +101,10 @@ export function buildPrediction(
       verdict = strong
         ? `${fav.name} llega como favorito claro ante ${dog.name}, por la campaña más sólida.`
         : `${fav.name} tiene una leve ventaja sobre ${dog.name}, pero sin margen para relajarse.`;
+    } else if (en) {
+      verdict = strong
+        ? `${fav.name} come in as clear favorites over ${dog.name}, on the stronger campaign.`
+        : `${fav.name} hold a slight edge over ${dog.name}, but no room to relax.`;
     } else {
       verdict = strong
         ? `${fav.name} entra como favorito claro diante de ${dog.name}, pela campanha mais sólida.`
@@ -99,12 +116,16 @@ export function buildPrediction(
   let modelLines = "";
   if (bothPlayed) {
     // "Probabilidades" / "empate" read identically in pt and es.
-    const probLine =
-      `Probabilidades: ${home.name} ${pct(outcome.homeWin)} · ` +
-      `empate ${pct(outcome.draw)} · ${away.name} ${pct(outcome.awayWin)}.`;
+    const probLine = en
+      ? `Probabilities: ${home.name} ${pct(outcome.homeWin)} · ` +
+        `draw ${pct(outcome.draw)} · ${away.name} ${pct(outcome.awayWin)}.`
+      : `Probabilidades: ${home.name} ${pct(outcome.homeWin)} · ` +
+        `empate ${pct(outcome.draw)} · ${away.name} ${pct(outcome.awayWin)}.`;
     const { teamA, teamB } = outcome.mostLikelyScore;
     const scoreLine = es
       ? `Marcador más probable: ${home.name} ${teamA} x ${teamB} ${away.name}.`
+      : en
+      ? `Most likely score: ${home.name} ${teamA}-${teamB} ${away.name}.`
       : `Placar mais provável: ${home.name} ${teamA} x ${teamB} ${away.name}.`;
     modelLines = `\n${probLine}\n${scoreLine}`;
   }
@@ -113,8 +134,22 @@ export function buildPrediction(
   const notesLine = notes
     ? es
       ? `\nDestacaste: "${notes}" — anotado, pero el pronóstico sigue la campaña.`
+      : en
+      ? `\nYou noted: "${notes}" — noted, but the prediction follows the campaign.`
       : `\nVocê destacou: "${notes}" — anotado, mas o palpite segue a campanha.`
     : "";
+
+  if (en) {
+    return [
+      `## Prediction`,
+      `${verdict}${modelLines}`,
+      `## Numbers`,
+      `${teamLine(home, locale)}\n${teamLine(away, locale)}`,
+      `## Read`,
+      `Simulated prediction from a Poisson model with Dixon-Coles correction over the teams' ` +
+        `current campaign — it's fun for fans, not a called result.${notesLine}`,
+    ].join("\n");
+  }
 
   if (es) {
     return [

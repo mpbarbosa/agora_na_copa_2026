@@ -72,6 +72,20 @@ test("favors the higher model probability and cites real numbers", () => {
   assert.match(text, /Placar mais provável: Brasil 2 x 0 Haiti/);
 });
 
+test("narrates the prognosis in US English for the en locale", () => {
+  const text = buildPrediction(strong, weak, lopsided, undefined, "en");
+  assert.match(text, /## Prediction/);
+  assert.match(text, /## Numbers/);
+  assert.match(text, /## Read/);
+  assert.match(text, /Brasil come in as clear favorites over Haiti/);
+  // Real stats + US-style score, no Portuguese leaking through.
+  assert.match(text, /9 pts in 3 matches \(3W 0D 0L\)/);
+  assert.match(text, /GD \+7/);
+  assert.match(text, /Probabilities: Brasil 74% · draw 16% · Haiti 10%/);
+  assert.match(text, /Most likely score: Brasil 2-0 Haiti/);
+  assert.doesNotMatch(text, /Prognóstico|Placar|gols|empate/);
+});
+
 test("close probabilities read as an even tie, no false favorite", () => {
   const a = team({ name: "Suíça", code: "SUI", points: 4, played: 2, goalsFor: 3, goalsAgainst: 2, goalDifference: 1 });
   const b = team({ name: "Canadá", code: "CAN", points: 4, played: 2, goalsFor: 3, goalsAgainst: 2, goalDifference: 1 });
