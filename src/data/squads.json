@@ -15055,7 +15055,10 @@
       "instagram": "r.halhal4",
       "wikipedia": "https://en.wikipedia.org/wiki/Redouane_Halhal"
     },
-    "instagramPostUrl": "https://www.instagram.com/p/DaAyU0jFVnt/"
+    "instagramPostUrls": [
+      "https://www.instagram.com/p/DaAyU0jFVnt/",
+      "https://www.instagram.com/p/DaY5BQXmmqH/"
+    ]
   },
   "485802": {
     "fifaId": "485802",
