@@ -21,6 +21,12 @@ import { apiUrl, useT, useLocale, localeToIntlTag, getActiveLocale } from "../i1
 import { buildGroupPositionMap } from "../standings";
 import { localizedStageName } from "../utils/knockoutSlots";
 import { localizeOfficialFifaStatus } from "../i18n/matchStatus";
+import { BroadcastCountrySelect } from "./BroadcastCountrySelect";
+import {
+  DEFAULT_COUNTRY_BY_LOCALE,
+  DEFAULT_BROADCAST_COUNTRY,
+  isBroadcastCountry,
+} from "../data/broadcastCountries";
 import { resolveTeamDisplay } from "../utils/resolveTeamDisplay";
 import MATCH_VIDEOS from "../data/matchVideos.json";
 import MATCH_ANALYSIS from "../data/matchAnalysis.json";
@@ -78,6 +84,7 @@ const HEADER_MATCH_STATUS_GROUPS = MATCH_STATUS_GROUPS.filter(
 );
 
 const DEFAULT_MATCH_OVERLAY_REFRESH_INTERVAL_MS = 15 * 1000;
+const BROADCAST_COUNTRY_STORAGE_KEY = "agora-broadcast-country";
 const DEMO_MATCH_ID = "bra-mar-2026";
 const INITIAL_MATCHES_BY_ID = new Map(
   APP_MATCHES.map((match) => [match.id, match]),
@@ -612,6 +619,52 @@ export function MatchDetailView({
   initialMatchId,
 }: MatchDetailViewProps) {
   const { t, locale } = useLocale();
+  // Broadcast-guide country. Precedence: the user's stored choice → IP geo (set
+  // by the effect below) → the locale default (pt→BR, es→MX). Persisted so the
+  // pick sticks across visits.
+  const [broadcastCountry, setBroadcastCountry] = useState<string>(() => {
+    try {
+      const stored = window.localStorage?.getItem(BROADCAST_COUNTRY_STORAGE_KEY);
+      if (isBroadcastCountry(stored)) return stored!.toUpperCase();
+    } catch {
+      // localStorage may throw in private-mode/sandboxed contexts — ignore.
+    }
+    return DEFAULT_COUNTRY_BY_LOCALE[locale];
+  });
+  const handleBroadcastCountryChange = (code: string) => {
+    setBroadcastCountry(code);
+    try {
+      window.localStorage?.setItem(BROADCAST_COUNTRY_STORAGE_KEY, code);
+    } catch {
+      // Non-fatal — the choice just won't persist across reloads.
+    }
+  };
+  // One-time IP geo auto-detect, only when the user hasn't explicitly chosen a
+  // country. `/api/geo` returns `country: null` when the GeoLite2 db is absent
+  // (preview builds) or the IP doesn't resolve — we then keep the locale default.
+  useEffect(() => {
+    let stored: string | null = null;
+    try {
+      stored = window.localStorage?.getItem(BROADCAST_COUNTRY_STORAGE_KEY) ?? null;
+    } catch {
+      stored = null;
+    }
+    if (isBroadcastCountry(stored)) return; // respect an explicit choice
+    let active = true;
+    fetch("/api/geo")
+      .then((response) => (response.ok ? response.json() : null))
+      .then((data: { country?: string | null } | null) => {
+        if (active && isBroadcastCountry(data?.country)) {
+          setBroadcastCountry(data!.country!.toUpperCase());
+        }
+      })
+      .catch(() => {
+        // Geo is best-effort — on any failure keep the locale default.
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
   const [matchOverlays, setMatchOverlays] = useState<
     Record<string, MatchOverlayEntry>
   >({});
@@ -1038,7 +1091,14 @@ export function MatchDetailView({
       requestInFlight = true;
 
       try {
-        const response = await fetch(apiUrl("/api/match-overlays"));
+        // Keep the request bare-path for the server default (BR) so it stays
+        // byte-identical to before (and existing `**/api/match-overlays` route
+        // mocks still match); only add `?country=` for a non-default pick.
+        const overlaysPath =
+          broadcastCountry === DEFAULT_BROADCAST_COUNTRY
+            ? "/api/match-overlays"
+            : `/api/match-overlays?country=${encodeURIComponent(broadcastCountry)}`;
+        const response = await fetch(apiUrl(overlaysPath));
         if (!response.ok) {
           throw new Error("Falha ao atualizar dados da FIFA.");
         }
@@ -1092,7 +1152,8 @@ export function MatchDetailView({
       window.removeEventListener("focus", handlePageVisible);
       document.removeEventListener("visibilitychange", handlePageVisible);
     };
-  }, []);
+    // Re-fetch (and re-poll) whenever the chosen broadcast country changes.
+  }, [broadcastCountry]);
 
   // Custom edit mode to test different lineups
   const handleUpdateKickoff = () => {
@@ -2273,14 +2334,22 @@ export function MatchDetailView({
               }`}
               id="broadcaster-rows"
             >
-              <p
-                className={`mb-3 font-anton text-lg md:text-xl uppercase tracking-wide ${
-                  theme === "classic-light" ? "text-slate-900" : "text-white"
-                }`}
-                id="broadcast-section-title"
-              >
-                {t("aoVivo.broadcast.title")}
-              </p>
+              <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+                <p
+                  className={`font-anton text-lg md:text-xl uppercase tracking-wide ${
+                    theme === "classic-light" ? "text-slate-900" : "text-white"
+                  }`}
+                  id="broadcast-section-title"
+                >
+                  {t("aoVivo.broadcast.title")}
+                </p>
+                <BroadcastCountrySelect
+                  value={broadcastCountry}
+                  onChange={handleBroadcastCountryChange}
+                  theme={theme}
+                  label={t("aoVivo.broadcast.countryLabel")}
+                />
+              </div>
               <p
                 className={`mb-4 font-mono text-[11px] uppercase tracking-wider ${
                   theme === "classic-light"
@@ -2385,6 +2454,16 @@ export function MatchDetailView({
                     className="flex min-w-0 flex-1 items-center gap-2 md:gap-3 overflow-x-auto scrollbar-hidden snap-x py-1"
                     id="fifa-broadcasters-list"
                   >
+                    {visibleBroadcasters.length === 0 && (
+                      <span
+                        id="broadcast-none-for-country"
+                        className={`font-mono text-[11px] uppercase tracking-wider ${
+                          theme === "classic-light" ? "text-slate-500" : "text-slate-400"
+                        }`}
+                      >
+                        {t("aoVivo.broadcast.noneForCountry")}
+                      </span>
+                    )}
                     {visibleBroadcasters.map((cast) => (
                       <a
                         key={cast.id}

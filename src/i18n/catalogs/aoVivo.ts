@@ -128,6 +128,9 @@ export const aoVivoCatalog: CatalogModule = {
     "aoVivo.broadcast.title": "Onde ver o jogo",
     "aoVivo.broadcast.loadingNote": "Carregando dados oficiais da FIFA...",
     "aoVivo.broadcast.videoAria": "Assistir no YouTube: {title}",
+    "aoVivo.broadcast.countryLabel": "País de transmissão",
+    "aoVivo.broadcast.noneForCountry":
+      "Nenhuma transmissão oficial listada para este país.",
 
     // Incident panel
     "aoVivo.incidents.title": "Lances do jogo",
@@ -288,6 +291,9 @@ export const aoVivoCatalog: CatalogModule = {
     "aoVivo.broadcast.title": "Dónde ver el partido",
     "aoVivo.broadcast.loadingNote": "Cargando datos oficiales de la FIFA...",
     "aoVivo.broadcast.videoAria": "Ver en YouTube: {title}",
+    "aoVivo.broadcast.countryLabel": "País de transmisión",
+    "aoVivo.broadcast.noneForCountry":
+      "Sin transmisión oficial listada para este país.",
 
     // Incident panel
     "aoVivo.incidents.title": "Jugadas del partido",

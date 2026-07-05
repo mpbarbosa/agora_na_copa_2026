@@ -13,10 +13,12 @@ import type { Locale } from "./src/i18n/locale";
 
 const NOTE_TRANSLATIONS: Record<string, string> = {
   // Broadcast guide
-  "Dados oficiais do Onde Assistir da FIFA para o Brasil.":
+  "Dados oficiais de Onde Assistir da FIFA.":
     "Datos oficiales de «Dónde Ver» de la FIFA.",
   "Dados oficiais da FIFA indisponíveis para esta partida no momento; exibindo a lista local.":
     "Datos oficiales de la FIFA no disponibles para este partido por ahora; mostrando la lista local.",
+  "Nenhuma transmissão oficial da FIFA para esta partida no país selecionado.":
+    "No hay transmisión oficial de la FIFA para este partido en el país seleccionado.",
   // Team view
   "Painel da seleção abastecido por dados oficiais da FIFA sempre que disponíveis.":
     "Panel de la selección alimentado con datos oficiales de la FIFA siempre que estén disponibles.",

@@ -20,6 +20,8 @@ import type {
 } from "./fifa-sync-core";
 import { GOOGLE_TRENDS_BATCH_URL, buildGoogleTrendsRequestBody, parseGoogleTrendsBatch } from "./trends-core";
 import { buildOpenMeteoUrl, parseOpenMeteoCurrent } from "./weather-core";
+import maxmind, { type CountryResponse, type Reader } from "maxmind";
+import { normalizeClientIp, countryFromCountryResponse } from "./geo-core";
 import {
   localeFromFifaLanguage,
   localeFromHost,
@@ -123,6 +125,29 @@ const FIFA_COMPETITION_ID = "17";
 const FIFA_SEASON_ID = "285023";
 const DEFAULT_BROADCAST_COUNTRY = "BR";
 const DEFAULT_BROADCAST_LANGUAGE = "pt";
+
+// GeoIP: resolve a visitor's country (ISO-2) from their IP to pre-select the
+// broadcast-guide country. Reads the local GeoLite2-Country mmdb (the same db
+// `traffic-report.sh` uses; no user IP leaves the host). Absent db (preview
+// builds, CI/Docker) → reader stays null → `/api/geo` returns country: null and
+// the client falls back to its locale default. GEO_DB overrides the path.
+const GEO_DB_PATH =
+  process.env.GEO_DB || "/var/lib/GeoIP/GeoLite2-Country.mmdb";
+let geoReaderPromise: Promise<Reader<CountryResponse> | null> | undefined;
+const getGeoReader = (): Promise<Reader<CountryResponse> | null> => {
+  if (!geoReaderPromise) {
+    geoReaderPromise = maxmind
+      .open<CountryResponse>(GEO_DB_PATH)
+      .catch((error: unknown) => {
+        console.warn(
+          `GeoIP disabled — could not open ${GEO_DB_PATH}:`,
+          error instanceof Error ? error.message : error,
+        );
+        return null;
+      });
+  }
+  return geoReaderPromise;
+};
 
 // Resolve the response locale for a request. The explicit `?language=` param wins
 // (the client sends it for the active locale on FIFA-data fetches); otherwise the
@@ -274,14 +299,26 @@ interface BackgroundWarmDiagnostics {
   inFlight: boolean;
 }
 
-let broadcastGuideCache:
-  | {
-      key: string;
-      createdAt: number;
-      expiresAt: number;
-      payload: BroadcastGuideResponse;
-    }
-  | null = null;
+// Keyed by `country:language` so the guide can be cached per country at once —
+// a single slot would thrash the moment visitors from different countries hit
+// it. Capped + oldest-evicted to stay bounded (≈20 countries × 2 languages).
+interface BroadcastGuideCacheEntry {
+  createdAt: number;
+  expiresAt: number;
+  payload: BroadcastGuideResponse;
+}
+const broadcastGuideCache = new Map<string, BroadcastGuideCacheEntry>();
+const BROADCAST_GUIDE_CACHE_MAX = 64;
+
+const setBroadcastGuideCache = (key: string, entry: BroadcastGuideCacheEntry) => {
+  broadcastGuideCache.set(key, entry);
+  while (broadcastGuideCache.size > BROADCAST_GUIDE_CACHE_MAX) {
+    // Evict the oldest inserted key (Map preserves insertion order).
+    const oldest = broadcastGuideCache.keys().next().value;
+    if (oldest === undefined) break;
+    broadcastGuideCache.delete(oldest);
+  }
+};
 
 let matchStatesCache:
   | {
@@ -1039,21 +1076,24 @@ const getBroadcastGuidePayload = async (
   language: string,
 ): Promise<BroadcastGuideResponse> => {
   const cacheKey = `${country}:${language}`;
+  // Brazil is the only country we carry a curated local broadcaster fallback
+  // for (`match.broadcasters`). For any other country, showing that BR list when
+  // FIFA has no data would be wrong — a Colombian must not see Brazilian channels
+  // — so non-BR countries with no official data get an honest empty state.
+  const isBrazil = country === DEFAULT_BROADCAST_COUNTRY;
   fifaSyncDiagnostics.broadcastGuide.lastAttemptAt = new Date().toISOString();
 
-  if (
-    broadcastGuideCache &&
-    broadcastGuideCache.key === cacheKey &&
-    broadcastGuideCache.expiresAt > Date.now()
-  ) {
-    return broadcastGuideCache.payload;
+  const fresh = broadcastGuideCache.get(cacheKey);
+  if (fresh && fresh.expiresAt > Date.now()) {
+    return fresh.payload;
   }
 
   if (isCircuitOpen(fifaSyncDiagnostics.broadcastGuide)) {
-    if (broadcastGuideCache?.key === cacheKey) {
+    const stale = broadcastGuideCache.get(cacheKey);
+    if (stale) {
       markStaleServe(fifaSyncDiagnostics.broadcastGuide);
       console.warn(`Broadcast guide circuit open for ${cacheKey}; serving stale cache.`);
-      return broadcastGuideCache.payload;
+      return stale.payload;
     }
 
     throw new Error("FIFA broadcast guide fetch temporarily paused after repeated failures.");
@@ -1062,15 +1102,19 @@ const getBroadcastGuidePayload = async (
   try {
     const [calendarMatches, watchData] = await Promise.all([
       fetchCalendarMatches(language),
-      fetchJson<FifaWatchSeasonResponse>(
+      fetchJson<FifaWatchSeasonResponse | null>(
         `${FIFA_API_BASE_URL}/watch/season/${FIFA_SEASON_ID}/${encodeURIComponent(country)}?language=${encodeURIComponent(language)}`
       ),
     ]);
 
+    // FIFA returns a null/empty body for countries it has no watch data for
+    // (e.g. PY) — guard it, otherwise `watchData.Matches` throws and 502s the
+    // whole guide the moment a user picks such a country.
     const watchByMatchId = new Map(
-      (watchData.Matches || []).map((match) => [match.IdMatch, match]),
+      (watchData?.Matches ?? []).map((match) => [match.IdMatch, match]),
     );
 
+    const locale = localeFromFifaLanguage(language);
     const guides = Object.fromEntries(
       APP_MATCHES.map((match) => {
         const fifaMatch = findCalendarMatch(match, calendarMatches, language);
@@ -1080,17 +1124,22 @@ const getBroadcastGuidePayload = async (
         const fifaBroadcasters = normalizeBroadcasters(fifaWatchMatch?.Sources);
         const hasOfficialGuide = fifaBroadcasters.length > 0;
 
+        const notePt = hasOfficialGuide
+          ? "Dados oficiais de Onde Assistir da FIFA."
+          : isBrazil
+            ? "Dados oficiais da FIFA indisponíveis para esta partida no momento; exibindo a lista local."
+            : "Nenhuma transmissão oficial da FIFA para esta partida no país selecionado.";
+
         return [
           match.id,
           {
-            broadcasters: hasOfficialGuide ? fifaBroadcasters : match.broadcasters,
+            broadcasters: hasOfficialGuide
+              ? fifaBroadcasters
+              : isBrazil
+                ? match.broadcasters
+                : [],
             source: hasOfficialGuide ? "fifa" : "fallback",
-            note: localizeNote(
-              hasOfficialGuide
-                ? "Dados oficiais do Onde Assistir da FIFA para o Brasil."
-                : "Dados oficiais da FIFA indisponíveis para esta partida no momento; exibindo a lista local.",
-              localeFromFifaLanguage(language),
-            ),
+            note: localizeNote(notePt, locale),
             fifaMatchId: fifaMatch?.IdMatch,
             updatedAt: new Date().toISOString(),
           } satisfies BroadcastGuideEntry,
@@ -1104,12 +1153,11 @@ const getBroadcastGuidePayload = async (
       guides,
     };
 
-    broadcastGuideCache = {
-      key: cacheKey,
+    setBroadcastGuideCache(cacheKey, {
       createdAt: Date.now(),
       expiresAt: Date.now() + BROADCAST_GUIDE_CACHE_TTL_MS,
       payload,
-    };
+    });
     fifaSyncDiagnostics.broadcastGuide.lastSuccessAt = new Date().toISOString();
     resetFailureState(fifaSyncDiagnostics.broadcastGuide);
 
@@ -1117,13 +1165,14 @@ const getBroadcastGuidePayload = async (
   } catch (error) {
     recordFailureState(fifaSyncDiagnostics.broadcastGuide, error);
 
-    if (broadcastGuideCache?.key === cacheKey) {
+    const stale = broadcastGuideCache.get(cacheKey);
+    if (stale) {
       markStaleServe(fifaSyncDiagnostics.broadcastGuide);
       console.warn(
         `Serving stale broadcast guide cache for ${cacheKey} after FIFA error:`,
         error,
       );
-      return broadcastGuideCache.payload;
+      return stale.payload;
     }
 
     throw error;
@@ -2613,11 +2662,14 @@ app.get("/api/match-weather", async (req, res) => {
 
 app.get("/api/fifa-sync-status", (_req, res) => {
   const now = Date.now();
-  const broadcastGuideFallbackCount = broadcastGuideCache
-    ? Object.values(broadcastGuideCache.payload.guides).filter(
-        (guide) => guide.source === "fallback",
-      ).length
-    : 0;
+  const broadcastGuideEntries = [...broadcastGuideCache.values()];
+  const broadcastGuideFallbackCount = broadcastGuideEntries.reduce(
+    (total, entry) =>
+      total +
+      Object.values(entry.payload.guides).filter((guide) => guide.source === "fallback")
+        .length,
+    0,
+  );
   const matchStateFallbackCount = matchStatesCache
     ? Object.values(matchStatesCache.payload.states).filter(
         (state) => state.source === "fallback",
@@ -2641,10 +2693,13 @@ app.get("/api/fifa-sync-status", (_req, res) => {
           const openUntilMs = getCircuitOpenUntilMs(fifaSyncDiagnostics.broadcastGuide);
           return openUntilMs ? Math.max(0, openUntilMs - now) : null;
         })(),
-        cacheKey: broadcastGuideCache?.key || null,
-        cacheAgeMs: broadcastGuideCache ? now - broadcastGuideCache.createdAt : null,
-        cacheExpiresInMs: broadcastGuideCache
-          ? Math.max(0, broadcastGuideCache.expiresAt - now)
+        cacheKeys: [...broadcastGuideCache.keys()],
+        cachedCountryLangCount: broadcastGuideCache.size,
+        cacheAgeMs: broadcastGuideEntries.length
+          ? now - Math.max(...broadcastGuideEntries.map((entry) => entry.createdAt))
+          : null,
+        cacheExpiresInMs: broadcastGuideEntries.length
+          ? Math.max(0, Math.max(...broadcastGuideEntries.map((entry) => entry.expiresAt)) - now)
           : null,
         fallbackMatchCount: broadcastGuideFallbackCount,
       },
@@ -2915,6 +2970,30 @@ const deriveClientKey = (req: express.Request): string => {
   const clientId = typeof rawId === "string" ? rawId.slice(0, 64) : "";
   return clientId ? `${ip}|${clientId}` : ip;
 };
+
+// Resolve the caller's country (ISO-2) from their IP, for pre-selecting the
+// broadcast-guide country. `req.ip` is the real client IP via `trust proxy`
+// (nginx X-Forwarded-For). Not FIFA-sourced, so no resilience shape; returns
+// `country: null` whenever the db is absent or the IP doesn't resolve (localhost,
+// private ranges) — the client then falls back to its locale default.
+app.get("/api/geo", async (req, res) => {
+  res.set("Cache-Control", "no-store");
+  const reader = await getGeoReader();
+  if (!reader) {
+    return res.json({ country: null, source: "unavailable" });
+  }
+  const ip = normalizeClientIp(req.ip);
+  let country: string | null = null;
+  if (ip) {
+    try {
+      country = countryFromCountryResponse(reader.get(ip));
+    } catch {
+      // Malformed IP — treat as unresolved rather than error the request.
+      country = null;
+    }
+  }
+  res.json({ country, source: "geoip" });
+});
 
 app.post("/api/presence", (req, res) => {
   const now = Date.now();
