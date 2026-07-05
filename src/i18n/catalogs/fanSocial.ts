@@ -231,4 +231,117 @@ export const fanSocialCatalog: CatalogModule = {
     "fanSocial.postCountSingular": "post",
     "fanSocial.postCountPlural": "posts",
   },
+  en: {
+    // FanZoneView — header
+    "fanSocial.fanZoneTitle": "Fan Zone",
+    "fanSocial.fanZoneSubtitle":
+      "Fan trivia quiz, penalty shootout and simulated match predictions",
+    "fanSocial.fanZoneScopeNote": "100% simulated prediction • no external AI",
+
+    // Trivia panel
+    "fanSocial.triviaTitle": "Fan trivia quiz",
+    "fanSocial.triviaWarmup": "Warming up the quiz",
+    "fanSocial.triviaProgress": "Question {current} of {total}",
+    "fanSocial.triviaScore": "Score: {score}",
+    "fanSocial.triviaLoading": "Loading fan warm-up questions...",
+    "fanSocial.triviaError": "Couldn't load the quiz right now. Try refreshing the Fan Zone.",
+    "fanSocial.triviaCorrect": "Correct answer",
+    "fanSocial.triviaWrong": "Not this time",
+    "fanSocial.triviaRestart": "Restart quiz",
+    "fanSocial.triviaNext": "Next question",
+
+    // Penalty panel
+    "fanSocial.penaltyTitle": "Penalty shootout",
+    "fanSocial.penaltySubtitle": "Pick your corner and see which way the keeper dives",
+    "fanSocial.penaltyReset": "Restart shootout",
+    "fanSocial.penaltyShots": "Shots",
+    "fanSocial.penaltyGoals": "Goals",
+    "fanSocial.penaltySaves": "Saves",
+    "fanSocial.penaltyExplainer":
+      "The keeper alternates corner reads in a pseudo-random pattern to keep the game fast and consistent between rounds.",
+    "fanSocial.penaltyOptionLeft": "Left corner",
+    "fanSocial.penaltyOptionCenter": "Down the middle",
+    "fanSocial.penaltyOptionRight": "Right corner",
+    "fanSocial.penaltyLastResult": "Result of the last kick",
+    "fanSocial.penaltyGoalConfirmed": "Goal confirmed",
+    "fanSocial.penaltyKeeperSaved": "Keeper saved it",
+    "fanSocial.penaltyResultShotPrefix": "You shot to the",
+    "fanSocial.penaltyResultKeeperMid": "and the keeper dove to the",
+    "fanSocial.penaltyResultSuffix": ".",
+    "fanSocial.penaltyDirLeft": "left",
+    "fanSocial.penaltyDirCenter": "center",
+    "fanSocial.penaltyDirRight": "right",
+    "fanSocial.penaltyEmpty": "Take the first kick to open the Fan Zone scoreboard.",
+
+    // Predictor panel
+    "fanSocial.predictorTitle": "Match prediction",
+    "fanSocial.predictorSubtitle":
+      "Pick two teams and generate a forecast from their current campaign.",
+    "fanSocial.predictorSimulated": "Simulated",
+    "fanSocial.predictorHome": "Home",
+    "fanSocial.predictorAway": "Away",
+    "fanSocial.predictorSelect": "Select…",
+    "fanSocial.predictorNotesPlaceholder": "Optional: your take (injuries, weather, home advantage…)",
+    "fanSocial.predictorSameTeams": "Pick two different teams.",
+    "fanSocial.predictorGenerating": "Generating…",
+    "fanSocial.predictorGenerate": "Generate prediction",
+    "fanSocial.predictorSimulatedBadge": "Simulated prediction",
+    "fanSocial.predictorError": "Couldn't generate the prediction right now. Try again.",
+
+    // SocialMediasView — header
+    "fanSocial.socialTitle": "Social",
+    "fanSocial.socialSubtitle":
+      "The world at the World Cup • social feed with filters, likes and real-time comments",
+    "fanSocial.socialMultiview": "Live multiview",
+
+    // FIFA profile card
+    "fanSocial.fifaCardLabel": "Official FIFA World Cup card",
+    "fanSocial.fifaProfileLabel": "Official FIFA World Cup profile on Instagram",
+    "fanSocial.fifaOfficialProfile": "@fifaworldcup • Official profile",
+    "fanSocial.fifaFollowBlurb":
+      "Follow the official FIFA World Cup 2026 account and catch everything from the World Cup firsthand.",
+    "fanSocial.fifaFollow": "Follow",
+
+    // Player Instagram highlights feed
+    "fanSocial.igHighlightsSubtitle":
+      "The best moments from the World Cup's stars, straight from Instagram",
+    "fanSocial.igHighlightsAria": "Player highlights on Instagram",
+
+    // Google Trends card
+    "fanSocial.trendsLabel": "Trending searches on Google",
+    "fanSocial.trendsTitle": "Trending on Google",
+    "fanSocial.trendsSportsOnly": "Sports only",
+    "fanSocial.trendsSource": "Google Trends • Brazil",
+    "fanSocial.trendsLoading": "Loading trending searches…",
+    "fanSocial.trendsEmpty": "No trending sports searches right now.",
+    "fanSocial.trendsSearches": "{traffic} searches",
+
+    // Filters
+    "fanSocial.filterAll": "All",
+    "fanSocial.filterPhotos": "Photos",
+    "fanSocial.filterNews": "News",
+    "fanSocial.filterOfficial": "Official",
+    "fanSocial.filtersLabel": "Filter posts",
+
+    // Category badges
+    "fanSocial.categoryPhoto": "Photo",
+    "fanSocial.categoryNews": "News",
+    "fanSocial.categoryOfficial": "Official",
+
+    // Feed
+    "fanSocial.feedLabel": "Social feed",
+    "fanSocial.feedEmptyPrefix": "No posts for this filter right now. Try another tag or go back to ",
+    "fanSocial.feedEmptyAll": "All",
+    "fanSocial.feedEmptySuffix": ".",
+    "fanSocial.postOfficialAccount": "Official account",
+    "fanSocial.commentsEmpty": "Be the first to comment on this post.",
+    "fanSocial.commentPlaceholder": "Keep it real…",
+    "fanSocial.commentSubmit": "Send comment",
+
+    // Trending sidebar
+    "fanSocial.trendingTitle": "Trending",
+    "fanSocial.trendingHint": "Tap a hashtag to filter the feed",
+    "fanSocial.postCountSingular": "post",
+    "fanSocial.postCountPlural": "posts",
+  },
 };

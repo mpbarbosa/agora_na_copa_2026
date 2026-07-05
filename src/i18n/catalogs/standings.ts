@@ -250,4 +250,126 @@ export const standingsCatalog: CatalogModule = {
     "standings.history.openMatchAria": "Abrir el partido {teamA} contra {teamB}",
     "standings.history.live": "● en vivo",
   },
+  en: {
+    // StandingsView — header
+    "standings.title": "Standings Table",
+    "standings.subtitle": "Group Stage • 12 groups of 4 teams",
+    "standings.criteriaButtonTitle": "Qualification criteria",
+    "standings.criteria": "Criteria",
+
+    // StandingsView — tooltip legend hint
+    "standings.legendPrefix": "Tap or hover over the",
+    "standings.legendQualified": "(qualified),",
+    "standings.legendEliminated": "(eliminated), over the",
+    "standings.legendThirdHighlight": "3rd highlighted",
+    "standings.legendThirdHint": "(awaiting the 8 best third-place finishers) or over the",
+    "standings.legendPosition": "position no.",
+    "standings.legendPositionHint":
+      "(1st/2nd still up for grabs) to see the mathematical breakdown of each team's situation.",
+
+    // StandingsView — table columns
+    "standings.col.pts": "PTS",
+    "standings.col.sg": "GD",
+    "standings.col.j": "P",
+    "standings.col.v": "W",
+    "standings.col.e": "D",
+    "standings.col.d": "L",
+    "standings.col.gf": "GF",
+    "standings.col.ga": "GA",
+    "standings.col.position": "Position",
+    "standings.col.team": "Team",
+
+    // StandingsView — group card status
+    "standings.live": "Live",
+    "standings.finished": "Finished",
+    "standings.liveMatchLine": "{teamA} {scoreA}–{scoreB} {teamB} · in progress",
+    "standings.notPlayedYet": "Group-stage results not played yet",
+    "standings.somePending": "Some matchups in this group haven't been played yet",
+
+    // StandingsView — row titles/notes
+    "standings.rowTitleQualified": "Mathematically qualified for the knockout stage",
+    "standings.rowTitleEliminated": "Eliminated from the group stage",
+    "standings.rowTitleAwaitingThird": "Awaiting the 8 best third-place finishers",
+    "standings.noteThirdQualified":
+      "Finished 3rd in {group} and advanced to the knockout stage as one of the 8 best third-place finishers ({position} of the 12).",
+    "standings.noteThirdEliminated":
+      "Finished 3rd in {group} and is eliminated — fell short of the 8 best third-place finishers ({position} of the 12).",
+    "standings.noteAwaitingThird":
+      "Finished 3rd in {group}. The 8 best third-place finishers advance to the knockout stage — the cut is only set once every group wraps up.{suffix}",
+    "standings.noteAwaitingThirdSuffix":
+      " Provisional position among the 12 third-place teams: {position} — {status}",
+    "standings.noteAwaitingThirdInside": "inside the 8 that advance.",
+    "standings.noteAwaitingThirdOutside": "outside the 8, for now.",
+
+    // StandingsView — group analysis section
+    "standings.groupAnalysis": "Group analysis",
+
+    // StandingsRulesCard
+    "standings.rules.title": "Qualification Criteria",
+    "standings.rules.subtitle": "Article 13 · FIFA WC 2026 Regulations",
+    "standings.rules.close": "Close",
+    "standings.rules.intro":
+      "When two or more teams are tied on points at the end of the group stage, the criteria below are applied in order.",
+    "standings.rules.step1": "Step 1",
+    "standings.rules.step1Title": "Head-to-head",
+    "standings.rules.step1Desc": "Only the matches between the tied teams",
+    "standings.rules.step1A": "Most points among them",
+    "standings.rules.step1B": "Best goal difference in the matches among them",
+    "standings.rules.step1C": "Most goals scored in the matches among them",
+    "standings.rules.step2": "Step 2",
+    "standings.rules.step2Title": "If still tied",
+    "standings.rules.step2Desc": "Criteria A–C reapplied to the remaining subgroup; if still tied:",
+    "standings.rules.step2D": "Best goal difference across all group matches",
+    "standings.rules.step2E": "Most goals scored across all group matches",
+    "standings.rules.step2F": "Fair play — lowest disciplinary points total:",
+    "standings.rules.yellowCard": "Yellow card",
+    "standings.rules.yellowCardPts": "−1 pt",
+    "standings.rules.indirectRed": "Indirect red (2 yellows)",
+    "standings.rules.indirectRedPts": "−3 pts",
+    "standings.rules.directRed": "Direct red",
+    "standings.rules.directRedPts": "−4 pts",
+    "standings.rules.yellowPlusRed": "Yellow + direct red",
+    "standings.rules.yellowPlusRedPts": "−5 pts",
+    "standings.rules.step3": "Step 3",
+    "standings.rules.step3Title": "Last resort",
+    "standings.rules.step3G": "Most recent FIFA/Coca-Cola Men's Ranking",
+    "standings.rules.step3H": "Prior ranking editions, retroactively, until a decision is reached",
+    "standings.rules.best8Title": "8 best third-place finishers",
+    "standings.rules.best8Desc": "Separate criterion — no head-to-head:",
+    "standings.rules.best8Order": "Points → Goal difference → Goals scored → Fair play → FIFA Ranking",
+    "standings.rules.officialLink": "See the official FIFA regulations",
+
+    // ThirdPlaceTable
+    "standings.third.title": "Best 3rd-place finishers",
+    "standings.third.subtitle": "8 of the 12 groups advance via 3rd place · provisional ranking",
+    "standings.third.colGroup": "Grp.",
+    "standings.third.colTeam": "Team",
+    "standings.third.colChance": "Chance",
+    "standings.third.colChanceTitle": "Simulated probability (Monte Carlo) of advancing to the knockout stage",
+    "standings.third.colJTitle": "Matches played (finished + in progress)",
+    "standings.third.colFpTitle":
+      "Fair play (Art. 13.2f): −1 yellow, −3 second yellow, −4 direct red",
+    "standings.third.guaranteedTitle": "Guaranteed spot in the knockout stage (100% in the simulations)",
+    "standings.third.guaranteedAria": "Guaranteed qualification",
+    "standings.third.eliminatedTitle": "Eliminated: 0% chance of landing among the 8 best 3rd-place finishers",
+    "standings.third.eliminatedAria": "Eliminated",
+    "standings.third.chanceCellTitle": "Simulated probability of advancing to the knockout stage",
+    "standings.third.footnote":
+      "The green line marks the cut for the 8 qualifiers. The Chance column is a simulated probability (Monte Carlo) of advancing to the knockout stage — a call for the fans, not a locked result. The official assignment of each 3rd-place team to the knockout bracket is only set once the group stage ends.",
+    "standings.third.tooltipBase": "{name} · {ord}",
+    "standings.third.tooltipOrd": "{rank} best 3rd-place finisher",
+    "standings.third.tooltipGuaranteed": "{name} · {ord} — knockout-stage qualification guaranteed.",
+    "standings.third.tooltipEliminated":
+      "{name} · {ord} — eliminated: no scenarios for landing among the 8 best 3rd-place finishers.",
+    "standings.third.tooltipInside":
+      "{name} · {ord} — inside the provisional cut of 8, but no guaranteed spot ({pct}% in the simulations).",
+    "standings.third.tooltipContention":
+      "{name} · {ord} — outside the provisional cut of 8, but still in the hunt ({pct}% in the simulations).",
+
+    // GroupMatchHistory
+    "standings.history.title": "Match history",
+    "standings.history.openMatchTitle": "Open the {teamA} vs {teamB} match",
+    "standings.history.openMatchAria": "Open the {teamA} against {teamB} match",
+    "standings.history.live": "● live",
+  },
 };

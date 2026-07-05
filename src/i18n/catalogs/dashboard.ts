@@ -307,4 +307,155 @@ export const dashboardCatalog: CatalogModule = {
     "dashboard.trafficSeriesRate": "Solicitudes/min",
     "dashboard.trafficHourTooltip": "{hour}h · {count} sol",
   },
+  en: {
+    // Header
+    "dashboard.title": "Dashboard",
+    "dashboard.subtitlePanorama": "The FIFA World Cup 2026 by the numbers",
+    "dashboard.subtitleTrafego": "Behind the scenes of the site's audience by the numbers",
+
+    // Freshness badge
+    "dashboard.freshnessTitleUpToDate": "The panel reflects the last match played",
+    "dashboard.freshnessTitleStale": "A match was played after this panel was published",
+    "dashboard.freshUpToDate": "Up to date",
+    "dashboard.freshStale": "Out of date",
+
+    // Tabs
+    "dashboard.tabsAriaLabel": "Dashboard sections",
+    "dashboard.tabPanorama": "Overview",
+    "dashboard.tabTrafego": "Traffic",
+
+    // KPI tiles
+    "dashboard.kpiTeams": "Teams",
+    "dashboard.kpiTeamsHint": "6 continents",
+    "dashboard.kpiStadiums": "Host cities",
+    "dashboard.kpiStadiumsHint": "3 countries",
+    "dashboard.kpiMatchesFinished": "Matches finished",
+    "dashboard.kpiMatchesFinishedHint": "of {total}",
+    "dashboard.kpiLive": "Live",
+    "dashboard.kpiLiveHint": "now",
+    "dashboard.kpiUpcoming": "Scheduled",
+    "dashboard.kpiUpcomingHint": "to be played",
+    "dashboard.kpiGroupGoals": "Goals (groups)",
+    "dashboard.kpiGroupGoalsHint": "{value} per match",
+
+    // Legend / phase labels
+    "dashboard.phaseGroupStage": "Group Stage",
+    "dashboard.phaseRoundOf32": "Round of 32",
+    "dashboard.phaseRoundOf16": "Round of 16",
+
+    // Chart: continents
+    "dashboard.chartContinentsTitle": "Teams by continent",
+    "dashboard.chartContinentsSubtitle":
+      "by stage · {groupStage} groups → {roundOf32} Round of 32 → {roundOf16} Round of 16",
+
+    // Chart: matches by status
+    "dashboard.chartStatusTitle": "Matches by status",
+    "dashboard.chartStatusSubtitle": "whole tournament · groups + knockout",
+    "dashboard.donutCenterLabel": "matches",
+
+    // Chart: goals by group
+    "dashboard.chartGroupGoalsTitle": "Goals by group",
+    "dashboard.chartGroupGoalsSubtitle": "group stage · goals scored",
+
+    // Chart: top scorers
+    "dashboard.chartTopTeamsTitle": "Team scoring leaders",
+    "dashboard.chartTopTeamsSubtitle": "whole tournament · groups + knockout · 8 highest-scoring attacks",
+
+    // Chart: goals by phase
+    "dashboard.chartPhaseGoalsTitle": "Goals by stage",
+    "dashboard.chartPhaseGoalsSubtitle":
+      "goals scored by stage · groups + knockout · {total} goals",
+    "dashboard.phaseGameSingular": "{count} match",
+    "dashboard.phaseGamePlural": "{count} matches",
+
+    // Chart: goals by minute
+    "dashboard.chartGoalsByMinuteTitle": "Goals by minute",
+    "dashboard.chartGoalsByMinuteSubtitleTeam":
+      "{team} · {count} {goals} · match minute × number of goals",
+    "dashboard.chartGoalsByMinuteSubtitleAll":
+      "all finished matches · {count} goals · match minute × number of goals",
+    "dashboard.goalSingular": "goal",
+    "dashboard.goalPlural": "goals",
+    "dashboard.goalsTeamFilterAria": "Filter goals by minute by team",
+    "dashboard.goalsTeamFilterAll": "All teams",
+    "dashboard.goalsTeamFilterOption": "{name} ({goals})",
+    "dashboard.goalsByMinuteEmpty": "No goals recorded for this team",
+    "dashboard.axisMinute": "minute",
+    "dashboard.axisGoals": "goals",
+    "dashboard.markerHalfTime": "halftime",
+
+    // Chart: goals heat-map
+    "dashboard.chartHeatmapTitle": "Goals heat map",
+    "dashboard.chartHeatmapSubtitle":
+      "goals by team group × 15-min interval · {total} goals",
+    "dashboard.heatmapRowHeader": "Group",
+    "dashboard.heatmapCellSingular": "Group {group} · {interval} min · {value} goal",
+    "dashboard.heatmapCellPlural": "Group {group} · {interval} min · {value} goals",
+
+    // Chart primitives (shared)
+    "dashboard.lineChartNeedTwoPoints":
+      "At least two snapshots are needed to plot the trend",
+    "dashboard.scatterAria": "{yLabel} by {xLabel}",
+    "dashboard.heatmapLegendLess": "less",
+    "dashboard.heatmapLegendMore": "more",
+
+    // Traffic panel — status classes
+    "dashboard.statusSuccess": "Success (2xx)",
+    "dashboard.statusRedirect": "Redirect (3xx)",
+    "dashboard.statusClientError": "Client error (4xx)",
+    "dashboard.statusServerError": "Server error (5xx)",
+    "dashboard.statusOther": "Other",
+
+    // Traffic panel — empty/loading states
+    "dashboard.trafficEmptySnapshot": "No data in this snapshot",
+    "dashboard.trafficLoadFailed": "Could not load the traffic panel",
+    "dashboard.trafficLoading": "Loading traffic data…",
+    "dashboard.trafficNoSnapshots": "No traffic snapshots available yet",
+
+    // Traffic panel — summary line
+    "dashboard.trafficSummarySingular": "{count} snapshot · updated {when}",
+    "dashboard.trafficSummaryPlural": "{count} snapshots · updated {when}",
+    "dashboard.trafficGeoSuffix": " · geo: GeoLite2",
+
+    // Traffic panel — KPI tiles
+    "dashboard.trafficKpiRequests": "Requests",
+    "dashboard.trafficKpiRequestsHint": "in the log window",
+    "dashboard.trafficKpiUniqueIps": "Unique IPs",
+    "dashboard.trafficKpiAvgRate": "Avg req/min",
+    "dashboard.trafficKpiAvgRateHint": "in the window",
+    "dashboard.trafficKpiBots": "Bots",
+    "dashboard.trafficKpiBotsHint": "{count} hits",
+    "dashboard.trafficKpiSynthetic": "Synthetic (e2e)",
+    "dashboard.trafficKpiSyntheticHint": "{count} hits",
+    "dashboard.trafficKpiLogLines": "Log lines",
+
+    // Traffic panel — chart titles/subtitles
+    "dashboard.trafficCumulativeTitle": "Cumulative traffic",
+    "dashboard.trafficCumulativeSubtitle":
+      "cumulative requests in the log window · per snapshot",
+    "dashboard.trafficRateTitle": "Request rate",
+    "dashboard.trafficRateSubtitle": "requests/min between consecutive snapshots",
+    "dashboard.trafficTopPathsTitle": "Most accessed routes",
+    "dashboard.trafficTopPathsSubtitle": "synthetic e2e routes excluded",
+    "dashboard.trafficByHourTitle": "Requests by hour (UTC)",
+    "dashboard.trafficByHourSubtitle": "distribution across the day",
+    "dashboard.trafficStatusCodesTitle": "HTTP status codes",
+    "dashboard.trafficStatusCodesSubtitle": "grouped by class",
+    "dashboard.trafficCountriesVisitorsTitle": "Countries (unique visitors)",
+    "dashboard.trafficCountriesVisitorsSubtitle": "top 10 by unique IP",
+    "dashboard.trafficCountriesVolumeTitle": "Countries (request volume)",
+    "dashboard.trafficCountriesVolumeSubtitle": "top 10 by requests",
+    "dashboard.trafficCitiesVisitorsTitle": "Cities (unique visitors)",
+    "dashboard.trafficCitiesSubtitle": "less precise than country · (unknown) bucket expected",
+    "dashboard.trafficCitiesVolumeTitle": "Cities (request volume)",
+    "dashboard.trafficByDayTitle": "Requests by day",
+    "dashboard.trafficByDaySubtitle": "each day of the log window",
+    "dashboard.trafficReferrersTitle": "Top referrers",
+    "dashboard.trafficReferrersSubtitle": "traffic source",
+
+    // Traffic panel — series names + hour tooltip
+    "dashboard.trafficSeriesRequests": "Requests (cumulative)",
+    "dashboard.trafficSeriesRate": "Requests/min",
+    "dashboard.trafficHourTooltip": "{hour}h · {count} req",
+  },
 };

@@ -121,4 +121,62 @@ export const bannersCatalog: CatalogModule = {
     "banners.teamCountdown.closeAria": "Cerrar el seguimiento de la selección",
     "banners.teamCountdown.countdownAria": "Faltan {time} para el próximo partido",
   },
+  en: {
+    // DonationPix
+    "banners.pix.pixPrefix": "Pix:",
+    "banners.pix.copyKeyAria": "Copy Pix key",
+    "banners.pix.copied": "Copied",
+    "banners.pix.copy": "Copy",
+    "banners.pix.blurb":
+      "Scan the QR code in your bank app or copy the Pix key. Every contribution helps keep the project online.",
+    "banners.pix.keyLabel": "Pix key · {keyType}",
+    "banners.pix.brcodeCopied": "Pix Copy and Paste copied",
+    "banners.pix.brcodeCopy": "Copy Pix Copy and Paste",
+
+    // CookieConsentBanner
+    "banners.cookie.ariaLabel": "Cookie notice",
+    "banners.cookie.textBefore":
+      "We use cookies to measure audience and show ads, helping keep the site online. By accepting, you agree to the use of cookies. See our",
+    "banners.cookie.privacyPolicy": "Privacy Policy",
+    "banners.cookie.essential": "Essential only",
+    "banners.cookie.accept": "Accept",
+
+    // ShareButton
+    "banners.share.shareTitle": "Share",
+    "banners.share.shareAria": "Share the app",
+    "banners.share.linkCopied": "Link copied!",
+
+    // OnlineCountBadge
+    "banners.online.titleOne": "{count} fan online now",
+    "banners.online.titleMany": "{count} fans online now",
+    "banners.online.label": "online",
+
+    // VersionCheckTimer
+    "banners.version.updateTitle": "New version available — reload to update",
+    "banners.version.newVersion": "new version",
+    "banners.version.lastCheckAt": "last checked at {time}",
+    "banners.version.awaitingFirst": "awaiting the first check",
+    "banners.version.nextCheckTitle": "Next new-version check in {countdown} • {last}",
+    "banners.version.timerAria": "Time until the next new-version check",
+    "banners.version.updateNow": "Update now",
+    "banners.version.checkNow": "Check for update now",
+    "banners.version.updateNowAria": "Update to the new version now",
+
+    // AdSlot
+    "banners.ads.label": "Advertisement",
+
+    // TeamCountdownBadge (followed-team next-match countdown)
+    "banners.teamCountdown.next": "Next match",
+    "banners.teamCountdown.live": "{team} live",
+    "banners.teamCountdown.onPitch": "On the pitch",
+    "banners.teamCountdown.probable": "Likely matchup",
+    "banners.teamCountdown.change": "Change team",
+    "banners.teamCountdown.choose": "Choose your team",
+    "banners.teamCountdown.chooseHint": "Follow your team's next match",
+    "banners.teamCountdown.noNextMatch": "No next match",
+    "banners.teamCountdown.noNextMatchHint": "Choose another team to follow",
+    "banners.teamCountdown.selectAria": "Choose the team to follow",
+    "banners.teamCountdown.closeAria": "Close the team tracker",
+    "banners.teamCountdown.countdownAria": "{time} left until the next match",
+  },
 };

@@ -57,4 +57,30 @@ export const commonCatalog: CatalogModule = {
     "common.freshness.upToDate": "Actualizada",
     "common.freshness.stale": "Desactualizada",
   },
+  en: {
+    // MatchWeatherChip
+    "common.weatherChip.title":
+      "See the stadium weather forecast • Feels like {apparent}° • Humidity {humidity}% • Wind {wind} km/h",
+    "common.weatherChip.ariaLabel":
+      "Weather at the stadium: {description}, {temperature} degrees. Open the weather forecast.",
+
+    // RefereeChip
+    "common.referee.caption": "Referee",
+    "common.referee.titleWithCountry": "Match referee: {name} ({country})",
+    "common.referee.title": "Match referee: {name}",
+    "common.referee.labelWithCountry": "Referee: {name}, {country}",
+    "common.referee.label": "Referee: {name}",
+    "common.referee.openCard": "{label} — open referee card",
+
+    // WeatherSuspensionNotice
+    "common.weatherSuspension.title": "Open the FIFA regulations on suspended matches",
+    "common.weatherSuspension.text":
+      "Match halted — FIFA protocol for suspension due to weather conditions",
+
+    // AnalysisFreshnessBadge
+    "common.freshness.upToDateTitle": "The analysis reflects the latest match",
+    "common.freshness.staleTitle": "The analysis is behind the latest match",
+    "common.freshness.upToDate": "Up to date",
+    "common.freshness.stale": "Out of date",
+  },
 };

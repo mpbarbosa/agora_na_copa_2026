@@ -82,4 +82,40 @@ export const utilsCatalog: CatalogModule = {
     "utils.stage.TP": "Tercer puesto",
     "utils.stage.F": "Final",
   },
+  en: {
+    // teamTournamentStatus.ts
+    "utils.classifiedFor": "Qualified for {stage}",
+    "utils.champion": "Champions",
+    "utils.runnerUp": "Runners-up",
+    "utils.thirdPlace": "3rd place",
+    "utils.fourthPlace": "4th place",
+    "utils.eliminatedIn": "Eliminated in {stage}",
+    "utils.eliminatedGroupStage": "Eliminated in the group stage",
+
+    // matchResult.ts
+    "utils.pointsOne": "+1 pt",
+    "utils.pointsMany": "+{pts} pts",
+    "utils.pointsZero": "0 pts",
+    "utils.runnerUpShort": "Runners-up",
+    "utils.qualified": "Qualified",
+    "utils.eliminated": "Eliminated",
+
+    // playerDisplay.ts
+    "utils.positionGK": "Goalkeeper",
+    "utils.positionDF": "Defender",
+    "utils.positionMF": "Midfielder",
+    "utils.positionFW": "Forward",
+
+    // dateFormat.ts
+    "utils.updatedOn": "Updated on {stamp}",
+
+    // knockoutSlots.ts
+    "utils.stage.group": "Group Stage",
+    "utils.stage.R32": "Round of 32",
+    "utils.stage.R16": "Round of 16",
+    "utils.stage.QF": "Quarterfinals",
+    "utils.stage.SF": "Semifinals",
+    "utils.stage.TP": "Third-Place Match",
+    "utils.stage.F": "Final",
+  },
 };

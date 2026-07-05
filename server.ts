@@ -2594,10 +2594,7 @@ const fetchVenueWeather = async (
 
   return {
     source: "open-meteo",
-    note:
-      locale === "es"
-        ? "Condiciones en el estadio • Open-Meteo"
-        : "Condições no estádio • Open-Meteo",
+    note: localizeNote("Condições no estádio • Open-Meteo", locale),
     updatedAt: new Date().toISOString(),
     weather: snapshot,
   };
@@ -2611,10 +2608,7 @@ app.get("/api/match-weather", async (req, res) => {
   if (lat === null || lng === null) {
     res.status(400).json({
       source: "fallback",
-      note:
-        locale === "es"
-          ? "Coordenadas del estadio inválidas."
-          : "Coordenadas do estádio inválidas.",
+      note: localizeNote("Coordenadas do estádio inválidas.", locale),
       updatedAt: new Date().toISOString(),
       weather: null,
     } satisfies WeatherResponse);
@@ -2643,17 +2637,14 @@ app.get("/api/match-weather", async (req, res) => {
       res.json({
         ...cached.payload,
         source: "fallback",
-        note: locale === "es" ? "Actualizando el clima…" : "Atualizando o clima…",
+        note: localizeNote("Atualizando o clima…", locale),
       } satisfies WeatherResponse);
       return;
     }
     res.set("Cache-Control", "public, max-age=60");
     res.json({
       source: "fallback",
-      note:
-        locale === "es"
-          ? "Clima no disponible por ahora."
-          : "Clima indisponível no momento.",
+      note: localizeNote("Clima indisponível no momento.", locale),
       updatedAt: new Date().toISOString(),
       weather: null,
     } satisfies WeatherResponse);
@@ -2820,19 +2811,13 @@ app.post("/api/predict", (req, res) => {
 
   if (!homeKey || !awayKey) {
     res.status(400).json({
-      error:
-        locale === "es"
-          ? "Indica las dos selecciones (homeTeam y awayTeam)."
-          : "Informe as duas seleções (homeTeam e awayTeam).",
+      error: localizeNote("Informe as duas seleções (homeTeam e awayTeam).", locale),
     });
     return;
   }
   if (homeKey.toUpperCase() === awayKey.toUpperCase()) {
     res.status(400).json({
-      error:
-        locale === "es"
-          ? "Elige dos selecciones diferentes."
-          : "Escolha duas seleções diferentes.",
+      error: localizeNote("Escolha duas seleções diferentes.", locale),
     });
     return;
   }
@@ -2848,7 +2833,7 @@ app.post("/api/predict", (req, res) => {
   const away = byKey.get(awayKey.toUpperCase());
   if (!home || !away) {
     res.status(404).json({
-      error: locale === "es" ? "Selección no encontrada." : "Seleção não encontrada.",
+      error: localizeNote("Seleção não encontrada.", locale),
     });
     return;
   }
@@ -3045,23 +3030,18 @@ app.get("/api/chat/:matchId", (req, res) => {
 app.post("/api/chat/:matchId", (req, res) => {
   res.set("Cache-Control", "no-store");
   const locale = localeForRequest(req);
-  const es = locale === "es";
   const { matchId } = req.params;
   if (!VALID_MATCH_IDS.has(matchId)) {
-    return res.status(404).json({ error: es ? "Partido desconocido." : "Partida desconhecida." });
+    return res.status(404).json({ error: localizeNote("Partida desconhecida.", locale) });
   }
   if (process.memoryUsage().rss > CHAT_MAX_RSS_BYTES) {
     return res.status(503).json({
-      error: es
-        ? "Chat no disponible temporalmente. Prueba en unos instantes."
-        : "Chat temporariamente indisponível. Tente em instantes.",
+      error: localizeNote("Chat temporariamente indisponível. Tente em instantes.", locale),
     });
   }
   if (!isMatchLive(matchId)) {
     return res.status(403).json({
-      error: es
-        ? "El chat se abre cuando comienza el partido."
-        : "O chat abre quando a partida começa.",
+      error: localizeNote("O chat abre quando a partida começa.", locale),
     });
   }
   const body = (req.body ?? {}) as { nickname?: unknown; text?: unknown };
@@ -3073,9 +3053,7 @@ app.post("/api/chat/:matchId", (req, res) => {
   const now = Date.now();
   if (!passesRateLimit(chatRateMap, deriveClientKey(req), now)) {
     return res.status(429).json({
-      error: es
-        ? "Estás enviando mensajes demasiado rápido. Respira."
-        : "Você está enviando mensagens rápido demais. Respire.",
+      error: localizeNote("Você está enviando mensagens rápido demais. Respire.", locale),
     });
   }
 

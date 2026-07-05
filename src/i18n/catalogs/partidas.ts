@@ -102,4 +102,53 @@ export const partidasCatalog: CatalogModule = {
     // Empty state
     "partidas.emptyState": "No hay partidos en esta franja por ahora.",
   },
+  en: {
+    // Header
+    "partidas.title": "Matches",
+    "partidas.subtitle":
+      "Compact list inspired by the BBC scoreboard to browse the schedule without visual clutter.",
+
+    // Filter tabs (label + short label shown per date section)
+    "partidas.filterScheduled": "Scheduled",
+    "partidas.filterScheduledShort": "Schedule",
+    "partidas.filterLive": "Live",
+    "partidas.filterLiveShort": "Live",
+    "partidas.filterFinished": "Finished",
+    "partidas.filterFinishedShort": "Results",
+
+    // Count copy (match/matches)
+    "partidas.matchCountSingular": "{count} match",
+    "partidas.matchCountPlural": "{count} matches",
+
+    // Phase header
+    "partidas.groupStagePhase": "Group Stage",
+    "partidas.hiddenHintSingular": " hidden",
+    "partidas.hiddenHintPlural": " hidden",
+
+    // Status strip — compact label
+    "partidas.statusCompact.PRE_GAME": "Schedule",
+    "partidas.statusCompact.LIVE": "Live",
+    "partidas.statusCompact.SUSPENDED": "Stopped",
+    "partidas.statusCompact.FINISHED": "FT",
+
+    // Status — accessible (aria) label
+    "partidas.statusAccessible.PRE_GAME": "Scheduled",
+    "partidas.statusAccessible.LIVE": "Live",
+    "partidas.statusAccessible.SUSPENDED": "Match stopped",
+    "partidas.statusAccessible.FINISHED": "Finished",
+
+    // Center scoreboard display
+    "partidas.kickoff": "Kickoff",
+    "partidas.penalties": "Pens. {teamA} x {teamB}",
+    "partidas.fullTimeLong": "Full Time",
+    "partidas.inPlay": "In play",
+    "partidas.suspended": "Stopped",
+
+    // Provisional-team badge
+    "partidas.qualifiedProvisional": "Qualified (provisional)",
+    "partidas.provAbbrev": "prov.",
+
+    // Empty state
+    "partidas.emptyState": "No matches in this range right now.",
+  },
 };

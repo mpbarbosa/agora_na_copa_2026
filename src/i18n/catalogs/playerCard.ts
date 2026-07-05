@@ -131,4 +131,67 @@ export const playerCardCatalog: CatalogModule = {
     "playerCard.refereeRoleCountry": "Árbitro(a) • {country}",
     "playerCard.refereeBlurb": "Árbitro(a) principal designado(a) por la FIFA para el partido.",
   },
+  en: {
+    // Shared chrome
+    "playerCard.close": "Close",
+    "playerCard.openInstagram": "Open on Instagram",
+    "playerCard.instagramHighlightOne": "Instagram highlight",
+    "playerCard.instagramHighlightMany": "Instagram highlights",
+
+    // Player stat / detail labels
+    "playerCard.stat.shirt": "Number",
+    "playerCard.stat.age": "Age",
+    "playerCard.stat.height": "Height",
+    "playerCard.stat.goals": "Goals",
+    "playerCard.stat.yellows": "Yellows",
+    "playerCard.stat.reds": "Reds",
+
+    // Social platform labels
+    "playerCard.social.site": "Official site",
+    "playerCard.social.wikipedia": "Wikipedia",
+    "playerCard.social.followers": "followers",
+
+    // Birth-date month abbreviations
+    "playerCard.month.jan": "Jan",
+    "playerCard.month.feb": "Feb",
+    "playerCard.month.mar": "Mar",
+    "playerCard.month.apr": "Apr",
+    "playerCard.month.may": "May",
+    "playerCard.month.jun": "Jun",
+    "playerCard.month.jul": "Jul",
+    "playerCard.month.aug": "Aug",
+    "playerCard.month.sep": "Sep",
+    "playerCard.month.oct": "Oct",
+    "playerCard.month.nov": "Nov",
+    "playerCard.month.dec": "Dec",
+
+    // Player overlay card
+    "playerCard.photoAlt": "Photo of {name}",
+    "playerCard.signatureAlt": "Signature of {name}",
+    "playerCard.zoomedPhotoAlt": "Enlarged photo of {name}",
+    "playerCard.eyebrow": "Full player card",
+    "playerCard.openTeamPanel": "Open full {team} panel",
+    "playerCard.openFullPhoto": "Open full-size photo",
+    "playerCard.officialSocials": "Official socials",
+    "playerCard.webSearch": "Search the web",
+    "playerCard.news": "News",
+
+    // Coach card
+    "playerCard.coachEyebrow": "Head coach card",
+    "playerCard.coachRole": "Head coach",
+    "playerCard.coachRoleTeam": "Head coach • {team}",
+    "playerCard.coachGames": "Matches",
+    "playerCard.coachWins": "Wins",
+    "playerCard.coachDraws": "Draws",
+    "playerCard.coachLosses": "Losses",
+    "playerCard.coachGoals": "Goals (for / against)",
+    "playerCard.coachGoalDiff": "Goal difference",
+    "playerCard.coachPhotoCredit": "Photo:",
+
+    // Referee card
+    "playerCard.refereeEyebrow": "Referee card",
+    "playerCard.refereeRole": "Referee",
+    "playerCard.refereeRoleCountry": "Referee • {country}",
+    "playerCard.refereeBlurb": "Head referee assigned by FIFA for the match.",
+  },
 };

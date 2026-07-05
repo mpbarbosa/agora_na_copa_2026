@@ -40,4 +40,22 @@ export const teamsCatalog: CatalogModule = {
     "teams.eliminatedBadge": "Eliminada",
     "teams.eliminatedTitle": "Sin chances de clasificación a la fase eliminatoria",
   },
+  en: {
+    "teams.title": "Teams",
+    "teams.subtitle":
+      "All 48 World Cup teams with direct access to each squad's full panel",
+    "teams.legendQualified": "✓ Qualified",
+    "teams.legendQualifiedDesc": "spot locked up in the knockout round",
+    "teams.legendEliminated": "✕ Eliminated",
+    "teams.legendEliminatedDesc": "no chance of qualifying",
+    "teams.groupTeamCount": "{count} teams",
+    "teams.teamStatsOne": "{code} • {points} pt • {played} {jogos}",
+    "teams.teamStatsMany": "{code} • {points} pts • {played} {jogos}",
+    "teams.gameSingular": "match",
+    "teams.gamePlural": "matches",
+    "teams.qualifiedBadge": "Qualified",
+    "teams.qualifiedTitle": "Qualified for the knockout round",
+    "teams.eliminatedBadge": "Eliminated",
+    "teams.eliminatedTitle": "No chance of qualifying for the knockout round",
+  },
 };

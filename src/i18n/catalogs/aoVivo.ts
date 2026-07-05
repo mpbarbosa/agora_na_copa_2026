@@ -330,4 +330,167 @@ export const aoVivoCatalog: CatalogModule = {
     "aoVivo.overlayCard.matchContextValue":
       "{teamName} x {opponentName}: {playerName} aparece en el radar de las jugadas del partido.",
   },
+  en: {
+    // Header match-selector group labels
+    "aoVivo.group.finished": "Finished matches: ",
+    "aoVivo.group.live": "Current matches: ",
+    "aoVivo.group.upcoming": "Upcoming matches: ",
+
+    // Incident feed badges (GOAL / YC / RC / SUB / PLAY)
+    "aoVivo.incident.goal": "GOAL",
+    "aoVivo.incident.yellow": "YC",
+    "aoVivo.incident.red": "RC",
+    "aoVivo.incident.sub": "SUB",
+    "aoVivo.incident.play": "PLAY",
+
+    // Incident text fragments (rebuilt around the highlighted player name)
+    "aoVivo.incidentText.scoredSuffix": " scored.",
+    "aoVivo.incidentText.yellowSuffix": " picked up a yellow.",
+    "aoVivo.incidentText.redSuffix": " was sent off.",
+    "aoVivo.incidentText.subOut": "Off ",
+    "aoVivo.incidentText.subIn": ", on ",
+
+    // Simulated-incident texts (local demo simulator)
+    "aoVivo.sim.goalGeneric":
+      "Simulation goal for {teamName}. The group table was recalculated instantly.",
+    "aoVivo.sim.yellowGeneric": "Yellow card for {teamName} in the simulation pressure.",
+    "aoVivo.sim.redGeneric": "Red card for {teamName} on a locally recreated play.",
+    "aoVivo.sim.subGeneric": "Simulated substitution for {teamName}.",
+    "aoVivo.sim.whistle": "Simulated whistle on {teamName}.",
+    "aoVivo.sim.comment": "Local update for {teamName}.",
+
+    // Overlay source/updated line
+    "aoVivo.overlay.pending": "Update pending",
+    "aoVivo.overlay.unavailable": "Update unavailable",
+    "aoVivo.overlay.updatedAt": "Updated {time}",
+    "aoVivo.overlay.sourceSimulation": "Local simulation",
+    "aoVivo.overlay.sourceOfficial": "Official",
+    "aoVivo.overlay.sourceFallback": "Local fallback",
+
+    // Status line
+    "aoVivo.status.live": "LIVE",
+    "aoVivo.status.liveWithTime": "LIVE • {time}",
+    "aoVivo.status.suspended": "SUSPENDED",
+    "aoVivo.status.finished": "FINAL",
+    "aoVivo.status.preGame": "PREGAME",
+    "aoVivo.status.officialFifaTitle": "Official match status per FIFA",
+
+    // Simultaneous-live alert + toggle
+    "aoVivo.simultaneous.liveNow": "{count} matches live now",
+    "aoVivo.simultaneous.tapToSwitch": "Simultaneous matches — tap to switch:",
+    "aoVivo.simultaneous.bothAria": "See both live matches side by side",
+    "aoVivo.simultaneous.both": "Both",
+    "aoVivo.simultaneous.matchAria": "See {teamA} vs {teamB}",
+
+    // Match-selector chips (tooltips / aria)
+    "aoVivo.selector.matchTooltip": "{teamA} vs {teamB}",
+    "aoVivo.selector.prevIn": "See earlier matches in {label}",
+    "aoVivo.selector.nextIn": "See upcoming matches in {label}",
+
+    // Clock / simulation config drawer
+    "aoVivo.config.title": "SET UP THE MOCK CLOCK",
+    "aoVivo.config.close": "Close [X]",
+    "aoVivo.config.narrationStatus": "Narration status",
+    "aoVivo.config.browserSupport": "Browser support",
+    "aoVivo.config.available": "Available",
+    "aoVivo.config.unavailable": "Unavailable",
+    "aoVivo.config.voiceEngine": "Voice engine (CDN)",
+    "aoVivo.config.loaded": "Loaded",
+    "aoVivo.config.loading": "Loading…",
+    "aoVivo.config.dash": "—",
+    "aoVivo.config.selectedVoice": "Selected voice",
+    "aoVivo.config.loadingVoice": "loading voice…",
+    "aoVivo.config.voiceOnDevice": " · on device",
+    "aoVivo.config.voiceOnNetwork": " · from network",
+    "aoVivo.config.narration": "Narration",
+    "aoVivo.config.enabled": "Enabled",
+    "aoVivo.config.disabled": "Disabled",
+    "aoVivo.config.voiceLabel": "Voice (pick one that speaks on your device)",
+    "aoVivo.config.voiceAuto": "Automatic (recommended)",
+    "aoVivo.config.voiceNetworkSuffix": " · network",
+    "aoVivo.config.testVoiceStarting": "starting…",
+    "aoVivo.config.testVoiceTitle": "Speak a test phrase now (direct device test)",
+    "aoVivo.config.testVoice": "Test voice",
+    "aoVivo.config.kickoffLabel": "Main Kickoff Time:",
+    "aoVivo.config.kickoffPlaceholder": "Example: 16:00",
+    "aoVivo.config.remainingLabel": "Time Remaining (Seconds):",
+    "aoVivo.config.convertedPreview": "Converted preview: {value}",
+    "aoVivo.config.simulatorTitle": "Score and discipline simulator",
+    "aoVivo.config.simulatorDesc":
+      "Use the Brazil vs Morocco clash to validate the demo clock and watch Groups react to goals and cards in real time.",
+    "aoVivo.config.resetDemo": "Reset local demo",
+    "aoVivo.config.startLive": "Start live",
+    "aoVivo.config.goal": "Goal {code}",
+    "aoVivo.config.yellow": "Yellow {code}",
+    "aoVivo.config.red": "Red {code}",
+    "aoVivo.config.finishMatch": "End match",
+    "aoVivo.config.applyToMatch": "Apply to Match",
+
+    // Scoreboard
+    "aoVivo.scoreboard.penaltyTitle": "Penalty shootout result",
+    "aoVivo.scoreboard.penaltyLabel": "Penalties {a}",
+    "aoVivo.scoreboard.advancesOnPenalties": "{name} advances on penalties",
+    "aoVivo.scoreboard.openGroupTable": "Open {group} table",
+    "aoVivo.scoreboard.stadiumLocalTimeTitle": "Local time at the stadium",
+    "aoVivo.scoreboard.localTime": "Local time",
+    "aoVivo.scoreboard.countdown": "Kickoff in:",
+    "aoVivo.scoreboard.brasiliaTime": "BRASÍLIA TIME",
+    "aoVivo.scoreboard.fifaMatchPage": "Official FIFA page for this match",
+    "aoVivo.scoreboard.simultaneousOne": "Heads up: another match at the same time",
+    "aoVivo.scoreboard.simultaneousMany": "Heads up: other matches at the same time",
+    "aoVivo.scoreboard.simultaneousTitle":
+      "{teamA} vs {teamB} — kicks off at the same time",
+    "aoVivo.scoreboard.simultaneousAria":
+      "See {teamA} vs {teamB}, which kicks off at the same time",
+
+    // Tabs
+    "aoVivo.tab.broadcast": "Where to Watch",
+    "aoVivo.tab.lineup": "Lineup",
+    "aoVivo.tab.postGame": "Postgame",
+    "aoVivo.tab.preGame": "Pregame",
+    "aoVivo.tab.instagram": "Instagram",
+
+    // Broadcast guide
+    "aoVivo.broadcast.title": "Where to watch the match",
+    "aoVivo.broadcast.loadingNote": "Loading official FIFA data...",
+    "aoVivo.broadcast.videoAria": "Watch on YouTube: {title}",
+    "aoVivo.broadcast.countryLabel": "Broadcast country",
+    "aoVivo.broadcast.noneForCountry":
+      "No official broadcast listed for this country.",
+
+    // Incident panel
+    "aoVivo.incidents.title": "Match highlights",
+    "aoVivo.incidents.feedSimulation": "Local simulation feed",
+    "aoVivo.incidents.feedOfficial": "Official FIFA feed",
+    "aoVivo.incidents.feedWaiting": "Waiting for official FIFA plays",
+    "aoVivo.incidents.clickHint": "Click the highlighted name to open the player card",
+    "aoVivo.incidents.empty": "No official plays recorded by FIFA so far.",
+    "aoVivo.incidents.listenPlay": "Listen to the play",
+
+    // Finished-match bar
+    "aoVivo.finished.label": "Finished matches:",
+    "aoVivo.finished.prev": "See earlier finished matches",
+    "aoVivo.finished.next": "See later finished matches",
+
+    // Analysis + Instagram tabs
+    "aoVivo.analysis.highlights": "Match highlights",
+    "aoVivo.analysis.preview": "Match preview",
+    "aoVivo.analysis.highlightsLabel": "Highlights",
+    "aoVivo.analysis.previewLabel": "Preview",
+    "aoVivo.instagram.title": "On Instagram",
+    "aoVivo.instagram.open": "Open on Instagram",
+
+    // Lineup tab
+    "aoVivo.lineup.title": "TACTICAL HUB AND SPATIAL LAYOUT",
+    "aoVivo.lineup.desc":
+      "Strategic positioning planned for the official São Paulo / New York 2026 clash.",
+
+    // Incident player overlay
+    "aoVivo.overlayCard.position": "Position",
+    "aoVivo.overlayCard.birth": "Born",
+    "aoVivo.overlayCard.currentClub": "Current club",
+    "aoVivo.overlayCard.matchContext": "Match context",
+    "aoVivo.overlayCard.matchContextValue":
+      "{teamName} vs {opponentName}: {playerName} shows up on the radar of the match's key plays.",
+  },
 };

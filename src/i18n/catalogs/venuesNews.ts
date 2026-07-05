@@ -97,4 +97,50 @@ export const venuesNewsCatalog: CatalogModule = {
     "venuesNews.news.filterTeams": "Equipos",
     "venuesNews.news.filterGeneral": "General",
   },
+  en: {
+    // Country labels
+    "venuesNews.country.USA": "United States",
+    "venuesNews.country.MEX": "Mexico",
+    "venuesNews.country.CAN": "Canada",
+
+    // VenueMapView — header
+    "venuesNews.venues.title": "World Cup Stadiums",
+    "venuesNews.venues.subtitle":
+      "16 venues • real OpenStreetMap map • explore by host city",
+
+    // VenueMapView — map panel
+    "venuesNews.venues.mapTitle": "World Cup Routes",
+    "venuesNews.venues.mapHint":
+      "Pan the map, zoom in, and tap a marker to open the venue",
+    "venuesNews.venues.mapDescription":
+      "Explore all 16 venues at real scale, with free zoom across Canada, the United States, and Mexico.",
+
+    // VenueMapView — mobile list
+    "venuesNews.venues.matchCount": "{count} matches",
+
+    // VenueMapView — detail panel
+    "venuesNews.venues.selectedVenue": "Selected venue",
+    "venuesNews.venues.highlightedMatches": "{count} featured matches",
+    "venuesNews.venues.capacity": "Capacity",
+    "venuesNews.venues.inauguration": "Opened",
+    "venuesNews.venues.arenaXRay": "Arena X-ray",
+    "venuesNews.venues.matchesHere": "Matches at this venue",
+    "venuesNews.venues.matchesHereHint":
+      "Cross-referenced with the app's featured matches",
+    "venuesNews.venues.noMatches":
+      "This arena hasn't hosted any of the page's featured matches yet.",
+
+    // NewsView — header
+    "venuesNews.news.title": "News Hub",
+    "venuesNews.news.subtitle":
+      "Updates on venues, tickets, teams, and behind-the-scenes World Cup stories",
+    "venuesNews.news.highlightsCount": "{count} highlights in focus",
+
+    // NewsView — filters
+    "venuesNews.news.filterAll": "All",
+    "venuesNews.news.filterVenues": "Venues",
+    "venuesNews.news.filterTickets": "Tickets",
+    "venuesNews.news.filterTeams": "Teams",
+    "venuesNews.news.filterGeneral": "General",
+  },
 };

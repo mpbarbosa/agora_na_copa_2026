@@ -9,7 +9,7 @@
 import type { ChatMessage } from "./src/types";
 import type { Locale } from "./src/i18n/locale";
 
-// Validation messages, pt default with es-LATAM fallback (see src/i18n).
+// Validation messages, pt default with es-LATAM / en-US variants (see src/i18n).
 const CHAT_MESSAGES = {
   pt: {
     nicknameInvalid: "Apelido inválido.",
@@ -29,10 +29,19 @@ const CHAT_MESSAGES = {
     textTooLong: (max: number) => `El mensaje supera los ${max} caracteres.`,
     textLinks: "El mensaje no puede contener enlaces.",
   },
+  en: {
+    nicknameInvalid: "Invalid nickname.",
+    nicknameEmpty: "Choose a nickname to join in.",
+    nicknameLinks: "Nicknames can't contain links.",
+    textInvalid: "Invalid message.",
+    textEmpty: "Type a message.",
+    textTooLong: (max: number) => `Your message is over ${max} characters.`,
+    textLinks: "Messages can't contain links.",
+  },
 } as const;
 
 const chatMessages = (locale: Locale) =>
-  locale === "es" ? CHAT_MESSAGES.es : CHAT_MESSAGES.pt;
+  CHAT_MESSAGES[locale] ?? CHAT_MESSAGES.pt;
 
 /** Per-match ring buffer: matchId -> messages, oldest first. */
 export type ChatStore = Map<string, ChatMessage[]>;

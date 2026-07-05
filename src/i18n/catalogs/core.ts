@@ -98,4 +98,51 @@ export const coreCatalog: CatalogModule = {
     "nav.fanzone.desc":
       "Quiz y minijuegos para que el hincha siga el Mundial en clima de charla.",
   },
+  en: {
+    // App shell — header, banners, controls
+    "shell.brandName": "Now at the World Cup",
+    "shell.newVersion": "New version available",
+    "shell.updateNow": "Update now",
+    "shell.editClock": "Change Clock",
+    "shell.howToUse": "How to use the app",
+    "shell.toggleTheme": "Toggle visual style",
+    "shell.switchLanguage": "Change language",
+
+    // Footer
+    "footer.rights":
+      "© 2026 Now at the World Cup 26. All rights reserved. FIFA World Cup, trademarks and logos are the property of their respective owners.",
+    "footer.madeWith": "Built with care for the sports-data fanatic.",
+    "footer.credits": "Credits:",
+    "footer.privacy": "Privacy Policy",
+    "footer.pageVersion": "Page version:",
+
+    // Navigation (mirrors NAV_ITEMS ids)
+    "nav.dashboard.label": "Dashboard",
+    "nav.dashboard.desc": "Dashboard under construction.",
+    "nav.ao-vivo.label": "Live",
+    "nav.ao-vivo.desc": "Follow the timer, broadcasts and every play of each match.",
+    "nav.partidas.label": "Matches",
+    "nav.partidas.desc": "See every finished, live and scheduled match of the World Cup.",
+    "nav.grupos.label": "Groups",
+    "nav.grupos.desc": "Standings tables for the tournament's 12 groups.",
+    "nav.chaveamento.label": "Knockout",
+    "nav.chaveamento.desc": "Interactive knockout bracket all the way to the grand final.",
+    "nav.selecoes.label": "Teams",
+    "nav.selecoes.desc":
+      "Complete list of the teams that qualified for the World Cup with access to each team's panel.",
+    "nav.jogadores.label": "Players",
+    "nav.jogadores.desc": "Individual profiles of the athletes who qualified for the World Cup.",
+    "nav.lideres.label": "Leaders",
+    "nav.lideres.desc": "Top scorers, discipline and team standouts of the World Cup.",
+    "nav.estadios.label": "Stadiums",
+    "nav.estadios.desc": "Map and fun facts of the World Cup's 16 host venues.",
+    "nav.social-medias.label": "Social",
+    "nav.social-medias.desc":
+      "Social feed of the World Cup world with filters, trends, likes and comments.",
+    "nav.noticias.label": "News",
+    "nav.noticias.desc": "Feed of updates on teams, venues and tickets.",
+    "nav.fanzone.label": "Fan Zone",
+    "nav.fanzone.desc":
+      "Quiz and mini-games for fans to follow the World Cup with a laid-back vibe.",
+  },
 };

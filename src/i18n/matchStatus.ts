@@ -30,11 +30,40 @@ const ES_OFFICIAL_STATUS: Record<string, string> = {
   Paralisado: "Suspendido",
 };
 
+const EN_OFFICIAL_STATUS: Record<string, string> = {
+  // Period labels (US soccer voice)
+  Agendado: "Scheduled",
+  "Pré-jogo": "Pregame",
+  "1º tempo": "1st Half",
+  Intervalo: "Halftime",
+  "2º tempo": "2nd Half",
+  Prorrogação: "Extra Time",
+  "Prorrogação · 1º tempo": "Extra Time · 1st Half",
+  "Intervalo da prorrogação": "Extra-Time Break",
+  "Prorrogação · 2º tempo": "Extra Time · 2nd Half",
+  "Fim de jogo": "Full Time",
+  Pênaltis: "Penalty Shootout",
+  "Pós-jogo": "Postgame",
+  Abandonado: "Abandoned",
+  // Terminal / abnormal status labels
+  Encerrado: "Final",
+  "Escalações divulgadas": "Lineups Announced",
+  Adiado: "Postponed",
+  Cancelado: "Canceled",
+  Atrasado: "Delayed",
+  Paralisado: "Suspended",
+};
+
+const OFFICIAL_STATUS_BY_LOCALE: Partial<Record<Locale, Record<string, string>>> = {
+  es: ES_OFFICIAL_STATUS,
+  en: EN_OFFICIAL_STATUS,
+};
+
 /**
  * Localize the pt official-status label for the active UI locale. pt returns it
- * unchanged; es maps by the exact pt string, falling back to the input verbatim.
+ * unchanged; es/en map by the exact pt string, falling back to the input verbatim.
  */
 export const localizeOfficialFifaStatus = (
   ptLabel: string,
   locale: Locale = getActiveLocale(),
-): string => (locale === "es" ? ES_OFFICIAL_STATUS[ptLabel] ?? ptLabel : ptLabel);
+): string => OFFICIAL_STATUS_BY_LOCALE[locale]?.[ptLabel] ?? ptLabel;

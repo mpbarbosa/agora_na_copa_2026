@@ -197,4 +197,99 @@ export const toursCatalog: CatalogModule = {
     "tours.fullBracket.step3.description":
       "¡Listo! Las selecciones convergen desde los lados hasta la copa en el centro: las banderas encendidas muestran quién avanzó y las casillas vacías esperan los próximos partidos. En el celular, gira la pantalla al modo horizontal.",
   },
+  en: {
+    // featureTour.ts — TOUR_STEPS
+    "tours.feature.welcome.title": "Welcome to Agora na Copa 26 ⚽",
+    "tours.feature.welcome.description":
+      "A quick tour of the app's main areas — it takes less than 30 seconds.",
+    "tours.feature.aoVivo.title": "Live",
+    "tours.feature.aoVivo.description":
+      "Score, where to watch (Globo, SporTV, CazéTV, FIFA+), and the lineups for every match.",
+    "tours.feature.jogadores.title": "Players",
+    "tours.feature.jogadores.description":
+      "Search any player and open the full profile by tapping the name.",
+    "tours.feature.lideres.title": "Leaders",
+    "tours.feature.lideres.description":
+      "Top scorers, cards, and the stats that decide the World Cup.",
+    "tours.feature.chaveamento.title": "Knockout",
+    "tours.feature.chaveamento.description": "Follow the knockout road all the way to the final.",
+    "tours.feature.social.title": "Social",
+    "tours.feature.social.description": "Trends and the World Cup social feed, all in one place.",
+    "tours.feature.theme.title": "Light or dark theme",
+    "tours.feature.theme.description": "Tap here to switch the look whenever you want.",
+
+    // messiTour.ts
+    "tours.messi.step1.title": "Meet the greatest star ⭐",
+    "tours.messi.step1.description":
+      'Lionel Messi is the star of the World Cup. Let\'s open his card — it all starts on the Players tab. Tap "Next".',
+    "tours.messi.step2.title": "Lionel Messi",
+    "tours.messi.step2.description":
+      'Here\'s Messi among the players. Tap "Next" to open the full card.',
+    "tours.messi.step3.title": "Messi's full card ✓",
+    "tours.messi.step3.description":
+      "Done! Stats, analysis, and official socials — that's how you open any player's card.",
+
+    // tipTours.ts — team lineup tour
+    "tours.teamLineup.step1.title": "See every team's squad 🌎",
+    "tours.teamLineup.step1.description":
+      'All 48 teams have a full page. It all starts on the Teams tab — tap "Next".',
+    "tours.teamLineup.step2.title": "Tap the flag",
+    "tours.teamLineup.step2.description":
+      "Tap the team's crest to open the full squad. Let's open Brazil.",
+    "tours.teamLineup.step3.title": "Full squad ✓",
+    "tours.teamLineup.step3.description":
+      "Done! Starting lineup, coaching staff, and match history — that's how you open any team.",
+
+    // tipTours.ts — best thirds tour
+    "tours.bestThirds.step1.title": "8 of the 12 third-place teams advance 🧮",
+    "tours.bestThirds.step1.description":
+      'Not every 3rd-place team is out — and you can see who goes through. Let\'s find that table: open the Groups tab on "Next".',
+    "tours.bestThirds.step2.title": "Scroll to the bottom of the page ⬇️",
+    "tours.bestThirds.step2.description":
+      'The "Best third-place teams" section sits at the foot of this page, right below the 12 groups. Tap "Next" and I\'ll take you there.',
+    "tours.bestThirds.step3.title": "Found it: Best third-place teams ✓",
+    "tours.bestThirds.step3.description":
+      "Here it is. The 12 third-place teams are ranked by points, goal difference, goals, and fair play. The green line marks the cut: the top 8 advance to the knockout stage.",
+
+    // tipTours.ts — bracket tour
+    "tours.bracket.step1.title": "The road to the final 🏆",
+    "tours.bracket.step1.description":
+      'Follow the whole knockout stage, from the Round of 32 to the final, on the Knockout tab — tap "Next".',
+    "tours.bracket.step2.title": "World Cup knockout stage",
+    "tours.bracket.step2.description":
+      "At each round, the matchup is built from the qualified teams — including the spots for the 8 best third-place teams.",
+
+    // tipTours.ts — bracket feeder tour
+    "tours.bracketFeeder.step1.title": "Who decides the opponent? 🔍",
+    "tours.bracketFeeder.step1.description":
+      'In the Knockout stage, each matchup is born from two matches in the previous round — and you can see which ones. Open the Knockout tab on "Next".',
+    "tours.bracketFeeder.step2.title": "Point to a Round of 16 match",
+    "tours.bracketFeeder.step2.description":
+      'Hover (or tap, on mobile) over a Round of 16 matchup. On "Next" I\'ll do it for you.',
+    "tours.bracketFeeder.step3.title": "The 2 Round of 32 matches ✓",
+    "tours.bracketFeeder.step3.description":
+      "Done! The Round of 32 lights up the two matches that decide who reaches this matchup — highlighted and side by side. The rest of the column fades out to focus on the path.",
+
+    // tipTours.ts — group history tour
+    "tours.groupHistory.step1.title": "All the group's matches 📅",
+    "tours.groupHistory.step1.description":
+      'Results and upcoming matches for each group are on the group card. Open the Groups tab on "Next".',
+    "tours.groupHistory.step2.title": "Match history",
+    "tours.groupHistory.step2.description":
+      'Every group has a "Match history" section. Tap "Next" and I\'ll open it for you.',
+    "tours.groupHistory.step3.title": "Results and upcoming matches ✓",
+    "tours.groupHistory.step3.description":
+      "Done! Matches already played show the score and upcoming ones show the kickoff time — in order, without leaving the table.",
+
+    // tipTours.ts — full bracket tour
+    "tours.fullBracket.step1.title": "The whole bracket on one screen 🏆",
+    "tours.fullBracket.step1.description":
+      'You can see the entire knockout stage like a poster, from the Round of 32 to the final. Open the Knockout tab on "Next".',
+    "tours.fullBracket.step2.title": 'Turn on the "Full bracket"',
+    "tours.fullBracket.step2.description":
+      'This button swaps the columns for the full bracket — the symmetrical table with all the teams and the trophy in the center. On "Next" I\'ll turn it on for you.',
+    "tours.fullBracket.step3.title": "The full bracket ✓",
+    "tours.fullBracket.step3.description":
+      "Done! The teams converge from the sides toward the trophy in the center: the lit flags show who advanced and the empty boxes await the upcoming matches. On mobile, rotate your screen to landscape mode.",
+  },
 };

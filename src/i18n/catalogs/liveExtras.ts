@@ -57,4 +57,30 @@ export const liveExtrasCatalog: CatalogModule = {
     "liveExtras.speech.disable": "Desactivar la narración de las jugadas",
     "liveExtras.speech.enable": "Activar la narración de las jugadas",
   },
+  en: {
+    // MatchChatPanel
+    "liveExtras.chat.heading": "Live chatter",
+    "liveExtras.chat.liveBadge": "Live",
+    "liveExtras.chat.subtitle":
+      "Anonymous chat only during the match — messages disappear when the game ends.",
+    "liveExtras.chat.empty": "Be the first to sound off about the game.",
+    "liveExtras.chat.nicknamePlaceholder": "Your nickname",
+    "liveExtras.chat.nicknameAria": "Nickname",
+    "liveExtras.chat.messagePlaceholder": "Sound off…",
+    "liveExtras.chat.messageAria": "Message",
+    "liveExtras.chat.sendAria": "Send message",
+    "liveExtras.chat.closed": "The chat opens when the match kicks off. Come back at the opening whistle!",
+
+    // SimultaneousLiveMatches
+    "liveExtras.live.liveWithTime": "LIVE • {time}",
+    "liveExtras.live.live": "LIVE",
+    "liveExtras.live.suspended": "SUSPENDED",
+    "liveExtras.live.finished": "FINAL",
+    "liveExtras.live.whereToWatch": "Where to watch",
+    "liveExtras.live.incidents": "Plays",
+
+    // MatchSpeechToggle
+    "liveExtras.speech.disable": "Turn off play-by-play narration",
+    "liveExtras.speech.enable": "Turn on play-by-play narration",
+  },
 };

@@ -56,14 +56,16 @@ test("apiUrl appends the English FIFA language for en (pt stays bare)", () => {
 
 // ── Catalog integrity ────────────────────────────────────────────────────────
 
-test("es UI catalog is at full parity with the pt reference", () => {
+test("es and en UI catalogs are at full parity with the pt reference", () => {
   const ptKeys = Object.keys(CATALOGS.pt);
-  const missingInEs = ptKeys.filter((key) => !(key in CATALOGS.es));
-  assert.deepEqual(
-    missingInEs,
-    [],
-    `es is missing ${missingInEs.length} pt keys: ${missingInEs.slice(0, 10).join(", ")}`,
-  );
+  for (const locale of ["es", "en"] as const) {
+    const missing = ptKeys.filter((key) => !(key in CATALOGS[locale]));
+    assert.deepEqual(
+      missing,
+      [],
+      `${locale} is missing ${missing.length} pt keys: ${missing.slice(0, 10).join(", ")}`,
+    );
+  }
 });
 
 test("no locale carries an orphan key absent from the pt reference", () => {
@@ -80,7 +82,3 @@ test("no locale carries an orphan key absent from the pt reference", () => {
     );
   }
 });
-
-// NOTE (Phase 2): once the `en` catalogs are filled, add an `en`-completeness
-// assertion mirroring the es parity test above — that becomes the gate that
-// prevents shipping English with Portuguese-leaking gaps.

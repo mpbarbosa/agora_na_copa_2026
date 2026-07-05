@@ -109,18 +109,48 @@ const ES_WEEKDAYS = [
   "sábado",
 ];
 
-// pt-BR is the native format ("4 Julho 2026 (sábado)"); es renders the LATAM
-// month/weekday names ("4 Julio 2026 (sábado)"). APP_MATCHES is built once at
-// module load, so this reads the boot locale — correct for the es. subdomain,
-// the primary Spanish delivery path.
+const EN_MONTHS = [
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
+];
+
+const EN_WEEKDAYS = [
+  "Sunday",
+  "Monday",
+  "Tuesday",
+  "Wednesday",
+  "Thursday",
+  "Friday",
+  "Saturday",
+];
+
+// pt-BR is the native format ("4 Julho 2026 (sábado)"); es keeps the same
+// day-first shape with LATAM names ("4 Julio 2026 (sábado)"); en uses the US
+// month-first order ("July 4, 2026 (Saturday)"). APP_MATCHES is built once at
+// module load, so this reads the boot locale — correct for the per-locale
+// subdomains, the primary delivery path.
 const formatKickoffDate = (kickoffTimestamp: string) => {
   const [datePart] = kickoffTimestamp.split("T");
   const [year, month, day] = datePart.split("-").map(Number);
-  const es = getActiveLocale() === "es";
+  const weekdayIndex = new Date(Date.UTC(year, month - 1, day)).getUTCDay();
+  const locale = getActiveLocale();
+  if (locale === "en") {
+    return `${EN_MONTHS[month - 1]} ${day}, ${year} (${EN_WEEKDAYS[weekdayIndex]})`;
+  }
+  const es = locale === "es";
   const months = es ? ES_MONTHS : PT_MONTHS;
   const weekdays = es ? ES_WEEKDAYS : PT_WEEKDAYS;
-  const weekday = weekdays[new Date(Date.UTC(year, month - 1, day)).getUTCDay()];
-  return `${day} ${months[month - 1]} ${year} (${weekday})`;
+  return `${day} ${months[month - 1]} ${year} (${weekdays[weekdayIndex]})`;
 };
 
 const formatKickoffTime = (kickoffTimestamp: string) => kickoffTimestamp.slice(11, 16);

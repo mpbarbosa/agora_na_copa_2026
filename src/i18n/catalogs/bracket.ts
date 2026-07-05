@@ -137,4 +137,70 @@ export const bracketCatalog: CatalogModule = {
     "bracket.predictor.error":
       "No se pudo generar el pronóstico ahora. Intenta elegir el cruce nuevamente.",
   },
+  en: {
+    // Stage labels (per-stage columns)
+    "bracket.stage.R32": "Round of 32",
+    "bracket.stage.R16": "Round of 16",
+    "bracket.stage.QF": "Quarterfinals",
+    "bracket.stage.SF": "Semifinals",
+    "bracket.stage.TP": "3rd place",
+    "bracket.stage.F": "Final",
+
+    // Stage labels (short, full-bracket column headers)
+    "bracket.stageShort.R32": "Round of 32",
+    "bracket.stageShort.R16": "Round of 16",
+    "bracket.stageShort.QF": "Quarters",
+    "bracket.stageShort.SF": "Semis",
+    "bracket.stageShort.TP": "3rd place",
+    "bracket.stageShort.F": "Final",
+
+    // Slot row markers
+    "bracket.slot.qualified": "Qualified",
+    "bracket.slot.eliminated": "Eliminated",
+    "bracket.slot.provisionalShort": "prov.",
+    "bracket.slot.viewTeam": "View {name} team",
+
+    // Column subheading (confronto count)
+    "bracket.column.confrontoSingular": "{count} matchup",
+    "bracket.column.confrontoPlural": "{count} matchups",
+    "bracket.column.finalSummary": "Grand final in East Rutherford",
+    "bracket.column.thirdPlaceSummary": "Third-Place Match",
+
+    // View header
+    "bracket.title": "World Cup Knockout",
+    "bracket.subtitle":
+      "Official FIFA bracket • dates in Brasília time • Round of 32 spots filled provisionally by the current standings",
+    "bracket.route.title": "Road to MetLife Stadium",
+    "bracket.route.subtitle": "East Rutherford • Round of 32 → final • includes the Third-Place Match",
+
+    // View toggle
+    "bracket.toggle.aria": "Knockout view mode",
+    "bracket.toggle.columns": "Columns",
+    "bracket.toggle.full": "Full bracket",
+
+    // Legend
+    "bracket.legend.qualified": "Qualified",
+    "bracket.legend.provisional": "prov. Provisional",
+    "bracket.legend.bestThird": "Best 3rd",
+    "bracket.legend.officialLabels": "Other spots: official labels",
+
+    // Full bracket
+    "bracket.full.openTeam": "Open {name} team",
+    "bracket.full.rotateHint":
+      "Rotate your phone to landscape mode to see the full bracket",
+
+    // Predictor panel
+    "bracket.predictor.title": "Matchup prediction",
+    "bracket.predictor.subtitle":
+      "Pick a knockout matchup that's already set and generate a prediction from a statistical model (Poisson/Dixon-Coles) based on the teams' current campaign.",
+    "bracket.predictor.simulated": "Simulated",
+    "bracket.predictor.empty":
+      "No knockout matchup has both spots set yet. As soon as the standings fill both sides of a match, the prediction shows up here.",
+    "bracket.predictor.confrontoLabel": "Matchup",
+    "bracket.predictor.loading": "Generating prediction…",
+    "bracket.predictor.simulatedBadge": "Simulated prediction",
+    "bracket.predictor.prognosisFallback": "Prediction",
+    "bracket.predictor.error":
+      "Couldn't generate the prediction right now. Try picking the matchup again.",
+  },
 };
