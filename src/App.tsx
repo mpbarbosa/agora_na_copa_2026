@@ -289,9 +289,9 @@ export default function App() {
               onClick={() => window.dispatchEvent(new CustomEvent("toggle-match-clock-config"))}
               title={t("shell.editClock")}
               aria-label={t("shell.editClock")}
-              className="p-2 rounded-lg bg-[#1e2020]/5 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/10 transition"
+              className="p-2 rounded-lg bg-[#1e2020]/5 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/10 transition"
             >
-              <Settings size={14} />
+              <Settings size={14} strokeWidth={2.5} />
             </button>
 
             {/* Share the app */}
@@ -303,10 +303,11 @@ export default function App() {
               onClick={startTour}
               title={t("shell.howToUse")}
               aria-label={t("shell.howToUse")}
-              className="p-2 rounded-lg bg-[#1e2020]/5 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/10 transition"
+              className="p-2 rounded-lg bg-[#1e2020]/5 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/10 transition"
             >
               <HelpCircle
                 size={14}
+                strokeWidth={2.5}
                 className={theme === "classic-light" ? "text-[#007a2e]" : "text-[#00e476]"}
               />
             </button>
@@ -321,18 +322,18 @@ export default function App() {
               }
               title={t("shell.toggleTheme")}
               aria-label={t("shell.toggleTheme")}
-              className="p-2 rounded-lg bg-[#1e2020]/5 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/10 transition"
+              className="p-2 rounded-lg bg-[#1e2020]/5 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/10 transition"
             >
               {theme === "classic-light" ? (
-                <Moon size={14} className="text-indigo-600" />
+                <Moon size={14} strokeWidth={2.5} className="text-indigo-600" />
               ) : (
-                <Sun size={14} className="text-amber-400" />
+                <Sun size={14} strokeWidth={2.5} className="text-amber-400" />
               )}
             </button>
 
             {/* Language switcher — pt (default) / es (LATAM) / en (US). Persists to localStorage. */}
-            <div className="relative flex items-center rounded-lg bg-[#1e2020]/5 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/10 transition">
-              <Languages size={14} className="pointer-events-none absolute left-2" aria-hidden="true" />
+            <div className="relative flex items-center rounded-lg bg-[#1e2020]/5 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/10 transition">
+              <Languages size={14} strokeWidth={2.5} className="pointer-events-none absolute left-2" aria-hidden="true" />
               <select
                 id="btn-switch-language"
                 value={locale}
