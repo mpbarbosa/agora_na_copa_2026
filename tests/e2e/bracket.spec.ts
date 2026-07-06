@@ -11,12 +11,11 @@ import { stubLiveApis } from "./fixtures/aoVivo";
 test.describe("Bracket view (Chaveamento)", () => {
   test.beforeEach(async ({ page }) => {
     // Stub the live overlay empty so the bracket resolves only from the static
-    // seed (group standings + KNOCKOUT_RESULTS). The undecided ties asserted here
-    // (R16 #89/#90, feeding QF #97) are still unplayed; were the prod fallback to
-    // report one finished it would resolve its winner-ref slot ("Vencedor #89" →
-    // the team that advanced, a clickable team link), racing the assertions. The
-    // whole Round of 32 is finished in the seed, so those slots pick the next
-    // still-open round (oitavas) for the deterministic winner-ref checks.
+    // seed (group standings + KNOCKOUT_RESULTS). The seed has the Round of 32 and
+    // R16 #89–#91 finished, so those winner-ref slots resolve to real teams (QF #97
+    // → França × Marrocos); the still-unplayed R16 #93/#94 (feeding QF #98) stay
+    // official "Vencedor #NN" labels, so the deterministic winner-ref checks target
+    // #98 while the resolution check targets #97.
     await stubLiveApis(page);
     await page.addInitScript(() => localStorage.setItem("feature-tour-seen", "1"));
   });
@@ -45,11 +44,18 @@ test.describe("Bracket view (Chaveamento)", () => {
     await page.click("#btn-nav-chaveamento");
     await expect(page.locator("#bracket-view")).toBeVisible();
 
-    // QF #97 is fed by the winners of R16 #89 and #90 — still-unplayed ties, so both
-    // slots stay official winner-refs (deterministic, independent of any seeded result).
-    const qf = page.locator("#bracket-match-97");
-    await expect(qf.locator("#bracket-slot-97-a")).toContainText("Vencedor #89");
-    await expect(qf.locator("#bracket-slot-97-b")).toContainText("Vencedor #90");
+    // QF #97 is fed by the winners of R16 #89 (Paraguai 0×1 França) and #90 (Canadá 0×3
+    // Marrocos) — both finished in the seed, so the feeder chain resolves the slots to the
+    // qualified teams (a QF slot chases the winner down the chain, not just a direct ref).
+    const qf97 = page.locator("#bracket-match-97");
+    await expect(qf97.locator("#bracket-slot-97-a")).toContainText(/fran[çc]a/i);
+    await expect(qf97.locator("#bracket-slot-97-b")).toContainText(/marrocos/i);
+
+    // QF #98 is fed by R16 #93 and #94 — still unplayed, so both slots stay official
+    // "Vencedor #NN" winner-refs (deterministic, independent of any seeded result).
+    const qf98 = page.locator("#bracket-match-98");
+    await expect(qf98.locator("#bracket-slot-98-a")).toContainText("Vencedor #93");
+    await expect(qf98.locator("#bracket-slot-98-b")).toContainText("Vencedor #94");
 
     // The 3rd-place match (#103, TP) is fed by the two semifinal losers.
     const thirdPlace = page.locator("#bracket-stage-tp #bracket-match-103");
@@ -74,9 +80,10 @@ test.describe("Bracket view (Chaveamento)", () => {
     const canadaSlot = page.locator("#bracket-slot-73-b");
     await expect(canadaSlot).toContainText(/canad/i);
     expect(await canadaSlot.evaluate((el) => el.tagName)).toBe("BUTTON");
-    // …while an undecided winner-ref slot is a plain, non-clickable label.
-    const labelSlot = page.locator("#bracket-slot-97-a");
-    await expect(labelSlot).toContainText("Vencedor #89");
+    // …while an undecided winner-ref slot (QF #98, fed by unplayed R16 #93) is a plain,
+    // non-clickable label.
+    const labelSlot = page.locator("#bracket-slot-98-a");
+    await expect(labelSlot).toContainText("Vencedor #93");
     expect(await labelSlot.evaluate((el) => el.tagName)).toBe("DIV");
 
     // Clicking the resolved slot opens that national team's page.
@@ -161,12 +168,11 @@ test.describe("Bracket feeder spotlight on touch (two-stage tap)", () => {
 
   test.beforeEach(async ({ page }) => {
     // Stub the live overlay empty so the bracket resolves only from the static
-    // seed (group standings + KNOCKOUT_RESULTS). The feeders used here (R16 #89/#90)
-    // are still-unplayed ties; were the prod fallback to report one finished it
-    // would resolve its winner-ref slot ("Vencedor #89" → the team that advanced,
-    // a clickable team link), making the feeder/undecided assertions race live data.
-    // (The whole Round of 32 is finished in the seed, so the still-open oitavas
-    // feed the quartas card exercised here.)
+    // seed (group standings + KNOCKOUT_RESULTS). We tap QF #98, fed by the still-
+    // unplayed R16 #93/#94, so its slots stay unresolved "Vencedor #NN" labels and
+    // the whole card is a single tap target. (A decided QF like #97 → França ×
+    // Marrocos turns each slot into a clickable team link, which would split the
+    // card's tap target and defeat the two-stage-tap assertion.)
     await stubLiveApis(page);
     await page.addInitScript(() => localStorage.setItem("feature-tour-seen", "1"));
   });
@@ -176,10 +182,10 @@ test.describe("Bracket feeder spotlight on touch (two-stage tap)", () => {
     await page.click("#btn-nav-chaveamento");
     await expect(page.locator("#bracket-view")).toBeVisible();
 
-    const quartas = page.locator("#bracket-stage-qf #bracket-match-97");
-    const feederA = page.locator("#bracket-stage-r16 #bracket-match-89");
-    const feederB = page.locator("#bracket-stage-r16 #bracket-match-90");
-    const unrelated = page.locator("#bracket-stage-r16 #bracket-match-91");
+    const quartas = page.locator("#bracket-stage-qf #bracket-match-98");
+    const feederA = page.locator("#bracket-stage-r16 #bracket-match-93");
+    const feederB = page.locator("#bracket-stage-r16 #bracket-match-94");
+    const unrelated = page.locator("#bracket-stage-r16 #bracket-match-89");
 
     // First tap spotlights the feeders WITHOUT leaving the bracket.
     await quartas.tap();
@@ -215,12 +221,11 @@ test.describe("Bracket feeder spotlight on mobile (collapses the columns)", () =
 
   test.beforeEach(async ({ page }) => {
     // Stub the live overlay empty so the bracket resolves only from the static
-    // seed (group standings + KNOCKOUT_RESULTS). The feeders used here (R16 #89/#90)
-    // are still-unplayed ties; were the prod fallback to report one finished it
-    // would resolve its winner-ref slot ("Vencedor #89" → the team that advanced,
-    // a clickable team link), making the feeder/undecided assertions race live data.
-    // (The whole Round of 32 is finished in the seed, so the still-open oitavas
-    // feed the quartas card exercised here.)
+    // seed (group standings + KNOCKOUT_RESULTS). We select QF #98, fed by the still-
+    // unplayed R16 #93/#94, so its slots stay unresolved "Vencedor #NN" labels and
+    // the whole card is a single tap target. (A decided QF like #97 → França ×
+    // Marrocos turns each slot into a clickable team link, which would split the
+    // card's tap target and defeat the two-stage-tap assertion.)
     await stubLiveApis(page);
     await page.addInitScript(() => localStorage.setItem("feature-tour-seen", "1"));
   });
@@ -230,11 +235,11 @@ test.describe("Bracket feeder spotlight on mobile (collapses the columns)", () =
     await page.click("#btn-nav-chaveamento");
     await expect(page.locator("#bracket-view")).toBeVisible();
 
-    const selected = page.locator("#bracket-stage-qf #bracket-match-97");
-    const sibling = page.locator("#bracket-stage-qf #bracket-match-98"); // another Quartas tie
-    const feederA = page.locator("#bracket-stage-r16 #bracket-match-89");
-    const feederB = page.locator("#bracket-stage-r16 #bracket-match-90");
-    const unrelated = page.locator("#bracket-stage-r16 #bracket-match-91");
+    const selected = page.locator("#bracket-stage-qf #bracket-match-98");
+    const sibling = page.locator("#bracket-stage-qf #bracket-match-97"); // another Quartas tie
+    const feederA = page.locator("#bracket-stage-r16 #bracket-match-93");
+    const feederB = page.locator("#bracket-stage-r16 #bracket-match-94");
+    const unrelated = page.locator("#bracket-stage-r16 #bracket-match-89");
     // The visible (mobile) count in each column's subheading.
     const qfCount = page.locator("#bracket-stage-qf-summary span:visible");
     const r16Count = page.locator("#bracket-stage-r16-summary span:visible");

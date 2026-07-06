@@ -19,20 +19,50 @@ export function buildWinnerSlotByNumber(matches: Match[]): Map<number, Slot> {
 
 // Resolve later-round feeder slots to a concrete team once their feeder tie has finished:
 // "W74" → that tie's winner, "RU101" → its loser. Lets an Oitavas card show "Canadá"
-// instead of "Vencedor #73" the moment #73 is decided. Keyed by the raw slot label so a
-// card can look its slots up directly.
+// instead of "Vencedor #73" the moment #73 is decided — and, crucially, lets a QF slot
+// "W89" reach FRANÇA even though R16 #89's own sides are the deeper feeder refs "W74"/"W77"
+// (the bracket skeleton only names R32 group-draw sides; every later round is a feeder ref,
+// so the winning team must be chased down the chain). Keyed by the raw slot label so a card
+// can look its slots up directly.
 export function buildFeederTeamBySlot(
   matches: Match[],
 ): Map<string, NonNullable<KnockoutMatch["teamA"]>> {
   const winnerSlot = buildWinnerSlotByNumber(matches);
+  const byNumber = new Map<number, KnockoutMatch>();
+  for (const km of KNOCKOUT_MATCHES) byNumber.set(km.matchNumber, km);
+
+  // Resolve a slot label to the concrete team occupying it, following the feeder chain: a
+  // bracket-named side wins; otherwise the decided winner ("W") / loser ("RU"/"L") of its
+  // feeder tie, recursively. Null while any link is still undecided. Mirrors
+  // appMatches.resolveFeederSlot, but driven by the live winner map (buildWinnerSlotByNumber)
+  // so it tracks the exact results the rest of the bracket renders.
+  const resolveSlot = (
+    slot: string,
+    seen: Set<number>,
+  ): NonNullable<KnockoutMatch["teamA"]> | null => {
+    const parsed = /^(W|RU|L)(\d+)$/.exec(slot);
+    if (!parsed) return null;
+    const feederNumber = Number(parsed[2]);
+    if (seen.has(feederNumber)) return null; // defensive: never loop on a malformed bracket
+    seen.add(feederNumber);
+    const feeder = byNumber.get(feederNumber);
+    const won = winnerSlot.get(feederNumber);
+    if (!feeder || !won) return null;
+    const targetSlot: Slot = parsed[1] === "W" ? won : won === "A" ? "B" : "A";
+    const directRef = targetSlot === "A" ? feeder.teamA : feeder.teamB;
+    if (directRef) return directRef;
+    // The winning side is itself a feeder ref (a deeper round) — resolve it recursively.
+    const nestedSlot = targetSlot === "A" ? feeder.slotA : feeder.slotB;
+    return resolveSlot(nestedSlot, seen);
+  };
+
   const map = new Map<string, NonNullable<KnockoutMatch["teamA"]>>();
   for (const km of KNOCKOUT_MATCHES) {
-    const won = winnerSlot.get(km.matchNumber);
-    if (!won) continue;
-    const winnerRef = won === "A" ? km.teamA : km.teamB;
-    const loserRef = won === "A" ? km.teamB : km.teamA;
-    if (winnerRef) map.set(`W${km.matchNumber}`, winnerRef);
-    if (loserRef) map.set(`RU${km.matchNumber}`, loserRef);
+    if (!winnerSlot.get(km.matchNumber)) continue;
+    const winner = resolveSlot(`W${km.matchNumber}`, new Set());
+    const loser = resolveSlot(`RU${km.matchNumber}`, new Set());
+    if (winner) map.set(`W${km.matchNumber}`, winner);
+    if (loser) map.set(`RU${km.matchNumber}`, loser);
   }
   return map;
 }

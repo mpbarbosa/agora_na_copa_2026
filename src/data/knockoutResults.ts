@@ -102,4 +102,7 @@ export const KNOCKOUT_RESULTS: Record<number, KnockoutResultSeed> = {
   // #90 · Oitavas · Houston Stadium · 04/07/2026 — Canadá 0×3 Marrocos (Azzedine Ounahi 50' e
   // 82', Soufiane Rahimi 90+8' p/ MAR). Marrocos classificado às Quartas; alimenta a #97 (slot W90).
   90: { status: "FINISHED", score: { teamA: 0, teamB: 3 } },
+  // #91 · Oitavas · 04/07/2026 — Brasil 1×2 Noruega (Erling Haaland 79' e 90' p/ NOR; Neymar Jr
+  // 90+10' p/ BRA). Noruega classificada às Quartas; alimenta a #99 (slot W91). Brasil eliminado.
+  91: { status: "FINISHED", score: { teamA: 1, teamB: 2 } },
 };
