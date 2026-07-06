@@ -112,9 +112,28 @@ and composition of the above.
   unit tests, and the `match-speech` (drawer status / test-voice / simulated goal)
   / `navigation` (bra-mar countdown demo) / `standings` (manual simulator events)
   e2e specs (27 tests) green.
-- **Phase 4 — `MatchScoreboard` (biggest):** props = resolved `match`, `theme`,
-  weather/referee/advisory data, tab-switch callbacks. Verify with
-  `weather-suspension`, `referee-card`, `match-speech` specs.
+- **Phase 4 — `MatchScoreboard` (biggest): ✅ DONE.** Extracted the hero
+  scoreboard `<section id="core-live-scoreboard">` (the two teams, clock/score,
+  penalty tally, group/stage badge, venue block with the Brasília + stadium-local
+  clocks and pré-jogo countdown, and the weather/referee/suspension/advisory
+  chips) plus the two `renderMatchStatusLine`/`renderOverlaySourceLine` helpers.
+  Props: the resolved `match` + `teamA`/`teamB` (`resolveTeamDisplay`), `theme`,
+  `currentTime` + `secondsRemaining` (the countdown reads the parent's
+  `customCountdownSeconds`, so the seconds are computed in the shell and passed
+  down — not moved), `matchSpeech`, `simultaneousUpcomingMatches` +
+  `groupPositionMap`, the derived overlay fields (`officialFifaStatus`,
+  `overlaySourceLabel`, `overlayUpdatedAt`, `referee`, `matchAdvisory`), and the
+  event callbacks (`onSelectMatch`, `onSelectTeamLineup`, `onOpenStandingsGroup`,
+  `onOpenReferee` → opens the parent-owned `RefereeCard`). Score/penalty/maps-url/
+  group-stage-label/stadium-timezone derivations moved into the component. Removed
+  the now-orphaned imports (`FlagIcon`, `MatchWeatherChip`, `RefereeChip`,
+  `WeatherSuspensionNotice`, `MatchAdvisoryNotice`, `MatchSpeechToggle`,
+  `localizeOfficialFifaStatus`, `localizedStageName`, `resolveVenueTimeZone`,
+  `MapPin`/`Clock` icons, and the `formatBrasiliaTime`/`formatTimeInZone`/
+  `formatCountdown`/`getMatchGroupLabel`/`getMatchStageLabel` helpers) from the
+  view. View 1991 → 1544 lines. Verified: `tsc` clean, 240 unit tests, and the
+  `weather-suspension` / `referee-card` / `match-speech` / `match-weather` /
+  `navigation` e2e specs (21 tests) green.
 - **Phase 5 — `BroadcastGuideTab`:** props `match.broadcasters`, `broadcastCountry`,
   `onCountryChange`, `theme`. Verify with `affiliate-products.spec.ts`.
 

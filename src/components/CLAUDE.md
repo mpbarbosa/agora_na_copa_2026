@@ -9,7 +9,7 @@ Each maps to one `NAV_ITEMS` entry in `src/navigation.ts` and is mounted by `src
 
 | Component | Tab id | Lines |
 |-----------|--------|-------|
-| `MatchDetailView.tsx` | `ao-vivo` | 1991 |
+| `MatchDetailView.tsx` | `ao-vivo` | 1544 |
 | `PartidasView.tsx` | `partidas` | 365 |
 | `StandingsView.tsx` | `grupos` | 182 |
 | `TeamsView.tsx` | `selecoes` | 86 |
@@ -32,6 +32,7 @@ Each maps to one `NAV_ITEMS` entry in `src/navigation.ts` and is mounted by `src
 | `MatchLineupTab.tsx` | The interactive tactical-lineup tab inside `MatchDetailView` — header + the dynamic `PitchLineup` board for the selected match |
 | `MatchSelectorBar.tsx` | The Ao Vivo match-selector bar: live matches as chips, upcoming matches in a horizontally-scrollable rail (prev/next controls). Owns its rails via the shared `src/hooks/useMatchSelectorRail.ts`; the parent passes the status-split `groups` + selection state and receives the pick via `onSelectMatch` |
 | `MatchClockConfigDrawer.tsx` | The "Mudar Relógio" setup drawer (Ao Vivo, toggled by the global-header event): narration/voice diagnostics + test-voice button, the demo kickoff/countdown editor, and the live-match simulation controls (start / goal / card / finish / reset). Presentational — the parent owns the clock + simulation state and passes handlers in via a grouped `simulation` prop + `onApply`/`onClose`; only the transient test-voice status is local |
+| `MatchScoreboard.tsx` | The Ao Vivo hero scoreboard inside `MatchDetailView`: the two teams, the clock/score, the penalty tally, the group/stage badge, the venue block (Brasília + stadium-local clocks, pré-jogo countdown), and the weather/referee/suspension/advisory chips. Presentational — the parent owns the match + overlay + simulation state and passes the resolved fixture, the derived overlay fields (`officialFifaStatus`, `overlaySourceLabel`, `overlayUpdatedAt`, `referee`), and the current tick (`currentTime` + `secondsRemaining`, since the countdown reads the parent's `customCountdownSeconds`) down; events (match pick, team-lineup open, group table, referee card) go up via callbacks |
 | `PitchLineup.tsx` | Visual pitch with player `x`/`y` positions from `matches.json` |
 | `TeamPitchBoard.tsx` | Team-focused pitch board used by `TeamLineupView` |
 | `TeamLineupView.tsx` | Full team lineup panel (690 lines — standalone modal/panel) |
@@ -55,7 +56,7 @@ Each maps to one `NAV_ITEMS` entry in `src/navigation.ts` and is mounted by `src
 
 ## Size cautions
 
-`MatchDetailView.tsx` (1991 lines) covers match selection, scoreboard, broadcast guide, live commentary, and pitch lineup in one file. Its pure helpers were extracted to `src/utils/matchIncidents.ts`, `src/utils/matchClock.ts`, and `src/utils/matchSelection.ts` (each unit-tested); the incident-text renderer lives in `IncidentText.tsx`, the three leaf content tabs in `MatchEditorialTab.tsx` / `MatchInstagramTab.tsx` / `MatchLineupTab.tsx`, the live/upcoming match-selector rail in `MatchSelectorBar.tsx` (its rail-scroll behavior is the shared `src/hooks/useMatchSelectorRail.ts`, also used by the in-file "finished matches" rail), and the "Mudar Relógio" clock/simulation drawer in `MatchClockConfigDrawer.tsx`. See `docs/MATCHDETAILVIEW_REFACTOR_PLAN.md` for the staged decomposition. Before adding to it, consider whether the addition belongs in a sub-component. Do not read the full file for changes scoped to one section — use line-range reads.
+`MatchDetailView.tsx` (1544 lines) covers match selection, scoreboard, broadcast guide, live commentary, and pitch lineup in one file. Its pure helpers were extracted to `src/utils/matchIncidents.ts`, `src/utils/matchClock.ts`, and `src/utils/matchSelection.ts` (each unit-tested); the incident-text renderer lives in `IncidentText.tsx`, the three leaf content tabs in `MatchEditorialTab.tsx` / `MatchInstagramTab.tsx` / `MatchLineupTab.tsx`, the live/upcoming match-selector rail in `MatchSelectorBar.tsx` (its rail-scroll behavior is the shared `src/hooks/useMatchSelectorRail.ts`, also used by the in-file "finished matches" rail), the "Mudar Relógio" clock/simulation drawer in `MatchClockConfigDrawer.tsx`, and the hero scoreboard in `MatchScoreboard.tsx`. See `docs/MATCHDETAILVIEW_REFACTOR_PLAN.md` for the staged decomposition. Before adding to it, consider whether the addition belongs in a sub-component. Do not read the full file for changes scoped to one section — use line-range reads.
 
 `TeamLineupView.tsx` (690 lines) and `JogadoresView.tsx` (572 lines) are also large. Same caution applies.
 
