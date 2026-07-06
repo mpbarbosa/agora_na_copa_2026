@@ -91,8 +91,15 @@ and composition of the above.
   now-orphaned imports from the view (2503 → 2404 lines). Verified: `tsc` clean,
   240 unit tests, and the `match-instagram` / `player-mention` / `navigation` /
   `affiliate-products` e2e specs (16 tests) all green.
-- **Phase 2 — `MatchSelectorBar`:** props `matches`, `selectedMatchId`, `onSelect`,
-  `matchSelectorRailRefs`, `theme`. Covered by `simultaneous-live.spec.ts`.
+- **Phase 2 — `MatchSelectorBar`: ✅ DONE.** Extracted the live/upcoming selector
+  bar (props: `groups`, `groupPositionMap`, `selectedMatchId`, `onSelectMatch`,
+  `theme`). The rail-scroll + scroll-selected-into-view behavior was pulled into a
+  shared `src/hooks/useMatchSelectorRail.ts` (the in-file "finished matches" rail
+  shared the same helpers, so extracting a hook kept it DRY rather than
+  duplicating). Removed the parent's rail refs/effect and two dead derivations.
+  Verified: `tsc` clean, 240 unit tests, and the `navigation` (incl. "match
+  selector switches the active match") / `match-instagram` / `match-speech` /
+  `player-metadata` e2e specs green.
 - **Phase 3 — `MatchClockConfigDrawer`:** push `customKickoffTime`/
   `customCountdownSeconds` state down into the drawer; emit `onApply(state)` up.
 - **Phase 4 — `MatchScoreboard` (biggest):** props = resolved `match`, `theme`,
