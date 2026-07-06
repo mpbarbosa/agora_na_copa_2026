@@ -97,6 +97,9 @@ test("buildTrafficDashboard derives the timeline, window rate and public latest"
   // First point has no rate; second = 1000 requests / 10 min = 100/min.
   assert.equal(res.timeline[0].ratePerMin, null);
   assert.equal(res.timeline[1].ratePerMin, 100);
+  // Per-country cumulative counts (by volume) are carried into the timeline so the
+  // client can derive a per-country requests/min series for the country filter.
+  assert.equal(res.timeline[0].countries.Brazil, 340327);
   // Window rate across the whole span is the same here (single 10-min gap).
   assert.equal(res.windowRatePerMin, 100);
   // latest = the newer snapshot (B).

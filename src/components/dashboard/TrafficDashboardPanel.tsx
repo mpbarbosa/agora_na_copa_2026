@@ -183,6 +183,8 @@ export function TrafficDashboardPanel({ theme }: TrafficDashboardPanelProps) {
   // interpreted in UTC to match the chart's UTC x-axis; empty means the full range.
   const [rateStart, setRateStart] = useState("");
   const [rateEnd, setRateEnd] = useState("");
+  // Optional country filter for the rate chart (GeoLite2 label, e.g. "Brazil"); empty = all.
+  const [rateCountry, setRateCountry] = useState("");
 
   useEffect(() => {
     let cancelled = false;
@@ -211,19 +213,38 @@ export function TrafficDashboardPanel({ theme }: TrafficDashboardPanelProps) {
       color: palette[1],
       points: data.timeline.map((p) => ({ x: p.t, y: p.requests })),
     };
+    // Rate points: either the total requests/min (precomputed per snapshot) or, when a
+    // country is selected, that country's requests/min derived from its cumulative-count
+    // delta between consecutive snapshots (skipping snapshots where it's absent from the
+    // per-snapshot top-countries list). Then narrow by the [start, end] date range.
+    let ratePoints: { x: number; y: number }[];
+    if (rateCountry) {
+      ratePoints = [];
+      for (let i = 1; i < data.timeline.length; i++) {
+        const prev = data.timeline[i - 1];
+        const cur = data.timeline[i];
+        const prevC = prev.countries[rateCountry];
+        const curC = cur.countries[rateCountry];
+        if (prevC == null || curC == null) continue;
+        const dMin = (cur.t - prev.t) / 60000;
+        if (dMin <= 0) continue;
+        ratePoints.push({ x: cur.t, y: Math.max(0, Math.round((curC - prevC) / dMin)) });
+      }
+    } else {
+      ratePoints = data.timeline
+        .filter((p) => p.ratePerMin != null)
+        .map((p) => ({ x: p.t, y: p.ratePerMin as number }));
+    }
     const startMs = rateStart ? Date.parse(`${rateStart}T00:00:00Z`) : -Infinity;
     const endMs = rateEnd ? Date.parse(`${rateEnd}T23:59:59.999Z`) : Infinity;
-    const ratePts = data.timeline.filter(
-      (p) => p.ratePerMin != null && p.t >= startMs && p.t <= endMs,
-    );
     const rate: LineSeries = {
-      name: t("dashboard.trafficSeriesRate"),
+      name: rateCountry || t("dashboard.trafficSeriesRate"),
       color: palette[2],
-      points: ratePts.map((p) => ({ x: p.t, y: p.ratePerMin as number })),
+      points: ratePoints.filter((p) => p.x >= startMs && p.x <= endMs),
     };
     return { requests: [requests], rate: [rate] };
     // palette is stable per theme
-  }, [data, palette, t, rateStart, rateEnd]);
+  }, [data, palette, t, rateStart, rateEnd, rateCountry]);
 
   if (failed) {
     return (
@@ -266,6 +287,8 @@ export function TrafficDashboardPanel({ theme }: TrafficDashboardPanelProps) {
       ? "border-slate-200 bg-white text-slate-700 hover:border-slate-300"
       : "border-white/10 bg-[#1a1d1d] text-slate-200 hover:border-white/20"
   }`;
+  // Countries offered by the rate filter: the latest snapshot's top countries (by volume).
+  const rateCountries = latest.countriesByVolume.map((row) => row.label);
 
   return (
     <div className="mt-4">
@@ -301,7 +324,21 @@ export function TrafficDashboardPanel({ theme }: TrafficDashboardPanelProps) {
           title={t("dashboard.trafficRateTitle")}
           subtitle={t("dashboard.trafficRateSubtitle")}
           headerAction={
-            <div className="flex items-center gap-1.5">
+            <div className="flex flex-wrap items-center justify-end gap-1.5">
+              <select
+                id="traffic-rate-country"
+                aria-label={t("dashboard.trafficRateCountryAria")}
+                value={rateCountry}
+                onChange={(event) => setRateCountry(event.target.value)}
+                className={rateInputClasses}
+              >
+                <option value="">{t("dashboard.trafficRateCountryAll")}</option>
+                {rateCountries.map((country) => (
+                  <option key={country} value={country}>
+                    {country}
+                  </option>
+                ))}
+              </select>
               <input
                 type="date"
                 id="traffic-rate-start"

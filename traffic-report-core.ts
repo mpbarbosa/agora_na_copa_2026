@@ -234,11 +234,14 @@ export function buildTrafficDashboard(
       const dMin = ((snap.generatedMs as number) - (prev.generatedMs as number)) / 60000;
       if (dMin > 0) ratePerMin = Math.max(0, Math.round(dReq / dMin));
     }
+    const countries: Record<string, number> = {};
+    for (const row of snap.countriesByVolume) countries[row.label] = row.count;
     return {
       t: snap.generatedMs as number,
       requests: snap.requests || 0,
       uniqueIps: snap.uniqueIps || 0,
       ratePerMin,
+      countries,
     };
   });
 

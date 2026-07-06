@@ -691,6 +691,13 @@ export interface TrafficTimelinePoint {
   uniqueIps: number;
   /** Requests/min between this snapshot and the previous one (null on the first). */
   ratePerMin: number | null;
+  /**
+   * Cumulative request count per country label ("Brazil", "United States", …) at this
+   * snapshot — the "Top countries · by request volume" list (top ~20 per snapshot, so a
+   * small-volume country may be absent from some snapshots). Lets the client derive a
+   * per-country requests/min series by delta-ing consecutive snapshots.
+   */
+  countries: Record<string, number>;
 }
 
 /**
