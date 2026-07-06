@@ -100,8 +100,18 @@ and composition of the above.
   Verified: `tsc` clean, 240 unit tests, and the `navigation` (incl. "match
   selector switches the active match") / `match-instagram` / `match-speech` /
   `player-metadata` e2e specs green.
-- **Phase 3 — `MatchClockConfigDrawer`:** push `customKickoffTime`/
-  `customCountdownSeconds` state down into the drawer; emit `onApply(state)` up.
+- **Phase 3 — `MatchClockConfigDrawer`: ✅ DONE.** Extracted the "Mudar Relógio"
+  drawer (narration diagnostics, demo kickoff/countdown editor, simulation
+  controls). Note vs the original plan: `customCountdownSeconds` is *also* read by
+  the scoreboard countdown, so it could not be fully pushed down — it stays in the
+  parent (passed as value + setter). Only the transient `speechTestStatus` was
+  pushed into the drawer. The 5 simulation handlers + `matchSpeech` + team codes
+  are passed in (simulation handlers grouped into one `simulation` prop object;
+  `onApply`/`onClose` for the rest). Removed 4 now-orphaned lucide icons + the
+  `runDirectSpeechTest` import. View 2208 → 1991 lines. Verified: `tsc` clean, 240
+  unit tests, and the `match-speech` (drawer status / test-voice / simulated goal)
+  / `navigation` (bra-mar countdown demo) / `standings` (manual simulator events)
+  e2e specs (27 tests) green.
 - **Phase 4 — `MatchScoreboard` (biggest):** props = resolved `match`, `theme`,
   weather/referee/advisory data, tab-switch callbacks. Verify with
   `weather-suspension`, `referee-card`, `match-speech` specs.
