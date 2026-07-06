@@ -61,7 +61,13 @@ export function TeamCountdownBadge({
   // Nothing left to follow (tournament over / no live or upcoming fixtures) — stay hidden.
   if (selectable.length === 0) return null;
 
-  const meta = favoriteTeam ? teamMeta.get(favoriteTeam) : undefined;
+  // Only show the followed team while it's still alive (has a live/upcoming fixture, i.e. it
+  // appears in the selectable list). A team knocked out of the tournament — e.g. Brazil after
+  // a Round-of-16 loss — must NOT surface in the banner; it falls back to the "choose a
+  // seleção" invite so an eliminated side is never presented as the team being tracked.
+  const favoriteAlive =
+    !!favoriteTeam && selectable.some((team) => team.code === favoriteTeam);
+  const meta = favoriteAlive && favoriteTeam ? teamMeta.get(favoriteTeam) : undefined;
   const primary = meta?.primaryColor || FALLBACK_PRIMARY;
   const secondary = meta?.secondaryColor || FALLBACK_SECONDARY;
 
@@ -78,7 +84,7 @@ export function TeamCountdownBadge({
 
   // Show the team picker whenever there's no team yet, no upcoming match, or the user
   // explicitly opened it via "Trocar seleção".
-  const showPicker = pickerOpen || !favoriteTeam || !focus;
+  const showPicker = pickerOpen || !favoriteAlive || !focus;
 
   return (
     <div
@@ -233,15 +239,16 @@ export function TeamCountdownBadge({
             )}
           </>
         ) : (
-          // No focus: either no team chosen yet, or the chosen team has no upcoming match.
+          // No focus: an alive team awaiting its next fixture shows "sem próximo jogo"; a
+          // team that's out (or none chosen) shows the neutral "choose a seleção" invite.
           <div>
             <p className="font-anton text-sm uppercase leading-tight tracking-wide text-white">
-              {favoriteTeam
+              {favoriteAlive
                 ? t("banners.teamCountdown.noNextMatch")
                 : t("banners.teamCountdown.choose")}
             </p>
             <p className="mt-1 font-archivo text-[11px] leading-snug text-white/45">
-              {favoriteTeam
+              {favoriteAlive
                 ? t("banners.teamCountdown.noNextMatchHint")
                 : t("banners.teamCountdown.chooseHint")}
             </p>
