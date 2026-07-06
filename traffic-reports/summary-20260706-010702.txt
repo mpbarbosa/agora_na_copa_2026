@@ -1,0 +1,270 @@
+Agora na Copa 26 — traffic baseline (Phase 0)
+Generated: 2026-07-06T01:07:20+00:00
+Source:    /var/log/nginx/agora-na-copa.access.log* (628581 log lines)
+
+== Totals ==
+Requests:       628581
+Unique IPs:     2361
+Date range:     06/Jul/2026:00:00:02  ->  27/Jun/2026:23:59:52
+
+== Top 20 requested paths ==
+ 220029 /api/team-lineups
+ 169144 /api/match-overlays
+  68947 /api/match-states
+  21057 /api/presence
+  10840 /api/health
+   6097 /
+   1992 /api/tournament-leaders
+   1974 /api/chat/ko-88-2026?since=0
+   1958 /api/chat/ko-74-2026?since=0
+   1923 /api/player-stats/KSA/Abdulilah%20Alamri
+   1849 /api/player-stats/BRA/Atacante%20Teste
+   1710 /api/chat/ko-91-2026?since=0
+   1532 /api/team-view/BRA
+   1391 /api/chat/ko-90-2026?since=0
+   1346 /api/team-view/CAN
+   1331 /api/team-lineups?language=es
+   1267 /api/fifa-proxy/live/football/400021514?language=pt
+   1262 /api/fifa-proxy/live/football/400021520?language=pt
+   1259 /api/fifa-proxy/live/football/400021523?language=pt
+   1252 /api/fifa-proxy/live/football/400021516?language=pt
+
+== HTTP status codes ==
+ 618109 200
+   4236 304
+   4086 404
+    700 502
+    521 403
+    279 400
+    251 499
+    206 429
+    106 "-"
+     46 504
+     24 206
+     15 166
+      1 SP1
+      1 201
+
+== Top 20 referrers ==
+ 547300 "-"
+  73280 "https://copa2026.mpbarbosa.com/"
+   5646 "https://es.copa2026.mpbarbosa.com/"
+   1719 "https://en.copa2026.mpbarbosa.com/"
+    230 "https://copa2026.mpbarbosa.com/health"
+     80 "http://copa2026.mpbarbosa.com"
+     59 "https://copa2026.mpbarbosa.com/?fbclid=IwY2xjawSqj9pleHRuA2FlbQIxMQBzcnRjBmFwcF9pZAwzNTA2ODU1MzE3MjgAAR6WHt_2gfKFXL0edz2fOztVycHe2xAt68mJ6zAlfx2WA3kh0xSQ2-2UOvFFvQ_aem_pz34qcnoon2iL7HVaH5V-w"
+     44 "https://copa2026.mpbarbosa.com/?gtm_latency=1"
+     14 "https://copa2026.mpbarbosa.com/?fbclid=IwY2xjawSmtRpleHRuA2FlbQIxMQBzcnRjBmFwcF9pZAwzNTA2ODU1MzE3MjgAAR4cq3YUw2PvUjvrtU0k9Kn47FpZtNODhT0kpYTFNKBxk6FmdjQk-qcqz5K0Tg_aem_7CdwleyQSxv4vcPEfmw0IQ"
+     13 "http://es.copa2026.mpbarbosa.com"
+     11 rt=0.000
+     10 "https://copa2026.mpbarbosa.com/?gclid=1299855694"
+     10 "https://18.229.20.196/"
+      8 "https://www.linkedin.com/"
+      8 "https://copa2026.mpbarbosa.com/?fbclid=IwY2xjawSnXOdleHRuA2FlbQIxMQBzcnRjBmFwcF9pZAwzNTA2ODU1MzE3MjgAAR5E5UkImHIqAxwXeHnyKojWUKLGSBEoyNGC9f2yuoYQGoU5AKnMI-yfCsv5_A_aem_MbaWrct2GLKZ5mn81SJ3WA"
+      7 rt=0.114
+      6 rt=0.127
+      5 rt=9.879
+      5 "https://www.reddit.com/"
+      5 "https://copa2026.mpbarbosa.com/?fbclid=IwZXh0bgNhZW0CMTEAc3J0YwZhcHBfaWQMMjU2MjgxMDQwNTU4AAEeEP7TdbZmiVl-d6v-2B6QUGTvvgAGtdLFanRPD-QbfkhyTZGQoMCR2pW0VaY_aem_-WN7RFdZEWmgEfF9G2WLXQ"
+
+== Top countries ==
+Geo source: /var/lib/GeoIP/GeoLite2-City.mmdb
+-- by unique visitor (top 20) --
+    978 United States
+    880 Brazil
+     49 Germany
+     42 United Kingdom
+     40 France
+     37 The Netherlands
+     35 China
+     34 Singapore
+     23 Japan
+     20 Hong Kong
+     17 Portugal
+     15 South Korea
+     13 Switzerland
+     12 Canada
+     10 Indonesia
+     10 India
+      9 Sweden
+      9 Belgium
+      8 Romania
+      8 Denmark
+-- by request volume (top 20) --
+ 467547 Brazil
+ 158029 United States
+    455 United Kingdom
+    345 France
+    309 The Netherlands
+    222 Germany
+    206 Switzerland
+    197 Chile
+    195 Dominican Republic
+    156 Portugal
+     86 Canada
+     83 Singapore
+     76 Belgium
+     60 Taiwan
+     51 Japan
+     44 India
+     38 China
+     35 Sweden
+     32 Ireland
+     28 Hong Kong
+
+== Top cities ==
+Geo source: /var/lib/GeoIP/GeoLite2-City.mmdb
+Note: city-level geolocation is far less precise than country; expect a
+      sizable (unknown) bucket, especially for mobile/CGNAT IPs.
+-- by unique visitor (top 20) --
+    741 São Paulo, Brazil
+    320 (unknown)
+    109 Washington, United States
+     96 San Jose, United States
+     63 Santa Clara, United States
+     57 Ashburn, United States
+     54 Boydton, United States
+     48 Des Moines, United States
+     45 Chicago, United States
+     42 Maceió, Brazil
+     39 Frankfurt am Main, Germany
+     37 Cheyenne, United States
+     35 Phoenix, United States
+     30 Columbus, United States
+     25 Singapore, Singapore
+     23 San Antonio, United States
+     22 Tokyo, Japan
+     19 Amsterdam, The Netherlands
+     16 North Bergen, United States
+     16 New York, United States
+-- by request volume (top 20) --
+ 457745 São Paulo, Brazil
+  40636 Washington, United States
+  36181 San Jose, United States
+  19910 Boydton, United States
+  16798 Chicago, United States
+  16068 Cheyenne, United States
+  11262 Des Moines, United States
+   9523 Phoenix, United States
+   4954 (unknown)
+   4694 Lagoa da Canoa, Brazil
+   1055 Maceió, Brazil
+    890 Boca Raton, United States
+    605 Porto Alegre, Brazil
+    584 Piracicaba, Brazil
+    507 San Antonio, United States
+    412 Arlington, United States
+    357 Los Angeles, United States
+    293 Mongaguá, Brazil
+    290 Natal, Brazil
+    281 Curitiba, Brazil
+
+== Requests by hour of day ==
+  55585 00
+  62670 01
+  48828 02
+  70278 03
+  50482 04
+  20227 05
+   2279 06
+   2007 07
+   1810 08
+   1560 09
+   3795 10
+  12497 11
+  11093 12
+   8011 13
+   8297 14
+  10620 15
+  18916 16
+  22707 17
+  24968 18
+  32741 19
+  36570 20
+  40924 21
+  37843 22
+  43873 23
+
+== Requests by day ==
+  69136 01/Jul/2026
+  21811 02/Jul/2026
+  32088 03/Jul/2026
+  89329 04/Jul/2026
+  66719 05/Jul/2026
+  23783 06/Jul/2026
+   4902 22/Jun/2026
+   7371 23/Jun/2026
+   7415 24/Jun/2026
+  91104 25/Jun/2026
+  46643 26/Jun/2026
+  42539 27/Jun/2026
+  37976 28/Jun/2026
+  29109 29/Jun/2026
+  58656 30/Jun/2026
+
+== Bot / crawler share ==
+Bot-ish hits:   610 of 628581
+
+== Suspect / synthetic paths (e2e test fixtures) ==
+Suspect hits:   3772 of 628581
+-- by source (count · ip · status · user-agent) --
+   1647 177.60.79.191 404 agora-na-copa-2026/1.0
+    703 191.204.170.29 404 agora-na-copa-2026/1.0
+     32 177.60.79.191 499 agora-na-copa-2026/1.0
+     13 191.204.170.29 499 agora-na-copa-2026/1.0
+      8 57.151.128.99 404 agora-na-copa-2026/1.0
+      8 172.215.217.66 404 agora-na-copa-2026/1.0
+      8 172.178.118.82 404 agora-na-copa-2026/1.0
+      8 135.232.225.19 404 agora-na-copa-2026/1.0
+      8 135.232.177.197 404 agora-na-copa-2026/1.0
+      7 52.225.35.113 404 agora-na-copa-2026/1.0
+
+== Delta vs. previous snapshot ==
+Previous: traffic-reports/summary-20260706-000702.txt (2026-07-06T00:07:17+00:00)
+Current:  traffic-reports/summary-20260706-010702.txt (2026-07-06T01:07:20+00:00)
+Elapsed:  3603s (60.0 min)
+-- top path movers by |delta| (prev · cur · delta · per-minute) --
+path                                                 prev        cur    delta     d/min
+/api/team-lineups                                  217408     220029    +2621     +43.6
+/api/match-overlays                                167297     169144    +1847     +30.8
+/api/fifa-proxy/live/football/400021516?language=pt          0       1252    +1252     +20.8
+/api/chat/ko-89-2026?since=0                         1127          0    -1127     -18.8
+/api/match-states                                   68239      68947     +708     +11.8
+/api/fifa-proxy/live/football/400021514?language=pt       1019       1267     +248      +4.1
+/api/fifa-proxy/live/football/400021520?language=pt       1015       1262     +247      +4.1
+/api/fifa-proxy/live/football/400021523?language=pt       1017       1259     +242      +4.0
+/api/presence                                       20941      21057     +116      +1.9
+/api/team-lineups?language=es                        1274       1331      +57      +0.9
+/api/health                                         10800      10840      +40      +0.7
+/                                                    6065       6097      +32      +0.5
+/api/tournament-leaders                              1967       1992      +25      +0.4
+/api/player-stats/KSA/Abdulilah%20Alamri             1898       1923      +25      +0.4
+/api/team-view/CAN                                   1324       1346      +22      +0.4
+/api/player-stats/BRA/Atacante%20Teste               1831       1849      +18      +0.3
+/api/team-view/BRA                                   1516       1532      +16      +0.3
+/api/chat/ko-91-2026?since=0                         1704       1710       +6      +0.1
+/api/chat/ko-88-2026?since=0                         1974       1974       +0      +0.0
+/api/chat/ko-74-2026?since=0                         1958       1958       +0      +0.0
+
+-- top city movers by |delta| (request volume; prev · cur · delta · per-minute) --
+city                                           prev        cur    delta     d/min
+São Paulo, Brazil                            436577     457745   +21168    +352.5
+San Jose, United States                       34462      36181    +1719     +28.6
+Boydton, United States                        19396      19910     +514      +8.6
+Phoenix, United States                         9186       9523     +337      +5.6
+(unknown)                                      4953       4954       +1      +0.0
+Des Moines, United States                     11262      11262       +0      +0.0
+Porto Alegre, Brazil                            605        605       +0      +0.0
+Maceió, Brazil                                 1055       1055       +0      +0.0
+Lagoa da Canoa, Brazil                         4694       4694       +0      +0.0
+Piracicaba, Brazil                              584        584       +0      +0.0
+Mongaguá, Brazil                                293        293       +0      +0.0
+Boca Raton, United States                       890        890       +0      +0.0
+Chicago, United States                        16798      16798       +0      +0.0
+San Antonio, United States                      507        507       +0      +0.0
+Cheyenne, United States                       16068      16068       +0      +0.0
+Washington, United States                     40636      40636       +0      +0.0
+Arlington, United States                        412        412       +0      +0.0
+Los Angeles, United States                      357        357       +0      +0.0
+Curitiba, Brazil                                281        281       +0      +0.0
+Natal, Brazil                                   290        290       +0      +0.0
