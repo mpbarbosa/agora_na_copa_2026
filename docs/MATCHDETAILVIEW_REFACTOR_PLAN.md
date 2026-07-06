@@ -134,8 +134,29 @@ and composition of the above.
   view. View 1991 → 1544 lines. Verified: `tsc` clean, 240 unit tests, and the
   `weather-suspension` / `referee-card` / `match-speech` / `match-weather` /
   `navigation` e2e specs (21 tests) green.
-- **Phase 5 — `BroadcastGuideTab`:** props `match.broadcasters`, `broadcastCountry`,
-  `onCountryChange`, `theme`. Verify with `affiliate-products.spec.ts`.
+- **Phase 5 — `BroadcastGuideTab`: ✅ DONE.** Extracted the whole "Onde Assistir"
+  tab (`activeTab === "broadcast"`) — the broadcast guide (country picker + FIFA
+  broadcaster strip, or the finished-match videos strip), the live-incident feed
+  (`IncidentText` + per-incident narração), and the finished-match rail — plus
+  the paired `AffiliateProducts` strip (folded into the same component since both
+  were `activeTab === "broadcast"`-gated). Note vs the original plan: the tab
+  carries more than just the broadcasters, so the prop list grew beyond
+  `broadcasters`/`broadcastCountry`/`onCountryChange`/`theme` to include the
+  resolved `match`, the derived overlay fields (`broadcastNote`/
+  `broadcastUpdatedAt`, `simulated`/`matchStateSource`/`incidentsUpdatedAt`),
+  `incidents` + `teamACode`/`teamBCode` + `lineupEntry` + `matchSpeech` for the
+  incident feed, and `matches`/`selectedMatchId`/`onSelectMatch` for the finished
+  rail. The `useMatchSelectorRail` hook + the `shouldScrollIncidents` /
+  `hasClickableIncidentPlayers` derivations moved into the component; the incident
+  player tap goes up via `onSelectIncidentPlayer` (the parent still owns
+  `storedIncidentPlayer`). Removed the now-orphaned imports (`BroadcastCountrySelect`,
+  `AffiliateProducts`, `IncidentText`, `MATCH_VIDEOS`, `useMatchSelectorRail`,
+  `ChevronLeft`/`ChevronRight`/`Mic` icons, `formatOverlayUpdatedAt`,
+  `getBroadcasterBadgeLabel`, `buildIncidentSpeech`/`buildIncidentPlayerSelections`/
+  the four `getIncident*Class`/`getIncidentLabel` helpers) from the view. View
+  1544 → 1091 lines. Verified: `tsc` clean, 240 unit tests, and the
+  `affiliate-products` / `match-instagram` / `player-mention` / `match-speech`
+  e2e specs (9 tests) green.
 
 ### Prop-design rules (React gate)
 
