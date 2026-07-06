@@ -590,7 +590,8 @@
     "socials": {
       "instagram": "davidalaba",
       "wikipedia": "https://pt.wikipedia.org/wiki/David_Alaba"
-    }
+    },
+    "instagramPostUrl": "https://www.instagram.com/p/DaV3F8GjL3A/"
   },
   "318647": {
     "fifaId": "318647",
@@ -865,7 +866,8 @@
       "instagram": "memphisdepay",
       "instagramFollowers": 20000000,
       "wikipedia": "https://pt.wikipedia.org/wiki/Memphis_Depay"
-    }
+    },
+    "instagramPostUrl": "https://www.instagram.com/p/DZ1cr3vjYpE/"
   },
   "336170": {
     "fifaId": "336170",
@@ -2806,7 +2808,8 @@
       "https://www.instagram.com/p/DaJEBlOgsGG/",
       "https://www.instagram.com/p/DaZSbgnkYGr/",
       "https://www.instagram.com/p/DaZPLicEbdx/",
-      "https://www.instagram.com/p/DaPKsLMlTsQ/"
+      "https://www.instagram.com/p/DaPKsLMlTsQ/",
+      "https://www.instagram.com/p/DaY_UpAmOmO/"
     ],
     "worldCupNote": "## Leitura\nO farol francês não apaga. Kylian Mbappé marcou o gol da vitória por 1 a 0 sobre o Paraguai nas oitavas de final e levou a França às quartas. Capitão e artilheiro, o camisa 10 chegou a sete gols no Mundial e segue decisivo nos momentos que pesam.\n## Desempenho\nFez quatro gols na fase de grupos (dois no Senegal, dois no Iraque) e liderou os 100% de aproveitamento da França no Grupo I. Nos 16-avos, marcou duas vezes na goleada por 3 a 0 sobre a Suécia (45' e 74'). Nas oitavas, diante de um Paraguai muito fechado, quebrou a resistência aos 70' — seu sétimo gol no Mundial — e garantiu a classificação francesa.\n## Números\nJ5 · 7 gols · 0 cartões · França classificada às quartas de final, onde enfrenta o Marrocos. Mbappé segue como artilheiro e principal nome do ataque de um dos favoritos ao título.",
     "worldCupNoteUpdatedAt": "2026-07-04T21:00:00.000Z"
@@ -7331,7 +7334,8 @@
     "height": 178,
     "socials": {
       "wikipedia": "https://pt.wikipedia.org/wiki/Mois%C3%A9s_Caicedo"
-    }
+    },
+    "instagramPostUrl": "https://www.instagram.com/p/DZm8oCEEduG/"
   },
   "429063": {
     "fifaId": "429063",
@@ -9305,7 +9309,8 @@
     "socials": {
       "instagram": "wsemedo7",
       "wikipedia": "https://en.wikipedia.org/wiki/Willy_Semedo"
-    }
+    },
+    "instagramPostUrl": "https://www.instagram.com/p/DaYPjUpke59/"
   },
   "433754": {
     "fifaId": "433754",
@@ -11139,7 +11144,10 @@
       "instagramFollowers": 2000000,
       "wikipedia": "https://pt.wikipedia.org/wiki/Mike_Maignan"
     },
-    "instagramPostUrl": "https://www.instagram.com/p/DaQCW1HlaPs/"
+    "instagramPostUrls": [
+      "https://www.instagram.com/p/DaQCW1HlaPs/",
+      "https://www.instagram.com/p/DaaDT7-grFL/"
+    ]
   },
   "448341": {
     "fifaId": "448341",
@@ -11834,7 +11842,8 @@
     "socials": {
       "instagram": "mwene",
       "wikipedia": "https://pt.wikipedia.org/wiki/Phillipp_Mwene"
-    }
+    },
+    "instagramPostUrl": "https://www.instagram.com/p/DZrfsMFFlzp/"
   },
   "463465": {
     "fifaId": "463465",
@@ -18284,7 +18293,8 @@
     "club": "",
     "pictureUrl": "https://digitalhub.fifa.com/transform/3beeef45-2af9-4641-aa23-24aabb1ff865/RIOS-Richard_473050",
     "dateOfBirth": "2000-06-02",
-    "height": 185
+    "height": 185,
+    "instagramPostUrl": "https://www.instagram.com/p/DaYbvXvlvSm/"
   },
   "428886": {
     "fifaId": "428886",
@@ -18296,7 +18306,8 @@
     "club": "",
     "pictureUrl": "https://digitalhub.fifa.com/transform/e1e5fb3a-67cb-4e0d-9a70-95b7cc6d5ebf/DIAZ-Luis_428886",
     "dateOfBirth": "1997-01-13",
-    "height": 179
+    "height": 179,
+    "instagramPostUrl": "https://www.instagram.com/p/DaZcgqMFJ0n/"
   },
   "425580": {
     "fifaId": "425580",
@@ -18416,7 +18427,11 @@
     "club": "",
     "pictureUrl": "https://digitalhub.fifa.com/transform/961b906c-13d4-4869-942a-5f5d2e3fab3e/LERMA-Jefferson_395550",
     "dateOfBirth": "1994-10-25",
-    "height": 180
+    "height": 180,
+    "instagramPostUrls": [
+      "https://www.instagram.com/p/DZvjQEXD_C5/",
+      "https://www.instagram.com/p/DaYOudOFTjm/"
+    ]
   },
   "394500": {
     "fifaId": "394500",
@@ -18428,7 +18443,8 @@
     "club": "",
     "pictureUrl": "https://digitalhub.fifa.com/transform/efd8e0c0-6d52-43f0-95ce-b9c258914603/MOJICA-Johan_394500",
     "dateOfBirth": "1992-08-21",
-    "height": 184
+    "height": 184,
+    "instagramPostUrl": "https://www.instagram.com/p/DZoEVNJlMF4/"
   },
   "476345": {
     "fifaId": "476345",
@@ -18502,7 +18518,8 @@
     "club": "",
     "pictureUrl": "https://digitalhub.fifa.com/transform/ce6f352e-52e7-4265-9bc9-d482292fe4fb/SANCHEZ-Davinson_386013",
     "dateOfBirth": "1996-06-12",
-    "height": 188
+    "height": 188,
+    "instagramPostUrl": "https://www.instagram.com/p/DZ--LJTEZQF/"
   },
   "385998": {
     "fifaId": "385998",
