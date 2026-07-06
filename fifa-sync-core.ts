@@ -300,6 +300,7 @@ export const FIFA_MATCH_STATUS = {
   CANCELLED: 8,
   DELAYED: 10, // kickoff delayed (e.g. weather) but still expected — FIFA renders "Atrasado"
   LINE_UPS: 12, // line-ups published (still pre-match)
+  RESCHEDULED: 13, // kickoff moved to a new date/time — FIFA renders "Reagendado" (pre-match)
   SUSPENDED: 99, // stopped mid-match (e.g. weather), may resume
 } as const;
 
@@ -313,6 +314,7 @@ export const getMatchStatusFromFifa = (
     case FIFA_MATCH_STATUS.FUTURE:
     case FIFA_MATCH_STATUS.LINE_UPS:
     case FIFA_MATCH_STATUS.DELAYED:
+    case FIFA_MATCH_STATUS.RESCHEDULED:
       return "PRE_GAME";
     case FIFA_MATCH_STATUS.LIVE:
       return "LIVE";
@@ -323,13 +325,17 @@ export const getMatchStatusFromFifa = (
       return "SUSPENDED";
   }
 
-  if (typeof fifaMatch.MatchStatus === "number") {
-    return "LIVE";
-  }
-
+  // Unknown/unlisted numeric status: never assume LIVE while FIFA's (possibly
+  // rescheduled) kickoff is still in the future — a match that has not started
+  // must stay PRE_GAME. Respecting the kickoff time first is what stops a
+  // phantom "AO VIVO 0'" when FIFA introduces a status code we don't map yet.
   const kickoffTime = new Date(fifaMatch.Date).getTime();
   if (!Number.isNaN(kickoffTime) && kickoffTime > Date.now()) {
     return "PRE_GAME";
+  }
+
+  if (typeof fifaMatch.MatchStatus === "number") {
+    return "LIVE";
   }
 
   if (
@@ -385,6 +391,7 @@ const FIFA_STATUS_LABELS: Record<number, string> = {
   [FIFA_MATCH_STATUS.POSTPONED]: "Adiado",
   [FIFA_MATCH_STATUS.CANCELLED]: "Cancelado",
   [FIFA_MATCH_STATUS.DELAYED]: "Atrasado",
+  [FIFA_MATCH_STATUS.RESCHEDULED]: "Reagendado",
   [FIFA_MATCH_STATUS.SUSPENDED]: "Paralisado",
 };
 
@@ -396,6 +403,7 @@ const TERMINAL_OR_ABNORMAL_STATUS = new Set<number>([
   FIFA_MATCH_STATUS.POSTPONED,
   FIFA_MATCH_STATUS.CANCELLED,
   FIFA_MATCH_STATUS.DELAYED,
+  FIFA_MATCH_STATUS.RESCHEDULED,
 ]);
 
 /**

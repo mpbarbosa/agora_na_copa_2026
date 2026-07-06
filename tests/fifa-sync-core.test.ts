@@ -116,6 +116,41 @@ test("getMatchStatusFromFifa maps FIFA status codes into local match statuses", 
     "PRE_GAME",
   );
 
+  // Rescheduled (13, FIFA "Reagendado") is pre-match: FIFA moves the kickoff to
+  // a new time and reports code 13 with no score — it must NOT become LIVE.
+  // Regression: MEX×ENG (Jogo 92, match 400021531) showed a phantom "AO VIVO 0'"
+  // because 13 was unmapped and fell through the numeric fallback into LIVE.
+  assert.equal(
+    getMatchStatusFromFifa(localMatch, {
+      IdMatch: "400021531",
+      Date: "2026-07-06T01:00:00Z",
+      MatchStatus: 13,
+    }),
+    "PRE_GAME",
+  );
+
+  // Defense in depth: an unknown/unlisted numeric status must stay PRE_GAME
+  // while the kickoff is still in the future, instead of defaulting to LIVE.
+  assert.equal(
+    getMatchStatusFromFifa(localMatch, {
+      IdMatch: "1",
+      Date: "2099-01-01T00:00:00Z",
+      MatchStatus: 42,
+    }),
+    "PRE_GAME",
+  );
+
+  // …but an unknown numeric status whose kickoff has already passed is still
+  // treated as an in-progress LIVE match (unchanged behaviour).
+  assert.equal(
+    getMatchStatusFromFifa(localMatch, {
+      IdMatch: "1",
+      Date: "2026-06-14T17:00:00Z",
+      MatchStatus: 42,
+    }),
+    "LIVE",
+  );
+
   // Interrupted matches: suspended (99), abandoned (4), postponed (7),
   // cancelled (8) all collapse to SUSPENDED.
   for (const code of [99, 4, 7, 8]) {
@@ -147,6 +182,8 @@ test("getOfficialFifaStatusLabel prefers the live period, then the status", () =
   assert.equal(getOfficialFifaStatusLabel(7, 1), "Adiado");
   // Delayed kickoff (10) surfaces the "Atrasado" pill even with an unknown period.
   assert.equal(getOfficialFifaStatusLabel(10, 0), "Atrasado");
+  // Rescheduled (13) surfaces the "Reagendado" pill.
+  assert.equal(getOfficialFifaStatusLabel(13, 0), "Reagendado");
 
   // Status-only fallbacks and the unknown case.
   assert.equal(getOfficialFifaStatusLabel(12, 0), "Escalações divulgadas");
