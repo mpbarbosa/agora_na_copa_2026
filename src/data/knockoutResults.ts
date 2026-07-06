@@ -105,4 +105,8 @@ export const KNOCKOUT_RESULTS: Record<number, KnockoutResultSeed> = {
   // #91 · Oitavas · 04/07/2026 — Brasil 1×2 Noruega (Erling Haaland 79' e 90' p/ NOR; Neymar Jr
   // 90+10' p/ BRA). Noruega classificada às Quartas; alimenta a #99 (slot W91). Brasil eliminado.
   91: { status: "FINISHED", score: { teamA: 1, teamB: 2 } },
+  // #92 · Oitavas · 05/07/2026 — México 2×3 Inglaterra (Jude Bellingham 36' e 38', Harry Kane 60'
+  // p/ ING; Julian Quiñones 42' e Raúl Jiménez 69' p/ MEX; Jarell Quansah expulso aos 54' p/ ING).
+  // Inglaterra classificada às Quartas mesmo com um a menos; alimenta a #99 (slot W92). México eliminado.
+  92: { status: "FINISHED", score: { teamA: 2, teamB: 3 } },
 };
