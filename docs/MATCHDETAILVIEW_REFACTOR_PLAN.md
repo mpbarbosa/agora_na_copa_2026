@@ -59,11 +59,19 @@ All three are wired into the `test:unit` script in `package.json`.
 
 ---
 
-## Option 2 — Component decomposition (structural) — STAGED, not yet done
+## Option 2 — Component decomposition (structural) — ✅ DONE
 
 Turn `MatchDetailView` into a thin shell composing 5–6 focused components.
 Satisfies the responsibility and React gates. Higher risk (touches render + prop
 threading), so it is phased: each step ships independently and is e2e-verified.
+
+**All five phases are complete.** `MatchDetailView.tsx` went from **2974 → 1091
+lines** across the two options; the leaf tabs, match-selector bar, clock/simulation
+drawer, hero scoreboard, and the "Onde Assistir" broadcast tab now live in their
+own files (see the per-phase notes below). The shell keeps only what the plan
+scoped for it: state ownership, the two data effects (geo + overlay polling), the
+simultaneous-live alert, the overview/focus switch, the incident-player overlay
+cards, and composition of the extracted components.
 
 ### Target seams (JSX source ranges, pre-Option-1 line numbers)
 
