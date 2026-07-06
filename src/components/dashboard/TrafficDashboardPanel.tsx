@@ -179,6 +179,10 @@ export function TrafficDashboardPanel({ theme }: TrafficDashboardPanelProps) {
   const mutedClasses = isLight ? "text-slate-500" : "text-slate-400";
   const [data, setData] = useState<TrafficDashboardResponse | null>(null);
   const [failed, setFailed] = useState(false);
+  // Optional [start, end] date filter for the "Ritmo de requisições" chart. YYYY-MM-DD
+  // interpreted in UTC to match the chart's UTC x-axis; empty means the full range.
+  const [rateStart, setRateStart] = useState("");
+  const [rateEnd, setRateEnd] = useState("");
 
   useEffect(() => {
     let cancelled = false;
@@ -207,7 +211,11 @@ export function TrafficDashboardPanel({ theme }: TrafficDashboardPanelProps) {
       color: palette[1],
       points: data.timeline.map((p) => ({ x: p.t, y: p.requests })),
     };
-    const ratePts = data.timeline.filter((p) => p.ratePerMin != null);
+    const startMs = rateStart ? Date.parse(`${rateStart}T00:00:00Z`) : -Infinity;
+    const endMs = rateEnd ? Date.parse(`${rateEnd}T23:59:59.999Z`) : Infinity;
+    const ratePts = data.timeline.filter(
+      (p) => p.ratePerMin != null && p.t >= startMs && p.t <= endMs,
+    );
     const rate: LineSeries = {
       name: t("dashboard.trafficSeriesRate"),
       color: palette[2],
@@ -215,7 +223,7 @@ export function TrafficDashboardPanel({ theme }: TrafficDashboardPanelProps) {
     };
     return { requests: [requests], rate: [rate] };
     // palette is stable per theme
-  }, [data, palette, t]);
+  }, [data, palette, t, rateStart, rateEnd]);
 
   if (failed) {
     return (
@@ -249,6 +257,16 @@ export function TrafficDashboardPanel({ theme }: TrafficDashboardPanelProps) {
     : "—";
   const hasCities = latest.citiesByVisitor.length > 0 || latest.citiesByVolume.length > 0;
 
+  // Date bounds for the rate-chart filter (timeline is chronological; UTC YYYY-MM-DD).
+  const toDateInput = (ms: number) => new Date(ms).toISOString().slice(0, 10);
+  const rateMinDate = data.timeline.length ? toDateInput(data.timeline[0].t) : "";
+  const rateMaxDate = data.timeline.length ? toDateInput(data.timeline[data.timeline.length - 1].t) : "";
+  const rateInputClasses = `rounded-lg border px-2 py-1.5 font-mono text-[11px] tracking-wider outline-none transition focus-visible:ring-2 focus-visible:ring-sky-400 ${
+    isLight
+      ? "border-slate-200 bg-white text-slate-700 hover:border-slate-300"
+      : "border-white/10 bg-[#1a1d1d] text-slate-200 hover:border-white/20"
+  }`;
+
   return (
     <div className="mt-4">
       <p className={`mb-4 font-mono text-[11px] uppercase tracking-wider ${mutedClasses}`}>
@@ -278,7 +296,38 @@ export function TrafficDashboardPanel({ theme }: TrafficDashboardPanelProps) {
         </ChartCard>
       </div>
       <div className="mt-4">
-        <ChartCard theme={theme} title={t("dashboard.trafficRateTitle")} subtitle={t("dashboard.trafficRateSubtitle")}>
+        <ChartCard
+          theme={theme}
+          title={t("dashboard.trafficRateTitle")}
+          subtitle={t("dashboard.trafficRateSubtitle")}
+          headerAction={
+            <div className="flex items-center gap-1.5">
+              <input
+                type="date"
+                id="traffic-rate-start"
+                aria-label={t("dashboard.trafficRateStartAria")}
+                value={rateStart || rateMinDate}
+                min={rateMinDate}
+                max={rateEnd || rateMaxDate}
+                onChange={(event) => setRateStart(event.target.value)}
+                className={rateInputClasses}
+              />
+              <span className={`font-mono text-[11px] ${mutedClasses}`} aria-hidden="true">
+                →
+              </span>
+              <input
+                type="date"
+                id="traffic-rate-end"
+                aria-label={t("dashboard.trafficRateEndAria")}
+                value={rateEnd || rateMaxDate}
+                min={rateStart || rateMinDate}
+                max={rateMaxDate}
+                onChange={(event) => setRateEnd(event.target.value)}
+                className={rateInputClasses}
+              />
+            </div>
+          }
+        >
           <LineChart theme={theme} series={series.rate} />
         </ChartCard>
       </div>
