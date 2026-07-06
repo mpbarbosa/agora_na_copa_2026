@@ -96,6 +96,18 @@
       "wikipedia": "https://pt.wikipedia.org/wiki/Craig_Gordon"
     }
   },
+  "228686": {
+    "fifaId": "228686",
+    "teamCode": "COL",
+    "name": "David Ospina",
+    "fullName": "David Ospina",
+    "number": 1,
+    "position": "GK",
+    "club": "",
+    "pictureUrl": "https://digitalhub.fifa.com/transform/bb1dfed7-fde5-4558-8bf0-fe299883d6fa/OSPINA-David_228686",
+    "dateOfBirth": "1988-08-31",
+    "height": 183
+  },
   "228912": {
     "fifaId": "228912",
     "teamCode": "GER",
@@ -201,6 +213,25 @@
     "socials": {
       "wikipedia": "https://pt.wikipedia.org/wiki/Michael_Boxall"
     }
+  },
+  "269058": {
+    "fifaId": "269058",
+    "teamCode": "COL",
+    "name": "James Rodriguez",
+    "fullName": "James Rodriguez",
+    "number": 10,
+    "position": "MF",
+    "club": "",
+    "pictureUrl": "https://digitalhub.fifa.com/transform/800cc17f-8f64-4d16-90e9-c5ab79c4d302/RODRIGUEZ-James_269058",
+    "dateOfBirth": "1991-07-12",
+    "height": 181,
+    "socials": {
+      "instagram": "jamesrodriguez10",
+      "instagramFollowers": 50000000
+    },
+    "instagramPostUrl": "https://www.instagram.com/p/DaI4aWKkZDs/",
+    "worldCupNote": "## Leitura\nCapitão e camisa 10, James Rodríguez volta a ser o maestro da Colômbia: o organizador que dita o ritmo e a principal referência técnica de uma seleção que venceu o Grupo K com autoridade. Mais de uma década depois da Chuteira de Ouro de 2014, segue sendo a batuta criativa que os colombianos procuram em cada armação.\n## Desempenho\nTitular nas quatro partidas, foi o cérebro da armação e saiu para poupar fôlego em todas: substituído aos 72' na vitória por 3×1 sobre o Uzbequistão, aos 58' no 1×0 diante da RD Congo e aos 76' no 0×0 com Portugal que carimbou a liderança do grupo. Nos 16-avos, começou o triunfo por 1×0 sobre Gana — gol de Jhon Arias aos 14' — antes de dar lugar a Richard Ríos. Ainda sem marcar na competição, é o fio condutor de um time que sofreu apenas um gol em toda a fase de grupos.\n## Números\nJ4 · 0 gols · 0 cartões · líder do Grupo K (7 pts), classificada às oitavas",
+    "worldCupNoteUpdatedAt": "2026-07-04T01:30:00.000Z"
   },
   "269592": {
     "fifaId": "269592",
@@ -579,6 +610,18 @@
       "wikipedia": "https://pt.wikipedia.org/wiki/Hossein_Hosseini"
     }
   },
+  "315614": {
+    "fifaId": "315614",
+    "teamCode": "COL",
+    "name": "Santiago Arias",
+    "fullName": "Santiago Arias",
+    "number": 4,
+    "position": "DF",
+    "club": "",
+    "pictureUrl": "https://digitalhub.fifa.com/transform/5617bc24-ff35-493b-95f2-22239373414a/ARIAS-Santiago_315614",
+    "dateOfBirth": "1992-01-13",
+    "height": 177
+  },
   "316002": {
     "fifaId": "316002",
     "teamCode": "AUT",
@@ -836,7 +879,9 @@
       "instagram": "jpickford1",
       "instagramFollowers": 2000000,
       "wikipedia": "https://pt.wikipedia.org/wiki/Jordan_Pickford"
-    }
+    },
+    "worldCupNote": "## Leitura\nA muralha que leva a Inglaterra às quartas. Jordan Pickford, camisa 1 e goleiro titular dos Three Lions, foi a base da defesa que sustentou a campanha rumo ao mata-mata: dois jogos sem sofrer gols na fase de grupos e regularidade sob as traves na reta decisiva. Aos 32 anos, o arqueiro do Everton segue como o dono absoluto da meta inglesa em mais uma Copa.\n## Desempenho\nNa estreia levou dois na vitória por 4 a 2 sobre a Croácia, mas se recuperou com dois jogos sem ser vazado — 0 a 0 com Gana e 2 a 0 sobre o Panamá — para garantir a liderança do Grupo L. No mata-mata, sofreu um gol na vitória por 2 a 1 sobre a RD Congo (16-avos) e dois no eletrizante 3 a 2 sobre o México (oitavas), quando a Inglaterra segurou o resultado mesmo com um a menos após a expulsão de Quansah. Foram quatro vitórias e um empate no caminho até as quartas de final.\n## Números\nJ5 · 2 jogos sem sofrer gols · 5 gols sofridos · 0 cartões · 1º do Grupo L (7 pts). A Inglaterra está nas quartas de final, onde encara a Noruega de Haaland.",
+    "worldCupNoteUpdatedAt": "2026-07-06T00:00:00.000Z"
   },
   "336088": {
     "fifaId": "336088",
@@ -1333,6 +1378,18 @@
       "wikipedia": "https://pt.wikipedia.org/wiki/Lucas_Michel_Mendes"
     }
   },
+  "356704": {
+    "fifaId": "356704",
+    "teamCode": "COL",
+    "name": "Juan Quintero",
+    "fullName": "Juan Quintero",
+    "number": 20,
+    "position": "MF",
+    "club": "",
+    "pictureUrl": "https://digitalhub.fifa.com/transform/ab12e549-2406-4bbb-a420-0f9ccef2c09e/QUINTERO-Juan_356704",
+    "dateOfBirth": "1993-01-18",
+    "height": 167
+  },
   "356731": {
     "fifaId": "356731",
     "teamCode": "MEX",
@@ -1537,6 +1594,18 @@
       "instagram": "mertgunok_34",
       "wikipedia": "https://en.wikipedia.org/wiki/Mert_G%C3%BCnok"
     }
+  },
+  "360642": {
+    "fifaId": "360642",
+    "teamCode": "COL",
+    "name": "Camilo Vargas",
+    "fullName": "Camilo Vargas",
+    "number": 12,
+    "position": "GK",
+    "club": "",
+    "pictureUrl": "https://digitalhub.fifa.com/transform/0a3646b6-8b61-4004-a460-0aad23a8ff36/VARGAS-Camilo_360642",
+    "dateOfBirth": "1989-03-09",
+    "height": 183
   },
   "363863": {
     "fifaId": "363863",
@@ -1815,6 +1884,18 @@
       "instagramFollowers": 3000000,
       "wikipedia": "https://pt.wikipedia.org/wiki/John_Stones"
     }
+  },
+  "369530": {
+    "fifaId": "369530",
+    "teamCode": "COL",
+    "name": "Jhon Cordoba",
+    "fullName": "Jhon Cordoba",
+    "number": 9,
+    "position": "FW",
+    "club": "",
+    "pictureUrl": "https://digitalhub.fifa.com/transform/549e0eab-ae8f-4f4b-8d9b-36cbeaae716c/CORDOBA-Jhon_369530",
+    "dateOfBirth": "1993-05-11",
+    "height": 186
   },
   "369744": {
     "fifaId": "369744",
@@ -2538,6 +2619,31 @@
       "wikipedia": "https://pt.wikipedia.org/wiki/Cristian_Roldan"
     }
   },
+  "385998": {
+    "fifaId": "385998",
+    "teamCode": "COL",
+    "name": "Alvaro Montero",
+    "fullName": "Alvaro Montero",
+    "number": 24,
+    "position": "GK",
+    "club": "",
+    "pictureUrl": "https://digitalhub.fifa.com/transform/b7af4c7c-edc7-483d-a804-068ea864840e/MONTERO-Alvaro_385998",
+    "dateOfBirth": "1995-03-29",
+    "height": 201
+  },
+  "386013": {
+    "fifaId": "386013",
+    "teamCode": "COL",
+    "name": "Davinson Sanchez",
+    "fullName": "Davinson Sanchez",
+    "number": 23,
+    "position": "DF",
+    "club": "",
+    "pictureUrl": "https://digitalhub.fifa.com/transform/ce6f352e-52e7-4265-9bc9-d482292fe4fb/SANCHEZ-Davinson_386013",
+    "dateOfBirth": "1996-06-12",
+    "height": 188,
+    "instagramPostUrl": "https://www.instagram.com/p/DZ--LJTEZQF/"
+  },
   "386339": {
     "fifaId": "386339",
     "teamCode": "MEX",
@@ -3223,6 +3329,19 @@
     "height": 184,
     "instagramPostUrl": "https://www.instagram.com/p/DZviGU4ku_i/"
   },
+  "394376": {
+    "fifaId": "394376",
+    "teamCode": "COL",
+    "name": "Deiver Machado",
+    "fullName": "Deiver Machado",
+    "number": 22,
+    "position": "DF",
+    "club": "",
+    "pictureUrl": "https://digitalhub.fifa.com/transform/e3774306-ac78-44ee-954b-9f4328a035c1/MACHADO-Deiver_394376",
+    "dateOfBirth": "1993-09-02",
+    "height": 173,
+    "instagramPostUrl": "https://www.instagram.com/p/DaJTFEOD0l_/"
+  },
   "394456": {
     "fifaId": "394456",
     "teamCode": "BRA",
@@ -3239,6 +3358,19 @@
       "wikipedia": "https://pt.wikipedia.org/wiki/Fabinho_(futebolista,_1993)"
     },
     "instagramPostUrl": "https://www.instagram.com/p/DaLz2cDGOxP/"
+  },
+  "394500": {
+    "fifaId": "394500",
+    "teamCode": "COL",
+    "name": "Johan Mojica",
+    "fullName": "Johan Mojica",
+    "number": 17,
+    "position": "DF",
+    "club": "",
+    "pictureUrl": "https://digitalhub.fifa.com/transform/efd8e0c0-6d52-43f0-95ce-b9c258914603/MOJICA-Johan_394500",
+    "dateOfBirth": "1992-08-21",
+    "height": 184,
+    "instagramPostUrl": "https://www.instagram.com/p/DZoEVNJlMF4/"
   },
   "394824": {
     "fifaId": "394824",
@@ -3578,6 +3710,34 @@
       "instagram": "cjasib",
       "wikipedia": "https://pt.wikipedia.org/wiki/C%C3%A9sar_Montes"
     }
+  },
+  "395550": {
+    "fifaId": "395550",
+    "teamCode": "COL",
+    "name": "Jefferson Lerma",
+    "fullName": "Jefferson Lerma",
+    "number": 16,
+    "position": "MF",
+    "club": "",
+    "pictureUrl": "https://digitalhub.fifa.com/transform/961b906c-13d4-4869-942a-5f5d2e3fab3e/LERMA-Jefferson_395550",
+    "dateOfBirth": "1994-10-25",
+    "height": 180,
+    "instagramPostUrls": [
+      "https://www.instagram.com/p/DZvjQEXD_C5/",
+      "https://www.instagram.com/p/DaYOudOFTjm/"
+    ]
+  },
+  "395552": {
+    "fifaId": "395552",
+    "teamCode": "COL",
+    "name": "Yerry Mina",
+    "fullName": "Yerry Mina",
+    "number": 13,
+    "position": "DF",
+    "club": "",
+    "pictureUrl": "https://digitalhub.fifa.com/transform/908d10ae-e26e-4937-82b2-6baa54784ac7/MINA-Yerry_395552",
+    "dateOfBirth": "1994-09-23",
+    "height": 195
   },
   "395755": {
     "fifaId": "395755",
@@ -5197,6 +5357,18 @@
     },
     "instagramPostUrl": "https://www.instagram.com/p/DZkzbG7DsbZ/"
   },
+  "405755": {
+    "fifaId": "405755",
+    "teamCode": "COL",
+    "name": "Jaminton Campaz",
+    "fullName": "Jaminton Campaz",
+    "number": 21,
+    "position": "FW",
+    "club": "",
+    "pictureUrl": "https://digitalhub.fifa.com/transform/cd3d4afc-5780-444f-80ca-fc55b53a5329/CAMPAZ-Leandro_405755",
+    "dateOfBirth": "2000-05-24",
+    "height": 166
+  },
   "405841": {
     "fifaId": "405841",
     "teamCode": "ENG",
@@ -6101,6 +6273,19 @@
       "instagram": "pape",
       "wikipedia": "https://pt.wikipedia.org/wiki/Pape_Matar_Sarr"
     }
+  },
+  "418881": {
+    "fifaId": "418881",
+    "teamCode": "COL",
+    "name": "Cucho Hernandez",
+    "fullName": "Cucho Hernandez",
+    "number": 19,
+    "position": "FW",
+    "club": "",
+    "pictureUrl": "https://digitalhub.fifa.com/transform/a54cc361-8a38-4340-bbaa-1dab41b73626/HERNANDEZ-Cucho_418881",
+    "dateOfBirth": "1999-04-20",
+    "height": 176,
+    "instagramPostUrl": "https://www.instagram.com/p/DZu1K3MjqrI/"
   },
   "418963": {
     "fifaId": "418963",
@@ -7228,6 +7413,18 @@
       "wikipedia": "https://en.wikipedia.org/wiki/Carl_Saint%C3%A9"
     }
   },
+  "425580": {
+    "fifaId": "425580",
+    "teamCode": "COL",
+    "name": "Jorge Carrascal",
+    "fullName": "Jorge Carrascal",
+    "number": 8,
+    "position": "MF",
+    "club": "",
+    "pictureUrl": "https://digitalhub.fifa.com/transform/52a87992-08b2-4124-b02b-d25bd6e83c09/CARRASCAL-Jorge_425580",
+    "dateOfBirth": "1998-05-25",
+    "height": 180
+  },
   "425607": {
     "fifaId": "425607",
     "teamCode": "TUN",
@@ -7340,6 +7537,32 @@
       "wikipedia": "https://pt.wikipedia.org/wiki/Mois%C3%A9s_Caicedo"
     },
     "instagramPostUrl": "https://www.instagram.com/p/DZm8oCEEduG/"
+  },
+  "428886": {
+    "fifaId": "428886",
+    "teamCode": "COL",
+    "name": "Luis Diaz",
+    "fullName": "Luis Diaz",
+    "number": 7,
+    "position": "FW",
+    "club": "",
+    "pictureUrl": "https://digitalhub.fifa.com/transform/e1e5fb3a-67cb-4e0d-9a70-95b7cc6d5ebf/DIAZ-Luis_428886",
+    "dateOfBirth": "1997-01-13",
+    "height": 179,
+    "instagramPostUrl": "https://www.instagram.com/p/DaZcgqMFJ0n/"
+  },
+  "428905": {
+    "fifaId": "428905",
+    "teamCode": "COL",
+    "name": "Luis Suarez",
+    "fullName": "Luis Suarez",
+    "number": 25,
+    "position": "FW",
+    "club": "",
+    "pictureUrl": "https://digitalhub.fifa.com/transform/898b7742-30e2-4b72-8470-dbcdf5d5e058/SUAREZ-Luis_428905",
+    "dateOfBirth": "1997-12-02",
+    "height": 179,
+    "instagramPostUrl": "https://www.instagram.com/p/DaYIt4vDkYt/"
   },
   "429063": {
     "fifaId": "429063",
@@ -8481,6 +8704,19 @@
       "instagramFollowers": 18000000,
       "wikipedia": "https://pt.wikipedia.org/wiki/Cristian_Romero"
     }
+  },
+  "431200": {
+    "fifaId": "431200",
+    "teamCode": "COL",
+    "name": "Daniel Munoz",
+    "fullName": "Daniel Munoz",
+    "number": 2,
+    "position": "DF",
+    "club": "",
+    "pictureUrl": "https://digitalhub.fifa.com/transform/597b88e8-d3ab-4f1f-9ba5-c031478769d3/MUNOZ-Daniel_431200",
+    "dateOfBirth": "1996-05-26",
+    "height": 180,
+    "instagramPostUrl": "https://www.instagram.com/p/DZxjUNxnLBZ/"
   },
   "431202": {
     "fifaId": "431202",
@@ -10242,6 +10478,19 @@
       "instagram": "nicopaz1o",
       "wikipedia": "https://pt.wikipedia.org/wiki/Nico_Paz"
     }
+  },
+  "441622": {
+    "fifaId": "441622",
+    "teamCode": "COL",
+    "name": "Jhon Lucumi",
+    "fullName": "Jhon Lucumi",
+    "number": 3,
+    "position": "DF",
+    "club": "",
+    "pictureUrl": "https://digitalhub.fifa.com/transform/73d7ea6f-ca50-4665-97cf-4c319351dce6/LUCUMI-Jhon_441622",
+    "dateOfBirth": "1998-06-26",
+    "height": 187,
+    "instagramPostUrl": "https://www.instagram.com/p/DaOBrUREYmX/"
   },
   "441623": {
     "fifaId": "441623",
@@ -12042,6 +12291,18 @@
       "wikipedia": "https://en.wikipedia.org/wiki/Owen_Goodman"
     }
   },
+  "463902": {
+    "fifaId": "463902",
+    "teamCode": "COL",
+    "name": "Gustavo Puerta",
+    "fullName": "Gustavo Puerta",
+    "number": 14,
+    "position": "DF",
+    "club": "",
+    "pictureUrl": "https://digitalhub.fifa.com/transform/818f768e-54da-4c5f-88ef-8f596240c2b5/PUERTA-Gustavo_463902",
+    "dateOfBirth": "2003-07-23",
+    "height": 173
+  },
   "464055": {
     "fifaId": "464055",
     "teamCode": "FRA",
@@ -12631,6 +12892,35 @@
       "wikipedia": "https://en.wikipedia.org/wiki/Derrick_Etienne_Jr."
     }
   },
+  "470759": {
+    "fifaId": "470759",
+    "teamCode": "COL",
+    "name": "Kevin Castano",
+    "fullName": "Kevin Castano",
+    "number": 5,
+    "position": "MF",
+    "club": "",
+    "pictureUrl": "https://digitalhub.fifa.com/transform/0ba9e182-1726-4513-ab33-e6224e61815a/CASTANO-Kevin_470759",
+    "dateOfBirth": "2000-09-29",
+    "height": 179
+  },
+  "470760": {
+    "fifaId": "470760",
+    "teamCode": "COL",
+    "name": "Jhon Arias",
+    "fullName": "Jhon Arias",
+    "number": 11,
+    "position": "MF",
+    "club": "",
+    "pictureUrl": "https://digitalhub.fifa.com/transform/1449efe8-a491-4d19-8c7d-c6fb0b6e8d0f/ARIAS-Jhon_470760",
+    "dateOfBirth": "1997-09-21",
+    "height": 168,
+    "socials": {
+      "instagram": "jhonariasa",
+      "instagramFollowers": 1000000
+    },
+    "instagramPostUrl": "https://www.instagram.com/p/DaHYZBuDYb_/"
+  },
   "472877": {
     "fifaId": "472877",
     "teamCode": "TUR",
@@ -12662,6 +12952,19 @@
       "instagram": "cuf_5",
       "wikipedia": "https://pt.wikipedia.org/wiki/Vladim%C3%ADr_Coufal"
     }
+  },
+  "473050": {
+    "fifaId": "473050",
+    "teamCode": "COL",
+    "name": "Richard Rios",
+    "fullName": "Richard Rios",
+    "number": 6,
+    "position": "MF",
+    "club": "",
+    "pictureUrl": "https://digitalhub.fifa.com/transform/3beeef45-2af9-4641-aa23-24aabb1ff865/RIOS-Richard_473050",
+    "dateOfBirth": "2000-06-02",
+    "height": 185,
+    "instagramPostUrl": "https://www.instagram.com/p/DaYbvXvlvSm/"
   },
   "473062": {
     "fifaId": "473062",
@@ -12756,6 +13059,18 @@
     "socials": {
       "instagram": "amir_razaghinia8"
     }
+  },
+  "476345": {
+    "fifaId": "476345",
+    "teamCode": "COL",
+    "name": "Willer Ditta",
+    "fullName": "Willer Ditta",
+    "number": 18,
+    "position": "DF",
+    "club": "",
+    "pictureUrl": "https://digitalhub.fifa.com/transform/bbf850f0-89dd-4ccc-979d-bb7b23e769b1/DITTA-Willer_476345",
+    "dateOfBirth": "1998-01-23",
+    "height": 179
   },
   "476348": {
     "fifaId": "476348",
@@ -15688,6 +16003,18 @@
       "wikipedia": "https://pt.wikipedia.org/wiki/Noni_Madueke"
     }
   },
+  "489849": {
+    "fifaId": "489849",
+    "teamCode": "COL",
+    "name": "Juan Portilla",
+    "fullName": "Juan Portilla",
+    "number": 15,
+    "position": "MF",
+    "club": "",
+    "pictureUrl": "https://digitalhub.fifa.com/transform/80d3008e-fc71-4841-bedb-fbb9e0bfe3b8/PORTILLA-Juan_489849",
+    "dateOfBirth": "1998-09-12",
+    "height": 181
+  },
   "491166": {
     "fifaId": "491166",
     "teamCode": "AUS",
@@ -15812,6 +16139,18 @@
       "instagram": "michaelsvoboda30",
       "wikipedia": "https://en.wikipedia.org/wiki/Michael_Svoboda"
     }
+  },
+  "492189": {
+    "fifaId": "492189",
+    "teamCode": "COL",
+    "name": "Andres Gomez",
+    "fullName": "Andres Gomez",
+    "number": 26,
+    "position": "FW",
+    "club": "",
+    "pictureUrl": "https://digitalhub.fifa.com/transform/300b07da-6c9b-4607-a30d-11a11614e6d8/GOMEZ-Andres_492189",
+    "dateOfBirth": "2002-09-12",
+    "height": 170
   },
   "492315": {
     "fifaId": "492315",
@@ -18228,342 +18567,5 @@
       "instagram": "aminesbai10",
       "wikipedia": "https://en.wikipedia.org/wiki/Amine_Sba%C3%AF"
     }
-  },
-  "228686": {
-    "fifaId": "228686",
-    "teamCode": "COL",
-    "name": "David Ospina",
-    "fullName": "David Ospina",
-    "number": 1,
-    "position": "GK",
-    "club": "",
-    "pictureUrl": "https://digitalhub.fifa.com/transform/bb1dfed7-fde5-4558-8bf0-fe299883d6fa/OSPINA-David_228686",
-    "dateOfBirth": "1988-08-31",
-    "height": 183
-  },
-  "431200": {
-    "fifaId": "431200",
-    "teamCode": "COL",
-    "name": "Daniel Munoz",
-    "fullName": "Daniel Munoz",
-    "number": 2,
-    "position": "DF",
-    "club": "",
-    "pictureUrl": "https://digitalhub.fifa.com/transform/597b88e8-d3ab-4f1f-9ba5-c031478769d3/MUNOZ-Daniel_431200",
-    "dateOfBirth": "1996-05-26",
-    "height": 180,
-    "instagramPostUrl": "https://www.instagram.com/p/DZxjUNxnLBZ/"
-  },
-  "441622": {
-    "fifaId": "441622",
-    "teamCode": "COL",
-    "name": "Jhon Lucumi",
-    "fullName": "Jhon Lucumi",
-    "number": 3,
-    "position": "DF",
-    "club": "",
-    "pictureUrl": "https://digitalhub.fifa.com/transform/73d7ea6f-ca50-4665-97cf-4c319351dce6/LUCUMI-Jhon_441622",
-    "dateOfBirth": "1998-06-26",
-    "height": 187,
-    "instagramPostUrl": "https://www.instagram.com/p/DaOBrUREYmX/"
-  },
-  "315614": {
-    "fifaId": "315614",
-    "teamCode": "COL",
-    "name": "Santiago Arias",
-    "fullName": "Santiago Arias",
-    "number": 4,
-    "position": "DF",
-    "club": "",
-    "pictureUrl": "https://digitalhub.fifa.com/transform/5617bc24-ff35-493b-95f2-22239373414a/ARIAS-Santiago_315614",
-    "dateOfBirth": "1992-01-13",
-    "height": 177
-  },
-  "470759": {
-    "fifaId": "470759",
-    "teamCode": "COL",
-    "name": "Kevin Castano",
-    "fullName": "Kevin Castano",
-    "number": 5,
-    "position": "MF",
-    "club": "",
-    "pictureUrl": "https://digitalhub.fifa.com/transform/0ba9e182-1726-4513-ab33-e6224e61815a/CASTANO-Kevin_470759",
-    "dateOfBirth": "2000-09-29",
-    "height": 179
-  },
-  "473050": {
-    "fifaId": "473050",
-    "teamCode": "COL",
-    "name": "Richard Rios",
-    "fullName": "Richard Rios",
-    "number": 6,
-    "position": "MF",
-    "club": "",
-    "pictureUrl": "https://digitalhub.fifa.com/transform/3beeef45-2af9-4641-aa23-24aabb1ff865/RIOS-Richard_473050",
-    "dateOfBirth": "2000-06-02",
-    "height": 185,
-    "instagramPostUrl": "https://www.instagram.com/p/DaYbvXvlvSm/"
-  },
-  "428886": {
-    "fifaId": "428886",
-    "teamCode": "COL",
-    "name": "Luis Diaz",
-    "fullName": "Luis Diaz",
-    "number": 7,
-    "position": "FW",
-    "club": "",
-    "pictureUrl": "https://digitalhub.fifa.com/transform/e1e5fb3a-67cb-4e0d-9a70-95b7cc6d5ebf/DIAZ-Luis_428886",
-    "dateOfBirth": "1997-01-13",
-    "height": 179,
-    "instagramPostUrl": "https://www.instagram.com/p/DaZcgqMFJ0n/"
-  },
-  "425580": {
-    "fifaId": "425580",
-    "teamCode": "COL",
-    "name": "Jorge Carrascal",
-    "fullName": "Jorge Carrascal",
-    "number": 8,
-    "position": "MF",
-    "club": "",
-    "pictureUrl": "https://digitalhub.fifa.com/transform/52a87992-08b2-4124-b02b-d25bd6e83c09/CARRASCAL-Jorge_425580",
-    "dateOfBirth": "1998-05-25",
-    "height": 180
-  },
-  "369530": {
-    "fifaId": "369530",
-    "teamCode": "COL",
-    "name": "Jhon Cordoba",
-    "fullName": "Jhon Cordoba",
-    "number": 9,
-    "position": "FW",
-    "club": "",
-    "pictureUrl": "https://digitalhub.fifa.com/transform/549e0eab-ae8f-4f4b-8d9b-36cbeaae716c/CORDOBA-Jhon_369530",
-    "dateOfBirth": "1993-05-11",
-    "height": 186
-  },
-  "269058": {
-    "fifaId": "269058",
-    "teamCode": "COL",
-    "name": "James Rodriguez",
-    "fullName": "James Rodriguez",
-    "number": 10,
-    "position": "MF",
-    "club": "",
-    "pictureUrl": "https://digitalhub.fifa.com/transform/800cc17f-8f64-4d16-90e9-c5ab79c4d302/RODRIGUEZ-James_269058",
-    "dateOfBirth": "1991-07-12",
-    "height": 181,
-    "socials": {
-      "instagram": "jamesrodriguez10",
-      "instagramFollowers": 50000000
-    },
-    "instagramPostUrl": "https://www.instagram.com/p/DaI4aWKkZDs/",
-    "worldCupNote": "## Leitura\nCapitão e camisa 10, James Rodríguez volta a ser o maestro da Colômbia: o organizador que dita o ritmo e a principal referência técnica de uma seleção que venceu o Grupo K com autoridade. Mais de uma década depois da Chuteira de Ouro de 2014, segue sendo a batuta criativa que os colombianos procuram em cada armação.\n## Desempenho\nTitular nas quatro partidas, foi o cérebro da armação e saiu para poupar fôlego em todas: substituído aos 72' na vitória por 3×1 sobre o Uzbequistão, aos 58' no 1×0 diante da RD Congo e aos 76' no 0×0 com Portugal que carimbou a liderança do grupo. Nos 16-avos, começou o triunfo por 1×0 sobre Gana — gol de Jhon Arias aos 14' — antes de dar lugar a Richard Ríos. Ainda sem marcar na competição, é o fio condutor de um time que sofreu apenas um gol em toda a fase de grupos.\n## Números\nJ4 · 0 gols · 0 cartões · líder do Grupo K (7 pts), classificada às oitavas",
-    "worldCupNoteUpdatedAt": "2026-07-04T01:30:00.000Z"
-  },
-  "470760": {
-    "fifaId": "470760",
-    "teamCode": "COL",
-    "name": "Jhon Arias",
-    "fullName": "Jhon Arias",
-    "number": 11,
-    "position": "MF",
-    "club": "",
-    "pictureUrl": "https://digitalhub.fifa.com/transform/1449efe8-a491-4d19-8c7d-c6fb0b6e8d0f/ARIAS-Jhon_470760",
-    "dateOfBirth": "1997-09-21",
-    "height": 168,
-    "socials": {
-      "instagram": "jhonariasa",
-      "instagramFollowers": 1000000
-    },
-    "instagramPostUrl": "https://www.instagram.com/p/DaHYZBuDYb_/"
-  },
-  "360642": {
-    "fifaId": "360642",
-    "teamCode": "COL",
-    "name": "Camilo Vargas",
-    "fullName": "Camilo Vargas",
-    "number": 12,
-    "position": "GK",
-    "club": "",
-    "pictureUrl": "https://digitalhub.fifa.com/transform/0a3646b6-8b61-4004-a460-0aad23a8ff36/VARGAS-Camilo_360642",
-    "dateOfBirth": "1989-03-09",
-    "height": 183
-  },
-  "395552": {
-    "fifaId": "395552",
-    "teamCode": "COL",
-    "name": "Yerry Mina",
-    "fullName": "Yerry Mina",
-    "number": 13,
-    "position": "DF",
-    "club": "",
-    "pictureUrl": "https://digitalhub.fifa.com/transform/908d10ae-e26e-4937-82b2-6baa54784ac7/MINA-Yerry_395552",
-    "dateOfBirth": "1994-09-23",
-    "height": 195
-  },
-  "463902": {
-    "fifaId": "463902",
-    "teamCode": "COL",
-    "name": "Gustavo Puerta",
-    "fullName": "Gustavo Puerta",
-    "number": 14,
-    "position": "DF",
-    "club": "",
-    "pictureUrl": "https://digitalhub.fifa.com/transform/818f768e-54da-4c5f-88ef-8f596240c2b5/PUERTA-Gustavo_463902",
-    "dateOfBirth": "2003-07-23",
-    "height": 173
-  },
-  "489849": {
-    "fifaId": "489849",
-    "teamCode": "COL",
-    "name": "Juan Portilla",
-    "fullName": "Juan Portilla",
-    "number": 15,
-    "position": "MF",
-    "club": "",
-    "pictureUrl": "https://digitalhub.fifa.com/transform/80d3008e-fc71-4841-bedb-fbb9e0bfe3b8/PORTILLA-Juan_489849",
-    "dateOfBirth": "1998-09-12",
-    "height": 181
-  },
-  "395550": {
-    "fifaId": "395550",
-    "teamCode": "COL",
-    "name": "Jefferson Lerma",
-    "fullName": "Jefferson Lerma",
-    "number": 16,
-    "position": "MF",
-    "club": "",
-    "pictureUrl": "https://digitalhub.fifa.com/transform/961b906c-13d4-4869-942a-5f5d2e3fab3e/LERMA-Jefferson_395550",
-    "dateOfBirth": "1994-10-25",
-    "height": 180,
-    "instagramPostUrls": [
-      "https://www.instagram.com/p/DZvjQEXD_C5/",
-      "https://www.instagram.com/p/DaYOudOFTjm/"
-    ]
-  },
-  "394500": {
-    "fifaId": "394500",
-    "teamCode": "COL",
-    "name": "Johan Mojica",
-    "fullName": "Johan Mojica",
-    "number": 17,
-    "position": "DF",
-    "club": "",
-    "pictureUrl": "https://digitalhub.fifa.com/transform/efd8e0c0-6d52-43f0-95ce-b9c258914603/MOJICA-Johan_394500",
-    "dateOfBirth": "1992-08-21",
-    "height": 184,
-    "instagramPostUrl": "https://www.instagram.com/p/DZoEVNJlMF4/"
-  },
-  "476345": {
-    "fifaId": "476345",
-    "teamCode": "COL",
-    "name": "Willer Ditta",
-    "fullName": "Willer Ditta",
-    "number": 18,
-    "position": "DF",
-    "club": "",
-    "pictureUrl": "https://digitalhub.fifa.com/transform/bbf850f0-89dd-4ccc-979d-bb7b23e769b1/DITTA-Willer_476345",
-    "dateOfBirth": "1998-01-23",
-    "height": 179
-  },
-  "418881": {
-    "fifaId": "418881",
-    "teamCode": "COL",
-    "name": "Cucho Hernandez",
-    "fullName": "Cucho Hernandez",
-    "number": 19,
-    "position": "FW",
-    "club": "",
-    "pictureUrl": "https://digitalhub.fifa.com/transform/a54cc361-8a38-4340-bbaa-1dab41b73626/HERNANDEZ-Cucho_418881",
-    "dateOfBirth": "1999-04-20",
-    "height": 176,
-    "instagramPostUrl": "https://www.instagram.com/p/DZu1K3MjqrI/"
-  },
-  "356704": {
-    "fifaId": "356704",
-    "teamCode": "COL",
-    "name": "Juan Quintero",
-    "fullName": "Juan Quintero",
-    "number": 20,
-    "position": "MF",
-    "club": "",
-    "pictureUrl": "https://digitalhub.fifa.com/transform/ab12e549-2406-4bbb-a420-0f9ccef2c09e/QUINTERO-Juan_356704",
-    "dateOfBirth": "1993-01-18",
-    "height": 167
-  },
-  "405755": {
-    "fifaId": "405755",
-    "teamCode": "COL",
-    "name": "Jaminton Campaz",
-    "fullName": "Jaminton Campaz",
-    "number": 21,
-    "position": "FW",
-    "club": "",
-    "pictureUrl": "https://digitalhub.fifa.com/transform/cd3d4afc-5780-444f-80ca-fc55b53a5329/CAMPAZ-Leandro_405755",
-    "dateOfBirth": "2000-05-24",
-    "height": 166
-  },
-  "394376": {
-    "fifaId": "394376",
-    "teamCode": "COL",
-    "name": "Deiver Machado",
-    "fullName": "Deiver Machado",
-    "number": 22,
-    "position": "DF",
-    "club": "",
-    "pictureUrl": "https://digitalhub.fifa.com/transform/e3774306-ac78-44ee-954b-9f4328a035c1/MACHADO-Deiver_394376",
-    "dateOfBirth": "1993-09-02",
-    "height": 173,
-    "instagramPostUrl": "https://www.instagram.com/p/DaJTFEOD0l_/"
-  },
-  "386013": {
-    "fifaId": "386013",
-    "teamCode": "COL",
-    "name": "Davinson Sanchez",
-    "fullName": "Davinson Sanchez",
-    "number": 23,
-    "position": "DF",
-    "club": "",
-    "pictureUrl": "https://digitalhub.fifa.com/transform/ce6f352e-52e7-4265-9bc9-d482292fe4fb/SANCHEZ-Davinson_386013",
-    "dateOfBirth": "1996-06-12",
-    "height": 188,
-    "instagramPostUrl": "https://www.instagram.com/p/DZ--LJTEZQF/"
-  },
-  "385998": {
-    "fifaId": "385998",
-    "teamCode": "COL",
-    "name": "Alvaro Montero",
-    "fullName": "Alvaro Montero",
-    "number": 24,
-    "position": "GK",
-    "club": "",
-    "pictureUrl": "https://digitalhub.fifa.com/transform/b7af4c7c-edc7-483d-a804-068ea864840e/MONTERO-Alvaro_385998",
-    "dateOfBirth": "1995-03-29",
-    "height": 201
-  },
-  "428905": {
-    "fifaId": "428905",
-    "teamCode": "COL",
-    "name": "Luis Suarez",
-    "fullName": "Luis Suarez",
-    "number": 25,
-    "position": "FW",
-    "club": "",
-    "pictureUrl": "https://digitalhub.fifa.com/transform/898b7742-30e2-4b72-8470-dbcdf5d5e058/SUAREZ-Luis_428905",
-    "dateOfBirth": "1997-12-02",
-    "height": 179,
-    "instagramPostUrl": "https://www.instagram.com/p/DaYIt4vDkYt/"
-  },
-  "492189": {
-    "fifaId": "492189",
-    "teamCode": "COL",
-    "name": "Andres Gomez",
-    "fullName": "Andres Gomez",
-    "number": 26,
-    "position": "FW",
-    "club": "",
-    "pictureUrl": "https://digitalhub.fifa.com/transform/300b07da-6c9b-4607-a30d-11a11614e6d8/GOMEZ-Andres_492189",
-    "dateOfBirth": "2002-09-12",
-    "height": 170
   }
 }
