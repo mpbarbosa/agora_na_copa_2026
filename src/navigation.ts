@@ -21,14 +21,14 @@ export const NAV_ITEMS: NavItem[] = [
     description: "Veja todos os jogos encerrados, ao vivo e agendados da Copa.",
   },
   {
-    id: "grupos",
-    label: "Grupos",
-    description: "Tabelas de classificação dos 12 grupos do torneio.",
-  },
-  {
     id: "chaveamento",
     label: "Mata-mata",
     description: "Mata-mata interativo até a grande final.",
+  },
+  {
+    id: "grupos",
+    label: "Grupos",
+    description: "Tabelas de classificação dos 12 grupos do torneio.",
   },
   {
     id: "selecoes",

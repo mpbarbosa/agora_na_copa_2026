@@ -86,7 +86,7 @@ test.describe("Navigation shell", () => {
     await expect(page.locator("#btn-nav-ao-vivo #nav-live-indicator")).toBeVisible();
   });
 
-  test("Partidas nav sits between Ao Vivo and Grupos and opens the full fixtures viewer", async ({
+  test("Partidas nav sits between Ao Vivo and Mata-mata and opens the full fixtures viewer", async ({
     page,
   }) => {
     await page.goto("/");
@@ -100,11 +100,14 @@ test.describe("Navigation shell", () => {
     );
     const aoVivoIndex = navLabels.indexOf("Ao Vivo");
     const partidasIndex = navLabels.indexOf("Partidas");
+    const chaveamentoIndex = navLabels.indexOf("Mata-mata");
     const gruposIndex = navLabels.indexOf("Grupos");
 
+    // Order: Ao Vivo → Partidas → Mata-mata → Grupos.
     expect(aoVivoIndex).toBeGreaterThanOrEqual(0);
     expect(partidasIndex).toBe(aoVivoIndex + 1);
-    expect(gruposIndex).toBe(partidasIndex + 1);
+    expect(chaveamentoIndex).toBe(partidasIndex + 1);
+    expect(gruposIndex).toBe(chaveamentoIndex + 1);
 
     await page.click("#btn-nav-partidas");
 

@@ -65,8 +65,8 @@ test.describe("Teams view (Seleções)", () => {
     await page.goto("/");
 
     const navButtons = page.locator("#main-nav button");
-    await expect(navButtons.nth(3)).toHaveText("Grupos");
-    await expect(navButtons.nth(4)).toHaveText("Mata-mata");
+    await expect(navButtons.nth(3)).toHaveText("Mata-mata");
+    await expect(navButtons.nth(4)).toHaveText("Grupos");
     await expect(navButtons.nth(5)).toHaveText("Seleções");
     await expect(navButtons.nth(6)).toHaveText("Jogadores");
     await expect(navButtons.nth(7)).toHaveText("Líderes");
