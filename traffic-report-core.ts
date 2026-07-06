@@ -96,6 +96,8 @@ export interface RawTrafficSnapshot {
   byDay: TrafficCountRow[];
   bots: number | null;
   suspect: number | null;
+  /** App's own server-side client (agora-na-copa-2026/x.y) hits dropped before aggregation. */
+  selfClientExcluded: number | null;
   /** Per-source (ip · status · ua) breakdown of synthetic hits. Never exposed publicly. */
   suspectSources: { count: number; ip: string; status: string; ua: string }[];
 }
@@ -126,6 +128,13 @@ export function parseSummary(text: string, file: string): RawTrafficSnapshot | n
   const geoSource = countries.geoSource || cities.geoSource;
 
   const bots = Number(grab(/Bot-ish hits:\s*(\d+)/, (s["Bot / crawler share"] || []).join("\n")));
+  // Null (not 0) when the section is absent, so pre-fix snapshots hide the KPI
+  // rather than claiming zero self-client traffic was filtered.
+  const selfClientRaw = grab(
+    /Self-client hits \(excluded\):\s*(\d+)/,
+    (s["Self-client (excluded)"] || []).join("\n"),
+  );
+  const selfClientExcluded = selfClientRaw == null ? null : Number(selfClientRaw);
   const suspectLines = s["Suspect / synthetic paths (e2e test fixtures)"] || [];
   const suspect = Number(grab(/Suspect hits:\s*(\d+)/, suspectLines.join("\n")));
 
@@ -162,6 +171,7 @@ export function parseSummary(text: string, file: string): RawTrafficSnapshot | n
     byDay: parseCountRows(s["Requests by day"] || []),
     bots: Number.isFinite(bots) ? bots : null,
     suspect: Number.isFinite(suspect) ? suspect : null,
+    selfClientExcluded: selfClientExcluded != null && Number.isFinite(selfClientExcluded) ? selfClientExcluded : null,
     suspectSources,
   };
 }
@@ -184,6 +194,7 @@ function projectLatest(snap: RawTrafficSnapshot): TrafficSnapshotLatest {
     geoSource: snap.geoSource,
     bots: snap.bots,
     suspect: snap.suspect,
+    selfClientExcluded: snap.selfClientExcluded,
     topPaths: snap.topPaths.filter((r) => !SYNTHETIC.test(r.label)),
     statusCodes: snap.statusCodes,
     referrers: snap.referrers

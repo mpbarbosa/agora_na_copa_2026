@@ -46,6 +46,9 @@ Geo source: /var/lib/GeoIP/GeoLite2-Country.mmdb
   69136 01/Jul/2026
   21811 02/Jul/2026
 
+== Self-client (excluded) ==
+Self-client hits (excluded): 455784
+
 == Bot / crawler share ==
 Bot-ish hits:   800 of 400000
 
@@ -69,11 +72,19 @@ test("parseSummary extracts totals, geo, hour buckets and suspect sources", () =
   assert.equal(snap!.generatedMs, Date.parse("2026-07-03T22:00:00+00:00"));
   assert.equal(snap!.bots, 800);
   assert.equal(snap!.suspect, 2900);
+  assert.equal(snap!.selfClientExcluded, 455784);
   assert.equal(snap!.byHour["01"], 60679);
   assert.deepEqual(snap!.countriesByVisitor[0], { label: "Brazil", count: 1190 });
   assert.deepEqual(snap!.countriesByVolume[0], { label: "Brazil", count: 340327 });
   // Per-source IPs ARE parsed at the raw layer (they are dropped only in the projection).
   assert.equal(snap!.suspectSources[0].ip, "177.60.79.191");
+});
+
+test("parseSummary leaves selfClientExcluded null on older snapshots without the section", () => {
+  const noSection = SNAP_A.replace(/== Self-client \(excluded\) ==\nSelf-client hits \(excluded\): \d+\n\n/, "");
+  const snap = parseSummary(noSection, "old.txt");
+  assert.ok(snap);
+  assert.equal(snap!.selfClientExcluded, null);
 });
 
 test("parseSummary returns null when the Generated timestamp is missing/unparseable", () => {
@@ -111,6 +122,8 @@ test("buildTrafficDashboard projection drops IPs, synthetic paths and referrer n
   const latest = res.latest!;
   // No suspectSources / IP field leaks into the public shape.
   assert.equal((latest as unknown as Record<string, unknown>).suspectSources, undefined);
+  // The self-client exclusion count is carried into the public projection.
+  assert.equal(latest.selfClientExcluded, 455784);
   // Synthetic e2e fixture path filtered out of top paths.
   assert.ok(!latest.topPaths.some((r) => /Atacante%20Teste/.test(r.label)));
   assert.ok(latest.topPaths.some((r) => r.label === "/api/team-lineups"));

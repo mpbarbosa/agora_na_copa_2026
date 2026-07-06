@@ -84,6 +84,22 @@ GEO_MAP=""
 trap 'rm -f "$TMP_LOG" "$GEO_MAP"' EXIT
 reader > "$TMP_LOG"
 
+# ── Drop the app's own server-side client (agora-na-copa-2026/x.y) ─────────────
+# Secondary instances hit prod with this User-Agent — mostly a misconfigured
+# poller looping on 301 redirects over a non-canonical base URL, plus some
+# sanctioned /api/fifa-proxy fallback fetches. Either way it is machine traffic,
+# not a visitor, and as of 2026-07 it is ~85-90% of all log lines across many IPs,
+# swamping every tally below. Count it once for transparency, then filter it out
+# of $TMP_LOG so every downstream section (Totals, Top paths, status, referrers,
+# geo, hour/day, bots, suspect) reflects real humans. Matches the UA family (any
+# version) so it catches every such instance, not one IP — the right knob, since
+# the offenders rotate IPs.
+SELF_CLIENT_RE='"agora-na-copa-2026/[0-9.]+"'
+SELF_CLIENT_HITS="$(grep -aEc "$SELF_CLIENT_RE" "$TMP_LOG" || true)"
+if [[ "${SELF_CLIENT_HITS:-0}" -gt 0 ]]; then
+  grep -avE "$SELF_CLIENT_RE" "$TMP_LOG" > "$TMP_LOG.filtered" && mv "$TMP_LOG.filtered" "$TMP_LOG"
+fi
+
 # ── Resolve a local GeoLite2 mmdb (no user IP leaves the host) ─────────────────
 # Prefer City over Country when both are present: a City db is a superset that
 # also drives the country tallies, so picking it loses nothing and unlocks the
@@ -216,6 +232,13 @@ fi
 
   echo "== Requests by day =="
   awk '{print $3}' "$TMP_LOG" | cut -d: -f1 | tr -d '[' | sort | uniq -c
+  echo
+
+  # Transparency line for the self-client filter applied above: how many machine
+  # hits (the app's own agora-na-copa-2026/x.y poller) were dropped before any
+  # tally ran. Parsed by traffic-report-core into `selfClientExcluded`.
+  echo "== Self-client (excluded) =="
+  printf "Self-client hits (excluded): %s\n" "${SELF_CLIENT_HITS:-0}"
   echo
 
   TOTAL="$(wc -l < "$TMP_LOG")"

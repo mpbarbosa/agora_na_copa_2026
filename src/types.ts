@@ -724,6 +724,8 @@ export interface TrafficSnapshotLatest {
   bots: number | null;
   /** Synthetic (e2e-fixture) hit count. */
   suspect: number | null;
+  /** App's own server-side client (agora-na-copa-2026/x.y) hits filtered out before aggregation. */
+  selfClientExcluded: number | null;
   /** Top requested paths (e2e-synthetic paths filtered out for display). */
   topPaths: TrafficCountRow[];
   /** HTTP status codes with their hit counts. */

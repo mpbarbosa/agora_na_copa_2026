@@ -273,6 +273,14 @@ export function TrafficDashboardPanel({ theme }: TrafficDashboardPanelProps) {
   const latest: TrafficSnapshotLatest = data.latest;
   const botPct = latest.requests ? ((latest.bots ?? 0) / latest.requests) * 100 : 0;
   const suspectPct = latest.requests ? ((latest.suspect ?? 0) / latest.requests) * 100 : 0;
+  // Self-client hits are filtered out BEFORE `requests` is counted, so the share of
+  // raw traffic they represented is excluded / (requests + excluded). Null on
+  // pre-fix snapshots that never carried the section, so the tile is hidden then.
+  const selfExcluded = latest.selfClientExcluded;
+  const selfPct =
+    selfExcluded != null && (latest.requests ?? 0) + selfExcluded > 0
+      ? (selfExcluded / ((latest.requests ?? 0) + selfExcluded)) * 100
+      : null;
   const genLabel = latest.generated
     ? new Date(latest.generated).toLocaleString(intlTag, { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" })
     : "—";
@@ -309,6 +317,15 @@ export function TrafficDashboardPanel({ theme }: TrafficDashboardPanelProps) {
         <StatCard theme={theme} label={t("dashboard.trafficKpiAvgRate")} value={fmt(data.windowRatePerMin)} hint={t("dashboard.trafficKpiAvgRateHint")} />
         <StatCard theme={theme} label={t("dashboard.trafficKpiBots")} value={`${botPct.toFixed(1).replace(".", ",")}%`} hint={t("dashboard.trafficKpiBotsHint", { count: fmt(latest.bots) })} accentColor="#f59e0b" />
         <StatCard theme={theme} label={t("dashboard.trafficKpiSynthetic")} value={`${suspectPct.toFixed(1).replace(".", ",")}%`} hint={t("dashboard.trafficKpiSyntheticHint", { count: fmt(latest.suspect) })} accentColor="#94a3b8" />
+        {selfExcluded != null && (
+          <StatCard
+            theme={theme}
+            label={t("dashboard.trafficKpiSelfClient")}
+            value={fmt(selfExcluded)}
+            hint={selfPct != null ? t("dashboard.trafficKpiSelfClientHint", { pct: selfPct.toFixed(1).replace(".", ",") }) : undefined}
+            accentColor="#64748b"
+          />
+        )}
         <StatCard theme={theme} label={t("dashboard.trafficKpiLogLines")} value={fmt(latest.logLines)} />
       </div>
 

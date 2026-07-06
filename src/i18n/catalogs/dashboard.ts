@@ -125,6 +125,8 @@ export const dashboardCatalog: CatalogModule = {
     "dashboard.trafficKpiBotsHint": "{count} hits",
     "dashboard.trafficKpiSynthetic": "Sintético (e2e)",
     "dashboard.trafficKpiSyntheticHint": "{count} hits",
+    "dashboard.trafficKpiSelfClient": "Auto-cliente",
+    "dashboard.trafficKpiSelfClientHint": "{pct}% do log bruto (excluído)",
     "dashboard.trafficKpiLogLines": "Linhas de log",
 
     // Traffic panel — chart titles/subtitles
@@ -280,6 +282,8 @@ export const dashboardCatalog: CatalogModule = {
     "dashboard.trafficKpiBotsHint": "{count} hits",
     "dashboard.trafficKpiSynthetic": "Sintético (e2e)",
     "dashboard.trafficKpiSyntheticHint": "{count} hits",
+    "dashboard.trafficKpiSelfClient": "Auto-cliente",
+    "dashboard.trafficKpiSelfClientHint": "{pct}% del log en bruto (excluido)",
     "dashboard.trafficKpiLogLines": "Líneas de log",
 
     // Traffic panel — chart titles/subtitles
@@ -435,6 +439,8 @@ export const dashboardCatalog: CatalogModule = {
     "dashboard.trafficKpiBotsHint": "{count} hits",
     "dashboard.trafficKpiSynthetic": "Synthetic (e2e)",
     "dashboard.trafficKpiSyntheticHint": "{count} hits",
+    "dashboard.trafficKpiSelfClient": "Self-client",
+    "dashboard.trafficKpiSelfClientHint": "{pct}% of raw log (excluded)",
     "dashboard.trafficKpiLogLines": "Log lines",
 
     // Traffic panel — chart titles/subtitles
