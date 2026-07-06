@@ -258,6 +258,45 @@ test("buildMatchStateEntry prefers live FIFA score and minute over calendar data
   assert.equal(entry.fifaMatchId, "400021464");
 });
 
+test("buildMatchStateEntry surfaces FIFA's kickoff on a rescheduled (status 13) match", () => {
+  // MEX×ENG (Jogo 92, match 400021531): FIFA moved kickoff from 21:00 to 22:00
+  // Brasília (2026-07-06T01:00:00Z) and reports status 13 ("Reagendado"). The
+  // state must stay PRE_GAME and carry FIFA's authoritative kickoff so the
+  // client stops showing the stale seed time.
+  const localMatch = createMatch({
+    status: "PRE_GAME",
+    kickoffTimestamp: "2026-07-05T21:00:00-03:00",
+  });
+  const calendarMatch: FifaCalendarMatch = {
+    IdMatch: "400021531",
+    Date: "2026-07-06T01:00:00Z",
+    MatchStatus: 13,
+  };
+
+  const entry = buildMatchStateEntry(localMatch, calendarMatch);
+
+  assert.equal(entry.status, "PRE_GAME");
+  assert.equal(entry.kickoffOverride, "2026-07-06T01:00:00Z");
+});
+
+test("buildMatchStateEntry omits kickoffOverride when FIFA's kickoff matches the seed", () => {
+  // FIFA's UTC "Date" is the same instant as the seed's Brasília offset time
+  // (17:00-03:00 === 20:00Z), so there is nothing to override.
+  const localMatch = createMatch({
+    status: "PRE_GAME",
+    kickoffTimestamp: "2026-06-14T17:00:00-03:00",
+  });
+  const calendarMatch: FifaCalendarMatch = {
+    IdMatch: "400021464",
+    Date: "2026-06-14T20:00:00Z",
+    MatchStatus: 12,
+  };
+
+  const entry = buildMatchStateEntry(localMatch, calendarMatch);
+
+  assert.equal(entry.kickoffOverride, undefined);
+});
+
 test("getPenaltyScoreFromFifa returns the shootout score only when both tallies exist", () => {
   // Knockout tie decided on penalties (e.g. GER 1-1 PAR, 3-4 on penalties).
   assert.deepEqual(

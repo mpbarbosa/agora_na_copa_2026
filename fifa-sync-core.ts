@@ -943,6 +943,24 @@ export const getRefereeFromFifa = (
   };
 };
 
+// FIFA's authoritative kickoff instant, surfaced only when it meaningfully
+// differs from the local seed's scheduled kickoff (e.g. a rescheduled match,
+// FIFA status 13). Compares by instant — not string — so an equivalent time in
+// a different offset (e.g. "…T00:00:00Z" vs "…T21:00:00-03:00") is not treated
+// as a change. Returns undefined when the FIFA date is missing/unparseable or
+// lands on the same instant as the seed, so the client keeps the seed kickoff.
+const resolveKickoffOverride = (
+  localKickoffTimestamp: string,
+  fifaDate: string | undefined,
+): string | undefined => {
+  if (!fifaDate) return undefined;
+  const fifaMs = new Date(fifaDate).getTime();
+  if (Number.isNaN(fifaMs)) return undefined;
+  const localMs = new Date(localKickoffTimestamp).getTime();
+  if (!Number.isNaN(localMs) && fifaMs === localMs) return undefined;
+  return fifaDate;
+};
+
 export const buildMatchStateEntry = (
   localMatch: Match,
   fifaMatch: FifaCalendarMatch | undefined,
@@ -980,12 +998,18 @@ export const buildMatchStateEntry = (
     fifaLiveMatch?.Period,
   );
 
+  const kickoffOverride = resolveKickoffOverride(
+    localMatch.kickoffTimestamp,
+    fifaLiveMatch?.Date || fifaMatch.Date,
+  );
+
   return {
     status,
     score: liveScore || fifaScore || (status === "PRE_GAME" ? undefined : localMatch.score),
     penaltyScore: status === "PRE_GAME" ? undefined : penaltyScore,
     matchTime:
       status === "LIVE" && fifaLiveMatch?.MatchTime ? fifaLiveMatch.MatchTime : undefined,
+    kickoffOverride,
     officialStatus,
     referee: getRefereeFromFifa(fifaMatch),
     incidents: incidents && incidents.length > 0 ? incidents : undefined,

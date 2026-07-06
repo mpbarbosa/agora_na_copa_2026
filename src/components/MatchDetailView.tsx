@@ -32,6 +32,7 @@ import MATCH_ANALYSIS_EN from "../data/matchAnalysis.en.json";
 import { pickEditorialText } from "../data/editorial";
 import { resolvePlayerEntry } from "../data/playerRegistry";
 import MATCH_INSTAGRAM from "../data/matchInstagram.json";
+import { formatKickoffFromInstant } from "../utils/kickoffFormat";
 import type { TeamLineupsMap } from "../utils/teamLineup";
 import { PlayerOverlayCard, PlayerPictureOverlay, buildPlayerStatCells, formatBirthDate } from "./PlayerOverlayCard";
 import { usePlayerStats } from "../hooks/usePlayerStats";
@@ -99,6 +100,23 @@ const MATCH_STATUS_GROUPS: { status: MatchStatus; labelKey: string }[] = [
 const HEADER_MATCH_STATUS_GROUPS = MATCH_STATUS_GROUPS.filter(
   ({ status }) => status !== "FINISHED",
 );
+
+// Turns a FIFA kickoff-override instant (MatchStateEntry.kickoffOverride) into
+// the seed-shaped kickoff fields to spread over a match. Returns an empty patch
+// when there is no override or it can't be parsed, so the seed kickoff stands.
+function applyKickoffOverride(
+  match: Match,
+  kickoffOverride: string | undefined,
+): Partial<Pick<Match, "kickoffTime" | "kickoffDate" | "kickoffTimestamp">> {
+  if (!kickoffOverride) return {};
+  const display = formatKickoffFromInstant(kickoffOverride);
+  if (!display) return {};
+  return {
+    kickoffTime: display.kickoffTime,
+    kickoffDate: display.kickoffDate,
+    kickoffTimestamp: kickoffOverride,
+  };
+}
 
 const DEFAULT_MATCH_OVERLAY_REFRESH_INTERVAL_MS = 15 * 1000;
 const BROADCAST_COUNTRY_STORAGE_KEY = "agora-broadcast-country";
@@ -523,6 +541,13 @@ export function MatchDetailView({
                     score: data.overlays[match.id].matchState.score,
                     penaltyScore: data.overlays[match.id].matchState.penaltyScore,
                     matchTime: data.overlays[match.id].matchState.matchTime,
+                    // FIFA rescheduled the kickoff — prefer its authoritative
+                    // instant over the now-stale seed time/date (and the
+                    // countdown target). Falls back to the seed if unparseable.
+                    ...applyKickoffOverride(
+                      match,
+                      data.overlays[match.id].matchState.kickoffOverride,
+                    ),
                   }
                 : match,
               simulatedMatchStatesRef.current[match.id],

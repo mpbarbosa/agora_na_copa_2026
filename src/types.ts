@@ -135,6 +135,14 @@ export interface MatchStateEntry {
     teamB: number;
   };
   matchTime?: string;
+  /**
+   * FIFA's authoritative kickoff instant (ISO 8601, typically UTC) surfaced only
+   * when it differs from the local seed's scheduled kickoff — e.g. a rescheduled
+   * match (FIFA status 13, "Reagendado"). Absent when FIFA's kickoff matches the
+   * seed. The client reformats it into the displayed time/date (Brasília,
+   * locale-aware), preferring it over the now-stale seed kickoff.
+   */
+  kickoffOverride?: string;
   /** Official FIFA status/period label in pt-BR (e.g. "2º tempo", "Intervalo", "Encerrado"). */
   officialStatus?: string;
   /** Main referee, when FIFA has assigned and published one for the match. */

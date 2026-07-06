@@ -7,24 +7,9 @@ import { KNOCKOUT_MATCHES } from "./data/knockoutBracket";
 import { KNOCKOUT_RESULTS, type KnockoutResultSeed } from "./data/knockoutResults";
 import { humanizeSlot, KNOCKOUT_STAGE_NAMES } from "./utils/knockoutSlots";
 import { decisiveSlot } from "./utils/matchResult";
-import { getActiveLocale } from "./i18n/locale";
+import { formatKickoffDate, formatKickoffTime } from "./utils/kickoffFormat";
 import { localizeTeamName } from "./i18n/teamNames";
 import type { Match, KnockoutMatch, KnockoutTeamRef } from "./types";
-
-const PT_MONTHS = [
-  "Janeiro",
-  "Fevereiro",
-  "Março",
-  "Abril",
-  "Maio",
-  "Junho",
-  "Julho",
-  "Agosto",
-  "Setembro",
-  "Outubro",
-  "Novembro",
-  "Dezembro",
-];
 
 const BASE_MATCHES = baseMatchesData as Match[];
 
@@ -73,87 +58,6 @@ const teamByCode = new Map(
     },
   ]),
 );
-
-const PT_WEEKDAYS = [
-  "domingo",
-  "segunda-feira",
-  "terça-feira",
-  "quarta-feira",
-  "quinta-feira",
-  "sexta-feira",
-  "sábado",
-];
-
-const ES_MONTHS = [
-  "Enero",
-  "Febrero",
-  "Marzo",
-  "Abril",
-  "Mayo",
-  "Junio",
-  "Julio",
-  "Agosto",
-  "Septiembre",
-  "Octubre",
-  "Noviembre",
-  "Diciembre",
-];
-
-const ES_WEEKDAYS = [
-  "domingo",
-  "lunes",
-  "martes",
-  "miércoles",
-  "jueves",
-  "viernes",
-  "sábado",
-];
-
-const EN_MONTHS = [
-  "January",
-  "February",
-  "March",
-  "April",
-  "May",
-  "June",
-  "July",
-  "August",
-  "September",
-  "October",
-  "November",
-  "December",
-];
-
-const EN_WEEKDAYS = [
-  "Sunday",
-  "Monday",
-  "Tuesday",
-  "Wednesday",
-  "Thursday",
-  "Friday",
-  "Saturday",
-];
-
-// pt-BR is the native format ("4 Julho 2026 (sábado)"); es keeps the same
-// day-first shape with LATAM names ("4 Julio 2026 (sábado)"); en uses the US
-// month-first order ("July 4, 2026 (Saturday)"). APP_MATCHES is built once at
-// module load, so this reads the boot locale — correct for the per-locale
-// subdomains, the primary delivery path.
-const formatKickoffDate = (kickoffTimestamp: string) => {
-  const [datePart] = kickoffTimestamp.split("T");
-  const [year, month, day] = datePart.split("-").map(Number);
-  const weekdayIndex = new Date(Date.UTC(year, month - 1, day)).getUTCDay();
-  const locale = getActiveLocale();
-  if (locale === "en") {
-    return `${EN_MONTHS[month - 1]} ${day}, ${year} (${EN_WEEKDAYS[weekdayIndex]})`;
-  }
-  const es = locale === "es";
-  const months = es ? ES_MONTHS : PT_MONTHS;
-  const weekdays = es ? ES_WEEKDAYS : PT_WEEKDAYS;
-  return `${day} ${months[month - 1]} ${year} (${weekdays[weekdayIndex]})`;
-};
-
-const formatKickoffTime = (kickoffTimestamp: string) => kickoffTimestamp.slice(11, 16);
 
 const buildTeamEntry = (teamCode: string): Match["teamA"] => {
   const team = teamByCode.get(teamCode);
