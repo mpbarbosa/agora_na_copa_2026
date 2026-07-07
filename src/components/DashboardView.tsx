@@ -12,7 +12,9 @@ import {
   matchStatusBreakdown,
   topScoringTeamsAllPhases,
   tournamentTotals,
+  PHASE_KEYS,
   type MatchStatusKey,
+  type PhaseKey,
 } from "../dashboardStats";
 import {
   ChartCard,
@@ -42,13 +44,37 @@ const STATUS_COLORS: Record<"classic-light" | "stadium-dark", Record<MatchStatus
   "stadium-dark": { finished: "#00e476", live: "#ff5c7a", upcoming: "#64748b" },
 };
 
-// Phase series for the continent funnel: group stage → Round of 32 → Round of 16.
-const PHASE_COLORS: Record<
-  "classic-light" | "stadium-dark",
-  { groupStage: string; roundOf32: string; roundOf16: string }
-> = {
-  "classic-light": { groupStage: "#0033a0", roundOf32: "#009c3b", roundOf16: "#e8730c" },
-  "stadium-dark": { groupStage: "#4f8cff", roundOf32: "#00e476", roundOf16: "#ffa94d" },
+// Phase series for the continent funnel: group stage → the knockout ladder → champion.
+const PHASE_COLORS: Record<"classic-light" | "stadium-dark", Record<PhaseKey, string>> = {
+  "classic-light": {
+    groupStage: "#0033a0",
+    roundOf32: "#009c3b",
+    roundOf16: "#e8730c",
+    roundOf8: "#7b2ff7",
+    roundOf4: "#0e7c86",
+    final: "#db1730",
+    champion: "#b8860b",
+  },
+  "stadium-dark": {
+    groupStage: "#4f8cff",
+    roundOf32: "#00e476",
+    roundOf16: "#ffa94d",
+    roundOf8: "#b57bff",
+    roundOf4: "#36d0de",
+    final: "#ff5c7a",
+    champion: "#ffd24d",
+  },
+};
+
+/** i18n key for each funnel phase's short label (legend, filter, subtitle). */
+const PHASE_LABEL_KEY: Record<PhaseKey, string> = {
+  groupStage: "dashboard.phaseGroupStage",
+  roundOf32: "dashboard.phaseRoundOf32",
+  roundOf16: "dashboard.phaseRoundOf16",
+  roundOf8: "dashboard.phaseRoundOf8",
+  roundOf4: "dashboard.phaseRoundOf4",
+  final: "dashboard.phaseFinal",
+  champion: "dashboard.phaseChampion",
 };
 
 const integer = (n: number) => new Intl.NumberFormat(localeToIntlTag(getActiveLocale())).format(n);
@@ -66,11 +92,14 @@ export function DashboardView({ theme, matches }: DashboardViewProps) {
   const mutedClasses = isLight ? "text-slate-600" : "text-slate-300";
 
   const [tab, setTab] = useState<DashboardTab>("panorama");
+  // Continent funnel: "all" shows every reached phase side by side; a phase key
+  // narrows the chart to just that round.
+  const [phaseFilter, setPhaseFilter] = useState<PhaseKey | "all">("all");
 
   const {
     totals,
-    continents,
-    continentTotals,
+    continentPhases,
+    phaseTotals,
     groupGoals,
     statusSegments,
     topTeams,
@@ -90,20 +119,10 @@ export function DashboardView({ theme, matches }: DashboardViewProps) {
     };
     return {
       totals: tournamentTotals(matches, standings),
-      continents: phased.map((c) => ({
-        label: c.continent,
-        sublabel: c.confederation,
-        bars: [
-          { value: c.groupStage, color: phaseColors.groupStage },
-          { value: c.roundOf32, color: phaseColors.roundOf32 },
-          { value: c.roundOf16, color: phaseColors.roundOf16 },
-        ],
-      })),
-      continentTotals: {
-        groupStage: phased.reduce((s, c) => s + c.groupStage, 0),
-        roundOf32: phased.reduce((s, c) => s + c.roundOf32, 0),
-        roundOf16: phased.reduce((s, c) => s + c.roundOf16, 0),
-      },
+      continentPhases: phased,
+      phaseTotals: Object.fromEntries(
+        PHASE_KEYS.map((k) => [k, phased.reduce((s, c) => s + c.counts[k], 0)]),
+      ) as Record<PhaseKey, number>,
       groupGoals: goalsByGroup(standings).map((g) => ({ label: g.group, value: g.goals })),
       statusSegments: statusData.map<DonutSegment>((s) => ({
         label: s.label,
@@ -127,9 +146,49 @@ export function DashboardView({ theme, matches }: DashboardViewProps) {
     };
   }, [matches, theme, t]);
 
-  const goalsPerMatch = totals.groupGoalsPerMatch
-    ? totals.groupGoalsPerMatch.toFixed(2).replace(".", ",")
+  const goalsPerMatch = totals.goalsPerMatch
+    ? totals.goalsPerMatch.toFixed(2).replace(".", ",")
     : "—";
+
+  // Continent funnel view, driven by the round filter. Only phases some team has
+  // reached are offered (so empty future rounds never clutter the legend/filter);
+  // "all" (or a filter that fell out of range) shows every reached phase.
+  const visiblePhaseKeys = PHASE_KEYS.filter((k) => phaseTotals[k] > 0);
+  const activeFilter =
+    phaseFilter !== "all" && visiblePhaseKeys.includes(phaseFilter) ? phaseFilter : "all";
+  const shownPhaseKeys = activeFilter === "all" ? visiblePhaseKeys : [activeFilter];
+  const continentLegend = shownPhaseKeys.map((k) => ({
+    label: t(PHASE_LABEL_KEY[k]),
+    color: PHASE_COLORS[theme][k],
+  }));
+  const continentData = continentPhases.map((c) => ({
+    label: c.continent,
+    sublabel: c.confederation,
+    bars: shownPhaseKeys.map((k) => ({ value: c.counts[k], color: PHASE_COLORS[theme][k] })),
+  }));
+  const continentSubtitle = `${t("dashboard.chartContinentsByStage")} · ${shownPhaseKeys
+    .map((k) => `${phaseTotals[k]} ${t(PHASE_LABEL_KEY[k])}`)
+    .join(" → ")}`;
+  const phaseFilterControl = (
+    <select
+      id="dashboard-continent-phase-filter"
+      aria-label={t("dashboard.phaseFilterLabel")}
+      value={activeFilter}
+      onChange={(e) => setPhaseFilter(e.target.value as PhaseKey | "all")}
+      className={`rounded-lg border px-2 py-1 font-mono text-[10px] uppercase tracking-wider outline-none ${
+        isLight
+          ? "border-slate-200 bg-white text-slate-700"
+          : "border-white/10 bg-[#1a1c1c] text-slate-200"
+      }`}
+    >
+      <option value="all">{t("dashboard.phaseFilterAll")}</option>
+      {visiblePhaseKeys.map((k) => (
+        <option key={k} value={k}>
+          {t(PHASE_LABEL_KEY[k])}
+        </option>
+      ))}
+    </select>
+  );
 
   // Freshness of this build against the tournament. `latestKickoff` is the most recent
   // kickoff among matches already played or under way; `lastUpdated` renders it as an
@@ -275,9 +334,9 @@ export function DashboardView({ theme, matches }: DashboardViewProps) {
         />
         <StatCard
           theme={theme}
-          label={t("dashboard.kpiGroupGoals")}
-          value={integer(totals.groupGoals)}
-          hint={t("dashboard.kpiGroupGoalsHint", { value: goalsPerMatch })}
+          label={t("dashboard.kpiGoals")}
+          value={integer(totals.totalGoals)}
+          hint={t("dashboard.kpiGoalsHint", { value: goalsPerMatch })}
         />
       </div>
 
@@ -286,21 +345,10 @@ export function DashboardView({ theme, matches }: DashboardViewProps) {
         <ChartCard
           theme={theme}
           title={t("dashboard.chartContinentsTitle")}
-          subtitle={t("dashboard.chartContinentsSubtitle", {
-            groupStage: continentTotals.groupStage,
-            roundOf32: continentTotals.roundOf32,
-            roundOf16: continentTotals.roundOf16,
-          })}
+          subtitle={continentSubtitle}
+          headerAction={phaseFilterControl}
         >
-          <GroupedBars
-            theme={theme}
-            data={continents}
-            legend={[
-              { label: t("dashboard.phaseGroupStage"), color: PHASE_COLORS[theme].groupStage },
-              { label: t("dashboard.phaseRoundOf32"), color: PHASE_COLORS[theme].roundOf32 },
-              { label: t("dashboard.phaseRoundOf16"), color: PHASE_COLORS[theme].roundOf16 },
-            ]}
-          />
+          <GroupedBars theme={theme} data={continentData} legend={continentLegend} />
         </ChartCard>
 
         <ChartCard

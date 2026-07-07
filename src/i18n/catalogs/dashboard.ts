@@ -33,18 +33,23 @@ export const dashboardCatalog: CatalogModule = {
     "dashboard.kpiLiveHint": "agora",
     "dashboard.kpiUpcoming": "Agendados",
     "dashboard.kpiUpcomingHint": "a disputar",
-    "dashboard.kpiGroupGoals": "Gols (grupos)",
-    "dashboard.kpiGroupGoalsHint": "{value} por jogo",
+    "dashboard.kpiGoals": "Gols",
+    "dashboard.kpiGoalsHint": "{value} por jogo",
 
     // Legend / phase labels
     "dashboard.phaseGroupStage": "Fase de grupos",
     "dashboard.phaseRoundOf32": "16-avos",
     "dashboard.phaseRoundOf16": "Oitavas",
+    "dashboard.phaseRoundOf8": "Quartas",
+    "dashboard.phaseRoundOf4": "Semis",
+    "dashboard.phaseFinal": "Final",
+    "dashboard.phaseChampion": "Campeão",
+    "dashboard.phaseFilterAll": "Todas as fases",
+    "dashboard.phaseFilterLabel": "Filtrar por fase",
 
     // Chart: continents
     "dashboard.chartContinentsTitle": "Seleções por continente",
-    "dashboard.chartContinentsSubtitle":
-      "por fase · {groupStage} grupos → {roundOf32} 16-avos → {roundOf16} oitavas",
+    "dashboard.chartContinentsByStage": "por fase",
 
     // Chart: matches by status
     "dashboard.chartStatusTitle": "Partidas por situação",
@@ -190,18 +195,23 @@ export const dashboardCatalog: CatalogModule = {
     "dashboard.kpiLiveHint": "ahora",
     "dashboard.kpiUpcoming": "Programados",
     "dashboard.kpiUpcomingHint": "por disputar",
-    "dashboard.kpiGroupGoals": "Goles (grupos)",
-    "dashboard.kpiGroupGoalsHint": "{value} por partido",
+    "dashboard.kpiGoals": "Goles",
+    "dashboard.kpiGoalsHint": "{value} por partido",
 
     // Legend / phase labels
     "dashboard.phaseGroupStage": "Fase de grupos",
     "dashboard.phaseRoundOf32": "16-avos",
     "dashboard.phaseRoundOf16": "Octavos",
+    "dashboard.phaseRoundOf8": "Cuartos",
+    "dashboard.phaseRoundOf4": "Semis",
+    "dashboard.phaseFinal": "Final",
+    "dashboard.phaseChampion": "Campeón",
+    "dashboard.phaseFilterAll": "Todas las fases",
+    "dashboard.phaseFilterLabel": "Filtrar por fase",
 
     // Chart: continents
     "dashboard.chartContinentsTitle": "Selecciones por continente",
-    "dashboard.chartContinentsSubtitle":
-      "por fase · {groupStage} grupos → {roundOf32} 16-avos → {roundOf16} octavos",
+    "dashboard.chartContinentsByStage": "por fase",
 
     // Chart: matches by status
     "dashboard.chartStatusTitle": "Partidos por situación",
@@ -347,18 +357,23 @@ export const dashboardCatalog: CatalogModule = {
     "dashboard.kpiLiveHint": "now",
     "dashboard.kpiUpcoming": "Scheduled",
     "dashboard.kpiUpcomingHint": "to be played",
-    "dashboard.kpiGroupGoals": "Goals (groups)",
-    "dashboard.kpiGroupGoalsHint": "{value} per match",
+    "dashboard.kpiGoals": "Goals",
+    "dashboard.kpiGoalsHint": "{value} per match",
 
     // Legend / phase labels
     "dashboard.phaseGroupStage": "Group Stage",
     "dashboard.phaseRoundOf32": "Round of 32",
     "dashboard.phaseRoundOf16": "Round of 16",
+    "dashboard.phaseRoundOf8": "Round of 8",
+    "dashboard.phaseRoundOf4": "Round of 4",
+    "dashboard.phaseFinal": "Final",
+    "dashboard.phaseChampion": "Champion",
+    "dashboard.phaseFilterAll": "All rounds",
+    "dashboard.phaseFilterLabel": "Filter by round",
 
     // Chart: continents
     "dashboard.chartContinentsTitle": "Teams by continent",
-    "dashboard.chartContinentsSubtitle":
-      "by stage · {groupStage} groups → {roundOf32} Round of 32 → {roundOf16} Round of 16",
+    "dashboard.chartContinentsByStage": "by stage",
 
     // Chart: matches by status
     "dashboard.chartStatusTitle": "Matches by status",

@@ -3,7 +3,7 @@ import { stadiums } from "./data/tournament";
 import { APP_MATCHES } from "./appMatches";
 import { KNOCKOUT_MATCHES } from "./data/knockoutBracket";
 import { KNOCKOUT_RESULTS } from "./data/knockoutResults";
-import { decisiveSlot } from "./utils/matchResult";
+import { knockoutWinnerSlot } from "./utils/matchResult";
 import teamsByContinent from "./data/teamsByContinent.json";
 import goalTimeline from "./data/goalTimeline.json";
 
@@ -35,6 +35,10 @@ export interface TournamentTotals {
   groupGoals: number;
   /** Goals per completed group-stage match (0 when none played yet). */
   groupGoalsPerMatch: number;
+  /** Goals across ALL finished matches — group stage + knockout open play. */
+  totalGoals: number;
+  /** Goals per finished match (0 when none finished). Penalty-shootout goals excluded. */
+  goalsPerMatch: number;
 }
 
 /** Headline KPI figures for the stat cards. `standings` is the reconciled group table. */
@@ -43,15 +47,25 @@ export function tournamentTotals(matches: Match[], standings: StandingsRow[]): T
   // Each finished group match increments `played` for both sides, so halve the sum.
   const groupMatchesPlayed = standings.reduce((sum, row) => sum + row.played, 0) / 2;
   const countBy = (predicate: (m: Match) => boolean) => matches.filter(predicate).length;
+  const matchesFinished = countBy((m) => m.status === "FINISHED");
+  // Every finished fixture's open-play goals (group + knockout). A knockout tie decided on
+  // penalties keeps its level `score` (e.g. 1-1) here — the shoot-out tally lives in
+  // `penaltyScore` and is deliberately NOT counted as goals.
+  const totalGoals = matches.reduce(
+    (sum, m) => (m.status === "FINISHED" && m.score ? sum + m.score.teamA + m.score.teamB : sum),
+    0,
+  );
   return {
     teams: TEAM_COUNT,
     stadiums: stadiums.length,
     matchesTotal: matches.length,
-    matchesFinished: countBy((m) => m.status === "FINISHED"),
+    matchesFinished,
     matchesLive: countBy((m) => m.status === "LIVE" || m.status === "SUSPENDED"),
     matchesUpcoming: countBy((m) => m.status === "PRE_GAME"),
     groupGoals,
     groupGoalsPerMatch: groupMatchesPlayed ? groupGoals / groupMatchesPlayed : 0,
+    totalGoals,
+    goalsPerMatch: matchesFinished ? totalGoals / matchesFinished : 0,
   };
 }
 
@@ -70,15 +84,29 @@ export function continentBreakdown(): ContinentDatum[] {
   }));
 }
 
+/**
+ * Ordered knockout phases after the group stage. Each phase's count is the teams that
+ * REACHED that round: `roundOf32` = the 32 participants of the 16-avos draw, then the winners
+ * of each preceding round (Round of 16 = R32 winners, … `champion` = the Final winner).
+ */
+export const KNOCKOUT_PHASE_KEYS = [
+  "roundOf32",
+  "roundOf16",
+  "roundOf8",
+  "roundOf4",
+  "final",
+  "champion",
+] as const;
+export type KnockoutPhaseKey = (typeof KNOCKOUT_PHASE_KEYS)[number];
+/** Every funnel phase, group stage first. */
+export type PhaseKey = "groupStage" | KnockoutPhaseKey;
+export const PHASE_KEYS: readonly PhaseKey[] = ["groupStage", ...KNOCKOUT_PHASE_KEYS];
+
 export interface ContinentPhaseDatum {
   continent: string;
   confederation: string;
-  /** Teams that reached the group stage (i.e. all qualified — the 48-team field). */
-  groupStage: number;
-  /** Teams that advanced to the Round of 32 (16-avos). */
-  roundOf32: number;
-  /** Teams that advanced to the Round of 16 (oitavas) — only the decided ties so far. */
-  roundOf16: number;
+  /** Teams from this continent that reached each phase (groupStage = all qualified). */
+  counts: Record<PhaseKey, number>;
 }
 
 /** Tally how many of `codes` belong to each continent, via the code→continent index. */
@@ -92,37 +120,53 @@ function countByContinent(codeToContinent: Map<string, string>, codes: string[])
 }
 
 /**
- * Teams per continent broken down by phase reached: group stage (all qualified), the Round
- * of 32, and the Round of 16. Pure over its inputs — `continents` is the seeded breakdown,
- * `roundOf32Codes` the 32 R32 participants, `roundOf16Codes` the confirmed R16 qualifiers —
+ * Teams per continent broken down by every phase reached: group stage (all qualified) and
+ * each knockout round (the teams that reached it). Pure over its inputs — `continents` is the
+ * seeded breakdown and `codesByPhase` maps each knockout phase to the codes that reached it —
  * so it's unit-tested; `continentByPhase` sources them from the JSON + bracket + results. A
  * code with no continent mapping is ignored (defensive; every real code resolves).
  */
 export function aggregateContinentByPhase(
   continents: ContinentJson[],
-  roundOf32Codes: string[],
-  roundOf16Codes: string[],
+  codesByPhase: Record<KnockoutPhaseKey, string[]>,
 ): ContinentPhaseDatum[] {
   const codeToContinent = new Map<string, string>();
   for (const c of continents) {
     for (const team of c.teams) codeToContinent.set(team.code, c.continent);
   }
-  const r32 = countByContinent(codeToContinent, roundOf32Codes);
-  const r16 = countByContinent(codeToContinent, roundOf16Codes);
-  return continents.map((c) => ({
-    continent: c.continent,
-    confederation: c.confederation,
-    groupStage: c.count,
-    roundOf32: r32.get(c.continent) ?? 0,
-    roundOf16: r16.get(c.continent) ?? 0,
-  }));
+  const perPhase = {} as Record<KnockoutPhaseKey, Map<string, number>>;
+  for (const key of KNOCKOUT_PHASE_KEYS) {
+    perPhase[key] = countByContinent(codeToContinent, codesByPhase[key]);
+  }
+  return continents.map((c) => {
+    const counts = { groupStage: c.count } as Record<PhaseKey, number>;
+    for (const key of KNOCKOUT_PHASE_KEYS) counts[key] = perPhase[key].get(c.continent) ?? 0;
+    return { continent: c.continent, confederation: c.confederation, counts };
+  });
+}
+
+/** Stage code (R32…F) of each knockout fixture, by FIFA match number. */
+const STAGE_BY_KO_NUMBER = new Map<number, KnockoutMatch["stage"]>(
+  KNOCKOUT_MATCHES.map((m) => [m.matchNumber, m.stage]),
+);
+
+/**
+ * The knockout stage of an assembled `APP_MATCHES` fixture (id `ko-<n>-2026`), or null for a
+ * group-stage match. Unlike the raw `KNOCKOUT_MATCHES` bracket — which names concrete teams
+ * only for the R32 group-draw slots and leaves every later round as feeder refs ("W74") — the
+ * assembled matches carry the RESOLVED teams once a tie's feeders are decided, so reading the
+ * winners/participants from them works for every round, not just the R32.
+ */
+function knockoutStageOf(match: Match): KnockoutMatch["stage"] | null {
+  const n = /^ko-(\d+)-/.exec(match.id);
+  return n ? STAGE_BY_KO_NUMBER.get(Number(n[1])) ?? null : null;
 }
 
 /** The 32 team codes contesting the Round of 32 (16-avos), from the resolved bracket draw. */
 export function roundOf32TeamCodes(): string[] {
   const codes: string[] = [];
-  for (const match of KNOCKOUT_MATCHES) {
-    if (match.stage !== "R32") continue;
+  for (const match of APP_MATCHES) {
+    if (knockoutStageOf(match) !== "R32") continue;
     if (match.teamA?.code) codes.push(match.teamA.code);
     if (match.teamB?.code) codes.push(match.teamB.code);
   }
@@ -130,32 +174,43 @@ export function roundOf32TeamCodes(): string[] {
 }
 
 /**
- * The confirmed Round-of-16 (oitavas) qualifiers: the winners of finished R32 ties, read from
- * the seeded `KNOCKOUT_RESULTS` (the same source the bracket resolves from). A tie level after
- * regular/extra time is decided by its real `penaltyScore` when seeded (mirrors
+ * Winners of the finished ties at a given knockout stage — i.e. the teams that advanced to the
+ * NEXT round. Read from the assembled `APP_MATCHES` (resolved feeders), so it works past the
+ * R32. A tie level after regular/extra time is decided by its real `penaltyScore` (via
  * `knockoutWinnerSlot`); a level tie with no penalty tally yields no winner — we never invent
  * who advanced.
  */
-export function roundOf16TeamCodes(): string[] {
+export function stageWinnerCodes(stage: KnockoutMatch["stage"]): string[] {
   const codes: string[] = [];
-  for (const match of KNOCKOUT_MATCHES) {
-    if (match.stage !== "R32" || !match.teamA || !match.teamB) continue;
-    const result = KNOCKOUT_RESULTS[match.matchNumber];
-    if (!result || result.status !== "FINISHED") continue;
-    const winningSlot = decisiveSlot(result.score, result.penaltyScore);
-    if (!winningSlot) continue; // level with no shootout tally — winner unknown to the app
-    codes.push(winningSlot === "A" ? match.teamA.code : match.teamB.code);
+  for (const match of APP_MATCHES) {
+    if (knockoutStageOf(match) !== stage) continue;
+    const winningSlot = knockoutWinnerSlot(match);
+    if (!winningSlot) continue; // unfinished, or level with no shootout tally
+    const code = winningSlot === "A" ? match.teamA?.code : match.teamB?.code;
+    if (code) codes.push(code);
   }
   return codes;
 }
 
-/** Continent × phase breakdown (group stage → 16-avos → oitavas) from the seeded data. */
+/** The confirmed Round-of-16 (oitavas) qualifiers: the winners of the finished R32 ties. */
+export function roundOf16TeamCodes(): string[] {
+  return stageWinnerCodes("R32");
+}
+
+/**
+ * Continent × phase funnel (group stage → 16-avos → oitavas → quartas → semifinais → final →
+ * campeão) from the seeded bracket + results. Later rounds read 0 until their ties finish, so
+ * the funnel deepens automatically as the tournament advances.
+ */
 export function continentByPhase(): ContinentPhaseDatum[] {
-  return aggregateContinentByPhase(
-    teamsByContinent.continents,
-    roundOf32TeamCodes(),
-    roundOf16TeamCodes(),
-  );
+  return aggregateContinentByPhase(teamsByContinent.continents, {
+    roundOf32: roundOf32TeamCodes(),
+    roundOf16: stageWinnerCodes("R32"),
+    roundOf8: stageWinnerCodes("R16"),
+    roundOf4: stageWinnerCodes("QF"),
+    final: stageWinnerCodes("SF"),
+    champion: stageWinnerCodes("F"),
+  });
 }
 
 export interface GroupGoalsDatum {

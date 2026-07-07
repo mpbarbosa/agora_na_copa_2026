@@ -49,7 +49,7 @@ function row(partial: Partial<StandingsRow> & { code: string; group: string }): 
   };
 }
 
-function match(status: Match["status"]): Match {
+function match(status: Match["status"], score?: { teamA: number; teamB: number }): Match {
   return {
     id: `m-${status}-${Math.round(Math.random() * 1e9)}`,
     teamA: { name: "A", code: "AAA", flagSvg: "", primaryColor: "#000", secondaryColor: "#fff", group: "", lineup: [] },
@@ -61,6 +61,7 @@ function match(status: Match["status"]): Match {
     kickoffDate: "",
     kickoffTimestamp: "2026-06-01T00:00:00-03:00",
     status,
+    ...(score ? { score } : {}),
     countdownTargetSeconds: 0,
     broadcasters: [],
   } as Match;
@@ -77,18 +78,28 @@ test("continentBreakdown sums to the 48-team field", () => {
   }
 });
 
-test("aggregateContinentByPhase counts group-stage, Round-of-32 and Round-of-16 per continent", () => {
+// No knockout progress beyond the given phases — the later rounds are all empty.
+const noLaterRounds = { roundOf8: [], roundOf4: [], final: [], champion: [] };
+
+test("aggregateContinentByPhase counts every phase reached per continent", () => {
   const continents = [
     { continent: "Europa", confederation: "UEFA", count: 3, teams: [{ code: "GER" }, { code: "ESP" }, { code: "POR" }] },
     { continent: "Ásia", confederation: "AFC", count: 2, teams: [{ code: "JPN" }, { code: "KOR" }] },
     { continent: "Oceania", confederation: "OFC", count: 1, teams: [{ code: "NZL" }] },
   ];
-  // R32: GER, ESP, JPN advanced. R16: only GER survived (subset of R32).
-  const out = aggregateContinentByPhase(continents as never, ["GER", "ESP", "JPN"], ["GER"]);
+  // R32: GER, ESP, JPN reached. R16: GER, ESP. R8 (quartas): only GER.
+  const out = aggregateContinentByPhase(continents as never, {
+    roundOf32: ["GER", "ESP", "JPN"],
+    roundOf16: ["GER", "ESP"],
+    roundOf8: ["GER"],
+    roundOf4: [],
+    final: [],
+    champion: [],
+  });
   assert.deepEqual(out, [
-    { continent: "Europa", confederation: "UEFA", groupStage: 3, roundOf32: 2, roundOf16: 1 },
-    { continent: "Ásia", confederation: "AFC", groupStage: 2, roundOf32: 1, roundOf16: 0 },
-    { continent: "Oceania", confederation: "OFC", groupStage: 1, roundOf32: 0, roundOf16: 0 },
+    { continent: "Europa", confederation: "UEFA", counts: { groupStage: 3, roundOf32: 2, roundOf16: 2, roundOf8: 1, roundOf4: 0, final: 0, champion: 0 } },
+    { continent: "Ásia", confederation: "AFC", counts: { groupStage: 2, roundOf32: 1, roundOf16: 0, roundOf8: 0, roundOf4: 0, final: 0, champion: 0 } },
+    { continent: "Oceania", confederation: "OFC", counts: { groupStage: 1, roundOf32: 0, roundOf16: 0, roundOf8: 0, roundOf4: 0, final: 0, champion: 0 } },
   ]);
 });
 
@@ -96,9 +107,13 @@ test("aggregateContinentByPhase ignores codes with no continent mapping", () => 
   const continents = [
     { continent: "Europa", confederation: "UEFA", count: 1, teams: [{ code: "GER" }] },
   ];
-  const out = aggregateContinentByPhase(continents as never, ["GER", "ZZZ"], ["ZZZ"]);
-  assert.equal(out[0].roundOf32, 1); // ZZZ dropped, not crashed
-  assert.equal(out[0].roundOf16, 0);
+  const out = aggregateContinentByPhase(continents as never, {
+    roundOf32: ["GER", "ZZZ"],
+    roundOf16: ["ZZZ"],
+    ...noLaterRounds,
+  });
+  assert.equal(out[0].counts.roundOf32, 1); // ZZZ dropped, not crashed
+  assert.equal(out[0].counts.roundOf16, 0);
 });
 
 test("roundOf16TeamCodes are a subset of R32 participants (winners only)", () => {
@@ -111,12 +126,16 @@ test("roundOf16TeamCodes are a subset of R32 participants (winners only)", () =>
 
 test("continentByPhase is a monotonic funnel covering the 48-team field", () => {
   const phased = continentByPhase();
-  assert.equal(phased.reduce((s, c) => s + c.groupStage, 0), 48);
-  assert.equal(phased.reduce((s, c) => s + c.roundOf32, 0), 32);
-  // Each phase is a subset of the previous: grupos ≥ 16-avos ≥ oitavas.
+  const total = (key: "groupStage" | "roundOf32" | "roundOf16") =>
+    phased.reduce((s, c) => s + c.counts[key], 0);
+  assert.equal(total("groupStage"), 48);
+  assert.equal(total("roundOf32"), 32);
+  // Each phase is a subset of the previous, all the way down the ladder.
+  const keys = ["groupStage", "roundOf32", "roundOf16", "roundOf8", "roundOf4", "final", "champion"] as const;
   for (const c of phased) {
-    assert.ok(c.roundOf32 <= c.groupStage, `${c.continent} R32 > grupos`);
-    assert.ok(c.roundOf16 <= c.roundOf32, `${c.continent} oitavas > 16-avos`);
+    for (let i = 1; i < keys.length; i++) {
+      assert.ok(c.counts[keys[i]] <= c.counts[keys[i - 1]], `${c.continent} ${keys[i]} > ${keys[i - 1]}`);
+    }
   }
 });
 
@@ -132,26 +151,36 @@ test("goalsByGroup strips the 'Grupo ' prefix, sums per group, and orders by let
   ]);
 });
 
-test("tournamentTotals counts statuses and derives group goals per match", () => {
-  const matches = [match("FINISHED"), match("FINISHED"), match("LIVE"), match("SUSPENDED"), match("PRE_GAME")];
-  // Two finished group matches → played increments both sides → sum(played) = 4 → 2 matches.
+test("tournamentTotals counts statuses and derives group + all-match goals", () => {
+  const matches = [
+    match("FINISHED", { teamA: 2, teamB: 1 }), // group tie, 3 goals
+    match("FINISHED", { teamA: 3, teamB: 0 }), // knockout blowout, 3 goals
+    match("FINISHED", { teamA: 1, teamB: 1 }), // knockout draw → 2 open-play goals (pens not counted)
+    match("LIVE", { teamA: 1, teamB: 0 }), // in progress → excluded from goals
+    match("SUSPENDED"),
+    match("PRE_GAME"),
+  ];
+  // Two finished GROUP matches → played increments both sides → sum(played) = 4 → 2 matches.
   const standings = [
     row({ code: "T1", group: "Grupo A", goalsFor: 3, played: 2 }),
     row({ code: "T2", group: "Grupo A", goalsFor: 1, played: 2 }),
   ];
   const totals = tournamentTotals(matches, standings);
   assert.equal(totals.teams, 48);
-  assert.equal(totals.matchesTotal, 5);
-  assert.equal(totals.matchesFinished, 2);
+  assert.equal(totals.matchesTotal, 6);
+  assert.equal(totals.matchesFinished, 3);
   assert.equal(totals.matchesLive, 2); // LIVE + SUSPENDED
   assert.equal(totals.matchesUpcoming, 1);
-  assert.equal(totals.groupGoals, 4);
-  assert.equal(totals.groupGoalsPerMatch, 2); // 4 goals / 2 matches
+  assert.equal(totals.groupGoals, 4); // from the reconciled standings
+  assert.equal(totals.groupGoalsPerMatch, 2); // 4 goals / 2 group matches
+  assert.equal(totals.totalGoals, 8); // 3 + 3 + 2 across the three finished fixtures
+  assert.equal(totals.goalsPerMatch, 8 / 3); // over all finished matches, not just group
 });
 
 test("tournamentTotals avoids dividing by zero before any match is played", () => {
   const totals = tournamentTotals([match("PRE_GAME")], [row({ code: "T1", group: "Grupo A" })]);
   assert.equal(totals.groupGoalsPerMatch, 0);
+  assert.equal(totals.goalsPerMatch, 0);
 });
 
 test("matchStatusBreakdown returns the three situations in order", () => {
