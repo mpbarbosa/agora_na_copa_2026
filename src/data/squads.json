@@ -4359,7 +4359,8 @@
     "socials": {
       "instagram": "remo_freuler",
       "wikipedia": "https://pt.wikipedia.org/wiki/Remo_Freuler"
-    }
+    },
+    "instagramPostUrl": "https://www.instagram.com/p/DaX_T1GgiwN/"
   },
   "402022": {
     "fifaId": "402022",
@@ -10494,7 +10495,10 @@
     "pictureUrl": "https://digitalhub.fifa.com/transform/73d7ea6f-ca50-4665-97cf-4c319351dce6/LUCUMI-Jhon_441622",
     "dateOfBirth": "1998-06-26",
     "height": 187,
-    "instagramPostUrl": "https://www.instagram.com/p/DaOBrUREYmX/"
+    "instagramPostUrls": [
+      "https://www.instagram.com/p/DaOBrUREYmX/",
+      "https://www.instagram.com/p/DaX_T1GgiwN/"
+    ]
   },
   "441623": {
     "fifaId": "441623",
