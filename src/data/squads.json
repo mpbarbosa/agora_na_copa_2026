@@ -110,7 +110,10 @@
     "club": "",
     "pictureUrl": "https://digitalhub.fifa.com/transform/bb1dfed7-fde5-4558-8bf0-fe299883d6fa/OSPINA-David_228686",
     "dateOfBirth": "1988-08-31",
-    "height": 183
+    "height": 183,
+    "socials": {
+      "instagram": "d_ospina1"
+    }
   },
   "228912": {
     "fifaId": "228912",
