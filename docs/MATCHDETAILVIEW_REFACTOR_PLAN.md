@@ -8,8 +8,10 @@ Instagram tab, pitch lineup, live chat, speech narration, clock-config drawer,
 simultaneous-live alert). This violates the single-responsibility and React gates
 in `docs/guides/CODE_QUALITY_CONTROL_GUIDE.md`.
 
-This document captures the two-option refactor. **Option 1 has been executed**
-(see status below); Option 2 remains staged for a later, phased pass.
+This document captures the two-option refactor. **Both options are complete.**
+Option 1 (helper extraction) and all five phases of Option 2 (component
+decomposition) have landed on `main`; `MatchDetailView.tsx` went from 2974 to
+~1116 lines. See the per-phase status below.
 
 ---
 
