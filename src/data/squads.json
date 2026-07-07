@@ -7632,7 +7632,10 @@
     },
     "dateOfBirth": "1997-03-24",
     "height": 177,
-    "instagramPostUrl": "https://www.instagram.com/p/DaQoHc7EV2K/"
+    "instagramPostUrls": [
+      "https://www.instagram.com/p/DaQoHc7EV2K/",
+      "https://www.instagram.com/p/Dac17_ajMgf/"
+    ]
   },
   "429392": {
     "fifaId": "429392",
