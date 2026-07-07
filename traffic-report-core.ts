@@ -94,6 +94,8 @@ export interface RawTrafficSnapshot {
   citiesByVolume: TrafficCountRow[];
   byHour: Record<string, number>;
   byDay: TrafficCountRow[];
+  /** Distinct visitor IPs per day ("count dd/Mon/yyyy"). Empty for pre-fix snapshots. */
+  uniqueIpsByDay: TrafficCountRow[];
   bots: number | null;
   suspect: number | null;
   /** App's own server-side client (agora-na-copa-2026/x.y) hits dropped before aggregation. */
@@ -169,6 +171,7 @@ export function parseSummary(text: string, file: string): RawTrafficSnapshot | n
     citiesByVolume: cities.byVolume,
     byHour,
     byDay: parseCountRows(s["Requests by day"] || []),
+    uniqueIpsByDay: parseCountRows(s["Unique IPs by day"] || []),
     bots: Number.isFinite(bots) ? bots : null,
     suspect: Number.isFinite(suspect) ? suspect : null,
     selfClientExcluded: selfClientExcluded != null && Number.isFinite(selfClientExcluded) ? selfClientExcluded : null,
@@ -206,6 +209,7 @@ function projectLatest(snap: RawTrafficSnapshot): TrafficSnapshotLatest {
     citiesByVolume: snap.citiesByVolume,
     byHour: snap.byHour,
     byDay: snap.byDay,
+    uniqueIpsByDay: snap.uniqueIpsByDay,
   };
 }
 

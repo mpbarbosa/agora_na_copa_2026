@@ -425,6 +425,26 @@ export function TrafficDashboardPanel({ theme }: TrafficDashboardPanelProps) {
         </div>
       )}
 
+      {/* Unique visitors per day — only present once the report emits the section
+          (older snapshots, or a server still serving a pre-fix cached payload during
+          a rolling deploy, omit the field, so default it rather than crash). */}
+      {(latest.uniqueIpsByDay ?? []).length > 0 && (
+        <div className="mt-4">
+          <ChartCard
+            theme={theme}
+            title={t("dashboard.trafficUniqueIpsByDayTitle")}
+            subtitle={t("dashboard.trafficUniqueIpsByDaySubtitle")}
+          >
+            <BarList
+              theme={theme}
+              rows={(latest.uniqueIpsByDay ?? []).slice().sort((a, b) => dayKey(a.label) - dayKey(b.label))}
+              max={20}
+              color={palette[2]}
+            />
+          </ChartCard>
+        </div>
+      )}
+
       {/* By day + referrers */}
       <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
         <ChartCard theme={theme} title={t("dashboard.trafficByDayTitle")} subtitle={t("dashboard.trafficByDaySubtitle")}>

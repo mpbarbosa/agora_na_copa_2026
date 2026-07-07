@@ -234,6 +234,15 @@ fi
   awk '{print $3}' "$TMP_LOG" | cut -d: -f1 | tr -d '[' | sort | uniq -c
   echo
 
+  # Distinct visitor IPs seen each day: reduce to unique (day, ip) pairs, then
+  # count per day. Parsed by traffic-report-core into `uniqueIpsByDay` for the
+  # "Visitantes únicos por dia" chart. Only per-day COUNTS are emitted — the raw
+  # IPs are dropped by `sort -u | cut`, so no visitor address leaves the host.
+  echo "== Unique IPs by day =="
+  awk '{ d=$3; sub(/^\[/, "", d); sub(/:.*/, "", d); print d"\t"$1 }' "$TMP_LOG" \
+    | sort -u | cut -f1 | sort | uniq -c
+  echo
+
   # Transparency line for the self-client filter applied above: how many machine
   # hits (the app's own agora-na-copa-2026/x.y poller) were dropped before any
   # tally ran. Parsed by traffic-report-core into `selfClientExcluded`.

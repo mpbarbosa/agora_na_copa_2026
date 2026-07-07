@@ -159,6 +159,8 @@ export const dashboardCatalog: CatalogModule = {
     "dashboard.trafficCitiesVolumeTitle": "Cidades (volume de requisições)",
     "dashboard.trafficByDayTitle": "Requisições por dia",
     "dashboard.trafficByDaySubtitle": "cada dia da janela do log",
+    "dashboard.trafficUniqueIpsByDayTitle": "Visitantes únicos por dia",
+    "dashboard.trafficUniqueIpsByDaySubtitle": "IPs distintos por dia na janela do log",
     "dashboard.trafficReferrersTitle": "Principais referenciadores",
     "dashboard.trafficReferrersSubtitle": "origem do tráfego",
 
@@ -321,6 +323,8 @@ export const dashboardCatalog: CatalogModule = {
     "dashboard.trafficCitiesVolumeTitle": "Ciudades (volumen de solicitudes)",
     "dashboard.trafficByDayTitle": "Solicitudes por día",
     "dashboard.trafficByDaySubtitle": "cada día de la ventana del log",
+    "dashboard.trafficUniqueIpsByDayTitle": "Visitantes únicos por día",
+    "dashboard.trafficUniqueIpsByDaySubtitle": "IPs distintas por día en la ventana del log",
     "dashboard.trafficReferrersTitle": "Principales referenciadores",
     "dashboard.trafficReferrersSubtitle": "origen del tráfico",
 
@@ -483,6 +487,8 @@ export const dashboardCatalog: CatalogModule = {
     "dashboard.trafficCitiesVolumeTitle": "Cities (request volume)",
     "dashboard.trafficByDayTitle": "Requests by day",
     "dashboard.trafficByDaySubtitle": "each day of the log window",
+    "dashboard.trafficUniqueIpsByDayTitle": "Unique visitors per day",
+    "dashboard.trafficUniqueIpsByDaySubtitle": "distinct IPs per day in the log window",
     "dashboard.trafficReferrersTitle": "Top referrers",
     "dashboard.trafficReferrersSubtitle": "traffic source",
 

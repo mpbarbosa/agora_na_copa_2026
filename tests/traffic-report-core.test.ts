@@ -46,6 +46,10 @@ Geo source: /var/lib/GeoIP/GeoLite2-Country.mmdb
   69136 01/Jul/2026
   21811 02/Jul/2026
 
+== Unique IPs by day ==
+    412 01/Jul/2026
+    377 02/Jul/2026
+
 == Self-client (excluded) ==
 Self-client hits (excluded): 455784
 
@@ -78,6 +82,25 @@ test("parseSummary extracts totals, geo, hour buckets and suspect sources", () =
   assert.deepEqual(snap!.countriesByVolume[0], { label: "Brazil", count: 340327 });
   // Per-source IPs ARE parsed at the raw layer (they are dropped only in the projection).
   assert.equal(snap!.suspectSources[0].ip, "177.60.79.191");
+});
+
+test("parseSummary reads the Unique IPs by day section (empty when absent)", () => {
+  const snap = parseSummary(SNAP_A, "a.txt");
+  assert.deepEqual(snap!.uniqueIpsByDay, [
+    { label: "01/Jul/2026", count: 412 },
+    { label: "02/Jul/2026", count: 377 },
+  ]);
+  // Pre-fix snapshots without the section yield an empty series, so the client hides the chart.
+  const noSection = SNAP_A.replace(/== Unique IPs by day ==\n[\s\S]*?\n\n/, "");
+  assert.deepEqual(parseSummary(noSection, "old.txt")!.uniqueIpsByDay, []);
+});
+
+test("buildTrafficDashboard carries unique-IPs-by-day into the public latest", () => {
+  const res = buildTrafficDashboard([{ file: "summary-a.txt", text: SNAP_A }], "2026-07-03T22:00:05Z");
+  assert.deepEqual(res.latest!.uniqueIpsByDay, [
+    { label: "01/Jul/2026", count: 412 },
+    { label: "02/Jul/2026", count: 377 },
+  ]);
 });
 
 test("parseSummary leaves selfClientExcluded null on older snapshots without the section", () => {

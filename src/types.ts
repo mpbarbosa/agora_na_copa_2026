@@ -744,6 +744,13 @@ export interface TrafficSnapshotLatest {
   byHour: Record<string, number>;
   /** Requests bucketed by calendar day (label "DD/Mon/YYYY"). */
   byDay: TrafficCountRow[];
+  /**
+   * Distinct visitor IPs per calendar day (label "DD/Mon/YYYY") over the log
+   * window — the "unique visitors per day" series. Empty for snapshots taken
+   * before the report emitted the "Unique IPs by day" section, so the client
+   * hides the chart rather than showing nothing.
+   */
+  uniqueIpsByDay: TrafficCountRow[];
 }
 
 /**
