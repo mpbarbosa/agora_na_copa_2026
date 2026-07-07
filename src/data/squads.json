@@ -11281,7 +11281,10 @@
       "instagramFollowers": 42000000,
       "wikipedia": "https://pt.wikipedia.org/wiki/Jude_Bellingham"
     },
-    "instagramPostUrl": "https://www.instagram.com/p/DacKaQHAnDq/"
+    "instagramPostUrls": [
+      "https://www.instagram.com/p/DacKaQHAnDq/",
+      "https://www.instagram.com/p/Dab4z1vjC9l/"
+    ]
   },
   "448203": {
     "fifaId": "448203",
