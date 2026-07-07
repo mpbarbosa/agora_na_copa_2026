@@ -12973,7 +12973,10 @@
     "pictureUrl": "https://digitalhub.fifa.com/transform/3beeef45-2af9-4641-aa23-24aabb1ff865/RIOS-Richard_473050",
     "dateOfBirth": "2000-06-02",
     "height": 185,
-    "instagramPostUrl": "https://www.instagram.com/p/DaYbvXvlvSm/"
+    "instagramPostUrls": [
+      "https://www.instagram.com/p/DaYbvXvlvSm/",
+      "https://www.instagram.com/p/DaI9E3EkYDt/"
+    ]
   },
   "473062": {
     "fifaId": "473062",
