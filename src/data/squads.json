@@ -4355,7 +4355,10 @@
       "instagram": "jamiromonteiro",
       "wikipedia": "https://pt.wikipedia.org/wiki/Jamiro_Monteiro"
     },
-    "instagramPostUrl": "https://www.instagram.com/p/DaLQu7nFY-h/"
+    "instagramPostUrls": [
+      "https://www.instagram.com/p/DaLQu7nFY-h/",
+      "https://www.instagram.com/p/DaYWiKGFXx5/"
+    ]
   },
   "401924": {
     "fifaId": "401924",
@@ -4765,7 +4768,10 @@
       "instagram": "diogomcosta99",
       "wikipedia": "https://pt.wikipedia.org/wiki/Diogo_Costa"
     },
-    "instagramPostUrl": "https://www.instagram.com/p/DZqYaexAIPb/"
+    "instagramPostUrls": [
+      "https://www.instagram.com/p/DZqYaexAIPb/",
+      "https://www.instagram.com/p/DagNcx9gMxk/"
+    ]
   },
   "403002": {
     "fifaId": "403002",
@@ -7495,7 +7501,8 @@
     "socials": {
       "instagram": "johan_pipe",
       "wikipedia": "https://pt.wikipedia.org/wiki/Johan_V%C3%A1squez"
-    }
+    },
+    "instagramPostUrl": "https://www.instagram.com/p/Dadrv74HDq1/"
   },
   "425804": {
     "fifaId": "425804",
@@ -9359,7 +9366,8 @@
     "socials": {
       "instagram": "soufiane_rahimi",
       "wikipedia": "https://pt.wikipedia.org/wiki/Soufiane_Rahimi"
-    }
+    },
+    "instagramPostUrl": "https://www.instagram.com/p/DaN9mDDkRuW/"
   },
   "433439": {
     "fifaId": "433439",
@@ -10279,7 +10287,8 @@
     },
     "instagramPostUrls": [
       "https://www.instagram.com/p/DZ0VvuHlEUn/",
-      "https://www.instagram.com/p/DZikPX_FHtf/"
+      "https://www.instagram.com/p/DZikPX_FHtf/",
+      "https://www.instagram.com/p/DaZVbRniMVB/"
     ]
   },
   "441236": {
@@ -11880,7 +11889,8 @@
     "height": 186,
     "socials": {
       "wikipedia": "https://en.wikipedia.org/wiki/Chadi_Riad"
-    }
+    },
+    "instagramPostUrl": "https://www.instagram.com/p/DaMyeGrgLo8/"
   },
   "448612": {
     "fifaId": "448612",
@@ -13046,7 +13056,8 @@
       "https://www.instagram.com/p/DaYbvXvlvSm/",
       "https://www.instagram.com/p/DaI9E3EkYDt/",
       "https://www.instagram.com/p/DaYs4dikXig/",
-      "https://www.instagram.com/p/DZ-umdhkWzS/"
+      "https://www.instagram.com/p/DZ-umdhkWzS/",
+      "https://www.instagram.com/p/Dad-GeJDpMQ/"
     ]
   },
   "473062": {
@@ -15203,7 +15214,8 @@
     "socials": {
       "instagram": "francisco.conceicao7",
       "wikipedia": "https://pt.wikipedia.org/wiki/Francisco_Concei%C3%A7%C3%A3o"
-    }
+    },
+    "instagramPostUrl": "https://www.instagram.com/p/DaVpkqEEYrQ/"
   },
   "485131": {
     "fifaId": "485131",
@@ -15731,7 +15743,8 @@
     "socials": {
       "instagram": "nestory._",
       "wikipedia": "https://pt.wikipedia.org/wiki/Nestory_Irankunda"
-    }
+    },
+    "instagramPostUrl": "https://www.instagram.com/p/DaY2WPQlFq_/"
   },
   "486317": {
     "fifaId": "486317",
@@ -17167,7 +17180,8 @@
     "socials": {
       "instagram": "mateo.chaveez",
       "wikipedia": "https://en.wikipedia.org/wiki/Mateo_Ch%C3%A1vez"
-    }
+    },
+    "instagramPostUrl": "https://www.instagram.com/p/DaBUeQNjw3b/"
   },
   "502245": {
     "fifaId": "502245",
