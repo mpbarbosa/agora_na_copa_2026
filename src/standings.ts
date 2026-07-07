@@ -151,6 +151,19 @@ export function computeStandings(matches: Match[] = APP_MATCHES): StandingsRow[]
 
 export type QualificationStatus = "qualified" | "eliminated" | "contention";
 
+// Non-FINISHED Group Stage matches each team in `codes` still has to play, keyed by code
+// (every code seeded to 0). One home for the "games left" count shared by the qualification
+// math and the qualified/contention/eliminated narratives.
+function remainingByTeam(codes: Set<string>, matches: Match[]): Map<string, number> {
+  const remaining = new Map<string, number>([...codes].map((code) => [code, 0]));
+  for (const m of matches) {
+    if (m.stageName !== "Group Stage" || m.status === "FINISHED") continue;
+    if (codes.has(m.teamA.code)) remaining.set(m.teamA.code, remaining.get(m.teamA.code)! + 1);
+    if (codes.has(m.teamB.code)) remaining.set(m.teamB.code, remaining.get(m.teamB.code)! + 1);
+  }
+  return remaining;
+}
+
 // Returns true when teamA and teamB have a remaining (non-FINISHED) Group Stage
 // match scheduled against each other.
 function haveMutualRemainingMatch(
@@ -259,12 +272,7 @@ function computeGroupQualification(
   const codes = new Set(sortedRows.map((r) => r.code));
 
   // Remaining = non-FINISHED Group Stage matches for each team in this group
-  const remaining = new Map<string, number>(sortedRows.map((r) => [r.code, 0]));
-  for (const m of allMatches) {
-    if (m.stageName !== "Group Stage" || m.status === "FINISHED") continue;
-    if (codes.has(m.teamA.code)) remaining.set(m.teamA.code, remaining.get(m.teamA.code)! + 1);
-    if (codes.has(m.teamB.code)) remaining.set(m.teamB.code, remaining.get(m.teamB.code)! + 1);
-  }
+  const remaining = remainingByTeam(codes, allMatches);
 
   // When the group is fully played, use final sorted positions directly
   const totalRemaining = [...remaining.values()].reduce((a, b) => a + b, 0);
@@ -458,16 +466,7 @@ export function computeContentionNote(
   sortedRows: StandingsRow[],
   allMatches: Match[],
 ): string {
-  const codes = new Set(sortedRows.map((r) => r.code));
-  const remaining = new Map<string, number>(sortedRows.map((r) => [r.code, 0]));
-
-  for (const m of allMatches) {
-    if (m.stageName !== "Group Stage" || m.status === "FINISHED") continue;
-    if (codes.has(m.teamA.code))
-      remaining.set(m.teamA.code, (remaining.get(m.teamA.code) ?? 0) + 1);
-    if (codes.has(m.teamB.code))
-      remaining.set(m.teamB.code, (remaining.get(m.teamB.code) ?? 0) + 1);
-  }
+  const remaining = remainingByTeam(new Set(sortedRows.map((r) => r.code)), allMatches);
 
   const team = sortedRows.find((r) => r.code === teamCode);
   if (!team) return "Classificação ainda não garantida.";
@@ -506,16 +505,7 @@ export function computeQualificationNote(
   sortedRows: StandingsRow[],
   allMatches: Match[],
 ): string {
-  const codes = new Set(sortedRows.map((r) => r.code));
-  const remaining = new Map<string, number>(sortedRows.map((r) => [r.code, 0]));
-
-  for (const m of allMatches) {
-    if (m.stageName !== "Group Stage" || m.status === "FINISHED") continue;
-    if (codes.has(m.teamA.code))
-      remaining.set(m.teamA.code, (remaining.get(m.teamA.code) ?? 0) + 1);
-    if (codes.has(m.teamB.code))
-      remaining.set(m.teamB.code, (remaining.get(m.teamB.code) ?? 0) + 1);
-  }
+  const remaining = remainingByTeam(new Set(sortedRows.map((r) => r.code)), allMatches);
 
   const team = sortedRows.find((r) => r.code === teamCode);
   if (!team) return "Classificado matematicamente para o mata-mata.";
@@ -588,15 +578,7 @@ export function computeEliminationNote(
   const team = sortedRows.find((r) => r.code === teamCode);
   if (!team) return "Eliminada matematicamente da fase mata-mata.";
 
-  const codes = new Set(sortedRows.map((r) => r.code));
-  const remaining = new Map<string, number>(sortedRows.map((r) => [r.code, 0]));
-  for (const m of allMatches) {
-    if (m.stageName !== "Group Stage" || m.status === "FINISHED") continue;
-    if (codes.has(m.teamA.code))
-      remaining.set(m.teamA.code, (remaining.get(m.teamA.code) ?? 0) + 1);
-    if (codes.has(m.teamB.code))
-      remaining.set(m.teamB.code, (remaining.get(m.teamB.code) ?? 0) + 1);
-  }
+  const remaining = remainingByTeam(new Set(sortedRows.map((r) => r.code)), allMatches);
 
   const myPts = team.points;
   const myRem = remaining.get(teamCode) ?? 0;
