@@ -36,6 +36,15 @@ export function buildPlayerSearchUrls(playerName: string, teamName: string) {
   return { google: base, news: `${base}&tbm=nws` };
 }
 
+// The player card always links Wikipedia to the English edition, regardless of which
+// language the curated URL points at, by swapping the language subdomain
+// (e.g. `pt.wikipedia.org/wiki/Jordan_Pickford` → `en.wikipedia.org/wiki/Jordan_Pickford`).
+// Player article titles match across editions in the common case; a rare mismatch resolves
+// via Wikipedia's search redirect. Non-`wikipedia.org` URLs are returned unchanged.
+export function toEnglishWikipediaUrl(url: string): string {
+  return url.replace(/^(https?:\/\/)[a-z0-9.-]+\.wikipedia\.org\b/i, "$1en.wikipedia.org");
+}
+
 // Keys of PlayerSocials that are NOT outbound links, so they must be skipped when building the
 // list of social buttons (e.g. `instagramFollowers` is metadata for the Instagram link, not a URL).
 const NON_LINK_SOCIAL_KEYS = new Set<keyof PlayerSocials>(["instagramFollowers"]);
@@ -71,4 +80,130 @@ export function formatFollowerCount(count: number, locale: Locale = "pt"): strin
     return `${Math.round(count / 1_000).toLocaleString(intlTag)}${sep}${thousandsSuffix}`;
   }
   return count.toLocaleString(intlTag);
+}
+
+// ─── Player-card display helpers ──────────────────────────────────────────────
+// Pure text/URL helpers backing the player card. They take an optional `t` and
+// fall back to Portuguese when it is absent, so callers that have not been
+// threaded through i18n still render (the `t`-aware callers localize fully).
+
+/** Translate function shape from `useT()`; threaded into helpers that build display text. */
+export type TFn = (key: string, params?: Record<string, string | number>) => string;
+
+/** Whole-years age from an ISO birth date. `now` is injectable for deterministic tests. */
+export function getPlayerAge(dateOfBirth: string, now: number = Date.now()): number {
+  return Math.floor((now - new Date(dateOfBirth).getTime()) / (365.25 * 24 * 3600 * 1000));
+}
+
+const PT_MONTHS_SHORT = ["jan.", "fev.", "mar.", "abr.", "mai.", "jun.", "jul.", "ago.", "set.", "out.", "nov.", "dez."];
+const MONTH_KEYS = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
+
+// Formats "1993-07-28" → "28 jul. 1993" without timezone shift risk. Pass `t`
+// to localize the month abbreviation; without it, pt is used.
+export function formatBirthDate(isoDate: string, t?: TFn): string {
+  const [yearStr, monthStr, dayStr] = isoDate.split("-");
+  const month = parseInt(monthStr, 10);
+  const day = parseInt(dayStr, 10);
+  const monthLabel = t ? t(`playerCard.month.${MONTH_KEYS[month - 1]}`) : PT_MONTHS_SHORT[month - 1];
+  return `${day} ${monthLabel} ${yearStr}`;
+}
+
+export interface TournamentStats {
+  goals: number;
+  yellowCards: number;
+  redCards: number;
+}
+
+interface StatCell {
+  label: string;
+  value: string | number;
+  accent?: string;
+}
+
+// Returns stat cells for goals/yellows/reds, only including rows with value > 0.
+export function buildTournamentStatCells(
+  stats: TournamentStats | null | undefined,
+  theme: "classic-light" | "stadium-dark",
+  t?: TFn,
+): StatCell[] {
+  if (!stats) return [];
+  const label = (key: string, pt: string) => (t ? t(key) : pt);
+  const cells: StatCell[] = [];
+  if (stats.goals > 0)
+    cells.push({
+      label: label("playerCard.stat.goals", "Gols"),
+      value: stats.goals,
+      accent: theme === "classic-light" ? "text-[#065f2c]" : "text-[#00e476]",
+    });
+  if (stats.yellowCards > 0)
+    cells.push({
+      label: label("playerCard.stat.yellows", "Amarelos"),
+      value: stats.yellowCards,
+      accent: theme === "classic-light" ? "text-[#9a6700]" : "text-[#ffd84d]",
+    });
+  if (stats.redCards > 0)
+    cells.push({
+      label: label("playerCard.stat.reds", "Vermelhos"),
+      value: stats.redCards,
+      accent: theme === "classic-light" ? "text-[#9f1239]" : "text-[#ff879d]",
+    });
+  return cells;
+}
+
+// Numeric stat tiles for the "full" player card: shirt number, age, height, then
+// the tournament cells (goals/cards). All values are short numbers or "NNN cm",
+// so they share one uniform tile size. Categorical fields (Posição, Seleção) are
+// intentionally NOT tiles — long text breaks the grid's alignment.
+export function buildPlayerStatCells(
+  player: { number?: number; dateOfBirth?: string; height?: number },
+  tournamentStats: TournamentStats | null | undefined,
+  theme: "classic-light" | "stadium-dark",
+  t?: TFn,
+): StatCell[] {
+  const label = (key: string, pt: string) => (t ? t(key) : pt);
+  return [
+    ...(player.number != null ? [{ label: label("playerCard.stat.shirt", "Camisa"), value: player.number }] : []),
+    ...(player.dateOfBirth ? [{ label: label("playerCard.stat.age", "Idade"), value: getPlayerAge(player.dateOfBirth) }] : []),
+    ...(player.height ? [{ label: label("playerCard.stat.height", "Altura"), value: `${player.height} cm` }] : []),
+    ...buildTournamentStatCells(tournamentStats, theme, t),
+  ];
+}
+
+// `instagramFollowers` is metadata for the Instagram chip, not a linkable platform, so it is
+// excluded here (and never surfaces from `getPlayerSocialEntries`).
+const SOCIAL_PLATFORM_LABELS: Record<Exclude<keyof PlayerSocials, "instagramFollowers">, string> = {
+  instagram: "Instagram",
+  x: "X",
+  tiktok: "TikTok",
+  youtube: "YouTube",
+  facebook: "Facebook",
+  site: "Site oficial",
+  wikipedia: "Wikipédia",
+};
+
+const SOCIAL_BASE_URLS: Partial<Record<keyof PlayerSocials, string>> = {
+  instagram: "https://www.instagram.com/",
+  x:         "https://x.com/",
+  tiktok:    "https://www.tiktok.com/@",
+  youtube:   "https://www.youtube.com/@",
+  facebook:  "https://www.facebook.com/",
+};
+
+// Resolves a stored social value (a handle or a full URL) to its outbound link.
+export function getSocialUrl(platform: keyof PlayerSocials, value: string): string {
+  // Wikipedia always opens the English edition, whichever language the curated URL stores.
+  if (platform === "wikipedia") return toEnglishWikipediaUrl(value);
+  const base = SOCIAL_BASE_URLS[platform];
+  if (!base) return value; // "site" already stores the full URL
+  if (value.startsWith("http")) return value;
+  return `${base}${value}`;
+}
+
+// Localizable labels for the non-brand platforms; brand names (Instagram, X, …)
+// stay verbatim. Pass `t` to translate; without it, pt is used.
+export function socialPlatformLabel(platform: keyof PlayerSocials, t?: TFn): string {
+  if (!t) return SOCIAL_PLATFORM_LABELS[platform];
+  if (platform === "site") return t("playerCard.social.site");
+  if (platform === "wikipedia") return t("playerCard.social.wikipedia");
+  return SOCIAL_PLATFORM_LABELS[platform];
 }

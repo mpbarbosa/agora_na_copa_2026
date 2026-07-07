@@ -183,6 +183,8 @@ async function mockTeamView(page: Page) {
               socials: {
                 instagram: "https://instagram.com/atacanteteste",
                 x: "https://x.com/atacanteteste",
+                // Curated as a Portuguese Wikipedia URL — the card must rewrite it to en.
+                wikipedia: "https://pt.wikipedia.org/wiki/Atacante_Teste",
               },
               instagramPostUrl: "https://www.instagram.com/p/test-fw-post/",
               worldCupNote: "## Desempenho\nGrande atuação no jogo de teste.\n## Leitura\nPeça-chave da seleção no Mundial.",
@@ -790,6 +792,12 @@ test.describe("Team view", () => {
     await expect(page.locator("#player-feature-overlay-social-link-instagram")).toHaveAttribute(
       "href",
       "https://instagram.com/atacanteteste",
+    );
+    // The Wikipedia button always opens the English edition, even though the curated
+    // URL is pt.wikipedia.org (the language subdomain is rewritten to en at render).
+    await expect(page.locator("#player-feature-overlay-social-link-wikipedia")).toHaveAttribute(
+      "href",
+      "https://en.wikipedia.org/wiki/Atacante_Teste",
     );
     // Editorial note renders its labeled sections when the player has a worldCupNote.
     await expect(page.locator("#player-feature-overlay-leitura")).toBeVisible();

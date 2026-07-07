@@ -3,7 +3,7 @@ import { Position, type Player, type PlayerSocials } from "../types";
 import { InstagramBrandIcon } from "./InstagramBrandIcon";
 import { FlagIcon } from "./FlagIcon";
 import { useEscapeKey } from "../hooks/useEscapeKey";
-import { getPlayerSocialEntries, buildPlayerSearchUrls, formatFollowerCount } from "../utils/playerDisplay";
+import { getPlayerSocialEntries, buildPlayerSearchUrls, formatFollowerCount, getSocialUrl, socialPlatformLabel, type TFn } from "../utils/playerDisplay";
 import { WorldCupNoteCarousel } from "./WorldCupNoteCarousel";
 import { localizeWorldCupNote } from "../data/starNotesLocale";
 import { PlayerVideoRail } from "./PlayerVideoRail";
@@ -12,9 +12,6 @@ import { InstagramPostFrame } from "./InstagramPostFrame";
 import { resolveInstagramPostUrls } from "../utils/instagram";
 import { useT, useLocale, type Locale } from "../i18n";
 import PLAYER_SIGNATURES from "../data/playerSignatures.json";
-
-/** Translate function shape from `useT()`; threaded into helpers that build display text. */
-type TFn = (key: string, params?: Record<string, string | number>) => string;
 
 // Commons signature permalink (Special:FilePath → upload.wikimedia.org CDN),
 // the same hotlink pattern FlagIcon and the federation crests use. Keyed by
@@ -27,115 +24,6 @@ const signatureUrlFor = (fifaId: string | undefined): string | undefined => {
     ? `https://commons.wikimedia.org/wiki/Special:FilePath/${encodeURIComponent(file)}`
     : undefined;
 };
-
-export const getPlayerAge = (dateOfBirth: string): number =>
-  Math.floor((Date.now() - new Date(dateOfBirth).getTime()) / (365.25 * 24 * 3600 * 1000));
-
-const PT_MONTHS_SHORT = ["jan.", "fev.", "mar.", "abr.", "mai.", "jun.", "jul.", "ago.", "set.", "out.", "nov.", "dez."];
-const MONTH_KEYS = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
-
-// Formats "1993-07-28" → "28 jul. 1993" without timezone shift risk. Pass `t`
-// to localize the month abbreviation; without it, pt is used (callers that
-// haven't been threaded still render Portuguese).
-export function formatBirthDate(isoDate: string, t?: TFn): string {
-  const [yearStr, monthStr, dayStr] = isoDate.split("-");
-  const month = parseInt(monthStr, 10);
-  const day = parseInt(dayStr, 10);
-  const monthLabel = t ? t(`playerCard.month.${MONTH_KEYS[month - 1]}`) : PT_MONTHS_SHORT[month - 1];
-  return `${day} ${monthLabel} ${yearStr}`;
-}
-
-interface TournamentStats {
-  goals: number;
-  yellowCards: number;
-  redCards: number;
-}
-
-// Returns stat cells for goals/yellows/reds, only including rows with value > 0.
-export function buildTournamentStatCells(
-  stats: TournamentStats | null | undefined,
-  theme: "classic-light" | "stadium-dark",
-  t?: TFn,
-) {
-  if (!stats) return [];
-  const label = (key: string, pt: string) => (t ? t(key) : pt);
-  const cells = [];
-  if (stats.goals > 0)
-    cells.push({
-      label: label("playerCard.stat.goals", "Gols"),
-      value: stats.goals,
-      accent: theme === "classic-light" ? "text-[#065f2c]" : "text-[#00e476]",
-    });
-  if (stats.yellowCards > 0)
-    cells.push({
-      label: label("playerCard.stat.yellows", "Amarelos"),
-      value: stats.yellowCards,
-      accent: theme === "classic-light" ? "text-[#9a6700]" : "text-[#ffd84d]",
-    });
-  if (stats.redCards > 0)
-    cells.push({
-      label: label("playerCard.stat.reds", "Vermelhos"),
-      value: stats.redCards,
-      accent: theme === "classic-light" ? "text-[#9f1239]" : "text-[#ff879d]",
-    });
-  return cells;
-}
-
-// Numeric stat tiles for the "full" player card: shirt number, age, height, then
-// the tournament cells (goals/cards). All values are short numbers or "NNN cm",
-// so they share one uniform tile size. Categorical fields (Posição, Seleção) are
-// intentionally NOT tiles — long text breaks the grid's alignment, so callers put
-// Posição in the key/value details and Seleção lives in the header (teamName).
-export function buildPlayerStatCells(
-  player: { number?: number; dateOfBirth?: string; height?: number },
-  tournamentStats: TournamentStats | null | undefined,
-  theme: "classic-light" | "stadium-dark",
-  t?: TFn,
-) {
-  const label = (key: string, pt: string) => (t ? t(key) : pt);
-  return [
-    ...(player.number != null ? [{ label: label("playerCard.stat.shirt", "Camisa"), value: player.number }] : []),
-    ...(player.dateOfBirth ? [{ label: label("playerCard.stat.age", "Idade"), value: getPlayerAge(player.dateOfBirth) }] : []),
-    ...(player.height ? [{ label: label("playerCard.stat.height", "Altura"), value: `${player.height} cm` }] : []),
-    ...buildTournamentStatCells(tournamentStats, theme, t),
-  ];
-}
-
-// `instagramFollowers` is metadata for the Instagram chip, not a linkable platform, so it is
-// excluded here (and never surfaces from `getPlayerSocialEntries`).
-const SOCIAL_PLATFORM_LABELS: Record<Exclude<keyof PlayerSocials, "instagramFollowers">, string> = {
-  instagram: "Instagram",
-  x: "X",
-  tiktok: "TikTok",
-  youtube: "YouTube",
-  facebook: "Facebook",
-  site: "Site oficial",
-  wikipedia: "Wikipédia",
-};
-
-const SOCIAL_BASE_URLS: Partial<Record<keyof PlayerSocials, string>> = {
-  instagram: "https://www.instagram.com/",
-  x:         "https://x.com/",
-  tiktok:    "https://www.tiktok.com/@",
-  youtube:   "https://www.youtube.com/@",
-  facebook:  "https://www.facebook.com/",
-};
-
-function getSocialUrl(platform: keyof PlayerSocials, value: string): string {
-  const base = SOCIAL_BASE_URLS[platform];
-  if (!base) return value; // "site" already stores the full URL
-  if (value.startsWith("http")) return value;
-  return `${base}${value}`;
-}
-
-// Localizable labels for the non-brand platforms; brand names (Instagram, X, …)
-// stay verbatim. Pass `t` to translate; without it, pt is used.
-function socialPlatformLabel(platform: keyof PlayerSocials, t?: TFn): string {
-  if (!t) return SOCIAL_PLATFORM_LABELS[platform];
-  if (platform === "site") return t("playerCard.social.site");
-  if (platform === "wikipedia") return t("playerCard.social.wikipedia");
-  return SOCIAL_PLATFORM_LABELS[platform];
-}
 
 export function renderSocialPlatformLabel(
   platform: keyof PlayerSocials,

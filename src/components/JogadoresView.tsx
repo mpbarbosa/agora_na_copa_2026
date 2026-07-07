@@ -3,9 +3,9 @@ import { APP_MATCHES } from "../appMatches";
 import { getTeamSquad } from "../data/playerRegistry";
 import type { Player, TeamRef } from "../types";
 import { FlagIcon } from "./FlagIcon";
-import { PlayerPortrait, PlayerOverlayCard, PlayerPictureOverlay, buildPlayerStatCells, formatBirthDate } from "./PlayerOverlayCard";
+import { PlayerPortrait, PlayerOverlayCard, PlayerPictureOverlay } from "./PlayerOverlayCard";
 import { InstagramBrandIcon } from "./InstagramBrandIcon";
-import { getPositionLabel } from "../utils/playerDisplay";
+import { getPositionLabel, buildPlayerStatCells, formatBirthDate } from "../utils/playerDisplay";
 import { usePlayerStats } from "../hooks/usePlayerStats";
 import { useT } from "../i18n";
 

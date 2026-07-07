@@ -4,11 +4,9 @@ import {
   PlayerOverlayCard,
   PlayerPictureOverlay,
   PlayerPortrait,
-  buildPlayerStatCells,
-  formatBirthDate,
   renderSocialPlatformLabel,
 } from "./PlayerOverlayCard";
-import { getPlayerSocialEntries, getPositionLabel, toTitleCasePtBr, buildPlayerSearchUrls } from "../utils/playerDisplay";
+import { getPlayerSocialEntries, getPositionLabel, toTitleCasePtBr, buildPlayerSearchUrls, buildPlayerStatCells, formatBirthDate } from "../utils/playerDisplay";
 import { usePlayerStats } from "../hooks/usePlayerStats";
 import { useT } from "../i18n";
 
