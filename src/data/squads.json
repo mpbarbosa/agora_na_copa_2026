@@ -7357,7 +7357,10 @@
       "instagram": "asedi_",
       "wikipedia": "https://en.wikipedia.org/wiki/Anass_Salah-Eddine"
     },
-    "instagramPostUrl": "https://www.instagram.com/p/DZ0AnOMiCAy/"
+    "instagramPostUrls": [
+      "https://www.instagram.com/p/DZ0AnOMiCAy/",
+      "https://www.instagram.com/p/DadflBEmwyP/"
+    ]
   },
   "424081": {
     "fifaId": "424081",
