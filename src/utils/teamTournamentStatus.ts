@@ -1,4 +1,4 @@
-import type { TeamViewMatchSummary } from "../types";
+import type { Match, MatchStatus } from "../types";
 import { KNOCKOUT_STAGE_NAMES, localizedStageName } from "./knockoutSlots";
 import { translate, getActiveLocale } from "../i18n";
 
@@ -10,6 +10,20 @@ export type TeamStatusTone = "champion" | "advanced" | "eliminated";
 export interface TeamTournamentStatus {
   label: string;
   tone: TeamStatusTone;
+}
+
+/**
+ * The minimal per-team result shape getTeamTournamentStatus reads: a match's
+ * status, its stage, and the team/opponent-oriented score (+ penalty tally). A
+ * structural subset of the server's `TeamViewMatchSummary`, so a `/api/team-view`
+ * matchHistory passes straight through, while `buildTeamResultHistory` produces
+ * the same shape from the client-side APP_MATCHES for the Seleções grid.
+ */
+export interface TeamResultSummary {
+  status: MatchStatus;
+  stageName: string;
+  score?: { team: number; opponent: number };
+  penaltyScore?: { team: number; opponent: number };
 }
 
 // The round each winners'-bracket stage feeds into, by pt-BR stage name, used to
@@ -41,7 +55,7 @@ const NEXT_KNOCKOUT_STAGE: Record<string, string> = {
 // ends the eight best thirds aren't fixed, so a future qualifier and an
 // eliminated team are indistinguishable from one team's history alone.
 export function getTeamTournamentStatus(
-  matchHistory: TeamViewMatchSummary[] | undefined | null,
+  matchHistory: TeamResultSummary[] | undefined | null,
   groupStageComplete = false,
 ): TeamTournamentStatus | null {
   if (!Array.isArray(matchHistory)) return null; // payload may omit the history (fallback/stub)
@@ -111,4 +125,37 @@ export function getTeamTournamentStatus(
   }
 
   return null; // still in the group phase, or not placed in the bracket
+}
+
+/**
+ * Orient every match a team played into the team/opponent summaries
+ * getTeamTournamentStatus consumes, chronologically (so the deepest finished
+ * knockout tie is last). Lets the client-side Seleções grid derive a team's
+ * round from the shared APP_MATCHES without the `/api/team-view` payload. A
+ * knockout fixture the bracket hasn't resolved to this team is simply absent
+ * (its slots carry no matching code), so only ties the team actually reached
+ * appear.
+ */
+export function buildTeamResultHistory(
+  teamCode: string,
+  matches: readonly Match[],
+): TeamResultSummary[] {
+  return matches
+    .filter((m) => m.teamA.code === teamCode || m.teamB.code === teamCode)
+    .sort((a, b) => a.kickoffTimestamp.localeCompare(b.kickoffTimestamp))
+    .map((m) => {
+      const isHome = m.teamA.code === teamCode;
+      const summary: TeamResultSummary = { status: m.status, stageName: m.stageName };
+      if (m.score) {
+        summary.score = isHome
+          ? { team: m.score.teamA, opponent: m.score.teamB }
+          : { team: m.score.teamB, opponent: m.score.teamA };
+      }
+      if (m.penaltyScore) {
+        summary.penaltyScore = isHome
+          ? { team: m.penaltyScore.teamA, opponent: m.penaltyScore.teamB }
+          : { team: m.penaltyScore.teamB, opponent: m.penaltyScore.teamA };
+      }
+      return summary;
+    });
 }

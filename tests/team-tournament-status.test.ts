@@ -1,7 +1,10 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import type { TeamViewMatchSummary } from "../src/types";
-import { getTeamTournamentStatus } from "../src/utils/teamTournamentStatus";
+import type { Match, TeamViewMatchSummary } from "../src/types";
+import {
+  buildTeamResultHistory,
+  getTeamTournamentStatus,
+} from "../src/utils/teamTournamentStatus";
 import { KNOCKOUT_STAGE_NAMES } from "../src/utils/knockoutSlots";
 
 // getTeamTournamentStatus only reads status/stageName/score/penaltyScore.
@@ -122,4 +125,55 @@ test("once the group stage is over, a team with no knockout tie is eliminated in
 test("a missing/non-array history is tolerated (fallback or stubbed payload)", () => {
   assert.equal(getTeamTournamentStatus(undefined), null);
   assert.equal(getTeamTournamentStatus(null), null);
+});
+
+// buildTeamResultHistory — orient APP_MATCHES into team/opponent summaries.
+const m = (
+  ts: string,
+  stageName: string,
+  homeCode: string,
+  awayCode: string,
+  score?: [number, number],
+  pen?: [number, number],
+): Match =>
+  ({
+    teamA: { code: homeCode },
+    teamB: { code: awayCode },
+    stageName,
+    status: score ? "FINISHED" : "PRE_GAME",
+    kickoffTimestamp: ts,
+    ...(score ? { score: { teamA: score[0], teamB: score[1] } } : {}),
+    ...(pen ? { penaltyScore: { teamA: pen[0], teamB: pen[1] } } : {}),
+  }) as unknown as Match;
+
+test("buildTeamResultHistory orients score by side and sorts chronologically", () => {
+  const matches = [
+    m("2026-06-29T16:00:00-03:00", KNOCKOUT_STAGE_NAMES.R32, "BEL", "SEN", [3, 2]), // SEN away, lost
+    m("2026-06-15T16:00:00-03:00", "Group Stage", "SEN", "NED", [1, 1]), // SEN home
+    m("2026-06-20T16:00:00-03:00", "Group Stage", "QAT", "USA", [0, 2]), // not SEN — excluded
+  ];
+  const history = buildTeamResultHistory("SEN", matches);
+  assert.deepEqual(
+    history.map((h) => ({ stage: h.stageName, score: h.score })),
+    [
+      { stage: "Group Stage", score: { team: 1, opponent: 1 } }, // earlier kickoff first
+      { stage: KNOCKOUT_STAGE_NAMES.R32, score: { team: 2, opponent: 3 } }, // away side flipped
+    ],
+  );
+  // Feeds straight into the status derivation → eliminated in the 16-avos.
+  assert.deepEqual(getTeamTournamentStatus(history), {
+    label: "Eliminado em 16 avos de final",
+    tone: "eliminated",
+  });
+});
+
+test("buildTeamResultHistory flips the penalty tally for the away side", () => {
+  // Germany lost the R32 shoot-out 3-4 as the home side; from the away team's
+  // orientation the same tie is a 4-3 win.
+  const tie = m("2026-06-28T16:00:00-03:00", KNOCKOUT_STAGE_NAMES.R32, "GER", "PAR", [1, 1], [3, 4]);
+  assert.deepEqual(buildTeamResultHistory("PAR", [tie])[0].penaltyScore, { team: 4, opponent: 3 });
+  assert.deepEqual(getTeamTournamentStatus(buildTeamResultHistory("PAR", [tie])), {
+    label: "Classificado para oitavas de final",
+    tone: "advanced",
+  });
 });

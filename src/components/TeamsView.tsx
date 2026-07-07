@@ -2,6 +2,8 @@ import { useEffect, useMemo, useState } from "react";
 import type { Match, TeamRef } from "../types";
 import { apiUrl, useT } from "../i18n";
 import { computeStandings, groupStandings, rankBestThirds } from "../standings";
+import { buildTeamResultHistory, getTeamTournamentStatus } from "../utils/teamTournamentStatus";
+import type { TeamStatusTone } from "../utils/teamTournamentStatus";
 import { FlagIcon } from "./FlagIcon";
 
 interface TeamsViewProps {
@@ -93,6 +95,22 @@ export function TeamsView({ matches, theme, onSelectTeamLineup }: TeamsViewProps
   const headingClasses = theme === "classic-light" ? "text-slate-900" : "text-white";
   const mutedClasses = theme === "classic-light" ? "text-slate-600" : "text-slate-300";
 
+  // Badge palette, mirroring the team-page tournament-status pill: rose = out,
+  // amber = champion, green = still alive / advanced.
+  const toneClasses = (tone: TeamStatusTone) => {
+    if (tone === "eliminated")
+      return theme === "classic-light"
+        ? "border-rose-300 bg-rose-50 text-rose-700"
+        : "border-rose-400/30 bg-rose-500/10 text-rose-300";
+    if (tone === "champion")
+      return theme === "classic-light"
+        ? "border-amber-300 bg-amber-50 text-amber-700"
+        : "border-amber-400/30 bg-amber-400/10 text-amber-300";
+    return theme === "classic-light"
+      ? "border-[#009c3b]/30 bg-[#009c3b]/10 text-[#065f2c]"
+      : "border-[#00e476]/25 bg-[#00e476]/10 text-[#00e476]";
+  };
+
   return (
     <div className="mx-auto mt-8 max-w-7xl px-4 2xl:max-w-[1600px]" id="teams-view">
       <h2
@@ -137,8 +155,24 @@ export function TeamsView({ matches, theme, onSelectTeamLineup }: TeamsViewProps
                     ? "qualified"
                     : "eliminated"
                   : qualification.get(team.code);
-                const isQualified = status === "qualified";
-                const isEliminated = status === "eliminated";
+
+                // Show the CURRENT stage the team reached — the round it advanced
+                // to or was knocked out in, from its real knockout results —
+                // instead of the group-only qualified/eliminated verdict the
+                // Grupos view already carries. getTeamTournamentStatus reads only
+                // the knockout ties (it's given no groupStageComplete flag, so it
+                // never declares group elimination itself — that needs the
+                // cross-group best-thirds cut, resolved above as `status`). When
+                // the team has no knockout tie yet, fall back to that group
+                // verdict: eliminated → "na fase de grupos", clinched → generic.
+                const koStatus = getTeamTournamentStatus(buildTeamResultHistory(team.code, liveMatches));
+                const progress =
+                  koStatus ??
+                  (status === "eliminated"
+                    ? { label: t("utils.eliminatedGroupStage"), tone: "eliminated" as const }
+                    : status === "qualified"
+                      ? { label: t("teams.qualifiedBadge"), tone: "advanced" as const }
+                      : null);
 
                 return (
                   <button
@@ -168,35 +202,19 @@ export function TeamsView({ matches, theme, onSelectTeamLineup }: TeamsViewProps
                           jogos: t(team.played === 1 ? "teams.gameSingular" : "teams.gamePlural"),
                         })}
                       </p>
+
+                      {progress && (
+                        <span
+                          data-testid={`team-${progress.tone === "eliminated" ? "eliminated" : "qualified"}-${team.code.toLowerCase()}`}
+                          data-status-tone={progress.tone}
+                          title={progress.label}
+                          className={`mt-2 inline-flex max-w-full items-start gap-1 rounded-full border px-2.5 py-0.5 font-mono text-[10px] font-bold uppercase leading-tight tracking-wider ${toneClasses(progress.tone)}`}
+                        >
+                          <span aria-hidden="true">{progress.tone === "eliminated" ? "✕" : "✓"}</span>
+                          <span className="whitespace-normal">{progress.label}</span>
+                        </span>
+                      )}
                     </div>
-
-                    {isQualified && (
-                      <span
-                        data-testid={`team-qualified-${team.code.toLowerCase()}`}
-                        title={t("teams.qualifiedTitle")}
-                        className={`inline-flex shrink-0 items-center gap-1 rounded-full border px-2.5 py-1 font-mono text-[10px] font-bold uppercase tracking-wider ${
-                          theme === "classic-light"
-                            ? "border-[#009c3b]/30 bg-[#009c3b]/10 text-[#065f2c]"
-                            : "border-[#00e476]/25 bg-[#00e476]/10 text-[#00e476]"
-                        }`}
-                      >
-                        <span aria-hidden="true">✓</span> {t("teams.qualifiedBadge")}
-                      </span>
-                    )}
-
-                    {isEliminated && (
-                      <span
-                        data-testid={`team-eliminated-${team.code.toLowerCase()}`}
-                        title={t("teams.eliminatedTitle")}
-                        className={`inline-flex shrink-0 items-center gap-1 rounded-full border px-2.5 py-1 font-mono text-[10px] font-bold uppercase tracking-wider ${
-                          theme === "classic-light"
-                            ? "border-rose-300 bg-rose-50 text-rose-700"
-                            : "border-rose-400/30 bg-rose-500/10 text-rose-300"
-                        }`}
-                      >
-                        <span aria-hidden="true">✕</span> {t("teams.eliminatedBadge")}
-                      </span>
-                    )}
                   </button>
                 );
               })}

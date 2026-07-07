@@ -83,46 +83,50 @@ test.describe("Teams view (Seleções)", () => {
     await expect(page.locator("#team-lineup-title")).toContainText("BRASIL");
   });
 
-  test("marks teams that have qualified for the knockout phase", async ({ page }) => {
+  test("names the round a team advanced to", async ({ page }) => {
     await page.goto("/");
     await page.click("#btn-nav-selecoes");
     await expect(page.locator("#teams-view")).toBeVisible();
 
-    // México has mathematically secured a top-2 spot, so its card carries the
-    // qualified badge; a team still in contention does not.
-    await expect(page.getByTestId("team-qualified-mex")).toBeVisible();
-    await expect(page.getByTestId("team-qualified-mex")).toContainText("Classificada");
-    await expect(page.locator("#btn-team-card-mex")).toContainText("✓");
+    // França won its 16-avos and Oitavas ties, so its badge names the round it
+    // reached next — the Quartas — with the still-in-it ✓, not a group verdict.
+    await expect(page.getByTestId("team-qualified-fra")).toBeVisible();
+    await expect(page.getByTestId("team-qualified-fra")).toContainText("quartas");
+    await expect(page.locator("#btn-team-card-fra")).toContainText("✓");
+    await expect(page.getByTestId("team-eliminated-fra")).toHaveCount(0);
   });
 
-  test("marks teams that can no longer qualify for the knockout phase", async ({ page }) => {
+  test("names the round a team was knocked out in", async ({ page }) => {
     await page.goto("/");
     await page.click("#btn-nav-selecoes");
     await expect(page.locator("#teams-view")).toBeVisible();
 
-    // Haiti is mathematically out of a top-2 finish, so its card carries the
-    // eliminated badge. A qualified team must not also show it.
+    // Brasil qualified from its group but lost in the Oitavas, so its current
+    // status is the round it exited — not the (now redundant) group verdict.
+    await expect(page.getByTestId("team-eliminated-bra")).toBeVisible();
+    await expect(page.getByTestId("team-eliminated-bra")).toContainText("oitavas");
+    await expect(page.locator("#btn-team-card-bra")).toContainText("✕");
+    await expect(page.getByTestId("team-qualified-bra")).toHaveCount(0);
+
+    // Haiti never left the group stage — its exit round is the group phase.
     await expect(page.getByTestId("team-eliminated-hai")).toBeVisible();
-    await expect(page.getByTestId("team-eliminated-hai")).toContainText("Eliminada");
-    await expect(page.locator("#btn-team-card-hai")).toContainText("✕");
-    await expect(page.getByTestId("team-eliminated-mex")).toHaveCount(0);
+    await expect(page.getByTestId("team-eliminated-hai")).toContainText("fase de grupos");
   });
 
-  test("resolves a 3rd-placed team's fate by the best-thirds ranking", async ({ page }) => {
+  test("a 3rd-placed team's exit round shows whether it reached the bracket", async ({ page }) => {
     await page.goto("/");
     await page.click("#btn-nav-selecoes");
     await expect(page.locator("#teams-view")).toBeVisible();
 
-    // With every group finished, a 3rd-placed team is decided by the cross-group
-    // best-thirds cut (Art. 12.5) — the same resolution the Grupos view applies.
-    // KOR finished 3rd in Grupo A and falls outside the 8 best thirds, so it is
-    // eliminated (not left badge-less in "contention").
+    // KOR finished 3rd in Grupo A, outside the 8 best thirds — it never reached
+    // the knockout bracket, so it exited in the group phase.
     await expect(page.getByTestId("team-eliminated-kor")).toBeVisible();
-    await expect(page.getByTestId("team-eliminated-kor")).toContainText("Eliminada");
+    await expect(page.getByTestId("team-eliminated-kor")).toContainText("fase de grupos");
 
-    // SEN finished 3rd in Grupo I but ranks inside the 8 best thirds, so it
-    // carries the qualified badge.
-    await expect(page.getByTestId("team-qualified-sen")).toBeVisible();
-    await expect(page.getByTestId("team-qualified-sen")).toContainText("Classificada");
+    // SEN finished 3rd but ranked inside the 8 best thirds, so it reached the
+    // 16-avos before losing there — a deeper exit round than a group-phase exit,
+    // proving the best-thirds cut (Art. 12.5) placed it in the bracket.
+    await expect(page.getByTestId("team-eliminated-sen")).toBeVisible();
+    await expect(page.getByTestId("team-eliminated-sen")).toContainText("16 avos");
   });
 });
