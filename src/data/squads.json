@@ -1906,7 +1906,10 @@
     "pictureUrl": "https://digitalhub.fifa.com/transform/549e0eab-ae8f-4f4b-8d9b-36cbeaae716c/CORDOBA-Jhon_369530",
     "dateOfBirth": "1993-05-11",
     "height": 186,
-    "instagramPostUrl": "https://www.instagram.com/p/DZ-tQWJHEVV/"
+    "instagramPostUrls": [
+      "https://www.instagram.com/p/DZ-tQWJHEVV/",
+      "https://www.instagram.com/p/DaJEwFgHIia/"
+    ]
   },
   "369744": {
     "fifaId": "369744",
