@@ -109,4 +109,17 @@ export const KNOCKOUT_RESULTS: Record<number, KnockoutResultSeed> = {
   // p/ ING; Julian Quiñones 42' e Raúl Jiménez 69' p/ MEX; Jarell Quansah expulso aos 54' p/ ING).
   // Inglaterra classificada às Quartas mesmo com um a menos; alimenta a #99 (slot W92). México eliminado.
   92: { status: "FINISHED", score: { teamA: 2, teamB: 3 } },
+  // #93 · Oitavas · Dallas Stadium · 06/07/2026 — Portugal 0×1 Espanha (Mikel Merino aos 90+1').
+  // Espanha classificada às Quartas nos acréscimos; alimenta a #98 (slot W93). Portugal (Cristiano
+  // Ronaldo) eliminado.
+  93: { status: "FINISHED", score: { teamA: 0, teamB: 1 } },
+  // #94 · Oitavas · Seattle Stadium · 06/07/2026 — Estados Unidos 1×4 Bélgica (Charles De Ketelaere
+  // 1' e 33', Hans Vanaken 57', Romelu Lukaku 90+3' p/ BEL; Malik Tillman 31' p/ EUA). Bélgica
+  // classificada às Quartas com autoridade; alimenta a #98 (slot W94). EUA eliminados.
+  94: { status: "FINISHED", score: { teamA: 1, teamB: 4 } },
+  // #95 · Oitavas · Atlanta Stadium · 07/07/2026 — Argentina 3×2 Egito (Yasser Ibrahim 15' e Mostafa
+  // Zico 67' p/ EGY; Cristian Romero 79', Lionel Messi 83' e Enzo Fernández 90+2' p/ ARG; um egípcio
+  // expulso aos 90+4'). Argentina virou de 0×2 e se classificou às Quartas; alimenta a #100 (slot
+  // W95). Egito eliminado.
+  95: { status: "FINISHED", score: { teamA: 3, teamB: 2 } },
 };
