@@ -17,9 +17,11 @@ import {
   goalsByGroupAndInterval,
   goalsByMinute,
   goalsByPhase,
+  groupTotals,
   matchStatusBreakdown,
   roundOf16TeamCodes,
   roundOf32TeamCodes,
+  stageWinnerCodes,
   topScoringTeams,
   topScoringTeamsAllPhases,
   tournamentTotals,
@@ -439,4 +441,58 @@ test("goalsByPhase leads with the group stage and never exceeds bracket order", 
   const indices = phases.map((p) => order.indexOf(p.phase));
   assert.deepEqual(indices, [...indices].sort((a, b) => a - b), "phases stay in bracket order");
   for (const p of phases) assert.ok(p.played > 0, `${p.phase} has a completed match`);
+});
+
+// ── Knockout-stage readers: now pure over an injected `matches` array (R32 = FIFA #73–88) ──
+const koMatch = (num: number, over: Record<string, unknown>): Match =>
+  ({
+    id: `ko-${num}-2026`,
+    status: "FINISHED",
+    stageName: "16-avos de Final",
+    teamA: { code: `A${num}` },
+    teamB: { code: `B${num}` },
+    ...over,
+  }) as unknown as Match;
+
+test("roundOf32TeamCodes lists both sides of each R32 fixture, ignoring non-knockout matches", () => {
+  const matches = [
+    koMatch(73, { teamA: { code: "BRA" }, teamB: { code: "ARG" } }),
+    koMatch(74, { teamA: { code: "FRA" }, teamB: { code: "ESP" } }),
+    { id: "bra-mar-2026", teamA: { code: "XXX" }, teamB: { code: "YYY" } } as unknown as Match, // group → ignored
+  ];
+  assert.deepEqual(roundOf32TeamCodes(matches), ["BRA", "ARG", "FRA", "ESP"]);
+});
+
+test("stageWinnerCodes returns only the decided winners of the given stage", () => {
+  const matches = [
+    koMatch(73, { score: { teamA: 2, teamB: 1 }, teamA: { code: "BRA" }, teamB: { code: "ARG" } }), // A wins on score
+    koMatch(74, {
+      score: { teamA: 1, teamB: 1 },
+      penaltyScore: { teamA: 4, teamB: 2 },
+      teamA: { code: "FRA" },
+      teamB: { code: "ESP" },
+    }), // A wins on penalties
+    koMatch(75, { score: { teamA: 0, teamB: 0 }, teamA: { code: "GER" }, teamB: { code: "ITA" } }), // level, no shootout → no winner
+    koMatch(76, { status: "LIVE", score: { teamA: 3, teamB: 0 }, teamA: { code: "POR" }, teamB: { code: "NED" } }), // unfinished → excluded
+    {
+      id: "col-per-2026",
+      status: "FINISHED",
+      stageName: "Group Stage",
+      score: { teamA: 5, teamB: 0 },
+      teamA: { code: "COL" },
+      teamB: { code: "PER" },
+    } as unknown as Match, // not a knockout fixture → excluded
+  ];
+  assert.deepEqual(stageWinnerCodes("R32", matches), ["BRA", "FRA"]);
+  // roundOf16TeamCodes is stageWinnerCodes("R32") over APP_MATCHES — sanity-check it still returns an array.
+  assert.ok(Array.isArray(roundOf16TeamCodes()));
+});
+
+test("groupTotals sums group goals and halves the double-counted played column", () => {
+  const standings = [
+    row({ code: "AAA", group: "Grupo A", goalsFor: 5, played: 3 }),
+    row({ code: "BBB", group: "Grupo A", goalsFor: 2, played: 3 }),
+    row({ code: "CCC", group: "Grupo B", goalsFor: 4, played: 2 }),
+  ];
+  assert.deepEqual(groupTotals(standings), { groupGoals: 11, groupMatchesPlayed: 4 });
 });

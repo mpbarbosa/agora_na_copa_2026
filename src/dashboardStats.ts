@@ -41,11 +41,21 @@ export interface TournamentTotals {
   goalsPerMatch: number;
 }
 
+/**
+ * Group-stage goals and matches played, reduced from the reconciled standings. Each finished
+ * group match increments `played` for both sides, so the match count is the half-sum. One home
+ * for that rule — shared by `tournamentTotals` and `goalsByPhase`.
+ */
+export function groupTotals(standings: StandingsRow[]): { groupGoals: number; groupMatchesPlayed: number } {
+  return {
+    groupGoals: standings.reduce((sum, row) => sum + row.goalsFor, 0),
+    groupMatchesPlayed: standings.reduce((sum, row) => sum + row.played, 0) / 2,
+  };
+}
+
 /** Headline KPI figures for the stat cards. `standings` is the reconciled group table. */
 export function tournamentTotals(matches: Match[], standings: StandingsRow[]): TournamentTotals {
-  const groupGoals = standings.reduce((sum, row) => sum + row.goalsFor, 0);
-  // Each finished group match increments `played` for both sides, so halve the sum.
-  const groupMatchesPlayed = standings.reduce((sum, row) => sum + row.played, 0) / 2;
+  const { groupGoals, groupMatchesPlayed } = groupTotals(standings);
   const countBy = (predicate: (m: Match) => boolean) => matches.filter(predicate).length;
   const matchesFinished = countBy((m) => m.status === "FINISHED");
   // Every finished fixture's open-play goals (group + knockout). A knockout tie decided on
@@ -162,10 +172,13 @@ function knockoutStageOf(match: Match): KnockoutMatch["stage"] | null {
   return n ? STAGE_BY_KO_NUMBER.get(Number(n[1])) ?? null : null;
 }
 
-/** The 32 team codes contesting the Round of 32 (16-avos), from the resolved bracket draw. */
-export function roundOf32TeamCodes(): string[] {
+/**
+ * The 32 team codes contesting the Round of 32 (16-avos), from the resolved bracket draw.
+ * Pure over `matches` (defaults to `APP_MATCHES`) so it is unit-testable with a fixture.
+ */
+export function roundOf32TeamCodes(matches: Match[] = APP_MATCHES): string[] {
   const codes: string[] = [];
-  for (const match of APP_MATCHES) {
+  for (const match of matches) {
     if (knockoutStageOf(match) !== "R32") continue;
     if (match.teamA?.code) codes.push(match.teamA.code);
     if (match.teamB?.code) codes.push(match.teamB.code);
@@ -178,11 +191,11 @@ export function roundOf32TeamCodes(): string[] {
  * NEXT round. Read from the assembled `APP_MATCHES` (resolved feeders), so it works past the
  * R32. A tie level after regular/extra time is decided by its real `penaltyScore` (via
  * `knockoutWinnerSlot`); a level tie with no penalty tally yields no winner — we never invent
- * who advanced.
+ * who advanced. Pure over `matches` (defaults to `APP_MATCHES`) so it is unit-testable.
  */
-export function stageWinnerCodes(stage: KnockoutMatch["stage"]): string[] {
+export function stageWinnerCodes(stage: KnockoutMatch["stage"], matches: Match[] = APP_MATCHES): string[] {
   const codes: string[] = [];
-  for (const match of APP_MATCHES) {
+  for (const match of matches) {
     if (knockoutStageOf(match) !== stage) continue;
     const winningSlot = knockoutWinnerSlot(match);
     if (!winningSlot) continue; // unfinished, or level with no shootout tally
@@ -550,7 +563,6 @@ export function aggregateGoalsByPhase(
 
 /** Goals per phase across the whole tournament, from the standings + the knockout seed. */
 export function goalsByPhase(standings: StandingsRow[]): PhaseGoalsDatum[] {
-  const groupGoals = standings.reduce((sum, row) => sum + row.goalsFor, 0);
-  const groupMatchesPlayed = standings.reduce((sum, row) => sum + row.played, 0) / 2;
+  const { groupGoals, groupMatchesPlayed } = groupTotals(standings);
   return aggregateGoalsByPhase(groupGoals, groupMatchesPlayed, KNOCKOUT_MATCHES, KNOCKOUT_RESULTS);
 }
