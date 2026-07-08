@@ -69,21 +69,43 @@ Use Portuguese team names where applicable (e.g., "Brasil", "França", "Alemanha
 
 For each match, search and look for:
 - **Primary target**: A Cazé TV upload titled exactly "JOGO COMPLETO | \<Team A\> x \<Team B\> | Copa do Mundo 2026" (usually published within 24 h of the match)
-- **Fallback**: An "AO VIVO" archived livestream on Cazé TV's channel if no JOGO COMPLETO exists yet
+- **Stable fallback**: A Cazé TV **COMPACTO** (condensed full match) if no JOGO COMPLETO exists yet — preferred over an AO VIVO livestream VOD, which Cazé TV recycles/retitles (see [[reference_cazetv_video_gotchas]])
+- **Last-resort fallback**: An "AO VIVO" archived livestream on Cazé TV's channel
 
-Extract the YouTube video ID (the 11-character code after `?v=` or in the `/embed/` URL) and construct the embed URL:
+### VERIFY the uploader via oEmbed (never skip — this is the gate)
+
+**The search result title is a hint, NOT proof.** A fan re-upload can carry the
+exact "JOGO COMPLETO: …" title (this session, a "JOGO COMPLETO: ARGENTINA 3x2
+EGITO" hit was actually a **TMC Esporte** re-upload — rejected). YouTube's index
+also mislabels matches. Verify the real uploader with YouTube's own oEmbed:
+
+```bash
+ID=<VIDEO_ID>
+curl -s --max-time 20 "https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=$ID&format=json" \
+  | node -e 'let d="";process.stdin.on("data",c=>d+=c).on("end",()=>{const j=JSON.parse(d);console.log("["+j.author_name+"] "+j.title)})'
+```
+
+Accept **only** `author_name` = **CazéTV** (or FIFA / another official
+broadcaster). **Reject** any fan / re-upload / reaction / foreign-outlet channel
+(e.g. "TMC Esporte", "Coluna do Fla") — a real-but-unofficial video is still a
+fail (see [[reference_place_youtube_source_gate]]). Confirm the verified title's
+teams/score match the fixture. The search index frequently mislabels an AO VIVO
+livestream as another match — oEmbed catches it. If oEmbed is 404 / inconclusive,
+skip.
+
+Then construct the embed URL from the bare 11-char id (strip `?si=`, `&t=`):
 ```
 https://www.youtube.com/embed/<VIDEO_ID>
 ```
 
-Build a result table like:
+Build a result table (record the verified uploader, not the search label):
 
-| Match ID | Teams | YouTube ID | Type |
-|---|---|---|---|
-| `xxx-yyy-2026` | X vs Y | `xxxxxxxxxxx` | JOGO COMPLETO |
-| `aaa-bbb-2026` | A vs B | `xxxxxxxxxxx` | AO VIVO |
+| Match ID | Teams | YouTube ID | Type | Uploader (oEmbed) |
+|---|---|---|---|---|
+| `xxx-yyy-2026` | X vs Y | `xxxxxxxxxxx` | JOGO COMPLETO / COMPACTO | CazéTV |
 
-**If no video exists for a match at all** (e.g., match was recently played and Cazé TV hasn't uploaded yet), note it and skip. Do not add placeholder entries.
+**If no official full game exists for a match at all** (recently played, Cazé TV
+hasn't uploaded yet), note it and skip. Do not add placeholder or fan entries.
 
 ---
 
@@ -91,11 +113,12 @@ Build a result table like:
 
 ### 3a. Generate the Portuguese title
 
-Use the pattern: `"<Team A in pt-BR> x <Team B in pt-BR> — Copa do Mundo 2026"`
+- **JOGO COMPLETO / AO VIVO full game:** `"<Team A in pt-BR> x <Team B in pt-BR> — Copa do Mundo 2026"`
+- **COMPACTO fallback:** prefix with `Compacto:` → `"Compacto: <Team A> x <Team B> — Copa do Mundo 2026"`
 
 Examples:
-- Brasil x Marrocos → `"Brasil x Marrocos — Copa do Mundo 2026"`
-- Estados Unidos x Paraguai → `"Estados Unidos x Paraguai — Copa do Mundo 2026"`
+- Brasil x Marrocos (full game) → `"Brasil x Marrocos — Copa do Mundo 2026"`
+- Argentina x Egito (compacto) → `"Compacto: Argentina x Egito — Copa do Mundo 2026"`
 
 ### 3b. Update the file
 
@@ -139,4 +162,5 @@ Example: `chore: bump version to 0.0.185; add full-game videos for ARG×ALG, MEX
 - Match IDs follow the pattern `<teamA_code_lower>-<teamB_code_lower>-2026` (e.g., `bra-mar-2026`).
 - The `teamA` in the match ID is always the home/first team as listed in `src/matches.json`.
 - If Cazé TV removes a video or it becomes unavailable, update the URL but keep the entry (don't delete).
-- `matchVideos.json` stores an array per match to allow multiple videos in future (e.g., highlights + full game), but the current convention is one entry per match.
+- `matchVideos.json` stores an array per match and a match routinely holds **several** videos — full game, a CazéTV "Melhores Momentos", and a FIFA "(FIFA)" highlights (multi-language pt/es/en coverage). This skill adds only the **full game**; use [[find-missing-highlight-videos]] for highlights and [[place-youtube-video]] to place a single known URL. Never duplicate a video id.
+- **Never trust a title without oEmbed.** Only CazéTV / FIFA / official-broadcaster uploads qualify; a fan re-upload can carry the exact "JOGO COMPLETO:" title and must be rejected.
