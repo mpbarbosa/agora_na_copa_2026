@@ -168,7 +168,9 @@ const BACKGROUND_WARM_FAILURE_RETRY_MS = 30 * 1000;
 const CIRCUIT_BREAKER_FAILURE_THRESHOLD = 3;
 const CIRCUIT_BREAKER_OPEN_MS = 60 * 1000;
 const TOURNAMENT_LEADER_LIMIT = 5;
-const WIKIPEDIA_API_BASE = "https://pt.wikipedia.org/api/rest_v1";
+// Wikipedia REST summary API base for a given edition (pt/es/en) — the country
+// info card localizes its blurb + "read more" link to the active locale's edition.
+const wikipediaRestBase = (lang: string) => `https://${lang}.wikipedia.org/api/rest_v1`;
 const WIKIDATA_API_BASE = "https://www.wikidata.org/w/api.php";
 const COUNTRY_INFO_CACHE_TTL_MS = 24 * 60 * 60 * 1000; // Wikipedia data changes rarely
 const WIKIPEDIA_USER_AGENT = "agora-na-copa-2026 (https://github.com/mpbarbosa/agora_na_copa_2026)";
@@ -338,7 +340,8 @@ let teamLineupsCache:
     }
   | null = null;
 
-// Per-country cache — keyed by FIFA team code
+// Per-country cache — keyed by "<FIFA team code>:<locale>" (the payload is
+// localized per Wikipedia edition, so pt/es/en are cached separately).
 const countryInfoCache = new Map<
   string,
   { expiresAt: number; payload: CountryInfoResponse }
@@ -2083,19 +2086,57 @@ app.get("/api/team-view/:teamCode", async (req, res) => {
 // ---------------------------------------------------------------------------
 // Wikipedia / Wikidata country info
 // ---------------------------------------------------------------------------
-async function fetchCountryInfo(code: string): Promise<CountryInfoResponse | null> {
+// Resolve a country's Wikipedia article title in a non-pt edition from its
+// Wikidata sitelinks (e.g. es → "Alemania", en → "Germany" for Q183), so the
+// summary + "read more" link come from that edition rather than the curated
+// Portuguese title. Returns null when that edition has no article (or Wikidata
+// is unreachable) — the caller then falls back to the pt article.
+async function localizedWikipediaArticle(
+  wikidataId: string,
+  lang: Locale,
+): Promise<string | null> {
+  try {
+    const url =
+      `${WIKIDATA_API_BASE}?action=wbgetentities&ids=${wikidataId}` +
+      `&props=sitelinks&sitefilter=${lang}wiki&format=json`;
+    const res = await fetch(url, { headers: { "User-Agent": WIKIPEDIA_USER_AGENT } });
+    if (!res.ok) return null;
+    const data = (await res.json()) as {
+      entities?: Record<string, { sitelinks?: Record<string, { title?: string }> }>;
+    };
+    return data.entities?.[wikidataId]?.sitelinks?.[`${lang}wiki`]?.title ?? null;
+  } catch {
+    return null;
+  }
+}
+
+async function fetchCountryInfo(code: string, lang: Locale = "pt"): Promise<CountryInfoResponse | null> {
   const entry = WIKIPEDIA_COUNTRIES[code.toUpperCase()];
   if (!entry) return null;
 
-  const cached = countryInfoCache.get(code);
+  const cacheKey = `${code}:${lang}`;
+  const cached = countryInfoCache.get(cacheKey);
   if (cached && cached.expiresAt > Date.now()) return cached.payload;
 
   const { ptArticle, wikidataId } = entry;
   const now = new Date().toISOString();
 
+  // Pick the Wikipedia edition + article title for the locale. pt (the default
+  // and the curated source) uses ptArticle directly; es/en resolve their
+  // localized title via Wikidata sitelinks, falling back to pt when absent.
+  let wikiLang = "pt";
+  let article = ptArticle;
+  if (lang !== "pt") {
+    const localized = await localizedWikipediaArticle(wikidataId, lang);
+    if (localized) {
+      wikiLang = lang;
+      article = localized;
+    }
+  }
+
   // Wikipedia REST summary
-  const encodedTitle = encodeURIComponent(ptArticle);
-  const summaryUrl = `${WIKIPEDIA_API_BASE}/page/summary/${encodedTitle}`;
+  const encodedTitle = encodeURIComponent(article);
+  const summaryUrl = `${wikipediaRestBase(wikiLang)}/page/summary/${encodedTitle}`;
   const summaryRes = await fetch(summaryUrl, {
     headers: { "User-Agent": WIKIPEDIA_USER_AGENT },
   });
@@ -2106,7 +2147,7 @@ async function fetchCountryInfo(code: string): Promise<CountryInfoResponse | nul
       extract: "",
       thumbnailUrl: null,
       flagSvgUrl: null,
-      wikipediaUrl: `https://pt.wikipedia.org/wiki/${encodedTitle}`,
+      wikipediaUrl: `https://${wikiLang}.wikipedia.org/wiki/${encodedTitle}`,
       population: null,
       areaSqKm: null,
       capital: null,
@@ -2209,7 +2250,7 @@ async function fetchCountryInfo(code: string): Promise<CountryInfoResponse | nul
   if (allQids.length > 0) {
     const labelsUrl =
       `${WIKIDATA_API_BASE}?action=wbgetentities&ids=${allQids.join("|")}` +
-      `&languages=pt%7Cen&props=labels&format=json`;
+      `&languages=${lang}%7Cen%7Cpt&props=labels&format=json`;
     const labelsRes = await fetch(labelsUrl, {
       headers: { "User-Agent": WIKIPEDIA_USER_AGENT },
     });
@@ -2217,11 +2258,12 @@ async function fetchCountryInfo(code: string): Promise<CountryInfoResponse | nul
       const labelsData = (await labelsRes.json()) as {
         entities?: Record<string, { labels?: Record<string, { value?: string }> }>;
       };
-      // Prefer pt label; fall back to en (e.g. "euro" has no pt label in Wikidata)
+      // Prefer the active locale's label; fall back to en then pt (e.g. "euro"
+      // has no pt label in Wikidata).
       const labelOf = (qid: string | null) => {
         if (!qid) return null;
         const labels = labelsData.entities?.[qid]?.labels;
-        return labels?.["pt"]?.value ?? labels?.["en"]?.value ?? null;
+        return labels?.[lang]?.value ?? labels?.["en"]?.value ?? labels?.["pt"]?.value ?? null;
       };
 
       capital    = labelOf(capitalQid);
@@ -2239,7 +2281,7 @@ async function fetchCountryInfo(code: string): Promise<CountryInfoResponse | nul
     flagSvgUrl,
     wikipediaUrl:
       summary.content_urls?.desktop?.page ??
-      `https://pt.wikipedia.org/wiki/${encodedTitle}`,
+      `https://${wikiLang}.wikipedia.org/wiki/${encodedTitle}`,
     population,
     areaSqKm: areaSqKm ? Math.round(areaSqKm) : null,
     capital,
@@ -2251,7 +2293,7 @@ async function fetchCountryInfo(code: string): Promise<CountryInfoResponse | nul
     updatedAt: now,
   };
 
-  countryInfoCache.set(code, {
+  countryInfoCache.set(cacheKey, {
     expiresAt: Date.now() + COUNTRY_INFO_CACHE_TTL_MS,
     payload,
   });
@@ -2262,7 +2304,7 @@ app.get("/api/country-info/:code", async (req, res) => {
   const code = req.params.code.toUpperCase();
   const locale = localeForRequest(req);
   try {
-    const payload = await fetchCountryInfo(code);
+    const payload = await fetchCountryInfo(code, locale);
     if (!payload) {
       res.status(404).json({ error: localizeNote("País não encontrado", locale) });
       return;
@@ -2271,7 +2313,7 @@ app.get("/api/country-info/:code", async (req, res) => {
     res.json(localizeResilienceNote(payload, locale));
   } catch (error: any) {
     console.error("Wikipedia API Error in /api/country-info:", error);
-    const stale = countryInfoCache.get(code);
+    const stale = countryInfoCache.get(`${code}:${locale}`);
     if (stale) {
       res.set("Cache-Control", "public, max-age=3600");
       res.json({
