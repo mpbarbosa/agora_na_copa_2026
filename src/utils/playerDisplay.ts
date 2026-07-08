@@ -169,6 +169,63 @@ export function buildPlayerStatCells(
   ];
 }
 
+export interface DetailRow {
+  label?: string;
+  value: string;
+  fullWidth?: boolean;
+}
+
+/**
+ * Core detail rows shared by EVERY player overlay-card entry point (Jogadores,
+ * Líderes, Ao Vivo, team pitch) so the card renders identically regardless of
+ * where it's opened: position, birth date, current club — each only when the
+ * datum exists. Callers append their own additive rows (e.g. the match-context
+ * line) on top. Reuses the canonical `aoVivo.overlayCard.*` labels so there is a
+ * single source for the detail wording across every context.
+ */
+export function buildPlayerDetailRows(
+  player: { position?: Position; dateOfBirth?: string; club?: string },
+  t?: TFn,
+): DetailRow[] {
+  const label = (key: string, pt: string) => (t ? t(key) : pt);
+  const rows: DetailRow[] = [];
+  if (player.position != null) {
+    rows.push({ label: label("aoVivo.overlayCard.position", "Posição"), value: getPositionLabel(player.position) });
+  }
+  if (player.dateOfBirth) {
+    rows.push({ label: label("aoVivo.overlayCard.birth", "Nascimento"), value: formatBirthDate(player.dateOfBirth, t) });
+  }
+  if (player.club) {
+    rows.push({ label: label("aoVivo.overlayCard.currentClub", "Clube atual"), value: player.club });
+  }
+  return rows;
+}
+
+/**
+ * The additive "match context" row — shown ONLY when the card is opened from a
+ * specific match (Ao Vivo incident, team-pitch board), so it can't be
+ * context-independent. Uses the shared i18n template so every match flow reads
+ * identically (the team-pitch flow previously hard-coded this line in pt-BR).
+ */
+export function buildMatchContextRow(
+  teamName: string,
+  opponentName: string,
+  playerName: string,
+  t?: TFn,
+): DetailRow {
+  return {
+    label: t ? t("aoVivo.overlayCard.matchContext") : "Contexto da partida",
+    value: t
+      ? t("aoVivo.overlayCard.matchContextValue", {
+          teamName: toTitleCasePtBr(teamName),
+          opponentName: toTitleCasePtBr(opponentName),
+          playerName: toTitleCasePtBr(playerName),
+        })
+      : `${toTitleCasePtBr(teamName)} x ${toTitleCasePtBr(opponentName)}`,
+    fullWidth: true,
+  };
+}
+
 // `instagramFollowers` is metadata for the Instagram chip, not a linkable platform, so it is
 // excluded here (and never surfaces from `getPlayerSocialEntries`).
 const SOCIAL_PLATFORM_LABELS: Record<Exclude<keyof PlayerSocials, "instagramFollowers">, string> = {

@@ -6,7 +6,7 @@ import {
   PlayerPortrait,
   renderSocialPlatformLabel,
 } from "./PlayerOverlayCard";
-import { getPlayerSocialEntries, getPositionLabel, toTitleCasePtBr, buildPlayerSearchUrls, buildPlayerStatCells, formatBirthDate } from "../utils/playerDisplay";
+import { getPlayerSocialEntries, getPositionLabel, buildPlayerSearchUrls, buildPlayerStatCells, buildPlayerDetailRows, buildMatchContextRow } from "../utils/playerDisplay";
 import { usePlayerStats } from "../hooks/usePlayerStats";
 import { useT } from "../i18n";
 
@@ -392,21 +392,9 @@ export const TeamPitchBoard: FC<TeamPitchBoardProps> = ({
             t,
           )}
           details={[
-            { label: t("teamLineup.pitchPosition"), value: getPositionLabel(featuredPlayer.position) },
-            ...(featuredPlayer.dateOfBirth
-              ? [{ label: t("teamLineup.pitchBirth"), value: formatBirthDate(featuredPlayer.dateOfBirth, t) }]
-              : []),
-            ...(featuredPlayer.club
-              ? [{ label: t("teamLineup.pitchClub"), value: featuredPlayer.club }]
-              : []),
+            ...buildPlayerDetailRows(featuredPlayer, t),
             ...(opponentName
-              ? [
-                  {
-                    label: "Contexto da partida",
-                    value: `${toTitleCasePtBr(team.name)} x ${toTitleCasePtBr(opponentName)}: ${toTitleCasePtBr(featuredPlayer.name)} aparece como peça-chave para o plano de jogo.`,
-                    fullWidth: true as const,
-                  },
-                ]
+              ? [buildMatchContextRow(team.name, opponentName, featuredPlayer.name, t)]
               : []),
           ]}
           onClose={() => setFeaturedPlayer(null)}

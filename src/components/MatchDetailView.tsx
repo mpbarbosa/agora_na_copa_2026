@@ -34,7 +34,7 @@ import { formatKickoffFromInstant } from "../utils/kickoffFormat";
 import type { TeamLineupsMap } from "../utils/teamLineup";
 import { PlayerOverlayCard, PlayerPictureOverlay } from "./PlayerOverlayCard";
 import { usePlayerStats } from "../hooks/usePlayerStats";
-import { getPositionLabel, toTitleCasePtBr, buildPlayerStatCells, formatBirthDate } from "../utils/playerDisplay";
+import { buildPlayerStatCells, buildPlayerDetailRows, buildMatchContextRow } from "../utils/playerDisplay";
 import { MatchChatPanel } from "./MatchChatPanel";
 import { resolveInstagramPostUrls } from "../utils/instagram";
 import { RefereeCard } from "./RefereeCard";
@@ -1075,22 +1075,13 @@ export function MatchDetailView({
             t,
           )}
           details={[
-            { label: t("aoVivo.overlayCard.position"), value: getPositionLabel(selectedIncidentPlayer.player.position) },
-            ...(selectedIncidentPlayer.player.dateOfBirth
-              ? [{ label: t("aoVivo.overlayCard.birth"), value: formatBirthDate(selectedIncidentPlayer.player.dateOfBirth, t) }]
-              : []),
-            ...(selectedIncidentPlayer.player.club
-              ? [{ label: t("aoVivo.overlayCard.currentClub"), value: selectedIncidentPlayer.player.club }]
-              : []),
-            {
-              label: t("aoVivo.overlayCard.matchContext"),
-              value: t("aoVivo.overlayCard.matchContextValue", {
-                teamName: toTitleCasePtBr(selectedIncidentPlayer.team.name),
-                opponentName: toTitleCasePtBr(selectedIncidentPlayer.opponentName),
-                playerName: toTitleCasePtBr(selectedIncidentPlayer.player.name),
-              }),
-              fullWidth: true,
-            },
+            ...buildPlayerDetailRows(selectedIncidentPlayer.player, t),
+            buildMatchContextRow(
+              selectedIncidentPlayer.team.name,
+              selectedIncidentPlayer.opponentName,
+              selectedIncidentPlayer.player.name,
+              t,
+            ),
           ]}
           onClose={() => setStoredIncidentPlayer(null)}
           onOpenPicture={() =>

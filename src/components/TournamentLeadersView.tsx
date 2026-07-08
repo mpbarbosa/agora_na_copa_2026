@@ -2,7 +2,7 @@ import { useEffect, useState, type ReactNode } from "react";
 import { apiUrl, useLocale, useT } from "../i18n";
 import { FlagIcon } from "./FlagIcon";
 import { PlayerOverlayCard } from "./PlayerOverlayCard";
-import { getPositionLabel } from "../utils/playerDisplay";
+import { buildPlayerDetailRows } from "../utils/playerDisplay";
 import type {
   TeamRef,
   TournamentLeadersResponse,
@@ -499,12 +499,7 @@ export function TournamentLeadersView({ theme, onSelectTeamLineup }: TournamentL
             },
           ]}
           details={[
-            ...(selectedPlayer.club
-              ? [{ label: t("lideres.detailClub"), value: selectedPlayer.club }]
-              : []),
-            ...(selectedPlayer.position
-              ? [{ label: t("lideres.detailPosition"), value: getPositionLabel(selectedPlayer.position) }]
-              : []),
+            ...buildPlayerDetailRows(selectedPlayer, t),
             {
               value: t("lideres.officialHighlight", { team: selectedPlayer.teamName }),
               fullWidth: true,

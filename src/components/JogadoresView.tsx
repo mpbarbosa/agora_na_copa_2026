@@ -5,7 +5,7 @@ import type { Player, TeamRef } from "../types";
 import { FlagIcon } from "./FlagIcon";
 import { PlayerPortrait, PlayerOverlayCard, PlayerPictureOverlay } from "./PlayerOverlayCard";
 import { InstagramBrandIcon } from "./InstagramBrandIcon";
-import { getPositionLabel, buildPlayerStatCells, formatBirthDate } from "../utils/playerDisplay";
+import { getPositionLabel, buildPlayerStatCells, buildPlayerDetailRows } from "../utils/playerDisplay";
 import { usePlayerStats } from "../hooks/usePlayerStats";
 import { useT } from "../i18n";
 
@@ -580,12 +580,7 @@ export function JogadoresView({ theme, onSelectTeamLineup }: JogadoresViewProps)
           secondaryColor={selected.team.secondaryColor}
           flagSvg={selected.team.flagSvg}
           stats={buildPlayerStatCells(selected.player, selectedStats, theme, t)}
-          details={[
-            { label: t("jogadores.detailPosition"), value: getPositionLabel(selected.player.position) },
-            ...(selected.player.dateOfBirth
-              ? [{ label: t("jogadores.detailBirth"), value: formatBirthDate(selected.player.dateOfBirth, t) }]
-              : []),
-          ]}
+          details={buildPlayerDetailRows(selected.player, t)}
           onClose={() => setSelected(null)}
           onOpenPicture={() => setExpandedPlayer(selected.player)}
           onOpenTeamView={() => {
