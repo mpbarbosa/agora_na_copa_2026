@@ -1506,7 +1506,10 @@
       "instagramFollowers": 9000000,
       "wikipedia": "https://pt.wikipedia.org/wiki/Romelu_Lukaku"
     },
-    "instagramPostUrl": "https://www.instagram.com/p/DaRxy_VCLG9/"
+    "instagramPostUrls": [
+      "https://www.instagram.com/p/DaRxy_VCLG9/",
+      "https://www.instagram.com/p/DaesfsoFGL2/"
+    ]
   },
   "358120": {
     "fifaId": "358120",
