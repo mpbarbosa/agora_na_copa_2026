@@ -31,10 +31,14 @@ export interface TeamFocus {
   match: Match;
   // The followed team's resolved side (carries its live/upcoming identity).
   team: ResolvedSide;
-  opponent: ResolvedSide;
-  // True when the followed team or the opponent only provisionally holds its group slot —
-  // the knockout confronto isn't locked yet. Surfaced so the badge never asserts an
-  // unconfirmed pairing as certain (a hard data-accuracy rule).
+  // The opponent's resolved side, or null when the other slot is still undecided (e.g. a
+  // Quarterfinal whose opponent is the winner of an unplayed tie). The fixture is still
+  // surfaced — the followed team HAS a next match with a known kickoff — so the badge counts
+  // down and renders the opponent as "to be defined".
+  opponent: ResolvedSide | null;
+  // True when the followed team or the opponent only provisionally holds its slot, OR the
+  // opponent isn't decided yet — the knockout confronto isn't locked. Surfaced so the badge
+  // never asserts an unconfirmed pairing as certain (a hard data-accuracy rule).
   provisional: boolean;
 }
 
@@ -62,8 +66,10 @@ export function resolveSide(
 
 // The followed team's most imminent live-or-upcoming fixture, resolving knockout slots from
 // live standings so a bracket pairing (e.g. "1C" once the team tops its group) still
-// surfaces. Returns null when the team has no live/upcoming resolvable fixture — i.e. it is
-// out of the tournament (or between undecided knockout rounds), so the badge shows nothing.
+// surfaces. The opponent may still be undecided (a Quarterfinal fed by an unplayed tie) — the
+// fixture is returned with a null opponent so the badge still counts down to the known
+// kickoff. Returns null only when the team ITSELF has no live/upcoming fixture (out of the
+// tournament), never merely because the opponent isn't decided yet.
 export function findTeamFocus(
   matches: Match[],
   groupPositions: Map<string, ProvisionalSlot>,
@@ -77,13 +83,15 @@ export function findTeamFocus(
       const teamIsB = b?.code === teamCode;
       if (!teamIsA && !teamIsB) return null;
       const team = (teamIsA ? a : b)!;
+      // The opponent may be null: the followed team's slot is resolved but the other side is
+      // a still-undecided winner/best-third ref. Keep the fixture — the badge shows it as
+      // "opponent to be defined" and counts down to the scheduled kickoff.
       const opponent = teamIsA ? b : a;
-      if (!opponent) return null; // opponent slot still undecided — nothing to show
       return {
         match,
         team,
         opponent,
-        provisional: team.provisional || opponent.provisional,
+        provisional: team.provisional || !opponent || opponent.provisional,
       };
     })
     .filter((f): f is TeamFocus => f !== null)

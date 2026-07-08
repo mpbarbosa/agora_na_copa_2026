@@ -101,16 +101,19 @@ test("findTeamFocus prefers LIVE, else earliest PRE_GAME, else null", () => {
   const upcoming = mkMatch("m2", side("BRA", "BRASIL"), side("ARG", "ARGENTINA"), "PRE_GAME", "2026-06-08T16:00:00-03:00");
   const later = mkMatch("m3", side("BRA", "BRASIL"), side("USA", "ESTADOS UNIDOS"), "PRE_GAME", "2026-06-12T16:00:00-03:00");
   const focus = findTeamFocus([later, upcoming], NO_SLOTS, "BRA");
-  assert.equal(focus?.opponent.code, "ARG"); // earliest upcoming
+  assert.equal(focus?.opponent?.code, "ARG"); // earliest upcoming
 
   const live = mkMatch("m1", side("BRA", "BRASIL"), side("MAR", "MARROCOS"), "LIVE", "2026-06-05T16:00:00-03:00");
   const liveFocus = findTeamFocus([later, upcoming, live], NO_SLOTS, "BRA");
-  assert.equal(liveFocus?.opponent.code, "MAR"); // LIVE wins over upcoming
+  assert.equal(liveFocus?.opponent?.code, "MAR"); // LIVE wins over upcoming
 
   assert.equal(findTeamFocus([upcoming], NO_SLOTS, "GER"), null); // team not playing
 });
 
-test("findTeamFocus returns null when the opponent slot is unresolved", () => {
+test("findTeamFocus surfaces the fixture with a null opponent when only the opponent is undecided", () => {
+  // BRA is confirmed into a knockout tie whose opponent is still the winner of an unplayed
+  // match (a flagless "W73" ref) — the badge must still surface it and count down, with the
+  // opponent shown as "to be defined", instead of falsely reporting "no next match".
   const undecided = mkMatch(
     "k1",
     side("BRA", "BRASIL"),
@@ -118,5 +121,10 @@ test("findTeamFocus returns null when the opponent slot is unresolved", () => {
     "PRE_GAME",
     "2026-07-01T16:00:00-03:00",
   );
-  assert.equal(findTeamFocus([undecided], NO_SLOTS, "BRA"), null);
+  const focus = findTeamFocus([undecided], NO_SLOTS, "BRA");
+  assert.equal(focus?.team.code, "BRA");
+  assert.equal(focus?.opponent, null); // opponent to be defined
+  assert.equal(focus?.provisional, true); // pairing not locked
+  // Still null when the TEAM itself isn't in the fixture at all.
+  assert.equal(findTeamFocus([undecided], NO_SLOTS, "GER"), null);
 });

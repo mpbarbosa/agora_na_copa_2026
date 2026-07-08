@@ -173,15 +173,33 @@ export function TeamCountdownBadge({
               </p>
             )}
 
-            {/* Opponent */}
+            {/* Opponent — a resolved side shows its flag + name; an undecided opponent
+                (a knockout slot fed by an unplayed tie) shows a neutral "to be defined"
+                placeholder so the badge never invents a pairing. */}
             <div className="flex items-center gap-2">
-              <FlagIcon
-                flag={focus.opponent.flagSvg}
-                className="h-4 w-6 shrink-0 rounded-[2px]"
-              />
-              <span className="font-anton text-sm uppercase leading-tight tracking-wide text-white">
-                {focus.opponent.name}
-              </span>
+              {focus.opponent ? (
+                <>
+                  <FlagIcon
+                    flag={focus.opponent.flagSvg}
+                    className="h-4 w-6 shrink-0 rounded-[2px]"
+                  />
+                  <span className="font-anton text-sm uppercase leading-tight tracking-wide text-white">
+                    {focus.opponent.name}
+                  </span>
+                </>
+              ) : (
+                <>
+                  <span
+                    aria-hidden="true"
+                    className="flex h-4 w-6 shrink-0 items-center justify-center rounded-[2px] border border-white/20 font-mono text-[9px] text-white/40"
+                  >
+                    ?
+                  </span>
+                  <span className="font-anton text-sm uppercase leading-tight tracking-wide text-white/70">
+                    {t("banners.teamCountdown.opponentTbd")}
+                  </span>
+                </>
+              )}
             </div>
 
             {/* Date · time */}
@@ -190,8 +208,10 @@ export function TeamCountdownBadge({
             </p>
 
             {/* Confronto não confirmado: a seleção e/ou o adversário ainda dependem da
-                classificação — sinalizamos para não afirmar um cruzamento incerto. */}
-            {!isLive && focus.provisional && (
+                classificação — sinalizamos para não afirmar um cruzamento incerto. Só
+                quando há um adversário resolvido (o placeholder "a definir" já sinaliza
+                a incerteza quando não há). */}
+            {!isLive && focus.opponent && focus.provisional && (
               <p
                 className="mt-1 font-mono text-[8px] uppercase tracking-[0.16em]"
                 style={{ color: hexToRgba(secondary, 0.85) }}

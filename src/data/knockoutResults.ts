@@ -122,4 +122,9 @@ export const KNOCKOUT_RESULTS: Record<number, KnockoutResultSeed> = {
   // expulso aos 90+4'). Argentina virou de 0×2 e se classificou às Quartas; alimenta a #100 (slot
   // W95). Egito eliminado.
   95: { status: "FINISHED", score: { teamA: 3, teamB: 2 } },
+  // #96 · Oitavas · BC Place Vancouver · 07/07/2026 — Suíça 0×0 Colômbia (após a prorrogação),
+  // Suíça 4×3 nos pênaltis (Granit Xhaka, Zeki Amdouni, Cedric Itten e Ruben Vargas; Juan
+  // Quintero, Jaminton Campaz e Luis Díaz p/ COL). Suíça classificada às Quartas; alimenta a
+  // #100 (slot W96), duelo com a Argentina. Colômbia eliminada.
+  96: { status: "FINISHED", score: { teamA: 0, teamB: 0 }, penaltyScore: { teamA: 4, teamB: 3 } },
 };
