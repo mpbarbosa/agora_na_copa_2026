@@ -4,8 +4,10 @@ description: >
   Analyze one YouTube video URL, VERIFY what it actually is against the live
   source via oEmbed (real uploader + title — never the search label), and insert
   its /embed/ URL into the right curated data file — an official match video
-  (src/data/matchVideos.json, full game or "Melhores Momentos" highlights) or a
-  per-player rail (src/data/playerVideos.json, keyed by FIFA id). Rejects
+  (src/data/matchVideos.json: full game, "Melhores Momentos" highlights, or a
+  "Coletiva:" coach presser), a per-player rail (src/data/playerVideos.json, keyed
+  by FIFA id), a team-page rail (src/data/teamVideos.json, keyed by team code), or a
+  coach carousel (src/data/coachVideos.json, keyed by team code). Rejects
   fan/re-upload channels, strips tracking params, respects each file's
   array/title/key conventions, validates JSON. Use when the user says "analyze
   this YouTube video and choose where to insert it", "where does this YouTube
@@ -15,17 +17,32 @@ description: >
 
 ## Overview
 
-YouTube videos live in **two** curated data files (unlike Instagram's five). Each
-is a `{ embedUrl, title }[]` array; the `embedUrl` is always the `/embed/<id>` form.
+YouTube videos live in **four** curated data files. Each is a `{ embedUrl, title }[]`
+array; the `embedUrl` is always the `/embed/<id>` form.
 
 | Destination file | Keyed by | Renders as | Holds |
 |---|---|---|---|
-| `src/data/matchVideos.json` | **match id** (`bra-hai-2026`, `ko-91-2026`) | the finished-match videos strip (`BroadcastGuideTab`) | official **match** video(s): the full game, and the "Melhores Momentos" highlights |
+| `src/data/matchVideos.json` | **match id** (`bra-hai-2026`, `ko-91-2026`) | the finished-match videos strip (`BroadcastGuideTab`) + the team page's "Vídeos das partidas" list | official **match** video(s): full game, "Melhores Momentos" highlights, and coach-presser entries (title `Coletiva: …`) |
 | `src/data/playerVideos.json` | **fifaId** (Messi = `229397`) | the player card carousel (`PlayerVideoRail`) | YouTube videos **for one player**: official match highlights he featured in, or his official-channel content |
+| `src/data/teamVideos.json` | **3-letter team code** (`USA`) | the "Vídeos da seleção" rail on the national team page (`TeamVideoRail`) | official **team-level** content **not tied to one match**: team features, "road to…" docs, squad reveals, federation content |
+| `src/data/coachVideos.json` | **3-letter team code** (`USA`) | the "Vídeos" carousel in the `CoachCard` | official **coach** content: post-match press conferences, coach interviews |
 
-There is **no** team / coach / referee YouTube file — those surfaces are
-Instagram-only (see [[place-instagram-highlight]] for the IG analog). If a video
-fits neither a match nor a player, it has no home here — flag it and stop.
+There is no **referee** YouTube file — that surface is Instagram-only (see
+[[place-instagram-highlight]] for the IG analogs). If a video fits none of the
+four homes, flag it and stop.
+
+**Routing team/coach content (added 2026-07-08):**
+- A **coach press conference / interview** (FIFA/CazéTV/federation, about the coach) →
+  `coachVideos.json` under the team code. If it's about a **specific match**, ALSO add
+  it to that match in `matchVideos.json` with a `Coletiva: …` title (it shows on the
+  match broadcast tab; presser titles are auto-excluded from the team "Vídeos das
+  partidas" list so they aren't mislabeled as a full game).
+- **Team-level content not tied to one match** (a feature, a doc, a squad reveal) →
+  `teamVideos.json` under the team code. A **match-tied** team video is better placed
+  on the match (`matchVideos.json`), which already surfaces on the team page's "Vídeos
+  das partidas" — don't duplicate it into `teamVideos.json`.
+- Same source gate as always: **FIFA / CazéTV / the federation's own channel** only;
+  reject fan / foreign-outlet uploads (see [[reference_place_youtube_source_gate]]).
 
 The job: from the **verified** content (not the URL's label or a search snippet),
 decide which file(s) it belongs to, then insert it correctly. This is a
@@ -185,9 +202,10 @@ data: add <who/what> YouTube video(s)
   search is not enough — a fan re-upload can carry the exact "JOGO COMPLETO: …"
   title. Only `author_name` proves the uploader. This is the single most important
   rule this skill exists to enforce.
-- **Only two homes.** Match video → `matchVideos.json`; player video →
-  `playerVideos.json`. Anything else (a tactical breakdown, a generic news segment,
-  a video about the tournament at large) has no curated home — flag and skip.
+- **Four homes.** Match video → `matchVideos.json`; single-player → `playerVideos.json`;
+  team-level (non-match) → `teamVideos.json`; coach → `coachVideos.json`. Anything that
+  fits none (a referee clip — IG-only; a generic tournament montage) has no curated
+  home — flag and skip.
 - For **bulk** discovery of missing match footage, prefer the batch skills
   [[find-missing-match-videos]] (full games) and [[find-missing-highlight-videos]]
   (highlights) — this skill is the single-URL, place-one-video companion.
