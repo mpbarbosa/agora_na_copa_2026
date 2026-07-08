@@ -36,9 +36,14 @@ interface CoachCardProps {
   instagramPostUrls?: string[];
   /** Optional Instagram account handle (without the leading "@") — rendered as a profile link in the header, mirroring the player card's socials chip. */
   instagramHandle?: string;
+  /** Optional YouTube videos (coach press conferences, interviews) — rendered as a thumbnail carousel, keyed by team code in `coachVideos.json`. */
+  videos?: { embedUrl: string; title: string }[];
   onClose: () => void;
   id?: string;
 }
+
+// Extracts the YouTube id from an /embed/<id> URL (ignoring any query string).
+const getYoutubeId = (embedUrl: string) => embedUrl.match(/\/embed\/([^?/]+)/)?.[1] ?? "";
 
 // First letters of the first two name words, e.g. "Carlo Ancelotti" → "CA".
 function coachInitials(name: string): string {
@@ -72,6 +77,7 @@ export function CoachCard({
   photoCredit,
   instagramPostUrls,
   instagramHandle,
+  videos,
   onClose,
   id,
 }: CoachCardProps) {
@@ -80,6 +86,8 @@ export function CoachCard({
   const [igExpanded, setIgExpanded] = useState(false);
   const igPosts = instagramPostUrls ?? [];
   const hasInstagramHighlights = igPosts.length > 0;
+  const coachVideos = videos ?? [];
+  const hasVideos = coachVideos.length > 0;
   const igHandle = instagramHandle?.trim().replace(/^@/, "") || undefined;
 
   const accent = primaryColor ?? "#00e476";
@@ -299,6 +307,63 @@ export function CoachCard({
                   ))}
                 </div>
               )}
+            </div>
+          )}
+
+          {/* Vídeos — coach press conferences / interviews (thumbnail carousel) */}
+          {hasVideos && (
+            <div className="mt-5 border-t pt-4" style={{ borderColor }} id={id ? `${id}-videos` : undefined}>
+              <p className={`font-mono text-[10px] uppercase tracking-wider ${mutedClasses}`}>
+                Vídeos
+              </p>
+              <div className="mt-3 flex items-stretch gap-3 overflow-x-auto pb-1">
+                {coachVideos.map((video, idx) => {
+                  const videoId = getYoutubeId(video.embedUrl);
+                  const watchUrl = `https://www.youtube.com/watch?v=${videoId}`;
+                  const thumbUrl = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
+                  return (
+                    <a
+                      key={`${videoId}-${idx}`}
+                      href={watchUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      data-testid={id ? `${id}-videos-item` : undefined}
+                      aria-label={`Assistir no YouTube: ${video.title}`}
+                      title={video.title}
+                      className="group block w-[172px] shrink-0"
+                    >
+                      <span
+                        className="relative block overflow-hidden rounded-xl border"
+                        style={{ width: 172, height: 96, borderColor }}
+                      >
+                        <img
+                          src={thumbUrl}
+                          alt={video.title}
+                          className="h-full w-full object-cover"
+                          loading="lazy"
+                          decoding="async"
+                        />
+                        <span className="absolute inset-0 bg-black/30 transition-colors group-hover:bg-black/20" />
+                        <span className="absolute inset-0 flex items-center justify-center">
+                          <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[#ff0000] transition-transform group-hover:scale-110">
+                            <svg viewBox="0 0 24 24" className="h-4 w-4 translate-x-px fill-white" aria-hidden="true">
+                              <path d="M8 5v14l11-7z" />
+                            </svg>
+                          </span>
+                        </span>
+                      </span>
+                      <span
+                        className={`mt-1.5 line-clamp-2 block font-archivo text-[11px] leading-snug ${
+                          isLight ? "text-slate-700" : "text-slate-200"
+                        }`}
+                        style={{ maxWidth: 172 }}
+                      >
+                        {video.title}
+                      </span>
+                    </a>
+                  );
+                })}
+              </div>
             </div>
           )}
 

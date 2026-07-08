@@ -25,10 +25,12 @@ import COACH_NOTES_EN from "../data/coachNotes.en.json";
 import { pickEditorialText } from "../data/editorial";
 import COACH_IMAGES from "../data/coachImages.json";
 import COACH_INSTAGRAM from "../data/coachInstagram.json";
+import COACH_VIDEOS from "../data/coachVideos.json";
 import COACH_SOCIALS from "../data/coachSocials.json";
 import { formatAnalysisTimestamp } from "../utils/dateFormat";
 import { AnalysisFreshnessBadge } from "./AnalysisFreshnessBadge";
 import { TeamInstagramHighlights } from "./TeamInstagramHighlights";
+import { TeamVideoRail } from "./TeamVideoRail";
 import { ArrowLeft, ExternalLink } from "lucide-react";
 import MATCH_VIDEOS from "../data/matchVideos.json";
 
@@ -37,6 +39,11 @@ const MATCH_VIDEOS_BY_ID = MATCH_VIDEOS as Record<string, MatchVideo[]>;
 
 const getYoutubeId = (embedUrl: string) => embedUrl.match(/\/embed\/([^?/]+)/)?.[1] ?? "";
 const isHighlightVideo = (title: string) => /^melhores momentos:/i.test(title);
+// Coach press-conference / interview entries live in matchVideos.json too (so they
+// surface on the match's broadcast tab), but they are neither a full game nor a
+// highlights — exclude them from the "Vídeos das partidas" list, where they'd be
+// mislabeled. Their team-page home is TeamVideoRail; their coach home is CoachCard.
+const isPresserVideo = (title: string) => /^coletiva:/i.test(title);
 
 interface TeamLineupViewProps {
   team: TeamRef;
@@ -333,7 +340,10 @@ function MatchVideosList({
   const dividerClasses = theme === "classic-light" ? "border-slate-200" : "border-white/10";
 
   const entries = matches
-    .map((match) => ({ match, videos: MATCH_VIDEOS_BY_ID[match.matchId] ?? [] }))
+    .map((match) => ({
+      match,
+      videos: (MATCH_VIDEOS_BY_ID[match.matchId] ?? []).filter((v) => !isPresserVideo(v.title)),
+    }))
     // Any match with videos, plus FINISHED matches still missing them (so we can
     // report that the upload is pending).
     .filter((entry) => entry.videos.length > 0 || entry.match.status === "FINISHED");
@@ -816,6 +826,7 @@ export const TeamLineupView: React.FC<TeamLineupViewProps> = ({ team, theme, onB
     COACH_IMAGES as Record<string, { pictureUrl: string; credit: CoachPhotoCredit }>
   )[team.code];
   const coachInstagramPosts = (COACH_INSTAGRAM as Record<string, string[]>)[team.code];
+  const coachVideos = (COACH_VIDEOS as Record<string, { embedUrl: string; title: string }[]>)[team.code];
   const coachInstagramHandle = (COACH_SOCIALS as Record<string, { instagram?: string }>)[team.code]
     ?.instagram;
 
@@ -1065,6 +1076,7 @@ export const TeamLineupView: React.FC<TeamLineupViewProps> = ({ team, theme, onB
               )}
             </section>
 
+            <TeamVideoRail teamCode={team.code} teamName={teamView?.team.name ?? team.name} theme={theme} />
             <TeamInstagramHighlights teamCode={team.code} theme={theme} />
           </div>
 
@@ -1286,6 +1298,7 @@ export const TeamLineupView: React.FC<TeamLineupViewProps> = ({ team, theme, onB
           photoCredit={coachImage?.credit}
           instagramPostUrls={coachInstagramPosts}
           instagramHandle={coachInstagramHandle}
+          videos={coachVideos}
           onClose={() => setCoachCardOpen(false)}
         />
       )}

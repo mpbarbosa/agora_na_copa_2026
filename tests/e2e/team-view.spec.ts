@@ -692,6 +692,37 @@ test.describe("Team view", () => {
     await expect(profileLink).toHaveAttribute("rel", "noopener noreferrer");
   });
 
+  test("shows the team video rail and the coach card video for a team that has them", async ({ page }) => {
+    await mockTeamView(page);
+
+    await page.goto("/");
+    await page.click("#btn-nav-grupos");
+    // USA carries a curated team video + coach press-conference video (teamVideos.json / coachVideos.json).
+    await page.click("#standings-row-usa button[aria-label^='Ver escalação']");
+    await expect(page.locator("#team-lineup-view")).toBeVisible();
+
+    // "Vídeos da seleção" rail (TeamVideoRail) renders with at least one thumbnail linking to YouTube.
+    const teamVideos = page.locator("#team-view-videos");
+    await expect(teamVideos).toBeVisible();
+    await expect(teamVideos).toContainText("Vídeos da seleção");
+    const teamVideoItem = page.getByTestId("team-videos-item").first();
+    await expect(teamVideoItem).toBeVisible();
+    await expect(teamVideoItem).toHaveAttribute("href", /youtube\.com\/watch/);
+
+    // The coach card carries the press-conference video in its "Vídeos" carousel.
+    await page.click("#team-lineup-coach");
+    const card = page.locator("#team-view-coach-card");
+    await expect(card).toBeVisible();
+    await expect(card).toContainText("Mauricio Pochettino");
+    const coachVideos = page.locator("#team-view-coach-card-videos");
+    await expect(coachVideos).toBeVisible();
+    await expect(coachVideos).toContainText("Vídeos");
+    await expect(page.getByTestId("team-view-coach-card-videos-item").first()).toHaveAttribute(
+      "href",
+      /youtube\.com\/watch/,
+    );
+  });
+
   test("opens the full team page from the venue hosted matches list", async ({ page }) => {
     await mockTeamView(page);
 
