@@ -88,10 +88,14 @@ test.describe("Teams view (Seleções)", () => {
     await page.click("#btn-nav-selecoes");
     await expect(page.locator("#teams-view")).toBeVisible();
 
-    // França won its 16-avos and Oitavas ties, so its badge names the round it
-    // reached next — the Quartas — with the still-in-it ✓, not a group verdict.
+    // França keeps advancing in the bracket, so its badge names the knockout
+    // round it reached with the still-in-it ✓, not a group verdict. Matched
+    // round-agnostically so the test survives further progression (oitavas →
+    // quartas → semifinais → final) as the tournament plays on.
     await expect(page.getByTestId("team-qualified-fra")).toBeVisible();
-    await expect(page.getByTestId("team-qualified-fra")).toContainText("quartas");
+    await expect(page.getByTestId("team-qualified-fra")).toContainText(
+      /oitavas|quartas|semifinais|final/i,
+    );
     await expect(page.locator("#btn-team-card-fra")).toContainText("✓");
     await expect(page.getByTestId("team-eliminated-fra")).toHaveCount(0);
   });
