@@ -127,4 +127,12 @@ export const KNOCKOUT_RESULTS: Record<number, KnockoutResultSeed> = {
   // Quintero, Jaminton Campaz e Luis Díaz p/ COL). Suíça classificada às Quartas; alimenta a
   // #100 (slot W96), duelo com a Argentina. Colômbia eliminada.
   96: { status: "FINISHED", score: { teamA: 0, teamB: 0 }, penaltyScore: { teamA: 4, teamB: 3 } },
+  // #97 · Quartas · Boston Stadium · 09/07/2026 — França 2×0 Marrocos (Kylian Mbappé 60',
+  // Ousmane Dembélé 66'). França classificada às Semifinais; alimenta a #101 (slot W97), duelo
+  // com a Espanha. Marrocos eliminado.
+  97: { status: "FINISHED", score: { teamA: 2, teamB: 0 } },
+  // #98 · Quartas · Los Angeles Stadium · 10/07/2026 — Espanha 2×1 Bélgica (Fabián Ruiz 30' e
+  // Mikel Merino 88' p/ ESP; Charles De Ketelaere 41' p/ BEL). Espanha classificada às
+  // Semifinais; alimenta a #101 (slot W98). Bélgica eliminada.
+  98: { status: "FINISHED", score: { teamA: 2, teamB: 1 } },
 };
