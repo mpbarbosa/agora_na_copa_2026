@@ -9,14 +9,16 @@ import { translate, getActiveLocale } from "../i18n";
  * tree) and appMatches (knockout fixtures inserted into the scheduled list).
  */
 export function humanizeSlot(slot: string): string {
+  const locale = getActiveLocale();
   const groupPos = slot.match(/^([12])([A-L])$/);
-  if (groupPos) return `${groupPos[1]}º ${groupPos[2]}`;
+  if (groupPos) return translate(locale, `utils.slot.pos${groupPos[1]}`, { group: groupPos[2] });
   const bestThird = slot.match(/^3([A-L]{2,})$/);
-  if (bestThird) return `Melhor 3º · ${bestThird[1].split("").join("/")}`;
+  if (bestThird)
+    return translate(locale, "utils.slot.bestThird", { groups: bestThird[1].split("").join("/") });
   const winner = slot.match(/^W(\d+)$/);
-  if (winner) return `Vencedor #${winner[1]}`;
+  if (winner) return translate(locale, "utils.slot.winner", { n: winner[1] });
   const loser = slot.match(/^RU(\d+)$/);
-  if (loser) return `Perdedor #${loser[1]}`;
+  if (loser) return translate(locale, "utils.slot.loser", { n: loser[1] });
   return slot;
 }
 
@@ -30,9 +32,11 @@ export function humanizeSlot(slot: string): string {
 export function describeBestThirdSlot(slot: string): string | null {
   const bestThird = slot.match(/^3([A-L]{2,})$/);
   if (!bestThird) return null;
+  const locale = getActiveLocale();
   const letters = bestThird[1].split("");
-  const groups = `${letters.slice(0, -1).join(", ")} ou ${letters[letters.length - 1]}`;
-  return `Um dos melhores terceiros colocados — dos grupos ${groups}`;
+  const connector = translate(locale, "utils.slot.orConnector");
+  const groups = `${letters.slice(0, -1).join(", ")}${connector}${letters[letters.length - 1]}`;
+  return translate(locale, "utils.slot.bestThirdDesc", { groups });
 }
 
 /**

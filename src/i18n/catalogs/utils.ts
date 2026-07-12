@@ -45,6 +45,15 @@ export const utilsCatalog: CatalogModule = {
     "utils.stage.SF": "Semifinal",
     "utils.stage.TP": "Disputa do 3º Lugar",
     "utils.stage.F": "Final",
+
+    // knockoutSlots.ts — unresolved feeder-slot placeholder labels
+    "utils.slot.pos1": "1º {group}",
+    "utils.slot.pos2": "2º {group}",
+    "utils.slot.bestThird": "Melhor 3º · {groups}",
+    "utils.slot.winner": "Vencedor #{n}",
+    "utils.slot.loser": "Perdedor #{n}",
+    "utils.slot.bestThirdDesc": "Um dos melhores terceiros colocados — dos grupos {groups}",
+    "utils.slot.orConnector": " ou ",
   },
   es: {
     // teamTournamentStatus.ts
@@ -81,6 +90,15 @@ export const utilsCatalog: CatalogModule = {
     "utils.stage.SF": "Semifinal",
     "utils.stage.TP": "Tercer puesto",
     "utils.stage.F": "Final",
+
+    // knockoutSlots.ts — unresolved feeder-slot placeholder labels
+    "utils.slot.pos1": "1º {group}",
+    "utils.slot.pos2": "2º {group}",
+    "utils.slot.bestThird": "Mejor 3º · {groups}",
+    "utils.slot.winner": "Ganador #{n}",
+    "utils.slot.loser": "Perdedor #{n}",
+    "utils.slot.bestThirdDesc": "Uno de los mejores terceros — de los grupos {groups}",
+    "utils.slot.orConnector": " o ",
   },
   en: {
     // teamTournamentStatus.ts
@@ -117,5 +135,14 @@ export const utilsCatalog: CatalogModule = {
     "utils.stage.SF": "Semifinals",
     "utils.stage.TP": "Third-Place Match",
     "utils.stage.F": "Final",
+
+    // knockoutSlots.ts — unresolved feeder-slot placeholder labels
+    "utils.slot.pos1": "1st {group}",
+    "utils.slot.pos2": "2nd {group}",
+    "utils.slot.bestThird": "Best 3rd · {groups}",
+    "utils.slot.winner": "Winner #{n}",
+    "utils.slot.loser": "Loser #{n}",
+    "utils.slot.bestThirdDesc": "One of the best third-placed teams — from groups {groups}",
+    "utils.slot.orConnector": " or ",
   },
 };
