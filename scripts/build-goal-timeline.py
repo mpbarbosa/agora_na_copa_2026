@@ -53,13 +53,18 @@ def fetch_overlays() -> dict:
 
 
 def parse_minute(time_label: str) -> int | None:
-    """'45'+5'' -> 50; '7'' -> 7; unparseable -> None."""
+    """'45'+5'' -> 50; '7'' -> 7; unparseable -> None.
+
+    An opening-seconds goal comes through as '0'' (0 minutes elapsed), but football
+    minutes are 1-indexed (there is no 0th minute), so clamp to a real clock minute
+    of 1 — the value the Dashboard scatter and its invariant checks expect.
+    """
     if not time_label:
         return None
     m = _MINUTE_RE.match(time_label.strip())
     if not m:
         return None
-    return int(m.group(1)) + (int(m.group(2)) if m.group(2) else 0)
+    return max(1, int(m.group(1)) + (int(m.group(2)) if m.group(2) else 0))
 
 
 def goal_minutes_by_side(incidents: list) -> dict:
