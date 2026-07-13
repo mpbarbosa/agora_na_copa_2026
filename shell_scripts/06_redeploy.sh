@@ -65,11 +65,29 @@ fi
 PAYLOAD_STAGE_DIR="$(stage_deploy_payload "$STAGING_DIR")"
 
 echo "==> Syncing latest build from $STAGING_DIR to $DEPLOY_DIR..."
-rsync -av --delete --exclude ".env" "$PAYLOAD_STAGE_DIR/" "$DEPLOY_DIR/"
+# Capture the currently-installed lockfile hash BEFORE the rsync overwrites it, so we
+# can tell whether dependencies actually changed on this deploy.
+OLD_LOCK_HASH="$([ -f "$DEPLOY_DIR/package-lock.json" ] && sha256sum "$DEPLOY_DIR/package-lock.json" | cut -d' ' -f1 || echo none)"
 
-echo "==> Installing production dependencies..."
+# NEVER let --delete remove node_modules: it is not in the payload, so without this
+# exclude the rsync wipes the live production deps, and the service cannot boot
+# ("Error: Cannot find module 'express'") until the npm ci below finishes — any
+# interruption in that window is a 502 outage. Keep the live node_modules in place.
+rsync -av --delete --exclude ".env" --exclude "node_modules" "$PAYLOAD_STAGE_DIR/" "$DEPLOY_DIR/"
+
 cd "$DEPLOY_DIR"
-npm ci --omit=dev
+NEW_LOCK_HASH="$(sha256sum package-lock.json | cut -d' ' -f1)"
+
+# npm ci is destructive (it rm -rf's node_modules before reinstalling), so only run it
+# when the lockfile actually changed — or when node_modules is missing (first deploy, or
+# recovery after a previously-interrupted deploy). Data-/dist-only deploys (the common
+# case) then never touch node_modules at all: no dependency-less window, no outage risk.
+if [ "$OLD_LOCK_HASH" != "$NEW_LOCK_HASH" ] || [ ! -d node_modules ]; then
+    echo "==> Dependencies changed (or node_modules absent) — installing production dependencies..."
+    npm ci --omit=dev
+else
+    echo "==> Dependencies unchanged — preserving existing node_modules (skipping npm ci)."
+fi
 
 echo "==> Restarting ${SERVICE_NAME}..."
 sudo systemctl restart "$SERVICE_NAME"
