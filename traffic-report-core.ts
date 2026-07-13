@@ -182,7 +182,10 @@ export function parseSummary(text: string, file: string): RawTrafficSnapshot | n
 // ── Public projection ────────────────────────────────────────────────────────
 
 // e2e-synthetic / infra fixtures we filter out of the "top paths" for a cleaner read.
-const SYNTHETIC = /Atacante%20Teste|Goleiro%20Teste|Abdulilah%20Alamri|Clube%20Teste/;
+// Besides the e2e player/club fixtures, /api/health is pure uptime-monitor polling
+// (it exists for external monitors, carries no user signal) and otherwise dominates
+// the chart at #2, crowding out real content/engagement routes — so it is excluded too.
+const SYNTHETIC = /Atacante%20Teste|Goleiro%20Teste|Abdulilah%20Alamri|Clube%20Teste|\/api\/health(?![\w-])/;
 
 /** Project a raw snapshot to the public shape — drops the per-source IP breakdown,
  * strips synthetic paths from top paths, and cleans referrer noise ("-", rt=… ). */

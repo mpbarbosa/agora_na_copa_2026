@@ -726,7 +726,7 @@ export interface TrafficSnapshotLatest {
   suspect: number | null;
   /** App's own server-side client (agora-na-copa-2026/x.y) hits filtered out before aggregation. */
   selfClientExcluded: number | null;
-  /** Top requested paths (e2e-synthetic paths filtered out for display). */
+  /** Top requested paths (e2e-synthetic + uptime-monitor paths filtered out for display). */
   topPaths: TrafficCountRow[];
   /** HTTP status codes with their hit counts. */
   statusCodes: TrafficCountRow[];
