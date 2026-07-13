@@ -26,6 +26,11 @@ export const NAV_ITEMS: NavItem[] = [
     description: "Mata-mata interativo até a grande final.",
   },
   {
+    id: "social-medias",
+    label: "Redes Sociais",
+    description: "Feed social do Mundo na Copa com filtros, tendências, curtidas e comentários.",
+  },
+  {
     id: "grupos",
     label: "Grupos",
     description: "Tabelas de classificação dos 12 grupos do torneio.",
@@ -49,11 +54,6 @@ export const NAV_ITEMS: NavItem[] = [
     id: "estadios",
     label: "Estádios",
     description: "Mapa e curiosidades das 16 sedes do Mundial.",
-  },
-  {
-    id: "social-medias",
-    label: "Redes Sociais",
-    description: "Feed social do Mundo na Copa com filtros, tendências, curtidas e comentários.",
   },
   {
     id: "noticias",
