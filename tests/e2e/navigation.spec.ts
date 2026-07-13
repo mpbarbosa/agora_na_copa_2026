@@ -101,13 +101,15 @@ test.describe("Navigation shell", () => {
     const aoVivoIndex = navLabels.indexOf("Ao Vivo");
     const partidasIndex = navLabels.indexOf("Partidas");
     const chaveamentoIndex = navLabels.indexOf("Mata-mata");
+    const socialIndex = navLabels.indexOf("Redes Sociais");
     const gruposIndex = navLabels.indexOf("Grupos");
 
-    // Order: Ao Vivo → Partidas → Mata-mata → Grupos.
+    // Order: Ao Vivo → Partidas → Mata-mata → Redes Sociais → Grupos.
     expect(aoVivoIndex).toBeGreaterThanOrEqual(0);
     expect(partidasIndex).toBe(aoVivoIndex + 1);
     expect(chaveamentoIndex).toBe(partidasIndex + 1);
-    expect(gruposIndex).toBe(chaveamentoIndex + 1);
+    expect(socialIndex).toBe(chaveamentoIndex + 1);
+    expect(gruposIndex).toBe(socialIndex + 1);
 
     await page.click("#btn-nav-partidas");
 
