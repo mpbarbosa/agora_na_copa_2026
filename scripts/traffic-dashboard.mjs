@@ -409,7 +409,7 @@ function renderPage(data) {
 
   // Filter e2e-synthetic + infra paths out of the "top paths" for a cleaner read,
   // but keep the raw list available too.
-  const SYNTHETIC = /Atacante%20Teste|Goleiro%20Teste|Abdulilah%20Alamri|Clube%20Teste/;
+  const SYNTHETIC = /Atacante%20Teste|Goleiro%20Teste|Abdulilah%20Alamri|Clube%20Teste|\/api\/health(?![\w-])/;
   const realPaths = latest.topPaths.filter((r) => !SYNTHETIC.test(r.label));
 
   const botPct = latest.requests ? ((latest.bots || 0) / latest.requests) * 100 : 0;
@@ -556,7 +556,7 @@ function renderPage(data) {
     ${card(
       "Top paths",
       barList(realPaths, { max: 12, color: PALETTE[0] }),
-      "e2e-synthetic paths excluded"
+      "e2e-synthetic + monitoring paths excluded"
     )}
     ${card(
       "Requests by hour of day (UTC)",

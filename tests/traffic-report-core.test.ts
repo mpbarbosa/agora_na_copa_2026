@@ -16,6 +16,7 @@ Date range:     03/Jul/2026:00:03:01  ->  24/Jun/2026:23:59:58
 
 == Top 20 requested paths ==
  169000 /api/team-lineups
+  50000 /api/health
    1436 /api/player-stats/BRA/Atacante%20Teste
     900 /api/team-view/BRA
 
@@ -150,6 +151,8 @@ test("buildTrafficDashboard projection drops IPs, synthetic paths and referrer n
   // Synthetic e2e fixture path filtered out of top paths.
   assert.ok(!latest.topPaths.some((r) => /Atacante%20Teste/.test(r.label)));
   assert.ok(latest.topPaths.some((r) => r.label === "/api/team-lineups"));
+  // /api/health is uptime-monitor noise — also filtered out of top paths.
+  assert.ok(!latest.topPaths.some((r) => r.label === "/api/health"));
   // Referrer "-" and rt=… noise dropped, surrounding quotes stripped.
   assert.ok(!latest.referrers.some((r) => r.label === '"-"' || /^rt=/.test(r.label)));
   assert.equal(latest.referrers[0].label, "https://copa2026.mpbarbosa.com/");
