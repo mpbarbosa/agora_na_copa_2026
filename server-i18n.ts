@@ -190,6 +190,7 @@ const HTML_SEO = {
       "Cuenta regresiva, dónde ver, alineaciones, tablas de posiciones y llave de la Copa Mundial de la FIFA 2026 — todo en un solo lugar.",
     ogSiteName: "Ahora en el Mundial 26",
     ogImageAlt: "Ahora en el Mundial 26 — compañero de la Copa Mundial FIFA 2026",
+    sportsEventName: "Copa Mundial FIFA 2026",
   },
   en: {
     htmlLang: "en-US",
@@ -202,6 +203,7 @@ const HTML_SEO = {
       "Countdown, where to watch, lineups, standings and bracket for the FIFA World Cup 2026 — all in one place.",
     ogSiteName: "Now at the World Cup 26",
     ogImageAlt: "Now at the World Cup 26 — FIFA World Cup 2026 companion",
+    sportsEventName: "FIFA World Cup 2026",
   },
 } as const;
 
@@ -254,6 +256,15 @@ export const localizeIndexHtml = (html: string, locale: Locale): string => {
       /(<link\s+rel="canonical"\s+href=")[^"]*(")/,
       `$1${seo.canonical}$2`,
     )
+    .replace(
+      /(<meta\s+property="og:url"\s+content=")[^"]*(")/,
+      `$1${seo.canonical}$2`,
+    )
+    // JSON-LD (schema.org) locale swaps: the page language, the WebSite/Organization
+    // brand name (both occurrences), and the tournament's localized name.
+    .replace(/"inLanguage": "pt-BR"/, `"inLanguage": "${seo.htmlLang}"`)
+    .replace(/"name": "Agora na Copa 26"/g, `"name": "${seo.ogSiteName}"`)
+    .replace(/"name": "Copa do Mundo FIFA 2026"/, `"name": "${seo.sportsEventName}"`)
     .replace("</head>", `  <script>window.__AGORA_LOCALE__="${locale}";</script>\n  </head>`);
 };
 

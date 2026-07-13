@@ -3135,6 +3135,43 @@ app.get("/api/health", (_req, res) => {
   });
 });
 
+// Locale-aware sitemap: one entry per language home, each declaring all hreflang
+// alternates (pt-BR default, es., en., x-default). Served dynamically — registered
+// before the dev/prod static serving below so it wins over any file — so <lastmod>
+// stays fresh (the site updates daily during the live Cup). Not FIFA-sourced.
+app.get("/sitemap.xml", (_req, res) => {
+  const homes = [
+    { loc: "https://copa2026.mpbarbosa.com/", hreflang: "pt-BR" },
+    { loc: "https://es.copa2026.mpbarbosa.com/", hreflang: "es" },
+    { loc: "https://en.copa2026.mpbarbosa.com/", hreflang: "en" },
+  ];
+  const alternates = [
+    ...homes.map((h) => `    <xhtml:link rel="alternate" hreflang="${h.hreflang}" href="${h.loc}"/>`),
+    `    <xhtml:link rel="alternate" hreflang="x-default" href="https://copa2026.mpbarbosa.com/"/>`,
+  ].join("\n");
+  const lastmod = new Date().toISOString().slice(0, 10);
+  const urls = homes
+    .map((h) =>
+      [
+        "  <url>",
+        `    <loc>${h.loc}</loc>`,
+        alternates,
+        `    <lastmod>${lastmod}</lastmod>`,
+        "    <changefreq>daily</changefreq>",
+        "    <priority>1.0</priority>",
+        "  </url>",
+      ].join("\n"),
+    )
+    .join("\n");
+  const xml =
+    '<?xml version="1.0" encoding="UTF-8"?>\n' +
+    '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">\n' +
+    `${urls}\n</urlset>\n`;
+  res.set("Content-Type", "application/xml; charset=utf-8");
+  res.set("Cache-Control", "public, max-age=3600");
+  res.send(xml);
+});
+
 // Serve frontend build files in production or proxy to Vite in development
 async function startServer() {
   const port = await resolveAppPort();
