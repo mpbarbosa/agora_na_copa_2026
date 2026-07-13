@@ -80,6 +80,8 @@ export const fanSocialCatalog: CatalogModule = {
     "fanSocial.igHighlightsSubtitle":
       "Os melhores momentos dos craques da Copa, direto do Instagram",
     "fanSocial.igHighlightsAria": "Destaques de jogadores no Instagram",
+    "fanSocial.igCarouselAria": "Galeria animada de craques com destaque no Instagram",
+    "fanSocial.igCarouselTileAria": "Ver o destaque de {name} abaixo",
 
     // Google Trends card
     "fanSocial.trendsLabel": "Buscas em alta no Google",
@@ -202,6 +204,8 @@ export const fanSocialCatalog: CatalogModule = {
     "fanSocial.igHighlightsSubtitle":
       "Los mejores momentos de las estrellas del Mundial, directo desde Instagram",
     "fanSocial.igHighlightsAria": "Destacados de jugadores en Instagram",
+    "fanSocial.igCarouselAria": "Galería animada de estrellas con destacados en Instagram",
+    "fanSocial.igCarouselTileAria": "Ver el destacado de {name} abajo",
 
     // Google Trends card
     "fanSocial.trendsLabel": "Búsquedas populares en Google",
@@ -324,6 +328,8 @@ export const fanSocialCatalog: CatalogModule = {
     "fanSocial.igHighlightsSubtitle":
       "The best moments from the World Cup's stars, straight from Instagram",
     "fanSocial.igHighlightsAria": "Player highlights on Instagram",
+    "fanSocial.igCarouselAria": "Animated gallery of stars with Instagram highlights",
+    "fanSocial.igCarouselTileAria": "Jump to {name}'s highlight below",
 
     // Google Trends card
     "fanSocial.trendsLabel": "Trending searches on Google",

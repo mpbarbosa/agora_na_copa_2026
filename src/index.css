@@ -218,6 +218,46 @@
   100% { background-position: -200% center; }
 }
 
+/* Seamless marquee for the Instagram-highlights photo carousel: the track holds
+   two identical halves, so translating it by exactly -50% loops with no visible
+   seam. Duration is set inline (scales with tile count). Pauses on hover/focus
+   and honours reduced-motion (see below). */
+@keyframes ig-marquee {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+.ig-marquee-viewport {
+  /* Fade the two edges so tiles scroll in/out instead of hard-clipping. */
+  -webkit-mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
+  mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
+}
+
+.ig-marquee-track {
+  animation: ig-marquee var(--ig-marquee-duration, 90s) linear infinite;
+  will-change: transform;
+}
+
+.ig-marquee-viewport:hover .ig-marquee-track,
+.ig-marquee-viewport:focus-within .ig-marquee-track {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* No auto-scroll for users who ask for reduced motion — the viewport becomes a
+     normal horizontally-scrollable strip and the second (duplicate) half is hidden. */
+  .ig-marquee-track {
+    animation: none;
+    transform: none;
+  }
+  .ig-marquee-viewport {
+    overflow-x: auto;
+  }
+  .ig-marquee-dup {
+    display: none;
+  }
+}
+
 .sticker-foil-overlay {
   background: linear-gradient(
     108deg,
