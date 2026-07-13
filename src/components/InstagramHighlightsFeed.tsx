@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useT } from "../i18n";
 import { getInstagramHighlights } from "../data/instagramHighlights";
 import { getPositionLabel } from "../utils/playerDisplay";
@@ -8,6 +8,12 @@ import { FlagIcon } from "./FlagIcon";
 
 interface InstagramHighlightsFeedProps {
   theme: "classic-light" | "stadium-dark";
+  /**
+   * A request from the carousel above to focus a player's card: expand it (so its
+   * embed mounts) and scroll it into view. A fresh object (incrementing nonce)
+   * re-triggers the scroll even when the same player is clicked twice.
+   */
+  focus?: { fifaId: string; nonce: number } | null;
 }
 
 // A feed of real player Instagram highlights for the Redes Sociais tab. Each
@@ -15,12 +21,25 @@ interface InstagramHighlightsFeedProps {
 // load on tap — so the page never spins up many Instagram iframes at once (the
 // same performance posture as the per-player overlay). Renders nothing when no
 // player carries a highlight, keeping the tab clean.
-export function InstagramHighlightsFeed({ theme }: InstagramHighlightsFeedProps) {
+export function InstagramHighlightsFeed({ theme, focus }: InstagramHighlightsFeedProps) {
   const t = useT();
   const highlights = useMemo(getInstagramHighlights, []);
   const [expanded, setExpanded] = useState<Record<string, boolean>>(() =>
     highlights.length > 0 ? { [highlights[0].fifaId]: true } : {},
   );
+
+  // Respond to a carousel click: expand that player's card (mount its embed) and
+  // scroll it into view under the sticky header (the card's `scroll-mt` clears it).
+  // Scroll synchronously with an instant jump: the card always renders (only its
+  // embed panel is conditional) and expands downward, so its top offset is stable —
+  // no defer needed. (Both native smooth scroll and a requestAnimationFrame-deferred
+  // jump proved to be no-ops inside this app shell; an immediate jump is reliable.)
+  useEffect(() => {
+    if (!focus) return;
+    const { fifaId } = focus;
+    setExpanded((prev) => (prev[fifaId] ? prev : { ...prev, [fifaId]: true }));
+    document.getElementById(`ig-highlight-card-${fifaId}`)?.scrollIntoView({ block: "start" });
+  }, [focus]);
 
   if (highlights.length === 0) return null;
 
@@ -60,7 +79,7 @@ export function InstagramHighlightsFeed({ theme }: InstagramHighlightsFeedProps)
             <article
               key={highlight.fifaId}
               id={`ig-highlight-card-${highlight.fifaId}`}
-              className={`rounded-2xl border p-3 ${cardClasses}`}
+              className={`scroll-mt-24 rounded-2xl border p-3 ${cardClasses}`}
             >
               <button
                 type="button"

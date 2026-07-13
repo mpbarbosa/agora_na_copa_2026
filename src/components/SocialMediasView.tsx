@@ -15,6 +15,7 @@ import { useLocale, useT } from "../i18n";
 import { InstagramBrandIcon } from "./InstagramBrandIcon";
 import { InstagramEmbed } from "./InstagramEmbed";
 import { InstagramHighlightsFeed } from "./InstagramHighlightsFeed";
+import { InstagramHighlightsCarousel } from "./InstagramHighlightsCarousel";
 import { RedditPostsFeed } from "./RedditPostsFeed";
 
 interface SocialMediasViewProps {
@@ -141,6 +142,13 @@ export function SocialMediasView({ theme }: SocialMediasViewProps) {
   const [commentDrafts, setCommentDrafts] = useState<Record<string, string>>({});
   const [googleTrends, setGoogleTrends] = useState<GoogleTrendTopic[]>([]);
   const [trendsStatus, setTrendsStatus] = useState<"loading" | "ready" | "empty">("loading");
+  // Bridges the highlights carousel to the feed below: clicking a tile bumps this
+  // request (new nonce each click) so the feed expands + scrolls to that player's card.
+  const [highlightFocus, setHighlightFocus] = useState<{ fifaId: string; nonce: number } | null>(
+    null,
+  );
+  const focusHighlight = (fifaId: string) =>
+    setHighlightFocus((prev) => ({ fifaId, nonce: (prev?.nonce ?? 0) + 1 }));
   const [sportsOnly, setSportsOnly] = useState(false);
 
   useEffect(() => {
@@ -330,8 +338,11 @@ export function SocialMediasView({ theme }: SocialMediasViewProps) {
         </div>
       </section>
 
+      {/* Faixa animada de fotos dos craques; clicar leva ao card do jogador abaixo */}
+      <InstagramHighlightsCarousel theme={theme} onFocusPlayer={focusHighlight} />
+
       {/* Destaques de jogadores no Instagram (dados reais de squads.json) */}
-      <InstagramHighlightsFeed theme={theme} />
+      <InstagramHighlightsFeed theme={theme} focus={highlightFocus} />
 
       {/* Repercussão no Reddit (posts curados enriquecidos via /api/reddit) */}
       <RedditPostsFeed theme={theme} />
