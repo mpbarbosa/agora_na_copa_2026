@@ -118,6 +118,16 @@ export default function App() {
       ?.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
   }, [activeNavId]);
 
+  // Keep the rich home title on the default view (what Googlebot renders on "/"),
+  // and give other views a distinct "<label> — <brand>" for tab clarity + native
+  // shares. Deep entity state has no URL yet, so this stays view-level for now.
+  useEffect(() => {
+    document.title =
+      activeNavId === "ao-vivo"
+        ? t("meta.homeTitle")
+        : `${t(`nav.${activeNavId}.label`)} — ${t("meta.titleSuffix")}`;
+  }, [activeNavId, t]);
+
   const handleSelectNav = (navId: string) => {
     setActiveNavId(navId);
     if (navId !== "grupos") {

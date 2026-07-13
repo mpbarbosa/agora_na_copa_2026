@@ -7,6 +7,10 @@ export const coreCatalog: CatalogModule = {
   pt: {
     // App shell — header, banners, controls
     "shell.brandName": "Agora na Copa",
+    // Full <title> for the home/default view (mirrors index.html); other views
+    // get "<label> — <brand>" via App's document.title effect.
+    "meta.homeTitle": "Agora na Copa 26 — Copa do Mundo FIFA 2026 ao vivo",
+    "meta.titleSuffix": "Agora na Copa 26",
     "shell.newVersion": "Nova versão disponível",
     "shell.updateNow": "Atualizar agora",
     "shell.editClock": "Mudar Relógio",
@@ -54,6 +58,8 @@ export const coreCatalog: CatalogModule = {
   es: {
     // App shell
     "shell.brandName": "Ahora en el Mundial",
+    "meta.homeTitle": "Ahora en el Mundial 26 — Copa Mundial FIFA 2026 en vivo",
+    "meta.titleSuffix": "Ahora en el Mundial 26",
     "shell.newVersion": "Actualización disponible",
     "shell.updateNow": "Actualizar ahora",
     "shell.editClock": "Cambiar reloj",
@@ -101,6 +107,8 @@ export const coreCatalog: CatalogModule = {
   en: {
     // App shell — header, banners, controls
     "shell.brandName": "Now at the World Cup",
+    "meta.homeTitle": "Now at the World Cup 26 — FIFA World Cup 2026 live",
+    "meta.titleSuffix": "Now at the World Cup 26",
     "shell.newVersion": "New version available",
     "shell.updateNow": "Update now",
     "shell.editClock": "Change Clock",
