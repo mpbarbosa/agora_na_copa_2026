@@ -135,4 +135,12 @@ export const KNOCKOUT_RESULTS: Record<number, KnockoutResultSeed> = {
   // Mikel Merino 88' p/ ESP; Charles De Ketelaere 41' p/ BEL). Espanha classificada às
   // Semifinais; alimenta a #101 (slot W98). Bélgica eliminada.
   98: { status: "FINISHED", score: { teamA: 2, teamB: 1 } },
+  // #99 · Quartas · Miami Stadium — Noruega 1×2 Inglaterra após a prorrogação (Andreas Schjelderup
+  // 36' p/ NOR; Jude Bellingham 45+2' e 93' p/ ING). Inglaterra virou na prorrogação e se
+  // classificou às Semifinais; alimenta a #102 (slot W99), duelo com a Argentina. Noruega eliminada.
+  99: { status: "FINISHED", score: { teamA: 1, teamB: 2 } },
+  // #100 · Quartas · Kansas City Stadium — Argentina 3×1 Suíça após a prorrogação (Alexis Mac
+  // Allister 10', Julián Álvarez 112' e Lautaro Martínez 120+1' p/ ARG; Dan Ndoye 67' p/ SUI).
+  // Argentina classificada às Semifinais; alimenta a #102 (slot W100). Suíça eliminada.
+  100: { status: "FINISHED", score: { teamA: 3, teamB: 1 } },
 };
