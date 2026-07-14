@@ -89,16 +89,16 @@ test.describe("Teams view (Seleções)", () => {
     await page.click("#btn-nav-selecoes");
     await expect(page.locator("#teams-view")).toBeVisible();
 
-    // França keeps advancing in the bracket, so its badge names the knockout
-    // round it reached with the still-in-it ✓, not a group verdict. Matched
-    // round-agnostically so the test survives further progression (oitavas →
-    // quartas → semifinais → final) as the tournament plays on.
-    await expect(page.getByTestId("team-qualified-fra")).toBeVisible();
-    await expect(page.getByTestId("team-qualified-fra")).toContainText(
+    // Espanha reached the Final (beat França in the semifinal), so its badge names the
+    // knockout round it advanced to with the still-in-it ✓, not a group verdict. Matched
+    // round-agnostically (oitavas → quartas → semifinais → final) so the assertion is robust
+    // to which round the exemplar has reached.
+    await expect(page.getByTestId("team-qualified-esp")).toBeVisible();
+    await expect(page.getByTestId("team-qualified-esp")).toContainText(
       /oitavas|quartas|semifinais|final/i,
     );
-    await expect(page.locator("#btn-team-card-fra")).toContainText("✓");
-    await expect(page.getByTestId("team-eliminated-fra")).toHaveCount(0);
+    await expect(page.locator("#btn-team-card-esp")).toContainText("✓");
+    await expect(page.getByTestId("team-eliminated-esp")).toHaveCount(0);
   });
 
   test("names the round a team was knocked out in", async ({ page }) => {
