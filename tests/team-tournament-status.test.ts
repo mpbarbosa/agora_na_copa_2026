@@ -68,8 +68,11 @@ test("a knockout WIN names the round the team qualified for", () => {
   });
 });
 
-test("losing a Semifinal is not elimination (drops to the 3rd-place match)", () => {
-  assert.equal(getTeamTournamentStatus([ko(KNOCKOUT_STAGE_NAMES.SF, 0, 1)]), null);
+test("losing a Semifinal reads as qualified for the 3rd-place match, not eliminated", () => {
+  assert.deepEqual(getTeamTournamentStatus([ko(KNOCKOUT_STAGE_NAMES.SF, 0, 1)]), {
+    label: "Classificado para disputa do 3º lugar",
+    tone: "advanced",
+  });
 });
 
 test("Final and 3rd-place play-off get their own labels", () => {

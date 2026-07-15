@@ -40,10 +40,11 @@ const NEXT_KNOCKOUT_STAGE: Record<string, string> = {
 // title/podium labels at the Final and 3rd-place match, and "Classificado para
 // …" (the round it qualified for) both after a win and once the bracket places
 // it in a tie it hasn't played yet — including a group qualifier whose 16-avos
-// tie is merely scheduled. With `groupStageComplete`, a team that never reaches
-// the bracket reads "Eliminada na fase de grupos" (see below). Returns null
-// while still in the group phase (or not placed in the bracket) and for a
-// Semifinal loss (the team drops to the 3rd-place match, status pending).
+// tie is merely scheduled. A Semifinal loss reads "Classificado para disputa do
+// 3º lugar" — the team drops into (has qualified for) the 3rd-place match, only
+// its result pending. With `groupStageComplete`, a team that never reaches the
+// bracket reads "Eliminada na fase de grupos" (see below). Returns null while
+// still in the group phase (or not placed in the bracket).
 //
 // A level knockout scoreline is resolved from the real penalty-shootout tally
 // (`penaltyScore`); without it the outcome is unknown and the status is omitted
@@ -93,8 +94,10 @@ export function getTeamTournamentStatus(
         ? { label: t("utils.thirdPlace"), tone: "advanced" }
         : { label: t("utils.fourthPlace"), tone: "eliminated" };
     }
-    // A Semifinal loss drops the team to the 3rd-place match — status pending.
-    if (!won && stage === KNOCKOUT_STAGE_NAMES.SF) return null;
+    // A Semifinal loss drops the team into the 3rd-place match — it has
+    // qualified for that tie; only its result is still pending.
+    if (!won && stage === KNOCKOUT_STAGE_NAMES.SF)
+      return classifiedFor(KNOCKOUT_STAGE_NAMES.TP);
     if (won) {
       // Advanced — name the round it qualified for (e.g. won the R32 → oitavas).
       const nextStage = NEXT_KNOCKOUT_STAGE[stage];
