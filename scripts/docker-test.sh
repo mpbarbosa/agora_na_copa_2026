@@ -39,9 +39,22 @@ fi
 START=$(date +%s)
 
 # ── build image ───────────────────────────────────────────────────────────────
+# A rebuild needs the network (base image from Docker Hub, `npm ci`, Playwright).
+# If it fails transiently but a previously-built image exists, fall back to that
+# image rather than hard-failing the whole run — same effect as --no-build, but the
+# reused image may not include your latest source changes.
 if [[ "$BUILD" == true ]]; then
   hr "Building test image ($IMAGE)"
-  docker build -f "$ROOT/Dockerfile.test" -t "$IMAGE" "$ROOT"
+  if ! docker build -f "$ROOT/Dockerfile.test" -t "$IMAGE" "$ROOT"; then
+    if docker image inspect "$IMAGE" &>/dev/null; then
+      fail "Build failed (registry/npm/Playwright unreachable?). Falling back to the existing '$IMAGE' image — it may be stale (rebuild once connectivity is back)."
+      BUILD=false
+    else
+      fail "Build failed and there is no cached '$IMAGE' image to fall back to."
+      fail "A rebuild needs network access (Docker Hub base image, npm, Playwright). Restore connectivity and retry."
+      exit 1
+    fi
+  fi
 else
   printf 'Skipping build — using existing image %s\n' "$IMAGE"
 fi
