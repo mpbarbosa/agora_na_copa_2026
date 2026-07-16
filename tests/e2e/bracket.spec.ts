@@ -12,11 +12,11 @@ test.describe("Bracket view (Chaveamento)", () => {
   test.beforeEach(async ({ page }) => {
     // Stub the live overlay empty so the bracket resolves only from the static
     // seed (group standings + KNOCKOUT_RESULTS). The seed has the Round of 32, the R16, all
-    // four Quarterfinals (#97–#100) and Semifinal #101 (França 0×2 Espanha) finished, so their
-    // winner/loser-refs resolve down the chain to real teams (SF #101 → França × Espanha,
-    // #102 → Inglaterra × Argentina; Final #104 slot A → Espanha, 3rd-place #103 slot A →
-    // França). Only SF #102 is unplayed, so slot B of #103/#104 stays an official
-    // "Perdedor/Vencedor #102" label — the deterministic ref checks target those.
+    // four Quarterfinals (#97–#100) and both Semifinals (#101 França 0×2 Espanha, #102
+    // Inglaterra 1×2 Argentina) finished, so their winner/loser-refs resolve down the chain to
+    // real teams: the Final (#104) is Espanha × Argentina and the 3rd-place match (#103) is
+    // França × Inglaterra. With both semis played the whole bracket is drawn — only #103/#104's
+    // results remain pending — so every later-round slot names a real team.
     await stubLiveApis(page);
     await page.addInitScript(() => localStorage.setItem("feature-tour-seen", "1"));
   });
@@ -58,23 +58,22 @@ test.describe("Bracket view (Chaveamento)", () => {
     await expect(sf101.locator("#bracket-slot-101-a")).toContainText(/fran[çc]a/i);
     await expect(sf101.locator("#bracket-slot-101-b")).toContainText(/espanha/i);
 
-    // The 3rd-place match (#103, TP) is fed by the two semifinal losers. SF #101 finished
-    // (França lost), so slot A resolves to França; SF #102 is unplayed, so slot B stays an
-    // official "Perdedor #NN" loser-ref.
+    // The 3rd-place match (#103, TP) is fed by the two semifinal losers. Both semis finished
+    // (SF #101 França lost, SF #102 Inglaterra lost), so both slots resolve: França × Inglaterra.
     const thirdPlace = page.locator("#bracket-stage-tp #bracket-match-103");
     await expect(thirdPlace).toBeVisible();
     await expect(thirdPlace.locator("#bracket-slot-103-a")).toContainText(/fran[çc]a/i);
-    await expect(thirdPlace.locator("#bracket-slot-103-b")).toContainText("Perdedor #102");
+    await expect(thirdPlace.locator("#bracket-slot-103-b")).toContainText(/inglaterra/i);
     await expect(thirdPlace).toContainText("Miami");
 
     // The final (#104) in New Jersey, with the localized Brasília kickoff (19:00Z → 16:00).
-    // SF #101 finished (Espanha won), so slot A resolves to Espanha; slot B stays an official
-    // "Vencedor #NN" winner-ref while SF #102 is unplayed.
+    // Both semis finished (SF #101 Espanha won, SF #102 Argentina won), so both slots resolve:
+    // Espanha × Argentina.
     const final = page.locator("#bracket-stage-f #bracket-match-104");
     await expect(final).toContainText("New Jersey");
     await expect(final).toContainText("16:00");
     await expect(final.locator("#bracket-slot-104-a")).toContainText(/espanha/i);
-    await expect(final.locator("#bracket-slot-104-b")).toContainText("Vencedor #102");
+    await expect(final.locator("#bracket-slot-104-b")).toContainText(/argentina/i);
   });
 
   test("clicking a resolved bracket slot opens the team page", async ({ page }) => {
@@ -86,11 +85,10 @@ test.describe("Bracket view (Chaveamento)", () => {
     const canadaSlot = page.locator("#bracket-slot-73-b");
     await expect(canadaSlot).toContainText(/canad/i);
     expect(await canadaSlot.evaluate((el) => el.tagName)).toBe("BUTTON");
-    // …while an undecided winner-ref slot (Final #104 slot B, fed by the unplayed SF #102) is
-    // a plain, non-clickable label.
-    const labelSlot = page.locator("#bracket-slot-104-b");
-    await expect(labelSlot).toContainText("Vencedor #102");
-    expect(await labelSlot.evaluate((el) => el.tagName)).toBe("DIV");
+    // …and with both semifinals now played the bracket is fully drawn — no undecided winner/
+    // loser-ref labels remain, so even the Final's slots name real teams (e.g. #104 slot B
+    // resolves to Argentina, the SF #102 winner).
+    await expect(page.locator("#bracket-slot-104-b")).toContainText(/argentina/i);
 
     // Clicking the resolved slot opens that national team's page.
     await canadaSlot.click();

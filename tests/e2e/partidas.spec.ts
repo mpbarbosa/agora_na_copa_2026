@@ -1,12 +1,12 @@
 import { test, expect } from "@playwright/test";
 
-// The Partidas "Agendadas" list mixes group-stage and knockout fixtures, so it
-// prints a phase header ("Fase de Grupos", "Oitavas de Final", …) to separate the
-// rounds. Several knockout rounds are still scheduled at once, so more than one
-// phase header is present — but which specific rounds remain shifts as the
-// tournament advances (early on it is "16 Avos de Final", later "Oitavas", …),
-// so this asserts on the first *knockout* header generically rather than a fixed
-// round name that goes stale once that round finishes.
+// The Partidas "Agendadas" list prints a phase header ("Fase de Grupos",
+// "Oitavas de Final", … "Final") to separate the rounds it spans. Which rounds
+// remain scheduled shifts as the tournament advances — early on it mixes the
+// group stage with "16 Avos de Final"; late on only the last knockout rounds are
+// left (now the 3rd-place match and the Final). So this asserts generically on
+// the presence of multiple phase headers and on the first one being a knockout
+// round, rather than a fixed round name that goes stale once that round finishes.
 test.describe("Partidas list — phase separators", () => {
   test.beforeEach(async ({ page }) => {
     await page.addInitScript(() => localStorage.setItem("feature-tour-seen", "1"));
@@ -26,12 +26,13 @@ test.describe("Partidas list — phase separators", () => {
     expect(await phaseHeaders.count()).toBeGreaterThan(1);
 
     // The first knockout separator — the next scheduled round, whatever it is
-    // (16 Avos / Oitavas / Quartas / …) — sits above its first match card.
+    // (16 Avos / Oitavas / Quartas / … / Disputa do 3º Lugar / Final) — sits above
+    // its first match card.
     const koHeader = phaseHeaders
       .filter({ hasNotText: /Fase de Grupos/i })
       .first();
     await expect(koHeader).toBeVisible();
-    await expect(koHeader).toContainText(/avos|oitavas|quartas|semifinais|final/i);
+    await expect(koHeader).toContainText(/avos|oitavas|quartas|semifinais|disputa|lugar|final/i);
 
     // Collapsed by default, with a visible hint that its matches are hidden.
     const koDetails = koHeader.locator("xpath=ancestor::details[1]");

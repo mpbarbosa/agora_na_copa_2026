@@ -147,4 +147,9 @@ export const KNOCKOUT_RESULTS: Record<number, KnockoutResultSeed> = {
   // Pedro Porro 58'). Espanha classificada à FINAL (#104, slot W101); França cai para a disputa
   // do 3º lugar (#103, slot L101/RU101). Rabiot, Cucurella e Mbappé amarelados.
   101: { status: "FINISHED", score: { teamA: 0, teamB: 2 } },
+  // #102 · Semifinal · Atlanta Stadium · 15/07/2026 — Inglaterra 1×2 Argentina (Anthony Gordon
+  // 55' p/ ING; Enzo Fernández 85' e Lautaro Martínez 90+2' p/ ARG). Argentina classificada à
+  // FINAL (#104, slot W102); Inglaterra cai para a disputa do 3º lugar (#103, slot L102/RU102).
+  // Anderson; Lisandro Martínez, Romero e De Paul amarelados.
+  102: { status: "FINISHED", score: { teamA: 1, teamB: 2 } },
 };
