@@ -176,14 +176,12 @@ test.describe("Navigation shell", () => {
     await expect(analysis).toContainText("Cabo Verde");
     await expect(analysis).toContainText("Leitura");
 
-    // A match without an analysis entry exposes neither the tab nor the panel.
-    // Every FINISHED match now carries a recap, so the negative case uses the
-    // tournament Final (ko-104-2026): a knockout fixture that is PRE_GAME in the
-    // seed for the whole tournament and has no analysis entry, so this stays
-    // deterministic as group games finish. Reached from the always-visible header
-    // "Próximos jogos" selector.
+    // A match without an analysis entry exposes neither the tab nor the panel. The
+    // negative case uses the tournament Final (ko-104-2026): now FINISHED in the seed
+    // but with no analysis entry, so no "Pré-jogo" tab or panel appears. Reached from
+    // the finished-matches selector.
     await page.click("#btn-tab-broadcast");
-    await page.click("#match-selector-chips-PRE_GAME #btn-match-ko-104-2026");
+    await page.click("#match-selector-chips-finished #btn-match-ko-104-2026");
     await expect(page.locator("#btn-tab-pregame")).toHaveCount(0);
     await expect(page.getByTestId("match-analysis")).toHaveCount(0);
   });

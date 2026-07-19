@@ -152,4 +152,13 @@ export const KNOCKOUT_RESULTS: Record<number, KnockoutResultSeed> = {
   // FINAL (#104, slot W102); Inglaterra cai para a disputa do 3º lugar (#103, slot L102/RU102).
   // Anderson; Lisandro Martínez, Romero e De Paul amarelados.
   102: { status: "FINISHED", score: { teamA: 1, teamB: 2 } },
+  // #103 · Disputa do 3º Lugar · Miami Stadium · 18/07/2026 — França 4×6 Inglaterra (Kylian
+  // Mbappé 48' e 66', Bradley Barcola 54', Ousmane Dembélé 90+6' p/ FRA; Declan Rice 3', Ezri
+  // Konsa 18', Bukayo Saka 37', 45+1' e 87' [hat-trick] e Jude Bellingham 90+8' p/ ING).
+  // Inglaterra fica com o 3º lugar num jogo de dez gols; França em 4º.
+  103: { status: "FINISHED", score: { teamA: 4, teamB: 6 } },
+  // #104 · FINAL · New York/New Jersey Stadium · 19/07/2026 — Espanha 1×0 Argentina na
+  // prorrogação (Ferran Torres 106'). 🏆 ESPANHA CAMPEÃ DA COPA DO MUNDO FIFA 2026; Argentina
+  // vice-campeã.
+  104: { status: "FINISHED", score: { teamA: 1, teamB: 0 } },
 };

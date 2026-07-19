@@ -4,6 +4,7 @@ import { APP_MATCHES } from "./appMatches";
 import { buildTeamMetaMap } from "./utils/teamCountdown";
 import type { Match, TeamRef } from "./types";
 import { MatchDetailView } from "./components/MatchDetailView";
+import { ChampionCarousel } from "./components/ChampionCarousel";
 import { StandingsView } from "./components/StandingsView";
 import { TeamsView } from "./components/TeamsView";
 import { TournamentLeadersView } from "./components/TournamentLeadersView";
@@ -165,15 +166,19 @@ export default function App() {
         return <DashboardView theme={theme} matches={matches} />;
       case "ao-vivo":
         return (
-          <MatchDetailView
-            matches={matches}
-            setMatches={setMatches}
-            theme={theme}
-            onSelectTeamLineup={setLineupTeam}
-            onOpenStandingsGroup={handleOpenStandingsGroup}
-            teamLineups={teamLineups}
-            initialMatchId={aoVivoMatchId ?? undefined}
-          />
+          <>
+            {/* Champion celebration — renders only once the Final is decided */}
+            <ChampionCarousel theme={theme} onSelectTeam={setLineupTeam} />
+            <MatchDetailView
+              matches={matches}
+              setMatches={setMatches}
+              theme={theme}
+              onSelectTeamLineup={setLineupTeam}
+              onOpenStandingsGroup={handleOpenStandingsGroup}
+              teamLineups={teamLineups}
+              initialMatchId={aoVivoMatchId ?? undefined}
+            />
+          </>
         );
       case "partidas":
         return (
