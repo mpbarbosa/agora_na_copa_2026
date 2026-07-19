@@ -84,19 +84,17 @@ test.describe("Teams view (Seleções)", () => {
     await expect(page.locator("#team-lineup-title")).toContainText("BRASIL");
   });
 
-  test("names the round a team advanced to", async ({ page }) => {
+  test("marks the champion team with the terminal advanced-tone badge", async ({ page }) => {
     await page.goto("/");
     await page.click("#btn-nav-selecoes");
     await expect(page.locator("#teams-view")).toBeVisible();
 
-    // Espanha reached the Final (beat França in the semifinal), so its badge names the
-    // knockout round it advanced to with the still-in-it ✓, not a group verdict. Matched
-    // round-agnostically (oitavas → quartas → semifinais → final) so the assertion is robust
-    // to which round the exemplar has reached.
+    // With the tournament complete, Espanha is champion — its badge carries the terminal
+    // "Campeão" advanced-tone verdict with the still-standing ✓, not a group verdict or an
+    // elimination. (The knockout-round naming for teams that went out is covered by the
+    // "names the round a team was knocked out in" test below.)
     await expect(page.getByTestId("team-qualified-esp")).toBeVisible();
-    await expect(page.getByTestId("team-qualified-esp")).toContainText(
-      /oitavas|quartas|semifinais|final/i,
-    );
+    await expect(page.getByTestId("team-qualified-esp")).toContainText(/campe/i);
     await expect(page.locator("#btn-team-card-esp")).toContainText("✓");
     await expect(page.getByTestId("team-eliminated-esp")).toHaveCount(0);
   });
