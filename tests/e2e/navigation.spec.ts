@@ -176,12 +176,15 @@ test.describe("Navigation shell", () => {
     await expect(analysis).toContainText("Cabo Verde");
     await expect(analysis).toContainText("Leitura");
 
-    // A match without an analysis entry exposes neither the tab nor the panel. The
-    // negative case uses the tournament Final (ko-104-2026): now FINISHED in the seed
-    // but with no analysis entry, so no "Pré-jogo" tab or panel appears. Reached from
-    // the finished-matches selector.
+    // A match without an analysis entry exposes neither the tab nor the panel.
+    // The negative case uses a FINISHED knockout fixture that has no analysis
+    // entry — Quartas #100 (Argentina × Suíça, ko-100-2026), FINISHED in the seed
+    // and reached from the finished rail. Deliberately a finished match, not an
+    // upcoming one, so it stays deterministic even once the last knockout results
+    // are seeded and no PRE_GAME fixtures remain (the Final ko-104-2026, the prior
+    // pick here, now carries a recap).
     await page.click("#btn-tab-broadcast");
-    await page.click("#match-selector-chips-finished #btn-match-ko-104-2026");
+    await page.click("#match-selector-chips-finished #btn-match-ko-100-2026");
     await expect(page.locator("#btn-tab-pregame")).toHaveCount(0);
     await expect(page.getByTestId("match-analysis")).toHaveCount(0);
   });
