@@ -16,8 +16,12 @@ export interface SimulatedMatchState {
   updatedAt: string;
 }
 
-// A live (or suspended) match takes priority; otherwise the soonest match that
-// hasn't kicked off yet
+// Which match the Ao Vivo hero features on load, in priority order:
+//   1. a live (or suspended) match — the thing actually happening now;
+//   2. otherwise the soonest match that hasn't kicked off yet;
+//   3. otherwise (nothing live or upcoming — e.g. the tournament is over) the most
+//      recent finished match, so the latest result (the Final) leads rather than an
+//      arbitrary opening fixture.
 export function getInitialMatchId(matches: Match[]): string {
   const liveMatch = matches.find((m) => m.status === "LIVE" || m.status === "SUSPENDED");
   if (liveMatch) return liveMatch.id;
@@ -30,6 +34,15 @@ export function getInitialMatchId(matches: Match[]): string {
         new Date(b.kickoffTimestamp).getTime(),
     );
   if (upcoming.length > 0) return upcoming[0].id;
+
+  const recentFinished = matches
+    .filter((m) => m.status === "FINISHED")
+    .sort(
+      (a, b) =>
+        new Date(b.kickoffTimestamp).getTime() -
+        new Date(a.kickoffTimestamp).getTime(),
+    );
+  if (recentFinished.length > 0) return recentFinished[0].id;
 
   return matches[0].id;
 }
