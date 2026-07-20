@@ -29,7 +29,16 @@ test("getInitialMatchId picks the soonest upcoming match when none is live", () 
   assert.equal(getInitialMatchId(matches), "soon");
 });
 
-test("getInitialMatchId falls back to the first match", () => {
+test("getInitialMatchId features the most recent finished match when none is live or upcoming", () => {
+  const matches = [
+    m({ id: "opener", status: "FINISHED", kickoffTimestamp: "2026-06-11T18:00:00Z" }),
+    m({ id: "final", status: "FINISHED", kickoffTimestamp: "2026-07-19T19:00:00Z" }),
+    m({ id: "semi", status: "FINISHED", kickoffTimestamp: "2026-07-15T19:00:00Z" }),
+  ];
+  assert.equal(getInitialMatchId(matches), "final");
+});
+
+test("getInitialMatchId returns a lone match regardless of status", () => {
   const matches = [m({ id: "only", status: "FINISHED" })];
   assert.equal(getInitialMatchId(matches), "only");
 });
