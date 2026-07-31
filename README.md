@@ -1,6 +1,6 @@
 # agora_na_copa_2026
 
-Info about the current event and the next event in the World Cup 2026.
+World Cup 2026 companion app, live in production — React 19 · TypeScript · Express · AWS. Built end-to-end by directing AI coding agents (Claude Code, GitHub Copilot), with 20 automated test suites and CI/CD.
 
 ## Local setup
 
